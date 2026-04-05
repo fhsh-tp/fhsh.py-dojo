@@ -1,5 +1,5 @@
 {
-  "name": "cryptography-challenge",
+  "name": "fhsh-py-dojo",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -26,6 +26,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "codemirror": "^6.0.2",
     "pinia": "^3.0.4",
+    "@vueuse/core": "^14.2.1",
     "pyodide": "^0.29.3",
     "tailwindcss": "^4.2.1",
     "vitepress": "2.0.0-alpha.16",

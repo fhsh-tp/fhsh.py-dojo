@@ -1,6 +1,6 @@
-# Challenge 建立指南
+# 題目建立指南
 
-本文說明如何在本專案新增一道密碼學挑戰題目。
+本文說明如何在本專案新增一道 Python 自學道場題目。
 
 ---
 
@@ -35,15 +35,15 @@
 
 | 欄位 | 格式 | 範例 |
 |------|------|------|
-| 檔案名稱 | `kebab-case.md` | `caesar-encrypt.md` |
-| `algorithm` | `snake_case` | `caesar_encrypt` |
+| 檔案名稱 | `kebab-case.md` | `bubble-sort.md` |
+| `algorithm` | `snake_case` | `bubble_sort` |
 | `id` | 遞增整數 | `16`（接續現有最大值） |
 
 **演算法名稱與檔名的對應：**
 
 ```
-algorithm: caesar_encrypt  →  docs/challenge/caesar-encrypt.md
-algorithm: aes_ecb_encrypt →  docs/challenge/aes-ecb-encrypt.md
+algorithm: bubble_sort    →  docs/challenge/bubble-sort.md
+algorithm: binary_search  →  docs/challenge/binary-search.md
 ```
 
 規則：`algorithm` 欄位的底線（`_`）全部替換為連字號（`-`），即為檔名（不含 `.md`）。
@@ -61,8 +61,8 @@ id: 16                     # 題目 ID，整數，全站唯一，依序遞增
 title: 題目名稱             # 顯示於題目清單的中文名稱
 difficulty: easy           # 難度：easy | medium | hard
 tags:                      # 選填：分類標籤陣列
-  - 對稱加密
-  - 古典密碼
+  - 排序
+  - 基礎演算法
 algorithm: my_algorithm    # snake_case，用於 WASM 產生測資的識別鍵
 testcase_count: 5          # 選填，預設 5，測試案例數量
 params: ...                # 必填，定義 WASM 產生測資的參數規格（見下方）
@@ -96,21 +96,25 @@ WASM 產生的每筆測資為多行字串，每行對應一個參數，`generato
 
 ```yaml
 params:
-  plaintext:
-    type: alpha_upper
-    min_len: 5
-    max_len: 12
-  shift:
+  n:
+    type: int
+    min: 5
+    max: 20
+  numbers:
     type: int
     min: 1
-    max: 25
+    max: 100
+    count:
+      min: 5
+      max: 20
+      separator: " "
 ```
 
 以上定義產生的測資格式（兩行）：
 
 ```
-HELLO
-3
+10
+42 7 88 15 3 61 29 47 5 90
 ```
 
 #### 固定值參數
@@ -119,14 +123,14 @@ HELLO
 
 ```yaml
 params:
-  e:
+  base:
     type: int
-    min: 17
-    max: 17
+    min: 2
+    max: 2
   n:
     type: int
-    min: 3233
-    max: 3233
+    min: 1
+    max: 50
 ```
 
 #### count — 產生多個值
@@ -141,14 +145,14 @@ params:
     max: 100
     count:
       min: 3    # 最少產生 3 個
-      max: 5    # 最多產生 5 個
+      max: 8    # 最多產生 8 個
       separator: " "  # 值之間的分隔符，預設為空格
 ```
 
-產生的測資範例（該行包含 4 個整數）：
+產生的測資範例（該行包含 5 個整數）：
 
 ```
-42 7 88 15
+42 7 88 15 3
 ```
 
 省略 `count` 時等同於 `count: { min: 1, max: 1 }`，即只產生一個值。
@@ -166,14 +170,17 @@ params:
 - 數值型態需自行轉換（`int(input())`）
 - 避免使用外部套件（Pyodide 環境，可用標準函式庫）
 
-**範例（凱薩加密）：**
+**範例（氣泡排序）：**
 
 ```yaml
 generator: |
-  plaintext = input()
-  shift = int(input())
-  result = ''.join(chr((ord(c) - ord('A') + shift) % 26 + ord('A')) for c in plaintext)
-  print(result)
+  n = int(input())
+  nums = list(map(int, input().split()))
+  for i in range(n):
+      for j in range(n - i - 1):
+          if nums[j] > nums[j + 1]:
+              nums[j], nums[j + 1] = nums[j + 1], nums[j]
+  print(' '.join(map(str, nums)))
 ```
 
 ---
@@ -185,21 +192,19 @@ generator: |
 **規範：**
 
 - 提供函式骨架，使用者填入實作
-- 不需要包含讀取 `input()` 的程式碼，使用者自行撰寫
-- 通常只包含一個空白函式作為提示
+- 通常包含讀取 `input()` 的提示程式碼
 
 **範例：**
 
 ```yaml
 starter_code: |
-  def caesar_encrypt(plaintext: str, shift: int) -> str:
-      # 在此實作凱薩加密
+  def bubble_sort(nums):
+      # 在此實作氣泡排序
       pass
 
-  # 讀取輸入
-  plaintext = input()
-  shift = int(input())
-  print(caesar_encrypt(plaintext, shift))
+  n = int(input())
+  nums = list(map(int, input().split()))
+  print(' '.join(map(str, bubble_sort(nums))))
 ```
 
 ---
@@ -211,7 +216,7 @@ frontmatter 之後的 Markdown 內文會顯示於題目說明面板（左側）�
 ```markdown
 ## 題目名稱
 
-一段簡短的演算法說明，讓使用者了解這道題目在考什麼。
+一段簡短的演算法說明，讓學生了解這道題目在練習什麼。
 
 ### 演算法說明
 
@@ -219,26 +224,26 @@ frontmatter 之後的 Markdown 內文會顯示於題目說明面板（左側）�
 
 ### 輸入說明
 
-- 第一行：`plaintext`，長度 5~12 的大寫英文字串
-- 第二行：`shift`，整數 1~25
+- 第一行：`n`，整數 5~20，代表數字個數
+- 第二行：`numbers`，n 個以空格分隔的整數（1~100）
 
 ### 輸出說明
 
-- 輸出加密後的字串
+- 輸出排序後的整數，以空格分隔
 
 ### 範例
 
 **輸入：**
 
 ```
-HELLO
-3
+5
+42 7 88 15 3
 ```
 
 **輸出：**
 
 ```
-KHOOR
+3 7 15 42 88
 ```
 ```
 
@@ -246,7 +251,7 @@ KHOOR
 
 ## 完整範本
 
-以下是一道新 Challenge 的完整 Markdown 範本，複製後修改即可：
+以下是一道新題目的完整 Markdown 範本，複製後修改即可：
 
 ```markdown
 ---
@@ -260,33 +265,37 @@ tags:
 algorithm: my_algorithm
 testcase_count: 5
 params:
-  plaintext:
-    type: alpha_upper
-    min_len: 5
-    max_len: 12
-  key:
+  n:
+    type: int
+    min: 5
+    max: 20
+  numbers:
     type: int
     min: 1
-    max: 25
+    max: 100
+    count:
+      min: 5
+      max: 20
+      separator: " "
 generator: |
-  plaintext = input()
-  key = int(input())
+  n = int(input())
+  nums = list(map(int, input().split()))
   # 在此實作正確的演算法邏輯
-  result = plaintext  # 替換為實際計算
-  print(result)
+  result = sorted(nums)  # 替換為實際計算
+  print(' '.join(map(str, result)))
 starter_code: |
-  def my_algorithm(plaintext: str, key: int) -> str:
+  def my_algorithm(nums):
       # 在此實作你的解法
       pass
 
-  plaintext = input()
-  key = int(input())
-  print(my_algorithm(plaintext, key))
+  n = int(input())
+  nums = list(map(int, input().split()))
+  print(' '.join(map(str, my_algorithm(nums))))
 ---
 
 ## 你的題目名稱
 
-簡短說明此密碼學演算法的用途與背景。
+簡短說明此演算法的用途與背景。
 
 ### 演算法說明
 
@@ -294,26 +303,26 @@ starter_code: |
 
 ### 輸入說明
 
-- 第一行：`plaintext`，長度 5~12 的大寫英文字串
-- 第二行：`key`，整數 1~25
+- 第一行：`n`，整數 5~20，代表數字個數
+- 第二行：`numbers`，n 個以空格分隔的整數（1~100）
 
 ### 輸出說明
 
-- 輸出一行加密/解密結果
+- 輸出一行結果
 
 ### 範例
 
 **輸入：**
 
 \`\`\`
-HELLO
-3
+5
+42 7 88 15 3
 \`\`\`
 
 **輸出：**
 
 \`\`\`
-KHOOR
+3 7 15 42 88
 \`\`\`
 ```
 
@@ -323,9 +332,9 @@ KHOOR
 
 | 難度 | 題目範例 | 特徵 |
 |------|----------|------|
-| `easy` | 凱薩加密/解密、XOR 加密 | 單一簡單運算，參數少 |
-| `medium` | Vigenère 加密/解密 | 需要鍵值串列概念，稍複雜 |
-| `hard` | Playfair、AES-ECB、RSA | 多步驟演算法，需理解密碼學原理 |
+| `easy` | 費氏數列、反轉字串、判斷質數 | 單一簡單邏輯，參數少 |
+| `medium` | 氣泡排序、二分搜尋、字串處理 | 需要迴圈或條件組合 |
+| `hard` | 動態規劃、圖論、遞迴 | 多步驟演算法，需理解資料結構 |
 
 ---
 
@@ -345,7 +354,7 @@ pnpm test
 pnpm build
 ```
 
-> **注意：** WASM 僅在第一次啟動或修改 `testcase-generator/` Rust 程式碼後需要重新編譯。若只新增 Challenge Markdown 檔，直接執行 `pnpm docs:dev` 即可跳過 WASM 編譯步驟。
+> **注意：** WASM 僅在第一次啟動或修改 `testcase-generator/` Rust 程式碼後需要重新編譯。若只新增題目 Markdown 檔，直接執行 `pnpm docs:dev` 即可跳過 WASM 編譯步驟。
 
 ### 驗證新題目是否正常
 

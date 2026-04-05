@@ -23,9 +23,6 @@ The editor SHALL provide autocompletion for Python keywords (e.g., `if`, `for`, 
 source: codemirror-autocomplete
 updated: 2026-03-16
 code:
-  - docs/challenge/caesar-basic.md
-  - docs/challenge/caesar-advanced.md
-  - docs/challenge/caesar-custom-table.md
   - .vitepress/theme/components/editor/CodeEditor.vue
   - .vitepress/theme/composables/pythonCompletions.ts
   - package.json
@@ -48,9 +45,6 @@ The editor SHALL scan the current document and offer completions for identifiers
 source: codemirror-autocomplete
 updated: 2026-03-16
 code:
-  - docs/challenge/caesar-basic.md
-  - docs/challenge/caesar-advanced.md
-  - docs/challenge/caesar-custom-table.md
   - .vitepress/theme/components/editor/CodeEditor.vue
   - .vitepress/theme/composables/pythonCompletions.ts
   - package.json
@@ -87,9 +81,6 @@ Function entries in the stdlib list SHALL have an `apply` field ending with `(` 
 source: codemirror-autocomplete
 updated: 2026-03-16
 code:
-  - docs/challenge/caesar-basic.md
-  - docs/challenge/caesar-advanced.md
-  - docs/challenge/caesar-custom-table.md
   - .vitepress/theme/components/editor/CodeEditor.vue
   - .vitepress/theme/composables/pythonCompletions.ts
   - package.json
@@ -112,9 +103,6 @@ The completion dropdown SHALL activate automatically after each keystroke withou
 source: codemirror-autocomplete
 updated: 2026-03-16
 code:
-  - docs/challenge/caesar-basic.md
-  - docs/challenge/caesar-advanced.md
-  - docs/challenge/caesar-custom-table.md
   - .vitepress/theme/components/editor/CodeEditor.vue
   - .vitepress/theme/composables/pythonCompletions.ts
   - package.json
@@ -157,9 +145,6 @@ The editor SHALL automatically insert the closing counterpart when the user type
 source: codemirror-autocomplete
 updated: 2026-03-16
 code:
-  - docs/challenge/caesar-basic.md
-  - docs/challenge/caesar-advanced.md
-  - docs/challenge/caesar-custom-table.md
   - .vitepress/theme/components/editor/CodeEditor.vue
   - .vitepress/theme/composables/pythonCompletions.ts
   - package.json
@@ -189,9 +174,6 @@ The stdlib completion list SHALL NOT include `os` or `sys` module entries.
 source: codemirror-autocomplete
 updated: 2026-03-16
 code:
-  - docs/challenge/caesar-basic.md
-  - docs/challenge/caesar-advanced.md
-  - docs/challenge/caesar-custom-table.md
   - .vitepress/theme/components/editor/CodeEditor.vue
   - .vitepress/theme/composables/pythonCompletions.ts
   - package.json

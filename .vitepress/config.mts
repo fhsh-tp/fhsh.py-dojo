@@ -12,8 +12,8 @@ import { stripGenerator } from './plugins/strip-generator'
 export default defineConfig({
   srcDir: 'docs',
 
-  title: 'Crypto Challenge',
-  description: '關於密碼學的程式設計挑戰',
+  title: '台北市立復興高級中學 Python 自學道場',
+  description: 'Python 自學道場：在解題中學習 Python 程式設計',
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
     [
@@ -29,7 +29,7 @@ export default defineConfig({
     logo: '/favicon.svg',
     nav: [],
     sidebar: [],
-    socialLinks: [{ icon: 'github', link: 'https://github.com/CXPhoenix/crypto-challenge' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/fhsh-tp/fhsh.py-dojo' }],
   },
   vite: {
     plugins: [vueJsx(), vueDevTools(), tailwindcss(), wasm(), topLevelAwait(), stripGenerator()],

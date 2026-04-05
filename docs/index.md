@@ -3,9 +3,9 @@
 layout: home
 
 hero:
-  name: "Crypto Challenge"
-  text: "密碼學的挑戰"
-  tagline: 用程式碼征服密碼學的世界
+  name: "Python 自學道場"
+  text: "台北市立復興高級中學"
+  tagline: 在解題中學習 Python 程式設計
   image: 
     light: /assets/LOGO-light.svg
     dark: /assets/LOGO-dark.svg

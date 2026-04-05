@@ -10,19 +10,14 @@ Defines the build-time pipeline that generates encrypted testcase pool files for
 
 A build script (`scripts/generate-pools.ts`) SHALL read all `docs/challenge/*.md` files, parse frontmatter to extract `params`, `generator`, `testcase_count`, `algorithm`, and `verdict_detail` fields. For each challenge, it SHALL generate a configurable number of random inputs (default: 200) using the existing WASM `generate_challenge()` function or equivalent param-based generation, execute the `generator` Python code via subprocess for each input to produce `expected_output`, and package all `{input, expected_output}` pairs into an encrypted binary pool file.
 
-The build script SHALL declare its Python runtime and third-party package dependencies via a `requirements.txt` file at the project root. The `requirements.txt` file SHALL list `PyYAML` and `pycryptodome` with version constraints.
+The build script SHALL declare its Python runtime and third-party package dependencies via a `requirements.txt` file at the project root. The `requirements.txt` file SHALL list `PyYAML` with a version constraint. No third-party cryptography library (e.g., `pycryptodome`) SHALL be required as a standard dependency.
 
-Before processing any challenge files, the build script SHALL perform a preflight check that verifies the Python 3 runtime is available and all required packages (`yaml`, `Crypto.Cipher.DES`) can be imported. If the preflight check fails, the build script SHALL exit with a non-zero code and print an actionable error message that includes the exact installation command (`pip install -r requirements.txt`).
+Before processing any challenge files, the build script SHALL perform a preflight check that verifies the Python 3 runtime is available and the `yaml` package can be imported. If the preflight check fails, the build script SHALL exit with a non-zero code and print an actionable error message that includes the exact installation command (`pip install -r requirements.txt`).
 
 #### Scenario: Pool file created for each challenge
 
 - **WHEN** the build script runs
 - **THEN** one `.bin` file SHALL be created in `docs/public/pools/` for each challenge, named `<algorithm>.bin`
-
-#### Scenario: Generator with external Python dependencies executes correctly
-
-- **WHEN** a challenge generator imports `pycryptodome` (e.g., `from Crypto.Cipher import DES`)
-- **THEN** the build script SHALL execute it via Python subprocess with the dependency available, producing correct expected outputs
 
 #### Scenario: JSON factory format is supported
 
@@ -34,14 +29,9 @@ Before processing any challenge files, the build script SHALL perform a prefligh
 - **WHEN** a generator script raises a Python exception for any input
 - **THEN** the build script SHALL report the error with challenge name and input details, and exit with a non-zero code
 
-#### Scenario: Python dependencies declared in requirements.txt
+#### Scenario: Preflight check passes with Python and PyYAML installed
 
-- **WHEN** a developer or CI environment needs to install Python dependencies for pool generation
-- **THEN** a `requirements.txt` file SHALL exist at the project root listing `PyYAML` and `pycryptodome` with version constraints
-
-#### Scenario: Preflight check passes with all dependencies installed
-
-- **WHEN** the build script starts and Python 3 is available with `PyYAML` and `pycryptodome` installed
+- **WHEN** the build script starts and Python 3 is available with `PyYAML` installed
 - **THEN** the preflight check SHALL pass silently and pool generation SHALL proceed
 
 #### Scenario: Preflight check fails when Python is missing
@@ -49,54 +39,47 @@ Before processing any challenge files, the build script SHALL perform a prefligh
 - **WHEN** the build script starts and the `python3` command is not found
 - **THEN** the build script SHALL exit with a non-zero code and print an error message indicating that Python 3 is required
 
-#### Scenario: Preflight check fails when a required package is missing
+#### Scenario: Preflight check fails when PyYAML is missing
 
-- **WHEN** the build script starts and `PyYAML` or `pycryptodome` is not installed
+- **WHEN** the build script starts and `PyYAML` is not installed
 - **THEN** the build script SHALL exit with a non-zero code and print an error message that includes the command `pip install -r requirements.txt`
 
 
 <!-- @trace
-source: declare-release-python-toolchain
-updated: 2026-04-04
+source: rebrand-fhsh-py-dojo
+updated: 2026-04-05
 code:
-  - .vitepress/plugins/strip-generator.ts
-  - .vitepress/theme/components/editor/CodeEditor.vue
-  - requirements.txt
-  - testcase-generator/src/judge.rs
-  - .vitepress/theme/composables/useRemoteChallenge.ts
-  - testcase-generator/src/pool.rs
-  - .vitepress/theme/views/ChallengeView.vue
-  - scripts/generate-pools.ts
-  - scripts/generate-key-material.ts
-  - testcase-generator/src/lib.rs
-  - package.json
-  - tsconfig.node.json
-  - .github/workflows/release.yml
+  - docs/challenge/caesar-advanced.md
+  - .vitepress/theme/composables/useApi.ts
+  - LICENSE
+  - docs/challenge/rsa-basic.md
+  - docs/challenge/rail-fence-encrypt.md
+  - Usage.md
+  - docs/challenge/caesar-custom-table.md
+  - .vitepress/config.mts
+  - docs/index.md
+  - CHANGELOG.md
+  - .vitepress/theme/composables/index.ts
+  - docs/challenge/enigma-simplified.md
+  - docs/challenge/caesar-basic.md
   - README.md
-  - tsconfig.app.json
-  - .vitepress/theme/workers/pyodide.worker.ts
-  - .vitepress/theme/composables/useChallengeRunner.ts
+  - docs/challenge/vigenere-encrypt.md
+  - requirements.txt
+  - package.json
+  - docs/challenge/des-ecb-cbc.md
 tests:
-  - .vitepress/theme/__tests__/ChallengeView-verdict-detail.spec.ts
-  - .vitepress/theme/__tests__/useChallengeRunner-dev.spec.ts
-  - .vitepress/theme/__tests__/useChallengeRunner-prod.spec.ts
-  - .vitepress/theme/__tests__/pyodide-worker-run-only.spec.ts
+  - .vitepress/theme/__tests__/useApi.spec.ts
 -->
 
 ---
 ### Requirement: Python dependency manifest exists at project root
 
-A `requirements.txt` file SHALL exist at the project root directory. It SHALL list all Python packages required by the pool generation build step. At minimum, it SHALL contain `PyYAML` and `pycryptodome` with pinned or minimum version constraints. The file SHALL NOT include packages that are only part of the Python standard library.
+A `requirements.txt` file SHALL exist at the project root directory. It SHALL list all Python packages required by the pool generation build step. It SHALL contain `PyYAML` with a pinned or minimum version constraint. The file SHALL NOT include packages that are only part of the Python standard library. The file SHALL NOT list `pycryptodome` or any other third-party cryptography library as a standard dependency.
 
 #### Scenario: requirements.txt contains PyYAML
 
 - **WHEN** a user reads `requirements.txt`
 - **THEN** it SHALL contain a line specifying `PyYAML` with a version constraint
-
-#### Scenario: requirements.txt contains pycryptodome
-
-- **WHEN** a user reads `requirements.txt`
-- **THEN** it SHALL contain a line specifying `pycryptodome` with a version constraint
 
 #### Scenario: All listed packages install successfully
 
@@ -105,31 +88,29 @@ A `requirements.txt` file SHALL exist at the project root directory. It SHALL li
 
 
 <!-- @trace
-source: declare-release-python-toolchain
-updated: 2026-04-04
+source: rebrand-fhsh-py-dojo
+updated: 2026-04-05
 code:
-  - .vitepress/plugins/strip-generator.ts
-  - .vitepress/theme/components/editor/CodeEditor.vue
-  - requirements.txt
-  - testcase-generator/src/judge.rs
-  - .vitepress/theme/composables/useRemoteChallenge.ts
-  - testcase-generator/src/pool.rs
-  - .vitepress/theme/views/ChallengeView.vue
-  - scripts/generate-pools.ts
-  - scripts/generate-key-material.ts
-  - testcase-generator/src/lib.rs
-  - package.json
-  - tsconfig.node.json
-  - .github/workflows/release.yml
+  - docs/challenge/caesar-advanced.md
+  - .vitepress/theme/composables/useApi.ts
+  - LICENSE
+  - docs/challenge/rsa-basic.md
+  - docs/challenge/rail-fence-encrypt.md
+  - Usage.md
+  - docs/challenge/caesar-custom-table.md
+  - .vitepress/config.mts
+  - docs/index.md
+  - CHANGELOG.md
+  - .vitepress/theme/composables/index.ts
+  - docs/challenge/enigma-simplified.md
+  - docs/challenge/caesar-basic.md
   - README.md
-  - tsconfig.app.json
-  - .vitepress/theme/workers/pyodide.worker.ts
-  - .vitepress/theme/composables/useChallengeRunner.ts
+  - docs/challenge/vigenere-encrypt.md
+  - requirements.txt
+  - package.json
+  - docs/challenge/des-ecb-cbc.md
 tests:
-  - .vitepress/theme/__tests__/ChallengeView-verdict-detail.spec.ts
-  - .vitepress/theme/__tests__/useChallengeRunner-dev.spec.ts
-  - .vitepress/theme/__tests__/useChallengeRunner-prod.spec.ts
-  - .vitepress/theme/__tests__/pyodide-worker-run-only.spec.ts
+  - .vitepress/theme/__tests__/useApi.spec.ts
 -->
 
 ---

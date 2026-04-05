@@ -83,7 +83,6 @@ code:
   - .vitepress/theme/composables/useWasm.ts
   - .vitepress/theme/stores/challenge.ts
   - .vitepress/theme/workers/pyodide.worker.ts
-  - docs/challenge/vigenere-encrypt.md
   - package.json
   - docs/shared/challenge.data.ts
 tests:
@@ -123,7 +122,6 @@ code:
   - .vitepress/theme/composables/useWasm.ts
   - .vitepress/theme/stores/challenge.ts
   - .vitepress/theme/workers/pyodide.worker.ts
-  - docs/challenge/vigenere-encrypt.md
   - package.json
   - docs/shared/challenge.data.ts
 tests:

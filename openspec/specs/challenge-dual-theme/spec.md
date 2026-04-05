@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the dual-theme (dark/light mode) requirements for the Cryptography Challenge site. Dark mode follows a Matrix Terminal aesthetic; light mode follows a SOC/SIEM aesthetic. Theme state is controlled by VitePress and persisted to localStorage.
+Defines the dual-theme (dark/light mode) requirements for the FHSH Python 自學道場（台北市立復興高級中學 Python 自學道場）site. Dark mode follows a Matrix Terminal aesthetic; light mode follows a SOC/SIEM aesthetic. Theme state is controlled by VitePress and persisted to localStorage.
 
 ---
 
