@@ -82,3 +82,6 @@ docs/public/pools/
 
 # Superpowers
 .superpowers
+
+# Customized ignore
+refs/other-docs-dot-vitepress/
