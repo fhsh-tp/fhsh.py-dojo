@@ -281,23 +281,28 @@ function encryptPool(
 function main() {
   console.log('[generate-pools] Starting pool generation...')
 
-  // Verify Python runtime and packages are available
-  preflightCheckPython()
+  // Read encryption key and generate key_material.rs unconditionally —
+  // WASM compilation depends on this file regardless of whether challenges exist.
+  const key = getPoolKey(PROJECT_ROOT)
+  generateKeyMaterial(key, PROJECT_ROOT)
 
   // Ensure output directory exists
   if (!existsSync(POOLS_DIR)) {
     mkdirSync(POOLS_DIR, { recursive: true })
   }
 
-  // Read encryption key
-  const key = getPoolKey(PROJECT_ROOT)
-
   // Find all challenge files
+  if (!existsSync(CHALLENGES_DIR)) {
+    mkdirSync(CHALLENGES_DIR, { recursive: true })
+  }
   const files = readdirSync(CHALLENGES_DIR).filter((f) => f.endsWith('.md'))
   if (files.length === 0) {
-    console.error('[generate-pools] No challenge files found in', CHALLENGES_DIR)
-    process.exit(1)
+    console.warn('[generate-pools] No challenge files found in', CHALLENGES_DIR, '— skipping pool generation')
+    return
   }
+
+  // Verify Python runtime and packages are available (only needed for pool generation)
+  preflightCheckPython()
 
   let success = 0
   let failed = 0
@@ -336,9 +341,6 @@ function main() {
       failed++
     }
   }
-
-  // Generate key material for WASM
-  generateKeyMaterial(key, PROJECT_ROOT)
 
   console.log(`[generate-pools] Done: ${success} pools generated, ${failed} failed`)
 

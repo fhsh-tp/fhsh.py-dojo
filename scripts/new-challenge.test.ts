@@ -1,0 +1,186 @@
+// @vitest-environment node
+import { describe, it, expect } from 'vitest'
+import {
+  parseArgs,
+  validateName,
+  validateDifficulty,
+  computeNextId,
+  buildContent,
+  toTitleCase,
+  toAlgorithmName,
+} from './new-challenge.js'
+
+describe('toTitleCase', () => {
+  it('converts kebab-case to Title Case', () => {
+    expect(toTitleCase('bubble-sort')).toBe('Bubble Sort')
+    expect(toTitleCase('linear-search')).toBe('Linear Search')
+    expect(toTitleCase('fibonacci')).toBe('Fibonacci')
+  })
+})
+
+describe('toAlgorithmName', () => {
+  it('replaces hyphens with underscores', () => {
+    expect(toAlgorithmName('bubble-sort')).toBe('bubble_sort')
+    expect(toAlgorithmName('linear-search')).toBe('linear_search')
+    expect(toAlgorithmName('fibonacci')).toBe('fibonacci')
+  })
+})
+
+describe('parseArgs', () => {
+  it('returns null when name is missing', () => {
+    expect(parseArgs(['node', 'script.ts'])).toBeNull()
+    expect(parseArgs(['node', 'script.ts', '--difficulty', 'easy'])).toBeNull()
+  })
+
+  it('parses name and applies defaults', () => {
+    const result = parseArgs(['node', 'script.ts', 'bubble-sort'])
+    expect(result).toEqual({
+      name: 'bubble-sort',
+      title: 'Bubble Sort',
+      difficulty: 'easy',
+      algorithm: 'bubble_sort',
+    })
+  })
+
+  it('accepts explicit --title, --difficulty, --algorithm', () => {
+    const result = parseArgs([
+      'node', 'script.ts', 'linear-search',
+      '--title', '線性搜尋',
+      '--difficulty', 'medium',
+      '--algorithm', 'linear_search',
+    ])
+    expect(result).toEqual({
+      name: 'linear-search',
+      title: '線性搜尋',
+      difficulty: 'medium',
+      algorithm: 'linear_search',
+    })
+  })
+
+  it('options can appear before the name', () => {
+    const result = parseArgs([
+      'node', 'script.ts',
+      '--difficulty', 'hard',
+      'merge-sort',
+    ])
+    expect(result?.name).toBe('merge-sort')
+    expect(result?.difficulty).toBe('hard')
+  })
+})
+
+describe('validateName', () => {
+  it('returns null for valid kebab-case names', () => {
+    expect(validateName('bubble-sort')).toBeNull()
+    expect(validateName('fibonacci')).toBeNull()
+    expect(validateName('binary-search-tree')).toBeNull()
+    expect(validateName('base64')).toBeNull()
+  })
+
+  it('returns error for uppercase letters', () => {
+    expect(validateName('BubbleSort')).toBe(
+      '[new-challenge] ERROR: <name> must be kebab-case (lowercase letters, digits, hyphens only)',
+    )
+    expect(validateName('Bubble-sort')).not.toBeNull()
+  })
+
+  it('returns error for underscore-separated names', () => {
+    expect(validateName('bubble_sort')).not.toBeNull()
+  })
+
+  it('returns error for names with spaces', () => {
+    expect(validateName('bubble sort')).not.toBeNull()
+  })
+})
+
+describe('validateDifficulty', () => {
+  it('returns null for valid difficulties', () => {
+    expect(validateDifficulty('easy')).toBeNull()
+    expect(validateDifficulty('medium')).toBeNull()
+    expect(validateDifficulty('hard')).toBeNull()
+  })
+
+  it('returns exact error message for invalid difficulty', () => {
+    expect(validateDifficulty('extreme')).toBe(
+      '[new-challenge] ERROR: --difficulty must be one of: easy, medium, hard',
+    )
+    expect(validateDifficulty('')).not.toBeNull()
+    expect(validateDifficulty('Easy')).not.toBeNull()
+  })
+})
+
+describe('computeNextId', () => {
+  it('returns 1 when no files exist', () => {
+    expect(computeNextId([])).toBe(1)
+  })
+
+  it('returns max id + 1 from file contents', () => {
+    const contents = [
+      '---\nid: 3\ntitle: foo\n---',
+      '---\nid: 1\ntitle: bar\n---',
+      '---\nid: 7\ntitle: baz\n---',
+    ]
+    expect(computeNextId(contents)).toBe(8)
+  })
+
+  it('handles files without id field gracefully', () => {
+    const contents = ['---\ntitle: no-id\n---', '---\nid: 5\ntitle: with-id\n---']
+    expect(computeNextId(contents)).toBe(6)
+  })
+})
+
+describe('buildContent', () => {
+  const base = { id: 1, name: 'bubble-sort', title: 'Bubble Sort', difficulty: 'easy', algorithm: 'bubble_sort' }
+
+  it('produces valid YAML frontmatter with all required fields', () => {
+    const content = buildContent(base)
+    expect(content).toContain('layout: challenge')
+    expect(content).toContain('id: 1')
+    expect(content).toContain('title: Bubble Sort')
+    expect(content).toContain('difficulty: easy')
+    expect(content).toContain('algorithm: bubble_sort')
+    expect(content).toContain('testcase_count: 5')
+    expect(content).toContain('params:')
+    expect(content).toContain('generator: |')
+    expect(content).toContain('starter_code: |')
+  })
+
+  it('includes default params skeleton with int type', () => {
+    const content = buildContent(base)
+    expect(content).toContain('type: int')
+    expect(content).toContain('min: 1')
+    expect(content).toContain('max: 10')
+  })
+
+  it('generator reads n and prints it (no syntax error)', () => {
+    const content = buildContent(base)
+    expect(content).toContain('n = int(input())')
+    expect(content).toContain('print(n)')
+  })
+
+  it('starter_code has stub function and input read', () => {
+    const content = buildContent(base)
+    expect(content).toContain('def solve():')
+    expect(content).toContain('n = int(input())')
+  })
+
+  it('includes all markdown body sections', () => {
+    const content = buildContent(base)
+    expect(content).toContain('## Bubble Sort')
+    expect(content).toContain('### 演算法說明')
+    expect(content).toContain('### 輸入說明')
+    expect(content).toContain('### 輸出說明')
+    expect(content).toContain('### 範例')
+  })
+
+  it('frontmatter is fenced with --- delimiters', () => {
+    const content = buildContent(base)
+    expect(content.startsWith('---\n')).toBe(true)
+    const secondFence = content.indexOf('---\n', 4)
+    expect(secondFence).toBeGreaterThan(4)
+  })
+
+  it('tags field is empty array', () => {
+    const content = buildContent(base)
+    expect(content).toContain('tags: []')
+  })
+})
