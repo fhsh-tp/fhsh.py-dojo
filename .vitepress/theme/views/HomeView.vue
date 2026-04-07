@@ -124,7 +124,7 @@ const subjectLinkMap: Record<string, string> = {
     <section class="home-section">
       <h2 class="home-section__title">
         最新挑戰
-        <a href="/challenge/" class="home-section__more">查看全部 →</a>
+        <a href="/challenges" class="home-section__more">查看全部 →</a>
       </h2>
       <div v-if="latestChallenges.length > 0" class="home-challenge-grid">
         <ChallengeCard
