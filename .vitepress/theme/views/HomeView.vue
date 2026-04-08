@@ -13,7 +13,7 @@ const props = defineProps<{
 const latestTutorials = computed(() =>
   [...props.tutorials]
     .filter(t => !t.isIndex)
-    .sort((a, b) => b.createdTime.getTime() - a.createdTime.getTime())
+    .sort((a, b) => new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime())
     .slice(0, 3)
 )
 

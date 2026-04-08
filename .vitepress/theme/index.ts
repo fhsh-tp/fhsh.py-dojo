@@ -8,6 +8,7 @@ import ChallengeView from './views/ChallengeView.vue'
 import HomeView from './views/HomeView.vue'
 import ChallengeLink from './components/tutor/ChallengeLink.vue'
 import './tailwind.css'
+import './custom.css'
 
 export default {
   extends: DefaultTheme,

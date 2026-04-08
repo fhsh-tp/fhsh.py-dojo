@@ -13,9 +13,9 @@ params:
     max_len: 10
 generator: |
   name = input()
-  print(f"Hello, {name}!")
+  print("Hello,", name)
 starter_code: |
-  # 讀取輸入的名字，然後輸出 Hello, [名字]!
+  # 讀取輸入的名字，然後輸出 Hello, [名字]
 ---
 
 ## 哈囉，世界！
@@ -28,7 +28,7 @@ starter_code: |
 
 ### 輸出說明
 
-- 輸出一行：`Hello, S!`（注意逗號後有一個空格，結尾有驚嘆號）
+- 輸出一行：`Hello, S`（注意逗號後有一個空格）
 
 ### 範例
 
@@ -41,5 +41,5 @@ Alice
 **輸出：**
 
 ```
-Hello, Alice!
+Hello, Alice
 ```
