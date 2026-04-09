@@ -171,16 +171,20 @@ The `[START]/[END]` wrapper signals this isn't a "add one more sentence" fix —
 
 ## 3. Derived Editorial Rules (Summary)
 
-| ID | Rule | Category |
-|----|------|----------|
-| **P-1** | Prefer commas/colons over em-dashes in tutorial prose. Reserve `——` for dramatic hooks/jokes only. | Punctuation |
-| **T-1** | Never use a formal term before its teaching point. Use plain-language descriptions or controlled forward references. | Terminology |
-| **S-1** | Every analogy needs a meta-cognitive bridge — tell the reader *why* this comparison before making it. | Scaffolding |
-| **S-2** | After humor/digressions, use explicit connectors (沒錯！/ 回到正題 / etc.) to resume the thread. | Scaffolding |
-| **S-3** | Section-level transitions between major concepts require 2–4 sentences: summarize → identify gap → motivate. | Scaffolding |
-| **C-1** | Every code block must have a conversational lead-in. No heading → code without setup. | Code examples |
-| **E-1** | Address common beginner mistakes immediately after introducing the relevant syntax, not just in "錯誤排查". | Error prevention |
-| **M-1** | When a code example implicitly demonstrates a core concept (e.g., expression evaluation), make it explicit with a trace/walkthrough. | Mental models |
+| ID | Rule | Category | Status |
+|----|------|----------|--------|
+| **P-1** | Prefer commas/colons over em-dashes in tutorial prose. Reserve `——` for dramatic hooks/jokes only. Includes 5-point decision checklist. | Punctuation | **已修訂** |
+| **T-1** | Never use a formal term before its teaching point. Use plain-language descriptions or controlled forward references. | Terminology | |
+| **S-1** | Every analogy needs a meta-cognitive bridge — tell the reader *why* this comparison before making it. | Scaffolding | |
+| **S-2** | After humor/digressions, use explicit connectors (沒錯！/ 回到正題 / etc.) to resume the thread. Includes H3 boundary relaxation. | Scaffolding | **已修訂** |
+| **S-3** | Section-level transitions between major concepts require 2–4 sentences: summarize → identify gap → motivate. | Scaffolding | |
+| **C-1** | Every code block must have a conversational lead-in. No heading → code without setup. | Code examples | |
+| **E-1** | Address common beginner mistakes immediately after introducing the relevant syntax, not just in "錯誤排查". | Error prevention | |
+| **M-1** | When a code example implicitly demonstrates a core concept (e.g., expression evaluation), make it explicit with a trace/walkthrough. | Mental models | |
+| **F-1** | Image placeholders must use dual-line format: `![](path)` link + `> 📷` caption. No caption-only format. | Format | **新增** |
+| **V-1** | VitePress custom containers must use `> [!TYPE]` syntax (with `!`). `> [TYPE]` without `!` will not render. | Format | **新增** |
+| **T-3** | No empty custom container blocks. If content is not ready, wrap entire block in HTML comment. | Completeness | **新增** |
+| **K-1** | Emotional punctuation density: at least 1 per 30 prose lines, no more than 1 per 10 prose lines. | Rhythm | **新增** |
 
 ---
 

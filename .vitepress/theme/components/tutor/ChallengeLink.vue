@@ -27,6 +27,7 @@ const difficultyClass: Record<string, string> = {
     <a
       v-if="challenge"
       :href="challenge.url"
+      target="_blank"
       class="challenge-link__card"
     >
       <span class="challenge-link__icon">⚔️</span>
