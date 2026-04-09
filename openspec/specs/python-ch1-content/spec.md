@@ -128,12 +128,27 @@ code:
 ---
 ### Requirement: Practice challenges exist for independent work
 
-The system SHALL provide seven practice challenges:
+The system SHALL provide practice challenges linked from tutorial sections via `<ChallengeLink>` components:
+
 - `self-introduction` (id: 4), `parrot-echo` (id: 5) — linked from 1-1
 - `grade-average` (id: 6), `change-calculator` (id: 7), `seconds-converter` (id: 8) — linked from 1-2
 - `grade-level` (id: 9), `triangle-check` (id: 10) — linked from 1-3
 
-Each practice challenge MUST have valid params and a correct generator. Tutorial sections MUST reference practice challenges via `<ChallengeLink>` with a brief hint but no step-by-step walkthrough.
+Additionally, section 1-3 SHALL link the following scaffolded practice challenges organized in four difficulty tiers:
+
+**Tier 1 (★☆☆)**:
+- `odd-even` (id: 26), `sign-check` (id: 27)
+
+**Tier 2 (★★☆)**:
+- `grade-level` (id: 9), `bmi-classifier` (id: 28), `quadrant-classifier` (id: 29)
+
+**Tier 3 (★★★)**:
+- `triangle-classify` (id: 30), `quadratic-discriminant` (id: 31), `taxi-fare` (id: 32), `movie-ticket` (id: 33)
+
+**Tier 4 (★★★★)**:
+- `date-validator` (id: 34)
+
+Each practice challenge MUST have valid params and a correct generator. Tutorial sections MUST reference practice challenges via `<ChallengeLink>` with a brief situational context and a hint (but no step-by-step walkthrough). Each tier MUST have a brief introduction explaining the skill level and target competencies.
 
 #### Scenario: Practice challenges are accessible from tutorial sections
 
@@ -145,27 +160,23 @@ Each practice challenge MUST have valid params and a correct generator. Tutorial
 - **WHEN** a practice challenge generator is executed with valid test input
 - **THEN** the generator produces the correct expected output
 
+#### Scenario: Section 1-3 displays four-tier scaffolding
+
+- **WHEN** a user reads the practice section of 1-3.md
+- **THEN** exercises are organized under four clearly labeled tier headings (★☆☆ through ★★★★) with increasing difficulty
+
+#### Scenario: Each exercise has situational context
+
+- **WHEN** a user reads an exercise description in the practice section
+- **THEN** the description SHALL contain 3-5 lines of engaging real-world or mathematical context before the ChallengeLink
+
 
 <!-- @trace
-source: write-python-chapter-1
-updated: 2026-04-07
+source: revise-ch1-3-exercises
+updated: 2026-04-10
 code:
-  - docs/challenge/self-introduction.md
-  - docs/challenge/beverage-cashier.md
   - docs/tutor/py/ch1/1-3.md
-  - docs/tutor/py/ch1/1-1.md
-  - docs/challenge/change-calculator.md
-  - docs/challenge/grade-average.md
-  - docs/challenge/seconds-converter.md
   - docs/tutor/py/ch1/1-4.md
-  - docs/tutor/py/ch1/index.md
-  - refs/Python-self_learning-outline.md
-  - docs/challenge/triangle-check.md
-  - docs/tutor/py/ch1/1-2.md
-  - docs/challenge/leap-year.md
-  - docs/challenge/grade-level.md
-  - docs/challenge/parrot-echo.md
-  - docs/challenge/hello-world.md
 -->
 
 ---
@@ -695,4 +706,40 @@ code:
   - phoenix-popular-science-article-style-enhance.md
   - docs/tutor/py/ch1/1-2.md
   - docs/tutor/py/ch1/1-3.md
+-->
+
+---
+### Requirement: Section 1-4 contains a comprehensive Judge exercise
+
+Section `docs/tutor/py/ch1/1-4.md` SHALL contain a "模組一畢業考" section positioned after the self-check table and before the "模組二預告" section. This section SHALL include:
+
+1. A celebratory framing as a "graduation exam" for Module 1
+2. An explanation of how the exercise integrates skills from all three sections (I/O from 1-1, arithmetic from 1-2, conditionals from 1-3)
+3. A brief problem description for the vending machine change exercise
+4. A `<ChallengeLink slug="vending-change" />` component
+5. A hint about the greedy decomposition approach using `//` and `%`
+
+The section SHALL use Phoenix's conversational tone with kaomoji, consistent with the rest of Module 1.
+
+#### Scenario: Comprehensive exercise appears in correct position
+
+- **WHEN** a user reads section 1-4
+- **THEN** the "模組一畢業考" section SHALL appear after the self-check table and before the "模組二預告" section
+
+#### Scenario: Exercise cross-references all three sections
+
+- **WHEN** a user reads the comprehensive exercise description
+- **THEN** the description SHALL explicitly reference skills from 1-1 (input/output), 1-2 (arithmetic operators `//` and `%`), and 1-3 (if-else conditional)
+
+#### Scenario: ChallengeLink resolves to valid challenge
+
+- **WHEN** a user clicks the ChallengeLink for `vending-change`
+- **THEN** the link SHALL resolve to a valid challenge page at `/challenge/vending-change`
+
+<!-- @trace
+source: revise-ch1-4-exercise
+updated: 2026-04-10
+code:
+  - docs/tutor/py/ch1/1-3.md
+  - docs/tutor/py/ch1/1-4.md
 -->
