@@ -88,7 +88,6 @@ The function SHALL:
 
 ## Requirements
 
-
 <!-- @trace
 source: add-tutorial-content-system
 updated: 2026-04-05
@@ -112,6 +111,42 @@ code:
   - docs/tutor/py/ch4/index.md
   - docs/tutor/py/index.md
   - docs/tutor/ds/.gitkeep
+-->
+
+
+<!-- @trace
+source: fix-ch1-appendix-display
+updated: 2026-04-10
+code:
+  - docs/tutor/py/ch2/2-1.md
+  - docs/challenge/date-validator.md
+  - docs/challenge/sign-check.md
+  - docs/tutor/py/ch2/2-3.md
+  - docs/challenge/taxi-fare.md
+  - docs/tutor/py/ch1/1-1.md
+  - docs/challenge/quadratic-discriminant.md
+  - docs/tutor/py/ch1/1-3.md
+  - docs/tutor/py/ch1/references/Barr-Stephenson-2011-CT-K12.pdf
+  - docs/tutor/py/ch1/references/Weintrop-2016-CT-Math-Science.pdf
+  - docs/tutor/py/ch1/references/Wing-2006-CT.pdf
+  - docs/challenge/triangle-classify.md
+  - docs/challenge/quadrant-classifier.md
+  - docs/tutor/py/ch1/references/ISTE-CSTA-2011-CT-Definition.pdf
+  - docs/tutor/py/ch1/references/Taiwan-108-Math-Curriculum.pdf
+  - docs/challenge/bmi-classifier.md
+  - docs/challenge/movie-ticket.md
+  - docs/tutor/py/ch1/references/Wing-2011-CT-MicrosoftResearch.pdf
+  - docs/tutor/py/ch1/references/Papert-1980-Mindstorms.pdf
+  - docs/tutor/py/ch1/references/PISA-2022-Math-Framework.pdf
+  - docs/tutor/py/ch1/references/Taiwan-108-Tech-Curriculum.pdf
+  - docs/challenge/odd-even.md
+  - .vitepress/config.mts
+  - docs/challenge/vending-change.md
+  - docs/tutor/py/ch1/1-2.md
+  - docs/tutor/py/ch1/reference.md
+  - docs/tutor/py/ch2/2-2.md
+  - docs/tutor/py/ch1/1-4.md
+  - docs/tutor/py/ch1/references/Brennan-Resnick-2012-CT-Assessment.pdf
 -->
 
 ### Requirement: nav.yml defines static top navigation
@@ -151,7 +186,7 @@ The `nav.yml` SHALL define the following structure:
 The function SHALL:
 1. Enumerate all subject directories directly under `docs/tutor/`
 2. For each subject, enumerate all `chN/` directories
-3. For each chapter, collect `.md` files excluding `index.md`, sorted alphabetically by filename
+3. For each chapter, collect `.md` files excluding `index.md` AND excluding `appendix.md`, sorted alphabetically by filename
 4. Read each file's frontmatter `title` field using `gray-matter` or equivalent YAML front matter parser
 5. Place `index.md` as the first item in each chapter's sidebar group
 6. Generate sidebar keys for both `/tutor/<subject>/` (all chapters) and `/tutor/<subject>/chN/` (single chapter)
@@ -172,3 +207,60 @@ The function SHALL:
 
 - **WHEN** a user navigates to any page under `/challenge/`
 - **THEN** no sidebar SHALL be rendered (the multi-sidebar object SHALL NOT contain a `/challenge/` key)
+
+#### Scenario: appendix.md is excluded from sidebar
+
+- **WHEN** a chapter directory contains an `appendix.md` file
+- **THEN** `buildTutorSidebar()` SHALL NOT include `appendix.md` in the sidebar items for that chapter
+
+---
+### Requirement: Inline appendix headings are excluded from VitePress outline
+
+Tutorial section files that contain an Image Specification Appendix section SHALL use an HTML `<h2>` tag instead of a Markdown `##` heading for the appendix title. This ensures VitePress excludes the appendix heading from the page outline (right-side table of contents).
+
+The appendix content below the `<h2>` tag SHALL remain visible in the page body. Only the heading is changed from Markdown to HTML to prevent outline pollution.
+
+#### Scenario: Appendix heading not in page outline
+
+- **WHEN** a user views `1-3.md` or `1-4.md` in the browser
+- **THEN** the right-side page outline SHALL NOT contain an "Image Specification Appendix" entry
+
+#### Scenario: Appendix content remains visible
+
+- **WHEN** a user scrolls to the bottom of `1-3.md` or `1-4.md`
+- **THEN** the Image Specification Appendix content SHALL still be visible on the page
+
+<!-- @trace
+source: fix-ch1-appendix-display
+updated: 2026-04-10
+code:
+  - docs/tutor/py/ch2/2-1.md
+  - docs/challenge/date-validator.md
+  - docs/challenge/sign-check.md
+  - docs/tutor/py/ch2/2-3.md
+  - docs/challenge/taxi-fare.md
+  - docs/tutor/py/ch1/1-1.md
+  - docs/challenge/quadratic-discriminant.md
+  - docs/tutor/py/ch1/1-3.md
+  - docs/tutor/py/ch1/references/Barr-Stephenson-2011-CT-K12.pdf
+  - docs/tutor/py/ch1/references/Weintrop-2016-CT-Math-Science.pdf
+  - docs/tutor/py/ch1/references/Wing-2006-CT.pdf
+  - docs/challenge/triangle-classify.md
+  - docs/challenge/quadrant-classifier.md
+  - docs/tutor/py/ch1/references/ISTE-CSTA-2011-CT-Definition.pdf
+  - docs/tutor/py/ch1/references/Taiwan-108-Math-Curriculum.pdf
+  - docs/challenge/bmi-classifier.md
+  - docs/challenge/movie-ticket.md
+  - docs/tutor/py/ch1/references/Wing-2011-CT-MicrosoftResearch.pdf
+  - docs/tutor/py/ch1/references/Papert-1980-Mindstorms.pdf
+  - docs/tutor/py/ch1/references/PISA-2022-Math-Framework.pdf
+  - docs/tutor/py/ch1/references/Taiwan-108-Tech-Curriculum.pdf
+  - docs/challenge/odd-even.md
+  - .vitepress/config.mts
+  - docs/challenge/vending-change.md
+  - docs/tutor/py/ch1/1-2.md
+  - docs/tutor/py/ch1/reference.md
+  - docs/tutor/py/ch2/2-2.md
+  - docs/tutor/py/ch1/1-4.md
+  - docs/tutor/py/ch1/references/Brennan-Resnick-2012-CT-Assessment.pdf
+-->

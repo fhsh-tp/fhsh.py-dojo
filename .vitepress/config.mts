@@ -67,7 +67,7 @@ function buildTutorSidebar(docsDir: string): Record<string, unknown> {
 
     for (const chDir of chapterDirs) {
       const chPath = path.join(subjectDir, chDir)
-      const files = fs.readdirSync(chPath).filter(f => f.endsWith('.md'))
+      const files = fs.readdirSync(chPath).filter(f => f.endsWith('.md') && f !== 'appendix.md')
       if (files.length === 0) continue
 
       // index.md first, then alphabetical
