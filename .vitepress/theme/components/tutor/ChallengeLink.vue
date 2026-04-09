@@ -5,7 +5,7 @@ import { data as challenges } from '../../../../docs/shared/challenge.data'
 const props = defineProps<{ slug: string }>()
 
 const challenge = computed(() =>
-  challenges.find(c => c.url === `/challenge/${props.slug}` || c.url.endsWith(`/${props.slug}`))
+  challenges.find(c => c.url.replace(/\.html$/, '') === `/challenge/${props.slug}`)
 )
 
 const difficultyLabel: Record<string, string> = {
@@ -27,6 +27,7 @@ const difficultyClass: Record<string, string> = {
     <a
       v-if="challenge"
       :href="challenge.url"
+      target="_blank"
       class="challenge-link__card"
     >
       <span class="challenge-link__icon">⚔️</span>

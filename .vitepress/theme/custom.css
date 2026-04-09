@@ -1,0 +1,7 @@
+.custom-block-title {
+    font-size: 1.3rem;
+}
+
+.custom-block p:not(.custom-block-title) {
+    margin-left: 1rem;
+}
