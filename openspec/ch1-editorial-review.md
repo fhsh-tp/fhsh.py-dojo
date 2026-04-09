@@ -181,6 +181,9 @@ The `[START]/[END]` wrapper signals this isn't a "add one more sentence" fix —
 | **C-1** | Every code block must have a conversational lead-in. No heading → code without setup. | Code examples | |
 | **E-1** | Address common beginner mistakes immediately after introducing the relevant syntax, not just in "錯誤排查". | Error prevention | |
 | **M-1** | When a code example implicitly demonstrates a core concept (e.g., expression evaluation), make it explicit with a trace/walkthrough. | Mental models | |
+| **O-1** | Section 1-1 opening addresses "why learn programming" with personal anecdote before any technical content. | Opening | |
+| **W-1** | Every code block with a line-by-line walkthrough must have exact correspondence between code and walkthrough text. | Code examples | |
+| **T-2** | No residual `<!-- TBD -->` markers in published tutorial sections. All placeholders must be resolved and removed. | Completeness | |
 | **F-1** | Image placeholders must use dual-line format: `![](path)` link + `> 📷` caption. No caption-only format. | Format | **新增** |
 | **V-1** | VitePress custom containers must use `> [!TYPE]` syntax (with `!`). `> [TYPE]` without `!` will not render. | Format | **新增** |
 | **T-3** | No empty custom container blocks. If content is not ready, wrap entire block in HTML comment. | Completeness | **新增** |
@@ -200,7 +203,7 @@ Six TBD markers need content:
 
 ### 4.2 Cross-file: Apply editorial rules to 1-2, 1-3, 1-4, index
 
-Each file needs to be audited against all 8 rules. Preliminary observations:
+Each file needs to be audited against all 15 rules. Preliminary observations:
 
 **1-2.md**:
 - Multiple `——` usages (L19, and throughout) → P-1
@@ -235,7 +238,7 @@ All edits must be written in Phoenix's established voice:
 
 ## 5. Decision
 
-**What was decided**: A systematic editorial pass across all Chapter 1 files, guided by 8 derived rules and 6 specific TBDs in 1-1.md.
+**What was decided**: A systematic editorial pass across all Chapter 1 files, guided by 15 editorial rules (8 original + 3 from TBD resolution + 4 new) and 6 specific TBDs in 1-1.md.
 
 **Rationale**: The changes Phoenix made to 1-1.md are not isolated cosmetic fixes — they establish a pedagogical discipline (terminology control, scaffolding density, mental model planting) that the AI-generated first draft didn't consistently achieve. Applying these rules retroactively to 1-2 through 1-4 will produce a coherent, learner-centered module rather than a collection of individually adequate but stylistically uneven sections.
 

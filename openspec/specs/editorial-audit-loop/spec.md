@@ -18,12 +18,6 @@ The project SHALL define an Editorial Audit Loop (EAL) workflow that iteratively
 <!-- @trace
 source: ch1-editorial-rules-enhancement
 updated: 2026-04-09
--->
-
-
-<!-- @trace
-source: ch1-editorial-rules-enhancement
-updated: 2026-04-09
 code:
   - docs/public/assets/tutor/py/1-1/圖二.png
   - docs/public/assets/tutor/py/ch1/圖五.png
@@ -57,12 +51,6 @@ Each round of the EAL workflow SHALL scan all target files against every editori
 
 - **WHEN** a violation is detected during a scan
 - **THEN** the log entry SHALL include: file path, line number (or line range), rule ID, a description of the violation, and a specific suggested fix (not a generic instruction)
-
-<!-- @trace
-source: ch1-editorial-rules-enhancement
-updated: 2026-04-09
--->
-
 
 <!-- @trace
 source: ch1-editorial-rules-enhancement
@@ -109,12 +97,6 @@ The EAL workflow SHALL terminate when either: (a) a completed round produces zer
 <!-- @trace
 source: ch1-editorial-rules-enhancement
 updated: 2026-04-09
--->
-
-
-<!-- @trace
-source: ch1-editorial-rules-enhancement
-updated: 2026-04-09
 code:
   - docs/public/assets/tutor/py/1-1/圖二.png
   - docs/public/assets/tutor/py/ch1/圖五.png
@@ -148,12 +130,6 @@ Between each round of the EAL workflow, all violations detected in the current r
 
 - **WHEN** a new round begins after fixes have been applied
 - **THEN** the scan SHALL cover all files and all rules from the beginning, not just the previously violated locations
-
-<!-- @trace
-source: ch1-editorial-rules-enhancement
-updated: 2026-04-09
--->
-
 
 <!-- @trace
 source: ch1-editorial-rules-enhancement

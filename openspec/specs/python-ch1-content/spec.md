@@ -557,12 +557,6 @@ If the image file has not yet been generated, the image link SHALL still be pres
 <!-- @trace
 source: ch1-editorial-rules-enhancement
 updated: 2026-04-09
--->
-
-
-<!-- @trace
-source: ch1-editorial-rules-enhancement
-updated: 2026-04-09
 code:
   - docs/public/assets/tutor/py/1-1/圖二.png
   - docs/public/assets/tutor/py/ch1/圖五.png
@@ -596,12 +590,6 @@ All VitePress custom container callouts in `docs/tutor/py/ch1/` SHALL use the co
 
 - **WHEN** a tutorial section contains a pattern matching `> [WARNING]`, `> [TIP]`, `> [NOTE]`, `> [DANGER]`, or `> [DETAILS]` without the `!`
 - **THEN** the pattern SHALL be corrected to include the `!` (e.g., `> [WARNING]` → `> [!WARNING]`)
-
-<!-- @trace
-source: ch1-editorial-rules-enhancement
-updated: 2026-04-09
--->
-
 
 <!-- @trace
 source: ch1-editorial-rules-enhancement
@@ -643,12 +631,6 @@ Published tutorial sections in `docs/tutor/py/ch1/` SHALL NOT contain custom con
 <!-- @trace
 source: ch1-editorial-rules-enhancement
 updated: 2026-04-09
--->
-
-
-<!-- @trace
-source: ch1-editorial-rules-enhancement
-updated: 2026-04-09
 code:
   - docs/public/assets/tutor/py/1-1/圖二.png
   - docs/public/assets/tutor/py/ch1/圖五.png
@@ -682,11 +664,6 @@ Each tutorial section in `docs/tutor/py/ch1/` SHALL maintain a balanced density 
 
 - **WHEN** a contiguous block of 10 lines of prose is identified in a tutorial section
 - **THEN** no more than one kaomoji, parenthetical joke, or student dialogue interjection SHALL be present within that block
-
-<!-- @trace
-source: ch1-editorial-rules-enhancement
-updated: 2026-04-09
--->
 
 <!-- @trace
 source: ch1-editorial-rules-enhancement
