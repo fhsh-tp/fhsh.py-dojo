@@ -24,6 +24,8 @@ generator: |
 starter_code: |
   # 讀取正整數 N，計算各位數字的總和，但跳過數字 0
   # 提示：用 while 迴圈搭配 % 和 //，遇到 0 就 continue
+chapter: ch2
+description: 計算各位數字總和但跳過 0
 ---
 
 ## 跳零位數和

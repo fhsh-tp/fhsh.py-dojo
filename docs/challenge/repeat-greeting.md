@@ -22,6 +22,8 @@ generator: |
       print("Hello,", name)
 starter_code: |
   # 讀取名字和次數 N，輸出 N 行 "Hello, 名字"
+chapter: ch2
+description: 讀取名字和次數，輸出 N 行問候
 ---
 
 ## 重複問候

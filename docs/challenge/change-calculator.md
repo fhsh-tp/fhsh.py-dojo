@@ -21,6 +21,8 @@ generator: |
   print(payment - price)
 starter_code: |
   # 讀取商品金額和付款金額，計算並輸出找零
+chapter: ch1
+description: 讀取商品金額和付款金額，計算找零
 ---
 
 ## 便利商店找零

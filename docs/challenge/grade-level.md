@@ -25,6 +25,8 @@ generator: |
       print("F")
 starter_code: |
   # 讀取一個成績，根據分數輸出對應的等第
+chapter: ch1
+description: 根據分數輸出對應的成績等第
 ---
 
 ## 成績等第

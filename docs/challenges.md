@@ -1,5 +1,5 @@
 ---
-layout: doc
+layout: page
 title: 挑戰題庫
 sidebar: false
 ---

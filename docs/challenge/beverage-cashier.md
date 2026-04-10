@@ -21,6 +21,8 @@ generator: |
   print(quantity * price)
 starter_code: |
   # 讀取珍珠奶茶的數量和每杯單價，計算並輸出總金額
+chapter: ch1
+description: 計算客人買珍珠奶茶的總金額
 ---
 
 ## 飲料店的收銀機

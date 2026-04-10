@@ -21,6 +21,8 @@ generator: |
       print("Zero")
 starter_code: |
   # 讀取一個整數，判斷它是正數、負數還是零
+chapter: ch1
+description: 判斷整數是正數、負數還是零
 ---
 
 ## 正負零判斷

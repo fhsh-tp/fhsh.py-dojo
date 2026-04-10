@@ -16,6 +16,8 @@ generator: |
   print(sum(range(1, n + 1)))
 starter_code: |
   # 讀取正整數 N，計算並輸出 1 + 2 + ... + N 的結果
+chapter: ch2
+description: 計算從 1 加到 N 的總和
 ---
 
 ## 數字累加器

@@ -20,6 +20,8 @@ generator: |
 starter_code: |
   # 讀取非負整數 N，計算並輸出 N!（N 的階乘）
   # 提示：0! = 1
+chapter: ch2
+description: 計算並輸出 N 的階乘
 ---
 
 ## 階乘計算機

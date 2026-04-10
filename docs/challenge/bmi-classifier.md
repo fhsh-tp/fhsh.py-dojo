@@ -29,6 +29,8 @@ generator: |
       print("Obese")
 starter_code: |
   # 讀取體重（公斤）和身高（公分），計算 BMI 並分級
+chapter: ch1
+description: 根據體重身高計算 BMI 並分級
 ---
 
 ## BMI 健康分級

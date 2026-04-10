@@ -34,6 +34,8 @@ generator: |
       print("Quadrant 4")
 starter_code: |
   # 讀取座標 (x, y)，判斷它在哪個象限、哪條軸上、或是原點
+chapter: ch1
+description: 判斷座標點所在的象限
 ---
 
 ## 座標象限判斷

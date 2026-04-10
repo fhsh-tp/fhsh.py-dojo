@@ -23,6 +23,8 @@ generator: |
       i = i + 1
 starter_code: |
   # 讀取目標值 T，從 1 開始累加（1+2+3+...），找出讓累加和 ≥ T 的最小數字
+chapter: ch2
+description: 從 1 累加找出讓總和首次達到目標的數字
 ---
 
 ## 累加到目標

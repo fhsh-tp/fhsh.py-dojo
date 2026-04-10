@@ -21,6 +21,8 @@ generator: |
 starter_code: |
   # 讀取正整數 N，將 N 的數字反轉後輸出
   # 提示：用 while 迴圈搭配 % 和 //
+chapter: ch2
+description: 將正整數的數字反轉後輸出
 ---
 
 ## 數字反轉器

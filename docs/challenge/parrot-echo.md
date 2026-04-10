@@ -18,6 +18,8 @@ generator: |
   print(word)
 starter_code: |
   # 讀取一行字串，連續輸出三次（每次一行）
+chapter: ch1
+description: 讀取一行字串，連續輸出三次
 ---
 
 ## 鸚鵡學舌

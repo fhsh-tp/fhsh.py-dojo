@@ -18,6 +18,8 @@ generator: |
   print("Go!")
 starter_code: |
   # 讀取正整數 N，從 N 倒數到 1，每行印一個數字，最後印 "Go!"
+chapter: ch2
+description: 從 N 倒數到 1，最後印出 Go!
 ---
 
 ## 倒數計時器

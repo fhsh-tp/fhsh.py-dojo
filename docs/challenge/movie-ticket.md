@@ -31,6 +31,8 @@ generator: |
   print(price)
 starter_code: |
   # 讀取年齡和場次時間，計算電影票價
+chapter: ch1
+description: 根據年齡和場次計算電影票價
 ---
 
 ## 電影票價

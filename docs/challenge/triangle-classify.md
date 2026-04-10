@@ -34,6 +34,8 @@ generator: |
       print("Not a Triangle")
 starter_code: |
   # 讀取三個邊長，判斷能否構成三角形，若可以則分類
+chapter: ch1
+description: 判斷三角形是等邊、等腰還是不等邊
 ---
 
 ## 三角形分類器

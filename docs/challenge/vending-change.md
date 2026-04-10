@@ -31,6 +31,8 @@ generator: |
       print(c50, c10, c5, c1)
 starter_code: |
   # 讀取商品價格和投入金額，計算找零的硬幣組合
+chapter: ch1
+description: 計算自動販賣機的找零硬幣數量
 ---
 
 ## 自動販賣機找零

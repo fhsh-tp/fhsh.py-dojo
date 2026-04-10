@@ -20,6 +20,8 @@ generator: |
 starter_code: |
   # 讀取正整數 N（N ≥ 4），找出 N 的最小因數（不含 1 和 N 本身）
   # 提示：用 for 迴圈從 2 開始找，找到第一個就用 break 停下
+chapter: ch2
+description: 找出正整數的最小因數
 ---
 
 ## 第一個因數

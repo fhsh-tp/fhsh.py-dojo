@@ -45,6 +45,8 @@ generator: |
           print("Invalid")
 starter_code: |
   # 讀取年、月、日，判斷這個日期是否合法
+chapter: ch1
+description: 檢查日期的合法性
 ---
 
 ## 日期合法性檢查

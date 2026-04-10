@@ -32,6 +32,8 @@ generator: |
       print("No Real Roots")
 starter_code: |
   # 讀取二次方程式 ax² + bx + c = 0 的係數，用判別式判斷根的情況
+chapter: ch1
+description: 用判別式判斷二次方程式的根的類型
 ---
 
 ## 二次方程式判別式

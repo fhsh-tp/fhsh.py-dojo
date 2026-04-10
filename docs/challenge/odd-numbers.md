@@ -17,6 +17,8 @@ generator: |
       print(i)
 starter_code: |
   # 讀取正整數 N，印出 1 到 N 之間的所有奇數（每行一個）
+chapter: ch2
+description: 印出 1 到 N 之間所有的奇數
 ---
 
 ## 奇數列印機

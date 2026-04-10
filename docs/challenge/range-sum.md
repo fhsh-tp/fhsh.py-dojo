@@ -24,6 +24,8 @@ generator: |
   print(total)
 starter_code: |
   # 讀取兩個正整數 A 和 B（A ≤ B），計算 A + (A+1) + ... + B
+chapter: ch2
+description: 計算 A 到 B 的區間累加總和
 ---
 
 ## 區間累加器

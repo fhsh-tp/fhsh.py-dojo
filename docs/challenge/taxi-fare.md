@@ -21,6 +21,8 @@ generator: |
   print(fare)
 starter_code: |
   # 讀取搭乘距離（公尺），計算計程車車資
+chapter: ch1
+description: 根據搭乘距離計算計程車車資
 ---
 
 ## 計程車費計算

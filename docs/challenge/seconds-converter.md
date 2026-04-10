@@ -18,6 +18,8 @@ generator: |
   print(f"{minutes} {seconds}")
 starter_code: |
   # 讀取總秒數，轉換成幾分幾秒並輸出
+chapter: ch1
+description: 將總秒數轉換成幾分幾秒
 ---
 
 ## 秒數轉換器

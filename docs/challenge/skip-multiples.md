@@ -24,6 +24,8 @@ generator: |
       print(i)
 starter_code: |
   # 讀取 N 和 K，印出 1 到 N 中所有「不是 K 的倍數」的數字
+chapter: ch2
+description: 印出 1 到 N 中不是 K 倍數的數字
 ---
 
 ## 跳過倍數

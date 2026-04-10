@@ -24,6 +24,8 @@ generator: |
 starter_code: |
   # 讀取非負整數 N，計算 N 有幾位數
   # 提示：用 while 迴圈不斷除以 10
+chapter: ch2
+description: 計算非負整數的位數
 ---
 
 ## 位數計算器

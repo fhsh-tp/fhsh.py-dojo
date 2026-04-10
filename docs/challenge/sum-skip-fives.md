@@ -21,6 +21,8 @@ generator: |
   print(total)
 starter_code: |
   # 讀取正整數 N，計算 1 到 N 的總和，但跳過所有 5 的倍數
+chapter: ch2
+description: 計算 1 到 N 的總和但跳過 5 的倍數
 ---
 
 ## 跳五累加器

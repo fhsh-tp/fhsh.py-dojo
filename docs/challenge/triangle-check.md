@@ -29,6 +29,8 @@ generator: |
       print("NO")
 starter_code: |
   # 讀取三個正整數，判斷能否構成三角形
+chapter: ch1
+description: 給定三個正整數，判斷能否構成三角形
 ---
 
 ## 三角形判斷

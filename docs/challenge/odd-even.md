@@ -19,6 +19,8 @@ generator: |
       print("Odd")
 starter_code: |
   # 讀取一個整數，判斷是奇數還是偶數
+chapter: ch1
+description: 判斷整數是奇數還是偶數
 ---
 
 ## 奇偶數判斷

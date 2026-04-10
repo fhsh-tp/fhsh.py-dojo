@@ -43,6 +43,8 @@ generator: |
 starter_code: |
   # 第一行讀取正確密碼，第二行讀取最大嘗試次數 K
   # 接下來最多讀 K 行猜測，猜對印 OK 並結束；K 次都錯印 LOCKED
+chapter: ch2
+description: 模擬密碼驗證，限制嘗試次數
 ---
 
 ## 密碼驗證器
