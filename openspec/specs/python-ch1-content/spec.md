@@ -743,3 +743,125 @@ code:
   - docs/tutor/py/ch1/1-3.md
   - docs/tutor/py/ch1/1-4.md
 -->
+
+---
+### Requirement: Mathematical expressions in section 1-3 use LaTeX syntax
+
+Section `1-3.md` SHALL use LaTeX inline math syntax (`$...$`) for all mathematical expressions, including but not limited to quadratic equation notation (`$ax^2 + bx + c = 0$`), discriminant formula (`$D = b^2 - 4ac$`), and squared terms (`$b^2$`). Unicode superscript characters (e.g., `²`) SHALL NOT be used for mathematical notation.
+
+#### Scenario: Quadratic equation formula renders as LaTeX
+
+- **WHEN** a reader views section 1-3 in the browser
+- **AND** the section discusses the quadratic equation
+- **THEN** the formula SHALL be rendered as formatted LaTeX math (`$ax^2 + bx + c = 0$`) rather than plain Unicode text (`ax² + bx + c = 0`)
+
+#### Scenario: Discriminant formula renders as LaTeX
+
+- **WHEN** a reader views section 1-3 in the browser
+- **AND** the section discusses the discriminant
+- **THEN** the formula SHALL be rendered as formatted LaTeX math (`$D = b^2 - 4ac$`) rather than plain Unicode text (`D = b² − 4ac`)
+
+<!-- @trace
+source: convert-math-to-latex
+updated: 2026-04-10
+code:
+  - docs/challenge/password-check.md
+  - docs/tutor/py/ch1/1-3.md
+  - docs/.vitepress/cache/deps/package.json
+  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js.map
+  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js
+  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js
+  - docs/.vitepress/cache/deps/vue.js.map
+  - docs/.vitepress/cache/deps/vue.js
+  - docs/tutor/py/ch1/1-4.md
+  - .vitepress/config.mts
+  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js
+  - docs/challenge/quadratic-discriminant.md
+  - package.json
+  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js.map
+  - docs/.vitepress/cache/deps/_metadata.json
+  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js.map
+-->
+
+---
+### Requirement: Section 1-3 uses Mermaid flowchart for leap year logic
+
+Section `1-3.md` SHALL use a Mermaid `flowchart TD` diagram to illustrate the leap year decision logic, replacing the existing ASCII art flowchart. The Mermaid diagram SHALL preserve the same logical structure: three sequential divisibility checks (400, 100, 4) with Yes/No branches leading to 閏年 or 平年 outcomes. The diagram SHALL include a custom Mermaid theme configuration for consistent visual styling.
+
+#### Scenario: Leap year flowchart renders as Mermaid SVG
+
+- **WHEN** a reader views section 1-3 in the browser
+- **AND** the page reaches the flowchart section
+- **THEN** the leap year decision logic SHALL be displayed as a rendered Mermaid flowchart SVG
+- **AND** no ASCII art code block SHALL be present for this diagram
+
+#### Scenario: Flowchart preserves correct decision logic
+
+- **WHEN** the Mermaid flowchart is inspected
+- **THEN** it SHALL contain three diamond-shaped decision nodes for `year % 400 == 0`, `year % 100 == 0`, and `year % 4 == 0`
+- **AND** each decision node SHALL have Yes and No branches
+- **AND** the terminal nodes SHALL display 閏年 or 平年
+
+
+<!-- @trace
+source: convert-ascii-to-mermaid
+updated: 2026-04-10
+code:
+  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js.map
+  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js.map
+  - package.json
+  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js
+  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js
+  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js.map
+  - docs/.vitepress/cache/deps/vue.js
+  - docs/challenge/quadratic-discriminant.md
+  - .vitepress/config.mts
+  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js
+  - docs/tutor/py/ch1/1-3.md
+  - docs/.vitepress/cache/deps/vue.js.map
+  - docs/tutor/py/ch1/1-4.md
+  - docs/.vitepress/cache/deps/package.json
+  - docs/.vitepress/cache/deps/_metadata.json
+  - docs/challenge/password-check.md
+-->
+
+---
+### Requirement: Section 1-4 uses Mermaid mindmap for knowledge map
+
+Section `1-4.md` SHALL use a Mermaid `mindmap` diagram to illustrate the Module 1 knowledge map, replacing the existing ASCII art tree. The Mermaid diagram SHALL preserve the same hierarchical structure: root node 程式語言（Python） branching into three sections (1-1 I/O 基礎, 1-2 資料與運算, 1-3 流程控制) with their respective skill nodes.
+
+#### Scenario: Knowledge map renders as Mermaid SVG
+
+- **WHEN** a reader views section 1-4 in the browser
+- **AND** the page reaches the knowledge map section
+- **THEN** the Module 1 knowledge map SHALL be displayed as a rendered Mermaid mindmap SVG
+- **AND** no ASCII art code block SHALL be present for this diagram
+
+#### Scenario: Mindmap preserves all skill nodes
+
+- **WHEN** the Mermaid mindmap is inspected
+- **THEN** it SHALL contain a root node for 程式語言（Python）
+- **AND** it SHALL contain three branch nodes for the three sections
+- **AND** each branch SHALL list the same skill items as the original ASCII tree
+
+<!-- @trace
+source: convert-ascii-to-mermaid
+updated: 2026-04-10
+code:
+  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js.map
+  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js.map
+  - package.json
+  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js
+  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js
+  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js.map
+  - docs/.vitepress/cache/deps/vue.js
+  - docs/challenge/quadratic-discriminant.md
+  - .vitepress/config.mts
+  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js
+  - docs/tutor/py/ch1/1-3.md
+  - docs/.vitepress/cache/deps/vue.js.map
+  - docs/tutor/py/ch1/1-4.md
+  - docs/.vitepress/cache/deps/package.json
+  - docs/.vitepress/cache/deps/_metadata.json
+  - docs/challenge/password-check.md
+-->
