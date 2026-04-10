@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
@@ -107,7 +108,7 @@ function buildTutorSidebar(docsDir: string): Record<string, unknown> {
 const srcDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'docs')
 
 // https://vitepress.dev/reference/site-config
-export default defineConfig({
+export default withMermaid(defineConfig({
   srcDir: 'docs',
 
   title: '台北市立復興高級中學 Python 自學道場',
@@ -129,6 +130,9 @@ export default defineConfig({
     sidebar: buildTutorSidebar(srcDir) as never,
     socialLinks: [{ icon: 'github', link: 'https://github.com/fhsh-tp/fhsh.py-dojo' }],
   },
+  markdown: {
+    math: true,
+  },
   vite: {
     plugins: [vueJsx(), vueDevTools(), tailwindcss(), wasm(), topLevelAwait(), stripGenerator()],
     resolve: {
@@ -144,4 +148,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

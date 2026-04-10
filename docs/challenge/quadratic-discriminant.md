@@ -36,13 +36,13 @@ starter_code: |
 
 ## 二次方程式判別式
 
-給定二次方程式 ax² + bx + c = 0 的三個係數，計算判別式 D = b² - 4ac，判斷根的情況。
+給定二次方程式 $ax^2 + bx + c = 0$ 的三個係數，計算判別式 $D = b^2 - 4ac$，判斷根的情況。
 
 ### 規則
 
-- D > 0 → `Two Real Roots`（兩個相異實根）
-- D = 0 → `One Repeated Root`（一個重根）
-- D < 0 → `No Real Roots`（無實根）
+- $D > 0$ → `Two Real Roots`（兩個相異實根）
+- $D = 0$ → `One Repeated Root`（一個重根）
+- $D < 0$ → `No Real Roots`（無實根）
 
 ### 輸入說明
 
