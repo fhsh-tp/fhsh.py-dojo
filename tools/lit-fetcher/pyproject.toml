@@ -1,0 +1,24 @@
+[project]
+name = "lit-fetcher"
+version = "0.1.0"
+description = "Literature fetcher for SkillSleep — searches approved venues, downloads papers, verifies compliance"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiohttp>=3.13.5",
+    "httpx>=0.28.1",
+    "openpyxl>=3.1.5",
+    "pandas>=3.0.2",
+    "python-dotenv>=1.2.2",
+    "rich>=15.0.0",
+]
+
+[project.scripts]
+lit-fetcher = "lit_fetcher.cli:main"
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,2 @@
+[console_scripts]
+ref-verifier = ref_verifier.cli:main

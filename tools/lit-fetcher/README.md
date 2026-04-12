@@ -1,0 +1,160 @@
+# lit-fetcher
+
+SkillSleep 專案的學術文獻管理工具。透過 Semantic Scholar 與 OpenAlex API 搜尋、驗證、下載學術論文，並自動進行 venue 合規性檢查。
+
+## 解決的問題
+
+NTUEE 11402 AI Concepts & Applications 期中報告要求引用論文必須來自**指定會議**（ICML、NeurIPS、IJCNN、AAAI、IJCAI、ICLR、CVPR、ICCV）或 **SCI Q1 CS-AI 期刊**（共 52 本，來源：`midterm/JCR_CS_AI_10_2025.xlsx`）。本工具自動化以下工作：
+
+1. **搜尋**（`search`）：在核准 venue 中搜尋相關論文
+2. **驗證**（`verify`）：檢查現有文獻是否來自核准 venue
+3. **下載**（`download`）：下載 open access PDF 或透過輔大 EZProxy 下載付費論文
+
+## 系統需求
+
+| 需求 | 版本 |
+|------|------|
+| Python | >= 3.12 |
+| uv | >= 0.6 |
+| 網路連線 | 必要（API 呼叫 + PDF 下載） |
+
+## 安裝
+
+```bash
+# 進入工具目錄
+cd term-project/tools/lit-fetcher
+
+# uv 會自動處理虛擬環境和依賴安裝
+uv sync
+
+# 驗證安裝
+uv run lit-fetcher --help
+```
+
+不需要手動建立虛擬環境或 `pip install`。`uv sync` 一步完成所有設定。
+
+## 快速開始
+
+```bash
+# 1. 設定環境變數（選填，見下方說明）
+cp .env.example .env
+# 編輯 .env 填入你的設定
+
+# 2. 驗證現有文獻的 venue 合規性
+uv run lit-fetcher verify
+
+# 3. 搜尋核准 venue 上的論文
+uv run lit-fetcher search
+
+# 4. 搜尋並儲存結果到 refs/
+uv run lit-fetcher search --save
+
+# 5. 下載所有 open access 論文的 PDF
+uv run lit-fetcher download
+```
+
+詳細使用說明請參閱 [Usage.md](Usage.md)。
+
+## 專案結構
+
+```
+lit-fetcher/
+├── pyproject.toml              # uv 專案設定、依賴管理、CLI entry point
+├── .env.example                # 環境變數範本
+├── .env                        # 你的環境變數（不進 git）
+├── .gitignore
+├── README.md                   # 本文件
+├── Usage.md                    # 詳細使用指南
+└── src/lit_fetcher/
+    ├── __init__.py
+    ├── cli.py                  # CLI 入口，3 個子命令：search / verify / download
+    ├── config.py               # 環境變數讀取、核准 venue 名單（8 會議 + 34 期刊）
+    ├── apis.py                 # Semantic Scholar + OpenAlex API client（含 retry）
+    ├── venue_matcher.py        # Venue 名稱比對引擎（精確 > 縮寫 > 子字串）
+    ├── downloader.py           # PDF 下載器（arXiv / open access / FJU proxy）
+    └── saver.py                # abstract.md 儲存（含 venue compliance 欄位）
+```
+
+## 輸出格式
+
+每篇論文儲存為一個目錄，位於 `term-project/refs/` 下：
+
+```
+refs/
+├── arXiv-2604.02268v1/         # 以 arXiv ID 命名
+│   ├── abstract.md             # 結構化 metadata + 摘要 + venue 合規狀態
+│   └── paper.pdf               # PDF 全文（若成功下載）
+├── doi-10.1109_TPAMI.2024.XXX/ # 以 DOI 命名（無 arXiv ID 時）
+│   ├── abstract.md
+│   └── paper.pdf
+└── ...
+```
+
+`abstract.md` 格式：
+
+```markdown
+# Paper Title
+
+- **Authors:** Author A, Author B, ...
+- **Year:** 2025
+- **Venue:** ICML 2025
+- **arXiv:** 2501.12345
+- **DOI:** 10.1234/example
+- **Open Access:** Yes
+- **PDF URL:** https://arxiv.org/pdf/2501.12345
+
+## Abstract
+
+Full abstract text...
+
+## Venue Compliance
+
+- **Approved Venue:** ICML
+- **Venue Type:** conference
+```
+
+## 環境變數
+
+| 變數 | 必要 | 預設值 | 說明 |
+|------|------|--------|------|
+| `FJU_PROXY_USER` | 否 | `""` | 輔大 EZProxy 帳號（學號） |
+| `FJU_PROXY_PASS` | 否 | `""` | 輔大 EZProxy 密碼 |
+| `FJU_PROXY_URL` | 否 | `https://ezproxy.lib.fju.edu.tw/login` | EZProxy 登入 URL |
+| `OUTPUT_DIR` | 否 | `../../refs` | 輸出目錄（相對於 lit-fetcher/） |
+| `SEMANTIC_SCHOLAR_API_KEY` | 否 | `""` | S2 API key（無 key 時 rate limit 較嚴格） |
+| `SEARCH_YEAR_MIN` | 否 | `2024` | 搜尋年份下限 |
+| `SEARCH_YEAR_MAX` | 否 | `2026` | 搜尋年份上限 |
+
+## 核准 Venue 名單
+
+### 會議（8 個）
+
+ICML, NeurIPS, IJCNN, AAAI, IJCAI, ICLR, CVPR, ICCV
+
+### Q1 期刊（34 個，來源：`midterm/JCR_CS_AI_10_2025.xlsx`）
+
+Nature Machine Intelligence, IEEE TPAMI, Information Fusion, Artificial Intelligence Review, IEEE TIP, IEEE TEVC, IEEE TFS, Medical Image Analysis, IEEE T-CYB, IEEE TKDE, IJCV, IEEE TNNLS, Neural Networks, Neurocomputing, Pattern Recognition, Knowledge-Based Systems, Expert Systems with Applications, Applied Soft Computing, ACM TIST, TACL, JMLR, EAAI, AEI, SEC, IEEE IS, CL, ICAE, FnTML, AI Open, CAAI TIT, MIR, BDMA, AIM, AIS, RAS
+
+## API Rate Limits
+
+| API | 無 Key | 有 Key |
+|-----|--------|--------|
+| Semantic Scholar | ~1 req/sec, 100 req/5min | 10 req/sec |
+| OpenAlex | 10 req/sec（需 mailto） | 同上 |
+
+本工具內建 exponential backoff retry（最多 3 次），並在 verify 命令中於請求間加入 3 秒延遲以避免 429 錯誤。
+
+## 依賴
+
+| 套件 | 用途 |
+|------|------|
+| `httpx` | 非同步 HTTP client（API 呼叫 + PDF 下載） |
+| `aiohttp` | FJU proxy session 管理的備用 HTTP client |
+| `python-dotenv` | `.env` 環境變數讀取 |
+| `rich` | 終端機美化輸出（表格、顏色） |
+| `pandas` | JCR Excel 檔案解析（未來擴充用） |
+| `openpyxl` | Excel 讀取引擎 |
+
+## 授權
+
+本工具為 SkillSleep 專案的內部工具，僅供學術研究使用。
