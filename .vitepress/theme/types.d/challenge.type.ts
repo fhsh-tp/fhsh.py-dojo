@@ -4,6 +4,6 @@ export interface Challenge {
   url: string
   difficulty: 'easy' | 'medium' | 'hard' | 'mystery'
   tags: string[]
-  chapter?: string
-  description?: string
+  chapter: string
+  description: string
 }
