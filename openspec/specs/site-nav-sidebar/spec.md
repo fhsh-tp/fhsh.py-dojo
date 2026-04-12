@@ -149,6 +149,18 @@ code:
   - docs/tutor/py/ch1/references/Brennan-Resnick-2012-CT-Assessment.pdf
 -->
 
+
+<!-- @trace
+source: show-appendix-in-sidebar
+updated: 2026-04-12
+code:
+  - .vitepress/config.mts
+  - .vitepress/sidebar.ts
+  - docs/tutor/py/ch1/appendix.md
+tests:
+  - .vitepress/buildTutorSidebar.test.ts
+-->
+
 ### Requirement: nav.yml defines static top navigation
 
 A YAML file at `.vitepress/nav.yml` SHALL define the VitePress top navigation array. `config.mts` SHALL load this file at build time using `js-yaml` (`yaml.load(fs.readFileSync(…))`) and assign it to `themeConfig.nav`.
@@ -186,7 +198,7 @@ The `nav.yml` SHALL define the following structure:
 The function SHALL:
 1. Enumerate all subject directories directly under `docs/tutor/`
 2. For each subject, enumerate all `chN/` directories
-3. For each chapter, collect `.md` files excluding `index.md` AND excluding `appendix.md`, sorted alphabetically by filename
+3. For each chapter, collect `.md` files excluding `index.md`, sorted alphabetically by filename
 4. Read each file's frontmatter `title` field using `gray-matter` or equivalent YAML front matter parser
 5. Place `index.md` as the first item in each chapter's sidebar group
 6. Generate sidebar keys for both `/tutor/<subject>/` (all chapters) and `/tutor/<subject>/chN/` (single chapter)
@@ -208,10 +220,10 @@ The function SHALL:
 - **WHEN** a user navigates to any page under `/challenge/`
 - **THEN** no sidebar SHALL be rendered (the multi-sidebar object SHALL NOT contain a `/challenge/` key)
 
-#### Scenario: appendix.md is excluded from sidebar
+#### Scenario: appendix appears in sidebar before reference
 
-- **WHEN** a chapter directory contains an `appendix.md` file
-- **THEN** `buildTutorSidebar()` SHALL NOT include `appendix.md` in the sidebar items for that chapter
+- **WHEN** a chapter directory contains both `appendix.md` and `reference.md`
+- **THEN** `buildTutorSidebar()` SHALL include `appendix.md` in the sidebar items, positioned before `reference.md` (alphabetical order: `a` < `r` ensures this naturally)
 
 ---
 ### Requirement: Inline appendix headings are excluded from VitePress outline
