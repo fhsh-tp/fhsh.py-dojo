@@ -16,6 +16,8 @@ generator: |
   print("Hello,", name)
 starter_code: |
   # 讀取輸入的名字，然後輸出 Hello, [名字]
+chapter: ch1
+description: 讀取使用者的名字，然後跟他打招呼
 ---
 
 ## 哈囉，世界！

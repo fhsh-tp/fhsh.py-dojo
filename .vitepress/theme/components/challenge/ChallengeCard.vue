@@ -9,12 +9,14 @@ const difficultyClass: Record<string, string> = {
   easy: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/60 dark:text-green-300 dark:border-green-800',
   medium: 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/60 dark:text-yellow-300 dark:border-yellow-800',
   hard: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/60 dark:text-red-300 dark:border-red-800',
+  mystery: 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700',
 }
 
 const difficultyLabel: Record<string, string> = {
   easy: '簡單',
   medium: '中等',
   hard: '困難',
+  mystery: '未知',
 }
 </script>
 

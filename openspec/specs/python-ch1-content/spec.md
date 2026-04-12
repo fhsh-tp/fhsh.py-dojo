@@ -128,12 +128,27 @@ code:
 ---
 ### Requirement: Practice challenges exist for independent work
 
-The system SHALL provide seven practice challenges:
+The system SHALL provide practice challenges linked from tutorial sections via `<ChallengeLink>` components:
+
 - `self-introduction` (id: 4), `parrot-echo` (id: 5) — linked from 1-1
 - `grade-average` (id: 6), `change-calculator` (id: 7), `seconds-converter` (id: 8) — linked from 1-2
 - `grade-level` (id: 9), `triangle-check` (id: 10) — linked from 1-3
 
-Each practice challenge MUST have valid params and a correct generator. Tutorial sections MUST reference practice challenges via `<ChallengeLink>` with a brief hint but no step-by-step walkthrough.
+Additionally, section 1-3 SHALL link the following scaffolded practice challenges organized in four difficulty tiers:
+
+**Tier 1 (★☆☆)**:
+- `odd-even` (id: 26), `sign-check` (id: 27)
+
+**Tier 2 (★★☆)**:
+- `grade-level` (id: 9), `bmi-classifier` (id: 28), `quadrant-classifier` (id: 29)
+
+**Tier 3 (★★★)**:
+- `triangle-classify` (id: 30), `quadratic-discriminant` (id: 31), `taxi-fare` (id: 32), `movie-ticket` (id: 33)
+
+**Tier 4 (★★★★)**:
+- `date-validator` (id: 34)
+
+Each practice challenge MUST have valid params and a correct generator. Tutorial sections MUST reference practice challenges via `<ChallengeLink>` with a brief situational context and a hint (but no step-by-step walkthrough). Each tier MUST have a brief introduction explaining the skill level and target competencies.
 
 #### Scenario: Practice challenges are accessible from tutorial sections
 
@@ -145,27 +160,23 @@ Each practice challenge MUST have valid params and a correct generator. Tutorial
 - **WHEN** a practice challenge generator is executed with valid test input
 - **THEN** the generator produces the correct expected output
 
+#### Scenario: Section 1-3 displays four-tier scaffolding
+
+- **WHEN** a user reads the practice section of 1-3.md
+- **THEN** exercises are organized under four clearly labeled tier headings (★☆☆ through ★★★★) with increasing difficulty
+
+#### Scenario: Each exercise has situational context
+
+- **WHEN** a user reads an exercise description in the practice section
+- **THEN** the description SHALL contain 3-5 lines of engaging real-world or mathematical context before the ChallengeLink
+
 
 <!-- @trace
-source: write-python-chapter-1
-updated: 2026-04-07
+source: revise-ch1-3-exercises
+updated: 2026-04-10
 code:
-  - docs/challenge/self-introduction.md
-  - docs/challenge/beverage-cashier.md
   - docs/tutor/py/ch1/1-3.md
-  - docs/tutor/py/ch1/1-1.md
-  - docs/challenge/change-calculator.md
-  - docs/challenge/grade-average.md
-  - docs/challenge/seconds-converter.md
   - docs/tutor/py/ch1/1-4.md
-  - docs/tutor/py/ch1/index.md
-  - refs/Python-self_learning-outline.md
-  - docs/challenge/triangle-check.md
-  - docs/tutor/py/ch1/1-2.md
-  - docs/challenge/leap-year.md
-  - docs/challenge/grade-level.md
-  - docs/challenge/parrot-echo.md
-  - docs/challenge/hello-world.md
 -->
 
 ---
@@ -508,30 +519,51 @@ code:
 ---
 ### Requirement: Chapter 1 sections contain no residual TBD markers rule T-2
 
-All `<!-- [START] TBD ... -->` / `<!-- [END] TBD -->` comment pairs and standalone `<!-- TBD ... -->` comments SHALL be resolved and removed from `docs/tutor/py/ch1/1-1.md`. No placeholder or deferred-content markers SHALL remain in published tutorial sections.
+All `<!-- [START] TBD ... -->` / `<!-- [END] TBD -->` comment pairs and standalone `<!-- TBD ... -->` comments SHALL be resolved and removed from `docs/tutor/py/ch1/1-1.md` and `docs/tutor/py/ch1/appendix.md`. No placeholder or deferred-content markers SHALL remain in published tutorial sections of Chapter 1.
 
 #### Scenario: No TBD markers in 1-1.md
 
 - **WHEN** `docs/tutor/py/ch1/1-1.md` is scanned for HTML comment patterns matching `TBD`
 - **THEN** zero matches SHALL be found
 
+#### Scenario: No TBD markers in appendix.md
+
+- **WHEN** `docs/tutor/py/ch1/appendix.md` is scanned for HTML comment patterns matching `TBD`
+- **THEN** zero matches SHALL be found
+
+
 <!-- @trace
-source: ch1-fix-1-1-tbd
-updated: 2026-04-08
+source: ch1-appendix-keywords-table
+updated: 2026-04-12
 code:
+  - docs/public/references/ch1/Barr-Stephenson-2011-CT-K12.pdf
+  - docs/public/references/ch1/ISTE-CSTA-2011-CT-Definition.pdf
+  - docs/tutor/py/ch1/references/Wing-2011-CT-MicrosoftResearch.pdf
+  - .vitepress/sidebar.ts
+  - docs/public/references/ch1/Taiwan-108-Tech-Curriculum.pdf
+  - docs/public/references/ch1/Wing-2006-CT.pdf
+  - docs/tutor/py/ch1/references/ISTE-CSTA-2011-CT-Definition.pdf
+  - docs/tutor/py/ch1/1-4.md
+  - .vitepress/config.mts
+  - docs/tutor/py/ch1/reference.md
+  - docs/tutor/py/ch1/references/PISA-2022-Math-Framework.pdf
+  - docs/tutor/py/ch1/1-3.md
+  - docs/tutor/py/ch1/references/Papert-1980-Mindstorms.pdf
+  - docs/tutor/py/ch1/references/Weintrop-2016-CT-Math-Science.pdf
+  - docs/public/references/ch1/Wing-2011-CT-MicrosoftResearch.pdf
+  - docs/public/references/ch1/PISA-2022-Math-Framework.pdf
   - docs/tutor/py/ch1/appendix.md
-  - .vitepress/theme/components/tutor/ChallengeLink.vue
-  - docs/public/assets/tutor/py/1-1/圖三.png
-  - docs/public/assets/tutor/py/1-1/圖二.png
-  - .vitepress/theme/custom.css
-  - docs/public/assets/tutor/py/1-1/圖四.png
-  - .vitepress/theme/index.ts
-  - .vitepress/theme/views/HomeView.vue
-  - docs/tutor/py/ch1/1-1.md
-  - docs/tutor/py/ch1/index.md
-  - .vitepress/nav.yml
-  - docs/public/assets/tutor/py/1-1/圖一.png
-  - docs/challenge/hello-world.md
+  - docs/public/references/ch1/Brennan-Resnick-2012-CT-Assessment.pdf
+  - docs/tutor/py/ch1/references/Barr-Stephenson-2011-CT-K12.pdf
+  - docs/public/references/ch1/Weintrop-2016-CT-Math-Science.pdf
+  - docs/tutor/py/ch1/references/Taiwan-108-Tech-Curriculum.pdf
+  - docs/tutor/py/ch1/references/Brennan-Resnick-2012-CT-Assessment.pdf
+  - docs/public/references/ch1/Papert-1980-Mindstorms.pdf
+  - docs/tutor/py/ch1/references/Taiwan-108-Math-Curriculum.pdf
+  - docs/tutor/py/ch1/references/Wing-2006-CT.pdf
+  - docs/public/references/ch1/Taiwan-108-Math-Curriculum.pdf
+tests:
+  - .vitepress/buildTutorSidebar.test.ts
 -->
 
 ---
@@ -695,4 +727,280 @@ code:
   - phoenix-popular-science-article-style-enhance.md
   - docs/tutor/py/ch1/1-2.md
   - docs/tutor/py/ch1/1-3.md
+-->
+
+---
+### Requirement: Section 1-4 contains a comprehensive Judge exercise
+
+Section `docs/tutor/py/ch1/1-4.md` SHALL contain a "模組一畢業考" section positioned after the self-check table and before the "模組二預告" section. This section SHALL include:
+
+1. A celebratory framing as a "graduation exam" for Module 1
+2. An explanation of how the exercise integrates skills from all three sections (I/O from 1-1, arithmetic from 1-2, conditionals from 1-3)
+3. A brief problem description for the vending machine change exercise
+4. A `<ChallengeLink slug="vending-change" />` component
+5. A hint about the greedy decomposition approach using `//` and `%`
+
+The section SHALL use Phoenix's conversational tone with kaomoji, consistent with the rest of Module 1.
+
+#### Scenario: Comprehensive exercise appears in correct position
+
+- **WHEN** a user reads section 1-4
+- **THEN** the "模組一畢業考" section SHALL appear after the self-check table and before the "模組二預告" section
+
+#### Scenario: Exercise cross-references all three sections
+
+- **WHEN** a user reads the comprehensive exercise description
+- **THEN** the description SHALL explicitly reference skills from 1-1 (input/output), 1-2 (arithmetic operators `//` and `%`), and 1-3 (if-else conditional)
+
+#### Scenario: ChallengeLink resolves to valid challenge
+
+- **WHEN** a user clicks the ChallengeLink for `vending-change`
+- **THEN** the link SHALL resolve to a valid challenge page at `/challenge/vending-change`
+
+<!-- @trace
+source: revise-ch1-4-exercise
+updated: 2026-04-10
+code:
+  - docs/tutor/py/ch1/1-3.md
+  - docs/tutor/py/ch1/1-4.md
+-->
+
+---
+### Requirement: Mathematical expressions in section 1-3 use LaTeX syntax
+
+Section `1-3.md` SHALL use LaTeX inline math syntax (`$...$`) for all mathematical expressions, including but not limited to quadratic equation notation (`$ax^2 + bx + c = 0$`), discriminant formula (`$D = b^2 - 4ac$`), and squared terms (`$b^2$`). Unicode superscript characters (e.g., `²`) SHALL NOT be used for mathematical notation.
+
+#### Scenario: Quadratic equation formula renders as LaTeX
+
+- **WHEN** a reader views section 1-3 in the browser
+- **AND** the section discusses the quadratic equation
+- **THEN** the formula SHALL be rendered as formatted LaTeX math (`$ax^2 + bx + c = 0$`) rather than plain Unicode text (`ax² + bx + c = 0`)
+
+#### Scenario: Discriminant formula renders as LaTeX
+
+- **WHEN** a reader views section 1-3 in the browser
+- **AND** the section discusses the discriminant
+- **THEN** the formula SHALL be rendered as formatted LaTeX math (`$D = b^2 - 4ac$`) rather than plain Unicode text (`D = b² − 4ac`)
+
+<!-- @trace
+source: convert-math-to-latex
+updated: 2026-04-10
+code:
+  - docs/challenge/password-check.md
+  - docs/tutor/py/ch1/1-3.md
+  - docs/.vitepress/cache/deps/package.json
+  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js.map
+  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js
+  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js
+  - docs/.vitepress/cache/deps/vue.js.map
+  - docs/.vitepress/cache/deps/vue.js
+  - docs/tutor/py/ch1/1-4.md
+  - .vitepress/config.mts
+  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js
+  - docs/challenge/quadratic-discriminant.md
+  - package.json
+  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js.map
+  - docs/.vitepress/cache/deps/_metadata.json
+  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js.map
+-->
+
+---
+### Requirement: Section 1-3 uses Mermaid flowchart for leap year logic
+
+Section `1-3.md` SHALL use a Mermaid `flowchart TD` diagram to illustrate the leap year decision logic, replacing the existing ASCII art flowchart. The Mermaid diagram SHALL preserve the same logical structure: three sequential divisibility checks (400, 100, 4) with Yes/No branches leading to 閏年 or 平年 outcomes. The diagram SHALL include a custom Mermaid theme configuration for consistent visual styling.
+
+#### Scenario: Leap year flowchart renders as Mermaid SVG
+
+- **WHEN** a reader views section 1-3 in the browser
+- **AND** the page reaches the flowchart section
+- **THEN** the leap year decision logic SHALL be displayed as a rendered Mermaid flowchart SVG
+- **AND** no ASCII art code block SHALL be present for this diagram
+
+#### Scenario: Flowchart preserves correct decision logic
+
+- **WHEN** the Mermaid flowchart is inspected
+- **THEN** it SHALL contain three diamond-shaped decision nodes for `year % 400 == 0`, `year % 100 == 0`, and `year % 4 == 0`
+- **AND** each decision node SHALL have Yes and No branches
+- **AND** the terminal nodes SHALL display 閏年 or 平年
+
+
+<!-- @trace
+source: convert-ascii-to-mermaid
+updated: 2026-04-10
+code:
+  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js.map
+  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js.map
+  - package.json
+  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js
+  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js
+  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js.map
+  - docs/.vitepress/cache/deps/vue.js
+  - docs/challenge/quadratic-discriminant.md
+  - .vitepress/config.mts
+  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js
+  - docs/tutor/py/ch1/1-3.md
+  - docs/.vitepress/cache/deps/vue.js.map
+  - docs/tutor/py/ch1/1-4.md
+  - docs/.vitepress/cache/deps/package.json
+  - docs/.vitepress/cache/deps/_metadata.json
+  - docs/challenge/password-check.md
+-->
+
+---
+### Requirement: Section 1-4 uses Mermaid mindmap for knowledge map
+
+Section `1-4.md` SHALL use a Mermaid `mindmap` diagram to illustrate the Module 1 knowledge map, replacing the existing ASCII art tree. The Mermaid diagram SHALL preserve the same hierarchical structure: root node 程式語言（Python） branching into three sections (1-1 I/O 基礎, 1-2 資料與運算, 1-3 流程控制) with their respective skill nodes.
+
+#### Scenario: Knowledge map renders as Mermaid SVG
+
+- **WHEN** a reader views section 1-4 in the browser
+- **AND** the page reaches the knowledge map section
+- **THEN** the Module 1 knowledge map SHALL be displayed as a rendered Mermaid mindmap SVG
+- **AND** no ASCII art code block SHALL be present for this diagram
+
+#### Scenario: Mindmap preserves all skill nodes
+
+- **WHEN** the Mermaid mindmap is inspected
+- **THEN** it SHALL contain a root node for 程式語言（Python）
+- **AND** it SHALL contain three branch nodes for the three sections
+- **AND** each branch SHALL list the same skill items as the original ASCII tree
+
+<!-- @trace
+source: convert-ascii-to-mermaid
+updated: 2026-04-10
+code:
+  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js.map
+  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js.map
+  - package.json
+  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js
+  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js
+  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js.map
+  - docs/.vitepress/cache/deps/vue.js
+  - docs/challenge/quadratic-discriminant.md
+  - .vitepress/config.mts
+  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js
+  - docs/tutor/py/ch1/1-3.md
+  - docs/.vitepress/cache/deps/vue.js.map
+  - docs/tutor/py/ch1/1-4.md
+  - docs/.vitepress/cache/deps/package.json
+  - docs/.vitepress/cache/deps/_metadata.json
+  - docs/challenge/password-check.md
+-->
+
+---
+### Requirement: Chapter 1 appendix image specifications use ordered lists
+
+The `docs/tutor/py/ch1/appendix.md` file's "Image Specification Appendix" section SHALL format each image's property entries as an ordered list using standard Markdown numbered syntax (`1. 2. 3. 4.`), not as unordered bullet lists.
+
+Each image entry SHALL contain exactly four ordered items in the following fixed sequence:
+1. **類型**：image type and narrative role (e.g., 四格漫畫（Hook）)
+2. **意圖**：teaching intent — what concept this image reinforces
+3. **完整 Prompt**：the full English AI generation prompt
+4. **備註**：production notes for rendering or composition
+
+This ordered list format SHALL be compatible with standard Markdown as rendered by both VitePress and Slidev (no Slidev-specific extensions required; plain `1. 2. 3. 4.` syntax is sufficient).
+
+#### Scenario: Image specification entries render as numbered list
+
+- **WHEN** a user visits `docs/tutor/py/ch1/appendix.md` in the browser
+- **THEN** each image's property block (類型, 意圖, 完整 Prompt, 備註) MUST be rendered as a numbered ordered list with items 1 through 4
+
+#### Scenario: Ordered list is valid Slidev-compatible Markdown
+
+- **WHEN** the appendix content is imported into a Slidev presentation file
+- **THEN** the ordered list SHALL render correctly without requiring any Slidev-specific syntax, because standard Markdown `1. Item` numbered lists are natively supported by Slidev
+
+<!-- @trace
+source: show-appendix-in-sidebar
+updated: 2026-04-12
+code:
+  - docs/tutor/py/ch1/appendix.md
+-->
+
+<!-- @trace
+source: show-appendix-in-sidebar
+updated: 2026-04-12
+code:
+  - .vitepress/config.mts
+  - .vitepress/sidebar.ts
+  - docs/tutor/py/ch1/appendix.md
+tests:
+  - .vitepress/buildTutorSidebar.test.ts
+-->
+
+---
+### Requirement: Chapter 1 appendix contains Python keywords reference table
+
+The file `docs/tutor/py/ch1/appendix.md` SHALL contain a dedicated H1 section titled `# Python Keywords Table` that presents a complete reference table for all Python 3.13 reserved words.
+
+The table SHALL list every hard keyword returned by `keyword.kwlist` (35 entries: `False`, `None`, `True`, `and`, `as`, `assert`, `async`, `await`, `break`, `class`, `continue`, `def`, `del`, `elif`, `else`, `except`, `finally`, `for`, `from`, `global`, `if`, `import`, `in`, `is`, `lambda`, `nonlocal`, `not`, `or`, `pass`, `raise`, `return`, `try`, `while`, `with`, `yield`) and every soft keyword returned by `keyword.softkwlist` (4 entries: `_`, `case`, `match`, `type`), for a total of 39 rows.
+
+The table SHALL be grouped by semantic category using H2 subheadings (for example: 常數值 / 邏輯運算 / 條件判斷 / 迴圈控制 / 函式與類別 / 例外處理 / 匯入 / 範圍與作用域 / 非同步 / 其他 / 軟關鍵字). Each row SHALL contain at minimum: the keyword itself, a one-line Traditional Chinese description, and a "first-taught" column indicating the chapter/section where the keyword is introduced or `—` if not yet taught.
+
+The appendix SHALL include an introductory paragraph before the table explaining:
+1. What "reserved words" are and why Python forbids using them as identifiers
+2. A concrete `SyntaxError` example showing what happens if a learner tries `if = 3`
+3. A pedagogical note distinguishing hard keywords from soft keywords (soft keywords are reserved only in specific contexts)
+
+Keywords introduced in Chapter 1 (`True`, `False`, `and`, `or`, `not`, `if`, `elif`, `else`) SHALL be visually marked (e.g., with a checkmark emoji or the cell value `1-3`) so learners can self-assess progress.
+
+#### Scenario: Appendix contains all 39 Python 3.13 keywords
+
+- **WHEN** `docs/tutor/py/ch1/appendix.md` is rendered as HTML
+- **THEN** the `# Python Keywords Table` section SHALL contain at least one row per keyword in `keyword.kwlist` and `keyword.softkwlist` under Python 3.13 (39 rows total)
+
+#### Scenario: Chapter 1 taught keywords are marked
+
+- **WHEN** a learner reads the keywords table after finishing section 1-3
+- **THEN** the rows for `True`, `False`, `and`, `or`, `not`, `if`, `elif`, and `else` SHALL display a "first-taught" indicator pointing to section `1-3` (or an equivalent visual marker)
+
+#### Scenario: Reserved word explanation precedes the table
+
+- **WHEN** the appendix is read top-to-bottom
+- **THEN** an explanatory paragraph defining "reserved words" and showing a `SyntaxError` example SHALL appear before the first keyword row of the table
+
+#### Scenario: Soft keywords are distinguished from hard keywords
+
+- **WHEN** the keywords table is rendered
+- **THEN** soft keywords (`_`, `case`, `match`, `type`) SHALL be placed under a distinct subheading or column value that clearly identifies them as "soft" / context-sensitive keywords separate from hard keywords
+
+<!-- @trace
+source: ch1-appendix-keywords-table
+updated: 2026-04-12
+code:
+  - docs/tutor/py/ch1/appendix.md
+-->
+
+<!-- @trace
+source: ch1-appendix-keywords-table
+updated: 2026-04-12
+code:
+  - docs/public/references/ch1/Barr-Stephenson-2011-CT-K12.pdf
+  - docs/public/references/ch1/ISTE-CSTA-2011-CT-Definition.pdf
+  - docs/tutor/py/ch1/references/Wing-2011-CT-MicrosoftResearch.pdf
+  - .vitepress/sidebar.ts
+  - docs/public/references/ch1/Taiwan-108-Tech-Curriculum.pdf
+  - docs/public/references/ch1/Wing-2006-CT.pdf
+  - docs/tutor/py/ch1/references/ISTE-CSTA-2011-CT-Definition.pdf
+  - docs/tutor/py/ch1/1-4.md
+  - .vitepress/config.mts
+  - docs/tutor/py/ch1/reference.md
+  - docs/tutor/py/ch1/references/PISA-2022-Math-Framework.pdf
+  - docs/tutor/py/ch1/1-3.md
+  - docs/tutor/py/ch1/references/Papert-1980-Mindstorms.pdf
+  - docs/tutor/py/ch1/references/Weintrop-2016-CT-Math-Science.pdf
+  - docs/public/references/ch1/Wing-2011-CT-MicrosoftResearch.pdf
+  - docs/public/references/ch1/PISA-2022-Math-Framework.pdf
+  - docs/tutor/py/ch1/appendix.md
+  - docs/public/references/ch1/Brennan-Resnick-2012-CT-Assessment.pdf
+  - docs/tutor/py/ch1/references/Barr-Stephenson-2011-CT-K12.pdf
+  - docs/public/references/ch1/Weintrop-2016-CT-Math-Science.pdf
+  - docs/tutor/py/ch1/references/Taiwan-108-Tech-Curriculum.pdf
+  - docs/tutor/py/ch1/references/Brennan-Resnick-2012-CT-Assessment.pdf
+  - docs/public/references/ch1/Papert-1980-Mindstorms.pdf
+  - docs/tutor/py/ch1/references/Taiwan-108-Math-Curriculum.pdf
+  - docs/tutor/py/ch1/references/Wing-2006-CT.pdf
+  - docs/public/references/ch1/Taiwan-108-Math-Curriculum.pdf
+tests:
+  - .vitepress/buildTutorSidebar.test.ts
 -->

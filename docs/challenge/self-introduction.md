@@ -21,6 +21,8 @@ generator: |
   print(f"Hi, I'm {name} and I'm {age} years old.")
 starter_code: |
   # 讀取名字和年齡，輸出自我介紹
+chapter: ch1
+description: 讀取名字和年齡，輸出英文自我介紹
 ---
 
 ## 自我介紹產生器

@@ -27,6 +27,8 @@ generator: |
   print(f"{avg:.1f}")
 starter_code: |
   # 讀取三科成績，計算並輸出平均（保留一位小數）
+chapter: ch1
+description: 讀取三科成績，計算並輸出平均
 ---
 
 ## 段考成績平均
