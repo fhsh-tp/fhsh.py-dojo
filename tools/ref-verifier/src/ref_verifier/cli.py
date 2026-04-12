@@ -72,30 +72,40 @@ async def run_verify(refs_dir: Path, output_dir: Path) -> list[VerifyResult]:
 
 def main():
     parser = argparse.ArgumentParser(description="Verify paper metadata against Semantic Scholar")
-    parser.add_argument(
-        "--refs-dir",
-        type=Path,
-        default=None,
-        help="Path to refs/ directory (default: ../../refs relative to tool)",
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=Path,
-        default=None,
-        help="Directory for report output (default: same as refs-dir)",
-    )
+    sub = parser.add_subparsers(dest="command")
+
+    # Original: verify refs/ directory
+    p_refs = sub.add_parser("verify-refs", help="Verify refs/ directory papers")
+    p_refs.add_argument("--refs-dir", type=Path, default=None)
+    p_refs.add_argument("--output-dir", type=Path, default=None)
+
+    # New: verify inline markdown references
+    p_inline = sub.add_parser("verify-inline", help="Verify inline markdown references")
+    p_inline.add_argument("--input", type=Path, required=True, help="Path to reference.md")
+    p_inline.add_argument("--output", type=Path, default=None, help="Output directory for report")
+
     args = parser.parse_args()
 
-    refs_dir = args.refs_dir or DEFAULT_REFS.resolve()
-    output_dir = args.output_dir or refs_dir
+    if args.command == "verify-inline":
+        from .verify_inline import run_verify_inline
+        input_path = args.input
+        if not input_path.exists():
+            print(f"Error: file not found: {input_path}")
+            return
+        output_dir = args.output or input_path.parent
+        output_dir.mkdir(parents=True, exist_ok=True)
+        asyncio.run(run_verify_inline(input_path, output_dir))
+    else:
+        # Default: original refs/ directory verification
+        refs_dir = getattr(args, "refs_dir", None) or DEFAULT_REFS.resolve()
+        output_dir = getattr(args, "output_dir", None) or refs_dir
 
-    if not refs_dir.exists():
-        print(f"Error: refs directory not found: {refs_dir}")
-        return
+        if not refs_dir.exists():
+            print(f"Error: refs directory not found: {refs_dir}")
+            return
 
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    asyncio.run(run_verify(refs_dir, output_dir))
+        output_dir.mkdir(parents=True, exist_ok=True)
+        asyncio.run(run_verify(refs_dir, output_dir))
 
 
 if __name__ == "__main__":

@@ -10,15 +10,11 @@ section: "reference"
 
 本頁列出模組一練習題設計所參考的學術文獻與教育資源。這些文獻涵蓋數學素養（Mathematical Literacy）、運算思維（Computational Thinking）及兩者整合的研究。
 
----
-
 ## 數學素養（Mathematical Literacy）
 
 1. **OECD (2022)**. PISA 2022 Mathematics Framework. [PDF](/references/ch1/PISA-2022-Math-Framework.pdf) | [Website](https://pisa2022-maths.oecd.org/ca/index.html)
 
 2. **教育部 (2018)**. 十二年國民基本教育課程綱要——數學領域. [PDF](/references/ch1/Taiwan-108-Math-Curriculum.pdf)
-
----
 
 ## 運算思維（Computational Thinking）
 
@@ -36,25 +32,21 @@ section: "reference"
 
 9. **Grover, S., & Pea, R. (2013)**. Computational Thinking in K-12: A Review of the State of the Field. *Educational Researcher*, 42(1), 38-43. [URL](https://journals.sagepub.com/doi/abs/10.3102/0013189x12463051)
 
-10. **Shute, V., Sun, C., & Asbell-Clarke, J. (2017)**. Demystifying Computational Thinking. *Educational Research Review*, 22, 142-158. [URL](https://www.sciencedirect.com/science/article/abs/pii/S1747938X17300350)
-
----
+10. **Shute, V., Sun, C., & Asbell-Clarke, J. (2017)**. Demystifying Computational Thinking. *Educational Research Review*, 22, 142-158. [URL](https://www.sciencedirect.com/science/article/abs/pii/S1747938X17300350) | [DOI](https://doi.org/10.1016/j.edurev.2017.09.003)
 
 ## 整合研究（CT × Math Integration）
 
-11. **Weintrop, D., et al. (2016)**. Defining Computational Thinking for Mathematics and Science Classrooms. *Journal of Science Education and Technology*, 25(1), 127-147. [PDF](/references/ch1/Weintrop-2016-CT-Math-Science.pdf)
+11. **Weintrop, D., et al. (2016)**. Defining Computational Thinking for Mathematics and Science Classrooms. *Journal of Science Education and Technology*, 25(1), 127-147. [PDF](/references/ch1/Weintrop-2016-CT-Math-Science.pdf) | [DOI](https://doi.org/10.1007/s10956-015-9581-5)
 
 12. **Olteanu, C. (2022)**. Programming, Mathematical Reasoning and Sense-Making. *International Journal of Mathematical Education in Science and Technology*, 53, 2046-2064. [URL](https://www.tandfonline.com/doi/full/10.1080/0020739X.2020.1858199)
 
 13. **Lee, S. W. Y., et al. (2023)**. Exploring the Multifaceted Roles of Mathematics Learning in Predicting Students' Computational Thinking Competency. *International Journal of STEM Education*, 10(1), Article 64. [URL](https://link.springer.com/article/10.1186/s40594-023-00455-2)
 
-14. **International Journal of STEM Education (2023)**. Integration of Computational Thinking in K-12 Mathematics Education: A Systematic Review. [URL](https://link.springer.com/article/10.1186/s40594-023-00396-w)
+14. **Ye, H., Liang, B., Ng, O.-L., & Chai, C. S. (2023)**. Integration of Computational Thinking in K-12 Mathematics Education: A Systematic Review on CT-Based Mathematics Instruction and Student Learning. *International Journal of STEM Education*, 10, Article 3. [URL](https://link.springer.com/article/10.1186/s40594-023-00396-w)
 
-15. **Education Sciences (2026)**. Quasi-Experimental Study on CT and Mathematical Reasoning. *MDPI*, 16(2), 345. [URL](https://www.mdpi.com/2227-7102/16/2/345)
+15. **Pajares Pescador, R., Martín-Antón, L. J., & Carbonero-Martín, M. A. (2026)**. The Impact of Computational Thinking on Logical-Mathematical Reasoning in High School Education: A Quasi-Experimental Study. *Education Sciences*, 16(2), 345. [URL](https://www.mdpi.com/2227-7102/16/2/345) | [DOI](https://doi.org/10.3390/educsci16020345)
 
-16. **Digital Experiences in Mathematics Education (2024)**. Designing Mathematical Programming Problems. [URL](https://link.springer.com/article/10.1007/s40751-024-00143-y)
-
----
+16. **Munthe, M., & Naalsund, M. (2024)**. Designing Mathematical Programming Problems. *Digital Experiences in Mathematics Education*, 10(2). [URL](https://link.springer.com/article/10.1007/s40751-024-00143-y)
 
 ## 台灣課綱與教育資源
 
@@ -68,6 +60,6 @@ section: "reference"
 
 21. **Project Euler**. Mathematical / Programming Problems. [URL](https://projecteuler.net/)
 
-22. **Springer (2024)**. Teaching CS Using Mathematics. [URL](https://link.springer.com/article/10.1007/s42979-024-03386-z)
+22. **Pattichis, M. S., Lee, H. H., Celedón-Pattichis, S., & LópezLeiva, C. A. (2024)**. Teaching Computer Programming Using Mathematics: Examples from Middle-School and Graduate School. *SN Computer Science*, 5(8), 1006. [URL](https://link.springer.com/article/10.1007/s42979-024-03386-z)
 
-23. **ERIC (2024)**. Quantitative Analysis of Programming in Mathematics Education. [URL](https://files.eric.ed.gov/fulltext/EJ1428026.pdf)
+23. **Rais, D., & Zhao, X. (2024)**. Elevating Student Engagement and Academic Performance: A Quantitative Analysis of Python Programming Integration in the Merdeka Belajar Curriculum. *Journal on Mathematics Education*, 15(2), 495-516. [URL](https://files.eric.ed.gov/fulltext/EJ1428026.pdf) | [DOI](https://doi.org/10.22342/jme.v15i2.pp495-516)
