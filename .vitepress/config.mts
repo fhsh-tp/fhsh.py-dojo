@@ -11,7 +11,7 @@ import wasm from 'vite-plugin-wasm'
 import topLevelAwait from 'vite-plugin-top-level-await'
 import { stripGenerator } from './plugins/strip-generator'
 import yaml from 'js-yaml'
-import { buildTutorSidebar } from './sidebar'
+import { buildTutorSidebar } from './sidebar.ts'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -35,7 +35,7 @@ const srcDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 
 export default defineConfig({
   srcDir: 'docs',
 
-  title: '台北市立復興高級中學 Python 自學道場',
+  title: 'Python 自學道場',
   description: 'Python 自學道場：在解題中學習 Python 程式設計',
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
