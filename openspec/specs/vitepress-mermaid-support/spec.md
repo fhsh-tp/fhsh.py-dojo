@@ -28,90 +28,86 @@ Markdown files containing fenced code blocks with the `mermaid` language identif
 - **THEN** the page SHALL NOT crash
 - **AND** an error indicator SHALL be displayed in place of the diagram
 
+#### Scenario: Mermaid loads only in browser context
+
+- **WHEN** VitePress performs server-side rendering or static site generation
+- **THEN** the mermaid library SHALL NOT be imported or evaluated
+- **AND** no TypeError or initialization error SHALL occur
+
+#### Scenario: Dark mode toggle re-renders diagrams
+
+- **WHEN** a page contains a rendered Mermaid diagram
+- **AND** the user toggles between dark and light mode
+- **THEN** the diagram SHALL re-render with the appropriate theme (`dark` or `default`)
+
 
 <!-- @trace
-source: setup-vitepress-mermaid-math
-updated: 2026-04-10
+source: fix-mermaid-prototype-error
+updated: 2026-04-13
 code:
-  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js
-  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js.map
-  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js.map
-  - docs/challenge/quadratic-discriminant.md
-  - docs/.vitepress/cache/deps/vue.js
-  - docs/tutor/py/ch1/1-4.md
-  - docs/.vitepress/cache/deps/vue.js.map
-  - docs/.vitepress/cache/deps/_metadata.json
-  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js
-  - docs/challenge/password-check.md
-  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js
-  - docs/tutor/py/ch1/1-3.md
-  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js.map
-  - package.json
-  - docs/.vitepress/cache/deps/package.json
   - .vitepress/config.mts
+  - .vitepress/theme/index.ts
+  - .vitepress/theme/components/MermaidDiagram.vue
+  - package.json
+  - .vitepress/plugins/markdown-mermaid.ts
+tests:
+  - .vitepress/theme/components/MermaidDiagram.test.ts
+  - .vitepress/plugins/markdown-mermaid.test.ts
 -->
 
 ---
 ### Requirement: Mermaid plugin is registered via withMermaid wrapper
 
-The VitePress configuration in `.vitepress/config.mts` SHALL use the `withMermaid()` wrapper from `vitepress-plugin-mermaid` to register the Mermaid rendering plugin.
+The VitePress configuration in `.vitepress/config.mts` SHALL use a custom markdown-it plugin registered via the `markdown.config` callback to transform Mermaid fenced code blocks into `<MermaidDiagram>` Vue component invocations. The `MermaidDiagram` component SHALL be registered as a global component in the theme's `enhanceApp` function. The configuration SHALL NOT use `withMermaid()` from `vitepress-plugin-mermaid`.
 
-#### Scenario: Config uses withMermaid wrapper
+#### Scenario: Config uses markdown.config with mermaid plugin
 
 - **WHEN** `.vitepress/config.mts` is inspected
-- **THEN** the default export SHALL be wrapped with `withMermaid()` from `vitepress-plugin-mermaid`
+- **THEN** the `markdown.config` callback SHALL invoke a custom mermaid markdown-it plugin
+- **AND** the default export SHALL NOT use `withMermaid()` from `vitepress-plugin-mermaid`
+
+#### Scenario: MermaidDiagram component is registered globally
+
+- **WHEN** `.vitepress/theme/index.ts` is inspected
+- **THEN** the `enhanceApp` function SHALL register `MermaidDiagram` as a global component via `app.component('MermaidDiagram', MermaidDiagram)`
 
 
 <!-- @trace
-source: setup-vitepress-mermaid-math
-updated: 2026-04-10
+source: fix-mermaid-prototype-error
+updated: 2026-04-13
 code:
-  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js
-  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js.map
-  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js.map
-  - docs/challenge/quadratic-discriminant.md
-  - docs/.vitepress/cache/deps/vue.js
-  - docs/tutor/py/ch1/1-4.md
-  - docs/.vitepress/cache/deps/vue.js.map
-  - docs/.vitepress/cache/deps/_metadata.json
-  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js
-  - docs/challenge/password-check.md
-  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js
-  - docs/tutor/py/ch1/1-3.md
-  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js.map
-  - package.json
-  - docs/.vitepress/cache/deps/package.json
   - .vitepress/config.mts
+  - .vitepress/theme/index.ts
+  - .vitepress/theme/components/MermaidDiagram.vue
+  - package.json
+  - .vitepress/plugins/markdown-mermaid.ts
+tests:
+  - .vitepress/theme/components/MermaidDiagram.test.ts
+  - .vitepress/plugins/markdown-mermaid.test.ts
 -->
 
 ---
 ### Requirement: Mermaid packages are installed as devDependencies
 
-The `package.json` SHALL list `vitepress-plugin-mermaid` and `mermaid` as `devDependencies`.
+The `package.json` SHALL list `mermaid` as a `devDependency`. The `vitepress-plugin-mermaid` package SHALL NOT be present in `package.json`.
 
-#### Scenario: Packages present in devDependencies
+#### Scenario: mermaid present and vitepress-plugin-mermaid absent
 
 - **WHEN** `package.json` is inspected
-- **THEN** `devDependencies` SHALL contain `vitepress-plugin-mermaid` and `mermaid`
+- **THEN** `devDependencies` SHALL contain `mermaid`
+- **AND** `devDependencies` SHALL NOT contain `vitepress-plugin-mermaid`
+- **AND** `dependencies` SHALL NOT contain `vitepress-plugin-mermaid`
 
 <!-- @trace
-source: setup-vitepress-mermaid-math
-updated: 2026-04-10
+source: fix-mermaid-prototype-error
+updated: 2026-04-13
 code:
-  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js
-  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js.map
-  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js.map
-  - docs/challenge/quadratic-discriminant.md
-  - docs/.vitepress/cache/deps/vue.js
-  - docs/tutor/py/ch1/1-4.md
-  - docs/.vitepress/cache/deps/vue.js.map
-  - docs/.vitepress/cache/deps/_metadata.json
-  - docs/.vitepress/cache/deps/vitepress___@vue_devtools-api.js
-  - docs/challenge/password-check.md
-  - docs/.vitepress/cache/deps/vitepress___@vueuse_core.js
-  - docs/tutor/py/ch1/1-3.md
-  - docs/.vitepress/cache/deps/chunk-5KHNRSJ4.js.map
-  - package.json
-  - docs/.vitepress/cache/deps/package.json
   - .vitepress/config.mts
+  - .vitepress/theme/index.ts
+  - .vitepress/theme/components/MermaidDiagram.vue
+  - package.json
+  - .vitepress/plugins/markdown-mermaid.ts
+tests:
+  - .vitepress/theme/components/MermaidDiagram.test.ts
+  - .vitepress/plugins/markdown-mermaid.test.ts
 -->

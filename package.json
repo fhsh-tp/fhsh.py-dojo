@@ -62,7 +62,6 @@
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-vue-devtools": "^8.0.6",
     "vite-plugin-wasm": "^3.5.0",
-    "vitepress-plugin-mermaid": "^2.0.17",
     "vitest": "^4.0.18",
     "vue-tsc": "^3.2.5",
     "wasm-pack": "^0.14.0"

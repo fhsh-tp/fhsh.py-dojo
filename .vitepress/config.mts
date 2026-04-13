@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import { defineConfig } from 'vitepress'
-import { withMermaid } from 'vitepress-plugin-mermaid'
+import { mermaidPlugin } from './plugins/markdown-mermaid'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
@@ -32,7 +32,7 @@ function loadYaml(file: string): unknown {
 const srcDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'docs')
 
 // https://vitepress.dev/reference/site-config
-export default withMermaid(defineConfig({
+export default defineConfig({
   srcDir: 'docs',
 
   title: '台北市立復興高級中學 Python 自學道場',
@@ -56,6 +56,9 @@ export default withMermaid(defineConfig({
   },
   markdown: {
     math: true,
+    config(md) {
+      mermaidPlugin(md)
+    },
   },
   vite: {
     plugins: [vueJsx(), vueDevTools(), tailwindcss(), wasm(), topLevelAwait(), stripGenerator()],
@@ -72,4 +75,4 @@ export default withMermaid(defineConfig({
       },
     },
   },
-}))
+})
