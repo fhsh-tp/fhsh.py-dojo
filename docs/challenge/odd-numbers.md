@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 15
+id: 25
 title: 奇數列印機
 difficulty: easy
 tags: [for, range, step, 奇數]

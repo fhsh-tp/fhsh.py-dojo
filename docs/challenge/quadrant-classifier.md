@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 29
+id: 14
 title: 座標象限判斷
 difficulty: easy
 tags: [if-elif-else, 邏輯運算, 座標]

@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 17
+id: 27
 title: 3N+1 猜想
 difficulty: medium
 tags: [while, 迴圈, Collatz, 條件判斷]

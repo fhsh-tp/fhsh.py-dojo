@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 16
+id: 26
 title: 區間累加器
 difficulty: medium
 tags: [for, range, start, stop, 累加]

@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 35
+id: 20
 title: 自動販賣機找零
 difficulty: medium
 tags: [if-else, 整除, 取餘數, 綜合]

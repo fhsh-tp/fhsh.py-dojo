@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 12
+id: 22
 title: 重複問候
 difficulty: easy
 tags: [for, range, 迴圈, print]

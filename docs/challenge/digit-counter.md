@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 18
+id: 28
 title: 位數計算器
 difficulty: easy
 tags: [while, 迴圈, 位數]

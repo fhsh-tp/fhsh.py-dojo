@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 14
+id: 24
 title: 倒數計時器
 difficulty: easy
 tags: [for, range, step, 倒數]

@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 25
+id: 35
 title: 跳零位數和
 difficulty: medium
 tags: [while, continue, 迴圈控制, 位數]

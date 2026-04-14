@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 31
+id: 16
 title: 二次方程式判別式
 difficulty: medium
 tags: [if-elif-else, 運算, 數學公式]

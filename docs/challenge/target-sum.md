@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 22
+id: 32
 title: 累加到目標
 difficulty: medium
 tags: [while, break, 迴圈控制, 累加]

@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 27
+id: 12
 title: 正負零判斷
 difficulty: easy
 tags: [if-elif-else, 比較運算]

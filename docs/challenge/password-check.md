@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 21
+id: 31
 title: 密碼驗證器
 difficulty: easy
 tags: [while, break, 迴圈控制, 字串比對]

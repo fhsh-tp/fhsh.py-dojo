@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 24
+id: 34
 title: 跳五累加器
 difficulty: easy
 tags: [for, continue, 迴圈控制, 累加]
