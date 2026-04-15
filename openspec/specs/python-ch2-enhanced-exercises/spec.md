@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines requirements for adding APCS beginner transition-style practice problems to sections 2-1, 2-2, and 2-3. Each section receives additional 「自己動手試試」problems appended after existing content, with corresponding challenge files. Existing content in those sections SHALL NOT be modified.
+Defines requirements for adding and reformatting APCS literacy-style practice problems in sections 1-3, 1-4, 2-1, 2-2, 2-3, and 2-4. Each section receives additional 「自己動手試試」problems and/or reformatted existing exercises, with corresponding challenge files.
 
 ## Requirements
 
@@ -381,85 +381,45 @@ code:
 ---
 ### Requirement: APCS beginner transition format template
 
-All new practice problems for sections 2-1, 2-2, 2-3, and 2-4 SHALL follow this format template:
+All practice problems in sections 1-3, 1-4, 2-1, 2-2, 2-3, and 2-4 — including both existing exercises and any exercises added in future changes — SHALL follow the APCS literacy exercise format defined in the `apcs-literacy-exercise-template` spec. "Practice problems" excludes Judge 解題實戰 teaching worked-examples (see `apcs-literacy-exercise-template` spec for the exclusion list).
 
-```
-### [題目名稱]
+This replaces the previous "APCS beginner transition format" template. The key differences from the previous format are:
 
-<ChallengeLink slug="[slug]" />
+1. **問題情境** replaces **題目說明**: The narrative SHALL be 150-300 Chinese characters (up from 2-3 sentences) and SHALL use a named character in a real-world scenario
+2. **🔍 思考引導** is a new mandatory section: Each exercise SHALL include at least 1 scaffold element (Math Expression, Partial Flowchart, or Step Decomposition) as defined in the `apcs-literacy-exercise-template` spec
+3. **範例說明** is a new mandatory section: Each exercise SHALL include a step-by-step computation trace of the most instructive example
+4. The scope expands from "sections 2-1, 2-2, and 2-3" to "sections 1-3, 1-4, 2-1, 2-2, 2-3, and 2-4"
 
-**題目說明**：[保留對話語氣的敘事情境，2-3 句描述問題背景與要求]
+All other requirements from the `apcs-literacy-exercise-template` spec (input format, output format, sample I/O pairs, teacher hints) SHALL apply.
 
-**輸入格式**：
-第一行：[逐行說明每一行的輸入內容與型別] (限制：[值域範圍，如 1 ≤ N ≤ 100])
+#### Scenario: Practice problem follows APCS literacy format
 
-**輸出格式**：
-[精確描述輸出內容、格式、換行規則]
+- **WHEN** a practice problem in sections 1-3, 1-4, 2-1, 2-2, 2-3, or 2-4 is parsed
+- **THEN** it SHALL contain all mandatory sections defined in the `apcs-literacy-exercise-template` spec: 問題情境 (150-300 chars with named character), 思考引導 (with at least 1 scaffold), 輸入格式 (with constraints), 輸出格式, at least 2 sample I/O pairs, 範例說明 (with numbered steps), and 老師的提示
 
-**範例一**：
+#### Scenario: Existing short-format exercises are upgraded
 
-| 輸入 | 輸出 |
-|------|------|
-| [sample input] | [sample output] |
+- **WHEN** an exercise that previously used the short format (1-2 sentence description + hint + ChallengeLink) is found in sections 2-1, 2-2, or 2-3
+- **THEN** it SHALL be rewritten to the full APCS literacy format with all mandatory sections
 
-**範例二**：
+#### Scenario: Section 1-3 tier format is replaced
 
-| 輸入 | 輸出 |
-|------|------|
-| [sample input] | [sample output] |
-
-> [!NOTE] 老師的提示
-> [1-2 句策略性提示，不含完整解法]
-```
-
-#### Scenario: Practice problem follows template
-
-- **WHEN** a new practice problem is added to sections 2-1, 2-2, 2-3, or 2-4
-- **THEN** it SHALL contain all template sections: 題目說明, 輸入格式 (with constraints), 輸出格式, at least 2 sample I/O pairs, and a teacher hint
+- **WHEN** section 1-3's exercises are examined after the change
+- **THEN** the tier system (★☆☆ through ★★★★) SHALL be removed and all exercises SHALL use the APCS literacy format instead
 
 <!-- @trace
-source: write-ch2-completion
-updated: 2026-04-13
+source: apcs-literacy-exercise-format
+updated: 2026-04-15
 code:
-  - docs/challenge/even-countdown.md
-  - docs/public/assets/tutor/py/ch2/圖十三.png
-  - docs/challenge/pair-count.md
-  - docs/public/assets/tutor/py/ch2/圖二.png
-  - docs/public/assets/tutor/py/ch2/圖四.png
-  - docs/public/assets/tutor/py/ch2/圖一.png
-  - docs/challenge/number-pyramid.md
-  - docs/public/assets/tutor/py/ch2/圖五.png
-  - docs/challenge/inverted-triangle.md
-  - docs/challenge/isosceles-triangle.md
-  - docs/tutor/py/ch2/appendix.md
-  - docs/challenge/star-diamond.md
-  - docs/tutor/py/ch2/reference.md
-  - docs/challenge/digital-root.md
-  - docs/public/assets/tutor/py/ch2/圖三.png
-  - docs/public/assets/tutor/py/ch2/圖十二.png
-  - docs/challenge/number-staircase.md
   - docs/tutor/py/ch2/2-4.md
-  - docs/tutor/py/ch2/index.md
-  - docs/challenge/prime-check.md
-  - docs/public/assets/tutor/py/ch2/圖十一.png
-  - docs/public/assets/tutor/py/ch2/圖九.png
-  - docs/public/assets/tutor/py/ch2/圖八.png
-  - docs/challenge/guess-number-simple.md
-  - docs/tutor/py/ch2/2-1.md
-  - docs/challenge/perfect-numbers-range.md
-  - docs/challenge/star-rectangle.md
-  - docs/challenge/gcd-euclid.md
-  - docs/challenge/perfect-number.md
-  - docs/tutor/py/ch2/2-2.md
-  - docs/challenge/star-square.md
-  - docs/challenge/nested-triangle.md
-  - docs/public/assets/tutor/py/ch2/圖七.png
-  - docs/public/assets/tutor/py/ch2/圖十四.png
+  - docs/tutor/py/ch1/1-4.md
   - docs/tutor/py/ch2/2-3.md
-  - docs/challenge/smallest-prime-factor.md
-  - docs/public/assets/tutor/py/ch2/圖十.png
-  - docs/tutor/py/ch2/2-5.md
-  - docs/challenge/multiplication-table.md
-  - docs/public/assets/tutor/py/ch2/圖六.png
-  - docs/challenge/arithmetic-sum.md
+  - docs/tutor/py/ch1/1-3.md
+  - docs/tutor/py/ch2/2-2.md
+  - refs/apcs/04_APCS-程式實作高級題本範例.pdf
+  - refs/apcs/02_APCS-程式實作中級題本範例.pdf
+  - refs/apcs/01_APCS-程式實作初級題本範例.pdf
+  - refs/apcs/03_APCS-程式實作中高級題本範例.pdf
+  - refs/apcs/程式識讀_題目範例_Python題本_0915.pdf
+  - docs/tutor/py/ch2/2-1.md
 -->
