@@ -1,0 +1,10 @@
+- text: 教學
+  items:
+    - text: Python 自學
+      link: /tutor/py/
+    - text: 演算法
+      link: /tutor/alg/
+    - text: 資料結構
+      link: /tutor/ds/
+- text: 挑戰題庫
+  link: /challenges

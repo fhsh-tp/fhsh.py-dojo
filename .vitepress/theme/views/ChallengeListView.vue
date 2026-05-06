@@ -9,10 +9,26 @@ const props = defineProps<{
 
 type Difficulty = 'all' | 'easy' | 'medium' | 'hard'
 const selectedDifficulty = ref<Difficulty>('all')
+const searchQuery = ref('')
 
 const filtered = computed(() => {
-  if (selectedDifficulty.value === 'all') return props.challenges
-  return props.challenges.filter((c) => c.difficulty === selectedDifficulty.value)
+  let result = props.challenges
+
+  if (selectedDifficulty.value !== 'all') {
+    result = result.filter((c) => c.difficulty === selectedDifficulty.value)
+  }
+
+  const q = searchQuery.value.toLowerCase()
+  if (q) {
+    result = result.filter((c) =>
+      c.title.toLowerCase().includes(q)
+      || c.description.toLowerCase().includes(q)
+      || c.tags.some(t => t.toLowerCase().includes(q))
+      || c.chapter.toLowerCase().includes(q)
+    )
+  }
+
+  return result
 })
 
 const difficulties: Difficulty[] = ['all', 'easy', 'medium', 'hard']
@@ -27,8 +43,18 @@ const SKELETON_COUNT = 6
 </script>
 
 <template>
-  <div class="my-10 vp-raw">
+  <div class="w-full my-10 vp-raw">
     <main class="px-6 py-6 max-w-7xl mx-auto">
+      <!-- Search -->
+      <input
+        v-model="searchQuery"
+        type="search"
+        placeholder="搜尋題目名稱、說明、標籤、章節..."
+        class="w-full mb-4 px-4 py-2 rounded-lg border border-blue-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:ring-emerald-500 transition-colors"
+        maxlength="100"
+        aria-label="搜尋挑戰題目"
+      />
+
       <!-- Difficulty filter -->
       <div class="flex gap-2 mb-6" role="toolbar" aria-label="難度篩選">
         <button
@@ -49,7 +75,7 @@ const SKELETON_COUNT = 6
       <!-- Challenge grid -->
       <div
         v-if="filtered.length > 0"
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+        class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
       >
         <ChallengeCard v-for="challenge in filtered" :key="challenge.id" :challenge="challenge" />
       </div>

@@ -1,0 +1,15 @@
+pyproject.toml
+src/ref_verifier/__init__.py
+src/ref_verifier/apis.py
+src/ref_verifier/checker.py
+src/ref_verifier/cli.py
+src/ref_verifier/parser.py
+src/ref_verifier/report.py
+src/ref_verifier/verify_inline.py
+src/ref_verifier.egg-info/PKG-INFO
+src/ref_verifier.egg-info/SOURCES.txt
+src/ref_verifier.egg-info/dependency_links.txt
+src/ref_verifier.egg-info/entry_points.txt
+src/ref_verifier.egg-info/requires.txt
+src/ref_verifier.egg-info/top_level.txt
+tests/test_verify_inline.py
