@@ -12,7 +12,7 @@ import RunModal from '../components/editor/RunModal.vue'
 import TestResultPanel from '../components/editor/TestResultPanel.vue'
 import { useExecutorStore } from '../stores/executor'
 
-const { frontmatter } = useData()
+const { frontmatter, page } = useData()
 const router = useRouter()
 const challengeStore = useChallengeStore()
 const executorStore = useExecutorStore()
@@ -25,7 +25,16 @@ const verdictDetail = resolveVerdictDetail(frontmatter.value.verdict_detail)
 const algorithm: string = frontmatter.value.algorithm ?? ''
 const starterCode: string = frontmatter.value.starter_code ?? ''
 
+// Derive per-challenge slug from the page path
+// (`challenge/<slug>.md` → `<slug>`). This is the canonical key for fetching
+// the encrypted pool and addressing the WASM session — independent of
+// `algorithm`, which is shared across multiple challenges.
+const slug = page.value.relativePath
+  .replace(/^challenge\//, '')
+  .replace(/\.md$/, '')
+
 const runner = useChallengeRunner({
+  id: slug,
   algorithm,
   params: frontmatter.value.params ?? {},
   generator: frontmatter.value.generator ?? '',
@@ -89,7 +98,10 @@ onMounted(() => {
     ro.observe(rightContainerRef.value)
   }
 
-  executorStore.setActiveChallenge(algorithm)
+  // Key per-challenge result snapshots by slug, not algorithm — otherwise all
+  // challenges sharing an `algorithm` value (e.g. all `nested-loop` challenges)
+  // would share a single results bucket.
+  executorStore.setActiveChallenge(slug)
   code.value = starterCode
 
   // Fire-and-forget: load testcases in background

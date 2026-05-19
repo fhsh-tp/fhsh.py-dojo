@@ -70,6 +70,7 @@ describe('useChallengeRunner dev path - stop/cancel semantics', () => {
   async function createReadyRunner() {
     const { useChallengeRunner } = await import('../composables/useChallengeRunner')
     const runner = useChallengeRunner({
+      id: 'test_algo',
       algorithm: 'test_algo',
       params: { shift: { type: 'int', min: 1, max: 25 } },
       generator: 'def generate(input): return input',
@@ -129,6 +130,7 @@ describe('useChallengeRunner dev path - stop/cancel semantics', () => {
   it('stop() during generator phase terminates activeWorker', async () => {
     const { useChallengeRunner } = await import('../composables/useChallengeRunner')
     const runner = useChallengeRunner({
+      id: 'test_algo',
       algorithm: 'test_algo',
       params: { shift: { type: 'int', min: 1, max: 25 } },
       generator: 'def generate(input): return input',

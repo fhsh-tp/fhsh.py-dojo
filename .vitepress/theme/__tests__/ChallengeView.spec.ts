@@ -16,6 +16,7 @@ vi.mock('vitepress', () => ({
         params: { n: { type: 'int', min: 1, max: 10 } },
       },
     },
+    page: { value: { relativePath: 'challenge/caesar-encrypt.md' } },
   }),
   useRouter: () => ({ go: vi.fn() }),
   Content: { template: '<div class="vp-content" />' },
