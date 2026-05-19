@@ -15,7 +15,7 @@ generator: |
   n = int(input())
   for i in range(1, n + 1):
       for j in range(1, n + 1):
-          print(f"{i * j:4}", end="")
+          print(f"{i * j:>4}", end="")
       print()
 starter_code: |
   n = int(input())
