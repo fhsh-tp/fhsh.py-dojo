@@ -41,8 +41,13 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      # --ignore-scripts skips the wasm-pack npm package's postinstall, which
+      # downloads a prebuilt binary this job never uses (no build:wasm here).
+      # That download currently 404s anyway: the npm installer points at
+      # drager/wasm-pack, which hosts no release assets. Verification needs
+      # only the JS deps, so skipping install scripts keeps CI hermetic.
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Type check
         run: pnpm typecheck
