@@ -47,12 +47,12 @@ jobs:
       - name: Package dist
         run: |
           cd .vitepress/dist
-          tar -czf ../../crypto-challenge-${{ github.ref_name }}.tar.gz .
-          zip -r ../../crypto-challenge-${{ github.ref_name }}.zip .
+          tar -czf ../../fhsh-py-dojo-${{ github.ref_name }}.tar.gz .
+          zip -r ../../fhsh-py-dojo-${{ github.ref_name }}.zip .
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            crypto-challenge-${{ github.ref_name }}.tar.gz
-            crypto-challenge-${{ github.ref_name }}.zip
+            fhsh-py-dojo-${{ github.ref_name }}.tar.gz
+            fhsh-py-dojo-${{ github.ref_name }}.zip

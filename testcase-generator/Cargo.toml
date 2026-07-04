@@ -8,6 +8,10 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 default = []
+# `faker` 為選用能力：啟用 ParamSpec::Faker 變體，透過 `fake` crate 產生擬真
+# 姓名 / Email / 城市等測資（對應規格 paramspec-enum-faker）。預設不啟用，以縮小
+# WASM 體積與相依；需要擬真資料的題目才以 `--features faker` 開啟。是否常駐啟用
+# 留待專責變更評估，故此處保留宣告而非移除。
 faker = ["dep:fake"]
 
 [dependencies]

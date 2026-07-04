@@ -22,12 +22,13 @@
 
 ## 快速流程
 
-1. 在 `docs/challenge/` 新增一個 Markdown 檔案（檔名用 kebab-case）
-2. 填入必要的 frontmatter（見下方說明）
+1. 執行 `pnpm new-challenge <name> --title "題目名稱" --difficulty easy` 產生題目骨架（`<name>` 為小寫 kebab-case；腳本會自動分配唯一的 `id`，並將檔案建立於 `docs/challenge/<name>.md`）
+   - **請勿手動建立題目檔**：手動建立容易造成 `id` 衝突。此為新增題目的首選方式，與 `CONTRIBUTE.md` 的 Phase 2 SOP 一致。
+2. 依下方「Frontmatter 欄位說明」編輯 `params`、`generator`、`starter_code` 等核心欄位
 3. 撰寫題目說明、輸入輸出規格與範例
-4. 執行 `pnpm dev` 在瀏覽器確認題目與測資是否正常
+4. 執行 `pnpm build:pools` 重新編譯加密測資池，再執行 `pnpm dev` 在瀏覽器確認題目與測資，並親自跑過一次確認可以通過（Accepted）
 
-> **不需要** 修改任何設定檔或 TOML 檔。所有題目資料皆定義在 Markdown 的 frontmatter 中。
+> 所有題目資料皆定義在 Markdown 的 frontmatter 中，**不需要** 額外修改設定檔或 TOML 檔。
 
 ---
 
@@ -37,7 +38,7 @@
 |------|------|------|
 | 檔案名稱 | `kebab-case.md` | `bubble-sort.md` |
 | `algorithm` | `snake_case` | `bubble_sort` |
-| `id` | 遞增整數 | `16`（接續現有最大值） |
+| `id` | 遞增整數 | `16`（由 `pnpm new-challenge` 自動分配，接續現有最大值） |
 
 **演算法名稱與檔名的對應：**
 

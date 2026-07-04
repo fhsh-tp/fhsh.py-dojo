@@ -28,7 +28,7 @@ const loader: {
       .map((challenge, idx) => {
         return {
           id: challenge.frontmatter.id ?? idx + 1,
-          title: challenge.frontmatter.title || `密碼學挑戰 #${idx + 1}`,
+          title: challenge.frontmatter.title || `挑戰 #${idx + 1}`,
           url: challenge.url,
           difficulty: challenge.frontmatter.difficulty || 'mystery',
           algorithm: challenge.frontmatter.algorithm ?? '',

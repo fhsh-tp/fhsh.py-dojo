@@ -64,9 +64,6 @@ __screenshots__/
 .spectra/
 openspec/.vector-search.db*
 
-# Rust
-challenge-generator/target
-
 # Pyodide self-hosted runtime (downloaded by scripts/download-pyodide.sh)
 docs/public/pyodide/
 
@@ -86,3 +83,6 @@ docs/public/pools/
 
 # Customized ignore
 refs/other-docs-dot-vitepress/
+
+# Dev-side analysis artifacts (understand knowledge graph)
+.understand-anything/
