@@ -96,21 +96,13 @@ tests:
 
 The workflow SHALL package the contents of `.vitepress/dist/` into a `.tar.gz` archive.
 The workflow SHALL package the contents of `.vitepress/dist/` into a `.zip` archive.
-The archive filenames SHALL follow the pattern `crypto-challenge-{tag}.tar.gz` and `crypto-challenge-{tag}.zip` where `{tag}` is the git tag name (e.g., `v1.0.0`).
+The archive filenames SHALL follow the pattern `fhsh-py-dojo-{tag}.tar.gz` and `fhsh-py-dojo-{tag}.zip` where `{tag}` is the git tag name (e.g., `v1.0.0`).
 The archives SHALL contain the dist contents directly at the root level (not nested under a `dist/` directory).
 
 #### Scenario: Archive contents
 
-- **WHEN** a user extracts `crypto-challenge-v1.0.0.tar.gz`
+- **WHEN** a user extracts `fhsh-py-dojo-v1.0.0.tar.gz`
 - **THEN** the extracted directory SHALL contain `index.html`, `assets/`, `wasm/`, and all other build outputs at the top level
-
-
-<!-- @trace
-source: github-release-dist-packaging
-updated: 2026-03-24
-code:
-  - .github/workflows/release.yml
--->
 
 ---
 ### Requirement: Asset upload to GitHub Release
@@ -124,20 +116,12 @@ The workflow SHALL update the existing release if one already exists (UI release
 #### Scenario: Assets visible on release page
 
 - **WHEN** the workflow completes successfully
-- **THEN** the GitHub Release page SHALL display both `crypto-challenge-{tag}.tar.gz` and `crypto-challenge-{tag}.zip` as downloadable assets
+- **THEN** the GitHub Release page SHALL display both `fhsh-py-dojo-{tag}.tar.gz` and `fhsh-py-dojo-{tag}.zip` as downloadable assets
 
 #### Scenario: Workflow re-run
 
 - **WHEN** the workflow is re-run for the same tag
 - **THEN** the existing assets SHALL be overwritten with freshly built archives
-
-
-<!-- @trace
-source: github-release-dist-packaging
-updated: 2026-03-24
-code:
-  - .github/workflows/release.yml
--->
 
 ---
 ### Requirement: Minimal permissions
