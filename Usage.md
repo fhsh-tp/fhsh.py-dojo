@@ -61,6 +61,7 @@ layout: challenge          # 固定值，觸發 ChallengeView 元件
 id: 16                     # 題目 ID，整數，全站唯一，依序遞增
 title: 題目名稱             # 顯示於題目清單的中文名稱
 difficulty: easy           # 難度：easy | medium | hard
+type: basic                # 選填，題型，預設 basic（見下方「題型 type」）
 tags:                      # 選填：分類標籤陣列
   - 排序
   - 基礎演算法
@@ -73,6 +74,24 @@ starter_code: |            # 必填，使用者初始程式碼範本
   ...
 ---
 ```
+
+---
+
+### 題型 type
+
+`type` 為選填欄位，標示題目的「題型」，預設 `basic`。省略時視同 `basic`，故既有題目無須修改。
+
+| `type` 值 | 說明 | 狀態 |
+|-----------|------|------|
+| `basic` | 基礎練習題 | ✅ 已實作（預設） |
+| `competition` | 競賽題 | ✅ 已實作 |
+| `fill_in_blank` | 填空題 | ⏳ deferred（下一版） |
+| `gamified` | 遊戲化題型 | ⏳ deferred（下一版） |
+| `guided` | 引導題型 | 🔮 future（設計中，placeholder） |
+
+`pnpm new-challenge` 以 `--type basic|competition` 指定題型；目前僅接受已實作的 `basic` 與 `competition`，其餘值會被拒絕（避免產出無樣板的半成品題）。出題流程可搭配 `.claude/skills/challenge-author/` skill 一鍵引導。
+
+> **注意**：此處的頂層 `type`（題型）與下方「params 參數型別」表格中每個參數各自的 `type`（如 `int`、`alpha_upper`）是**不同欄位、不同用途**，位於 frontmatter 的不同層級，請勿混淆。
 
 ---
 

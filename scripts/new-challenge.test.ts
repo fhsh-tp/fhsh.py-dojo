@@ -4,10 +4,12 @@ import {
   parseArgs,
   validateName,
   validateDifficulty,
+  validateType,
   computeNextId,
   buildContent,
   toTitleCase,
   toAlgorithmName,
+  EXERCISE_TYPES,
 } from './new-challenge.js'
 
 describe('toTitleCase', () => {
@@ -39,6 +41,7 @@ describe('parseArgs', () => {
       title: 'Bubble Sort',
       difficulty: 'easy',
       algorithm: 'bubble_sort',
+      type: 'basic',
     })
   })
 
@@ -59,6 +62,7 @@ describe('parseArgs', () => {
       title: '線性搜尋',
       difficulty: 'medium',
       algorithm: 'linear_search',
+      type: 'basic',
     })
   })
 
@@ -136,6 +140,7 @@ describe('buildContent', () => {
     title: 'Bubble Sort',
     difficulty: 'easy',
     algorithm: 'bubble_sort',
+    type: 'basic',
   }
 
   it('produces valid YAML frontmatter with all required fields', () => {
@@ -189,5 +194,65 @@ describe('buildContent', () => {
   it('tags field is empty array', () => {
     const content = buildContent(base)
     expect(content).toContain('tags: []')
+  })
+
+  it('emits the resolved exercise type in frontmatter', () => {
+    expect(buildContent({ ...base, type: 'basic' })).toContain('type: basic')
+    expect(buildContent({ ...base, type: 'competition' })).toContain('type: competition')
+  })
+})
+
+describe('validateType', () => {
+  it('accepts the implemented exercise types', () => {
+    expect(validateType('basic')).toBeNull()
+    expect(validateType('competition')).toBeNull()
+  })
+
+  it('rejects deferred / future / unknown types with a descriptive error', () => {
+    for (const bad of ['gamified', 'fill_in_blank', 'guided', 'nonsense', '']) {
+      const err = validateType(bad)
+      expect(err, `expected '${bad}' to be rejected`).not.toBeNull()
+      expect(err).toContain('--type')
+    }
+  })
+
+  it('exposes exactly the implemented values in EXERCISE_TYPES', () => {
+    expect([...EXERCISE_TYPES]).toEqual(['basic', 'competition'])
+  })
+})
+
+describe('parseArgs --type', () => {
+  it('defaults the type to basic when --type is omitted', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge'])
+    expect(parsed?.type).toBe('basic')
+  })
+
+  it('parses an explicit --type', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge', '--type', 'competition'])
+    expect(parsed?.type).toBe('competition')
+  })
+
+  it('parses the --type=value equals syntax (not silently dropped)', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge', '--type=competition'])
+    expect(parsed?.type).toBe('competition')
+  })
+
+  it('supports the equals syntax for other flags too', () => {
+    const parsed = parseArgs([
+      'node',
+      'new-challenge',
+      'merge-sort',
+      '--difficulty=hard',
+      '--title=合併排序',
+    ])
+    expect(parsed?.difficulty).toBe('hard')
+    expect(parsed?.title).toBe('合併排序')
+  })
+})
+
+describe('EXERCISE_TYPES lockstep', () => {
+  it('matches the data-layer exercise-type list', async () => {
+    const shared = await import('../docs/shared/exercise-type.js')
+    expect([...EXERCISE_TYPES]).toEqual([...shared.EXERCISE_TYPES])
   })
 })
