@@ -35,8 +35,8 @@ function preflightCheckPython(): void {
   } catch {
     console.error(
       '[generate-pools] ERROR: python3 is not available.\n' +
-      '  Pool generation requires Python 3.10+.\n' +
-      '  Please install Python 3 and ensure "python3" is on your PATH.',
+        '  Pool generation requires Python 3.10+.\n' +
+        '  Please install Python 3 and ensure "python3" is on your PATH.',
     )
     process.exit(1)
   }
@@ -47,7 +47,7 @@ function preflightCheckPython(): void {
   } catch {
     console.error(
       '[generate-pools] ERROR: Python package "PyYAML" is not installed.\n' +
-      '  Run: pip install -r requirements.txt',
+        '  Run: pip install -r requirements.txt',
     )
     process.exit(1)
   }
@@ -61,8 +61,8 @@ function preflightCheckPython(): void {
   } catch {
     console.warn(
       '[generate-pools] WARNING: Python package "pycryptodome" is not installed.\n' +
-      '  Challenges that require Crypto will fail.\n' +
-      '  Run: pip install -r requirements.txt',
+        '  Challenges that require Crypto will fail.\n' +
+        '  Run: pip install -r requirements.txt',
     )
   }
 }
@@ -111,9 +111,7 @@ export function validateSlug(slug: string, filePath: string): void {
     )
   }
   if (!SLUG_PATTERN.test(slug)) {
-    throw new Error(
-      `Invalid slug "${slug}" (from file ${filePath}): must match ${SLUG_PATTERN}`,
-    )
+    throw new Error(`Invalid slug "${slug}" (from file ${filePath}): must match ${SLUG_PATTERN}`)
   }
 }
 
@@ -140,9 +138,7 @@ export function collectAndValidateSlugs(
     validateSlug(slug, fullPath)
     const prior = seen.get(slug)
     if (prior !== undefined) {
-      throw new Error(
-        `Duplicate slug "${slug}" produced by two files: ${prior} and ${fullPath}`,
-      )
+      throw new Error(`Duplicate slug "${slug}" produced by two files: ${prior} and ${fullPath}`)
     }
     seen.set(slug, fullPath)
   }
@@ -154,10 +150,7 @@ export function collectAndValidateSlugs(
  * `validSlugs`. Skips non-`.bin` entries (such as `.gitkeep`) and subdirectories.
  * Returns the list of deleted file names. No-op if `poolsDir` does not exist.
  */
-export function cleanupObsoletePools(
-  poolsDir: string,
-  validSlugs: Set<string>,
-): string[] {
+export function cleanupObsoletePools(poolsDir: string, validSlugs: Set<string>): string[] {
   if (!existsSync(poolsDir)) return []
   const deleted: string[] = []
   for (const entry of readdirSync(poolsDir)) {
@@ -181,6 +174,12 @@ export interface ChallengeInfo {
   params: Record<string, unknown>
   testcase_count?: number
   verdict_detail?: string
+  /**
+   * Optional Python reference solution (a full program that reads stdin and
+   * prints the correct answer). Independent of `generator`; used only by the
+   * content-layer regression test to verify a known-correct solution earns AC.
+   */
+  reference_solution?: string
 }
 
 function parseFrontmatter(content: string): Record<string, unknown> {
@@ -190,11 +189,18 @@ function parseFrontmatter(content: string): Record<string, unknown> {
   // since we already need Python for generators anyway.
   const yaml = match[1]!
   const result = JSON.parse(
-    execFileSync('python3', ['-c', `
+    execFileSync(
+      'python3',
+      [
+        '-c',
+        `
 import sys, yaml, json
 data = yaml.safe_load(sys.stdin.read())
 print(json.dumps(data))
-`], { input: yaml, encoding: 'utf-8', timeout: 10_000 }),
+`,
+      ],
+      { input: yaml, encoding: 'utf-8', timeout: 10_000 },
+    ),
   )
   return result
 }
@@ -209,12 +215,13 @@ export function readChallenge(filePath: string): ChallengeInfo {
   const params = fm.params as Record<string, unknown>
   const testcase_count = (fm.testcase_count as number) ?? 10
   const verdict_detail = (fm.verdict_detail as string) ?? 'hidden'
+  const reference_solution = fm.reference_solution as string | undefined
 
   if (!algorithm) throw new Error(`Missing 'algorithm' in ${filePath}`)
   if (!generator) throw new Error(`Missing 'generator' in ${filePath}`)
   if (!params) throw new Error(`Missing 'params' in ${filePath}`)
 
-  return { slug, algorithm, generator, params, testcase_count, verdict_detail }
+  return { slug, algorithm, generator, params, testcase_count, verdict_detail, reference_solution }
 }
 
 // ── Input generation via Python ────────────────────────────────────────────
@@ -224,7 +231,7 @@ export function readChallenge(filePath: string): ChallengeInfo {
  * param-based generation logic. This avoids needing to load the WASM
  * module at build time.
  */
-function generateInputs(params: Record<string, unknown>, count: number): string[] {
+export function generateInputs(params: Record<string, unknown>, count: number): string[] {
   const script = `
 import json, random, string, sys
 
@@ -253,6 +260,11 @@ def gen_value(spec):
         return ''.join(random.choices(string.ascii_lowercase, k=length))
     elif t == "alpha_mixed":
         length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
+        mul = spec.get("multiple_of", 1)
+        if mul > 1:
+            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
+            hi = spec.get("max_len", 10) // mul
+            length = random.randint(lo, hi) * mul
         return ''.join(random.choices(string.ascii_letters, k=length))
     elif t == "hex_string":
         length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
@@ -264,6 +276,11 @@ def gen_value(spec):
         return ''.join(random.choices('0123456789abcdef', k=length))
     elif t == "printable_ascii":
         length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
+        mul = spec.get("multiple_of", 1)
+        if mul > 1:
+            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
+            hi = spec.get("max_len", 10) // mul
+            length = random.randint(lo, hi) * mul
         chars = [chr(c) for c in range(0x21, 0x7f)]
         return ''.join(random.choices(chars, k=length))
     elif t == "enum":
@@ -304,12 +321,12 @@ for _ in range(count):
 
 // ── Generator execution ────────────────────────────────────────────────────
 
-interface TestcaseResult {
+export interface TestcaseResult {
   input: string
   expected_output: string
 }
 
-function runGenerator(generatorCode: string, inputs: string[]): TestcaseResult[] {
+export function runGenerator(generatorCode: string, inputs: string[]): TestcaseResult[] {
   // Build a Python script that runs the generator for each input
   const script = `
 import json, sys, io
@@ -404,7 +421,11 @@ function main() {
   }
   const files = readdirSync(CHALLENGES_DIR).filter((f) => f.endsWith('.md'))
   if (files.length === 0) {
-    console.warn('[generate-pools] No challenge files found in', CHALLENGES_DIR, '— skipping pool generation')
+    console.warn(
+      '[generate-pools] No challenge files found in',
+      CHALLENGES_DIR,
+      '— skipping pool generation',
+    )
     return
   }
 
@@ -468,7 +489,9 @@ function main() {
   if (success > 0 && failed === 0) {
     const deleted = cleanupObsoletePools(POOLS_DIR, producedSlugs)
     if (deleted.length > 0) {
-      console.log(`[generate-pools] Removed ${deleted.length} obsolete pool(s): ${deleted.join(', ')}`)
+      console.log(
+        `[generate-pools] Removed ${deleted.length} obsolete pool(s): ${deleted.join(', ')}`,
+      )
     }
   } else if (failed > 0) {
     console.warn(

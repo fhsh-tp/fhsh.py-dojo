@@ -5,7 +5,8 @@
     "eslint.config.*",
     "prettier.config.*",
     ".vitepress/config.*",
-    ".vitepress/plugins/*.ts"
+    ".vitepress/plugins/*.ts",
+    ".vitepress/sidebar.ts"
   ],
   "compilerOptions": {
     "composite": true,

@@ -50,7 +50,6 @@ source: rebrand-fhsh-py-dojo
 updated: 2026-04-05
 code:
   - docs/challenge/caesar-advanced.md
-  - .vitepress/theme/composables/useApi.ts
   - LICENSE
   - docs/challenge/rsa-basic.md
   - docs/challenge/rail-fence-encrypt.md
@@ -67,8 +66,6 @@ code:
   - requirements.txt
   - package.json
   - docs/challenge/des-ecb-cbc.md
-tests:
-  - .vitepress/theme/__tests__/useApi.spec.ts
 -->
 
 ---
@@ -92,7 +89,6 @@ source: rebrand-fhsh-py-dojo
 updated: 2026-04-05
 code:
   - docs/challenge/caesar-advanced.md
-  - .vitepress/theme/composables/useApi.ts
   - LICENSE
   - docs/challenge/rsa-basic.md
   - docs/challenge/rail-fence-encrypt.md
@@ -109,8 +105,6 @@ code:
   - requirements.txt
   - package.json
   - docs/challenge/des-ecb-cbc.md
-tests:
-  - .vitepress/theme/__tests__/useApi.spec.ts
 -->
 
 ---

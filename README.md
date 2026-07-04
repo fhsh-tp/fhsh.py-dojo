@@ -124,7 +124,7 @@ fhsh.py-dojo/
 │       ├── components/          # challenge、editor、layout 元件
 │       ├── views/               # ChallengeView、ChallengeListView
 │       ├── stores/              # Pinia stores
-│       ├── composables/         # useWasm、useExecutor、useApi 等
+│       ├── composables/         # useWasm、useExecutor、useChallengeRunner 等
 │       ├── workers/             # Pyodide Web Worker
 │       └── __tests__/           # Vitest 測試
 ├── docs/

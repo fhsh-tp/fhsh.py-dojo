@@ -14,6 +14,9 @@ params:
 generator: |
   name = input()
   print("Hello,", name)
+reference_solution: |
+  name = input()
+  print(f"Hello, {name}")
 starter_code: |
   # 讀取輸入的名字，然後輸出 Hello, [名字]
 chapter: ch1

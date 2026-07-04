@@ -43,15 +43,15 @@ export function parseArgs(argv: string[]): ParsedArgs | null {
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--title' && i + 1 < args.length) {
-      title = args[++i]
+      title = args[++i]!
     } else if (args[i] === '--description' && i + 1 < args.length) {
-      description = args[++i]
+      description = args[++i]!
     } else if (args[i] === '--challenge' && i + 1 < args.length) {
-      challenge = args[++i]
-    } else if (!args[i].startsWith('--')) {
-      if (!subject) subject = args[i]
-      else if (!chapter) chapter = args[i]
-      else if (!section) section = args[i]
+      challenge = args[++i]!
+    } else if (!args[i]!.startsWith('--')) {
+      if (!subject) subject = args[i]!
+      else if (!chapter) chapter = args[i]!
+      else if (!section) section = args[i]!
     }
   }
 
@@ -156,7 +156,15 @@ function main(): void {
   }
 
   const createdTime = getFormattedDate()
-  const content = buildContent({ subject, chapter, section, title, description, challenge, createdTime })
+  const content = buildContent({
+    subject,
+    chapter,
+    section,
+    title,
+    description,
+    challenge,
+    createdTime,
+  })
 
   mkdirSync(outDir, { recursive: true })
   writeFileSync(outPath, content, 'utf-8')

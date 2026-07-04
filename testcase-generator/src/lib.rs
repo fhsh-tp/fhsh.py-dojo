@@ -5,6 +5,12 @@ mod judge;
 mod key_material;
 mod pool;
 
+// Re-exported for reuse and for the `param_conformance` integration test:
+// these are the core random-input generation API that `generate_challenge`
+// wraps for WASM. Exposing them lets tests exercise the same code path.
+pub use parser::parse_params;
+pub use rng::generate_input;
+
 use rand::SeedableRng;
 use rand::rngs::SmallRng;
 use serde::Serialize;
