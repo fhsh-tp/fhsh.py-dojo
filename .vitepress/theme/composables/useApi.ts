@@ -8,6 +8,6 @@ export function useApi<T = unknown>(
   return useFetch<T>(url, options ?? {})
 }
 
-export function useWsApi(url: string, options?: UseWebSocketOptions): UseWebSocketReturn {
+export function useWsApi(url: string, options?: UseWebSocketOptions): UseWebSocketReturn<unknown> {
   return useWebSocket(url, options)
 }

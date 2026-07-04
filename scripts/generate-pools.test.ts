@@ -149,9 +149,7 @@ describe('collectAndValidateSlugs', () => {
   })
 
   it('throws when two files yield the same slug', () => {
-    expect(() =>
-      collectAndValidateSlugs(['foo.md', 'foo.md'], '/challenges'),
-    ).toThrow(/duplicate/i)
+    expect(() => collectAndValidateSlugs(['foo.md', 'foo.md'], '/challenges')).toThrow(/duplicate/i)
   })
 
   it('error on duplicate names lists both conflicting paths', () => {
@@ -167,9 +165,7 @@ describe('collectAndValidateSlugs', () => {
   })
 
   it('throws when a slug fails shape validation', () => {
-    expect(() =>
-      collectAndValidateSlugs(['Bad.md'], '/challenges'),
-    ).toThrow(/Bad/)
+    expect(() => collectAndValidateSlugs(['Bad.md'], '/challenges')).toThrow(/Bad/)
   })
 
   it('throws when slug exceeds length limit', () => {

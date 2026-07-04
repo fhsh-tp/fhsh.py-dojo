@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 export function toTitleCase(kebab: string): string {
   return kebab
     .split('-')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ')
 }
 
@@ -46,13 +46,13 @@ export function parseArgs(argv: string[]): ParsedArgs | null {
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--title' && i + 1 < args.length) {
-      title = args[++i]
+      title = args[++i]!
     } else if (args[i] === '--difficulty' && i + 1 < args.length) {
-      difficulty = args[++i]
+      difficulty = args[++i]!
     } else if (args[i] === '--algorithm' && i + 1 < args.length) {
-      algorithm = args[++i]
-    } else if (!args[i].startsWith('--')) {
-      name = args[i]
+      algorithm = args[++i]!
+    } else if (!args[i]!.startsWith('--')) {
+      name = args[i]!
     }
   }
 
@@ -71,7 +71,7 @@ export function computeNextId(fileContents: string[]): number {
   for (const content of fileContents) {
     const match = content.match(/^id:\s*(\d+)/m)
     if (match) {
-      const id = parseInt(match[1], 10)
+      const id = parseInt(match[1]!, 10)
       if (id > maxId) maxId = id
     }
   }
@@ -103,6 +103,12 @@ params:
 generator: |
   n = int(input())
   print(n)
+# reference_solution（選填）：一段獨立於 generator 的正確 Python 解法，供內容層
+# 回歸測試（scripts/content-regression.test.ts）驗證「正解對正式加密池能得 AC」。
+# 建議與 generator 用不同寫法，才能同時抓出 generator 與正解各自的錯誤。取消下列註解即可啟用：
+# reference_solution: |
+#   n = int(input())
+#   print(n)
 starter_code: |
   def solve():
       # 在此實作你的解法
@@ -184,8 +190,8 @@ function main(): void {
   let fileContents: string[] = []
   if (existsSync(challengeDir)) {
     fileContents = readdirSync(challengeDir)
-      .filter(f => f.endsWith('.md'))
-      .map(f => readFileSync(join(challengeDir, f), 'utf-8'))
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => readFileSync(join(challengeDir, f), 'utf-8'))
   }
   const id = computeNextId(fileContents)
 

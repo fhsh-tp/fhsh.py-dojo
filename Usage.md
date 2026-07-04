@@ -185,6 +185,37 @@ generator: |
 
 ---
 
+### reference_solution 參考解答（選填）
+
+`reference_solution` 是一段**獨立於 `generator`** 的正確 Python 解法（完整程式，讀 `input()`、`print()` 出正解）。它**不影響題目在網站上的行為**，僅供**內容層回歸測試**（`scripts/content-regression.test.ts`）使用。
+
+**用途：** 測試會對有標註 `reference_solution` 的題目，用學生實際會拿到的輸入分別跑 `generator` 與 `reference_solution`，斷言兩者輸出一致——這等同於「正解在正式加密測資池下能得 AC」的離線驗證。若兩者輸出不一致，代表 `generator` 或參考解其中之一有誤，測試會指名該題失敗。
+
+**規範：**
+
+- 選填。未提供時，該題會被回歸測試 skip。
+- 建議刻意用**與 `generator` 不同的寫法**（例如質數判斷用 `sqrt` 上界、`generator` 用完整試除），才能同時抓出 `generator` 與參考解各自的錯誤。
+- 與 `generator` 同樣避免使用外部套件（Pyodide／標準函式庫）。
+
+**範例（氣泡排序）：**
+
+```yaml
+generator: |
+  n = int(input())
+  nums = list(map(int, input().split()))
+  for i in range(n):
+      for j in range(n - i - 1):
+          if nums[j] > nums[j + 1]:
+              nums[j], nums[j + 1] = nums[j + 1], nums[j]
+  print(' '.join(map(str, nums)))
+reference_solution: |
+  n = int(input())
+  nums = list(map(int, input().split()))
+  print(' '.join(map(str, sorted(nums))))
+```
+
+---
+
 ### starter_code 起始程式碼
 
 `starter_code` 是使用者在編輯器中看到的**初始程式碼範本**。

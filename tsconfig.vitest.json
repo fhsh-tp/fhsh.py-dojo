@@ -6,11 +6,13 @@
     "**/*.spec.tsx",
     "**/*.test.tsx",
     "**/__tests__/**/*",
+    "scripts/**/*.ts",
     "env.d.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "refs"
   ],
   "compilerOptions": {
     "composite": true,

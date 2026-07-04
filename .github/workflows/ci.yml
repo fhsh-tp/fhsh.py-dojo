@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [staging, main]
+  pull_request:
+    branches: [staging, main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # clippy component is needed for the Rust lint step. Only unit tests run
+      # here (no wasm-pack / build:wasm), so a stable toolchain is sufficient.
+      - name: Install Rust toolchain (with clippy)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # PyYAML is required by the content-regression and generate-pools code
+      # paths (frontmatter parsing + input generation).
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Lint (ESLint + Prettier)
+        run: pnpm lint
+
+      - name: Unit tests (Vitest)
+        run: pnpm test --run
+
+      # The Rust crate has an unconditional `mod key_material;`, and that file is
+      # gitignored (only ever produced by build:pools). Generate it standalone so
+      # `cargo test` can compile — without running the full pool build.
+      - name: Generate key material for Rust build
+        run: pnpm gen:keymaterial
+
+      - name: Rust tests
+        run: cargo test --manifest-path testcase-generator/Cargo.toml
+
+      # NOTE: This job intentionally does NOT run build:wasm / build:pyodide /
+      # build:pools. Verification (jsdom vitest + Rust unit tests) does not need
+      # those artifacts; skipping them keeps CI fast. Full-build verification
+      # lives in the release workflow.

@@ -44,10 +44,15 @@ describe('parseArgs', () => {
 
   it('accepts explicit --title, --difficulty, --algorithm', () => {
     const result = parseArgs([
-      'node', 'script.ts', 'linear-search',
-      '--title', '線性搜尋',
-      '--difficulty', 'medium',
-      '--algorithm', 'linear_search',
+      'node',
+      'script.ts',
+      'linear-search',
+      '--title',
+      '線性搜尋',
+      '--difficulty',
+      'medium',
+      '--algorithm',
+      'linear_search',
     ])
     expect(result).toEqual({
       name: 'linear-search',
@@ -58,11 +63,7 @@ describe('parseArgs', () => {
   })
 
   it('options can appear before the name', () => {
-    const result = parseArgs([
-      'node', 'script.ts',
-      '--difficulty', 'hard',
-      'merge-sort',
-    ])
+    const result = parseArgs(['node', 'script.ts', '--difficulty', 'hard', 'merge-sort'])
     expect(result?.name).toBe('merge-sort')
     expect(result?.difficulty).toBe('hard')
   })
@@ -129,7 +130,13 @@ describe('computeNextId', () => {
 })
 
 describe('buildContent', () => {
-  const base = { id: 1, name: 'bubble-sort', title: 'Bubble Sort', difficulty: 'easy', algorithm: 'bubble_sort' }
+  const base = {
+    id: 1,
+    name: 'bubble-sort',
+    title: 'Bubble Sort',
+    difficulty: 'easy',
+    algorithm: 'bubble_sort',
+  }
 
   it('produces valid YAML frontmatter with all required fields', () => {
     const content = buildContent(base)
