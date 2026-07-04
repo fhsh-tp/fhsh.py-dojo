@@ -22,11 +22,14 @@
 
 請確保你的電腦已安裝：
 - **Node.js (v22+)** 與 **pnpm**
-- **Rust & wasm-pack** (新增挑戰時，需要它來測試判定引擎)
+- **Rust & wasm-pack** (新增挑戰時，需要它來測試判定引擎；wasm-pack 以 `cargo install wasm-pack` 安裝，由 cargo 提供，**不隨 `pnpm install` 安裝**)
 - **Python 3** (用於測試題目生成器)
 
 ```bash
-# 安裝依賴
+# 安裝 wasm-pack（由 cargo 提供，非 npm 相依）
+cargo install wasm-pack
+
+# 安裝 JS 依賴
 pnpm install
 ```
 

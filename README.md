@@ -54,10 +54,11 @@ GitHub 倉庫：<https://github.com/fhsh-tp/fhsh.py-dojo>
 
 - [Node.js](https://nodejs.org) 22+
 - [pnpm](https://pnpm.io) 10+
-- [Rust](https://rustup.rs) 工具鏈 + wasm-pack
+- [Rust](https://rustup.rs) 工具鏈 + wasm-pack（wasm-pack 由 cargo 安裝，不隨 `pnpm install` 提供）
 - [Python](https://www.python.org) 3.10+（用於 pool generation）
 
 ```bash
+# wasm-pack 由 cargo 提供，非 npm 相依
 cargo install wasm-pack
 pip install -r requirements.txt
 ```
