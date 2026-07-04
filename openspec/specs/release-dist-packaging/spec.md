@@ -35,6 +35,7 @@ code:
 ### Requirement: Full project build in CI
 
 The workflow SHALL install Rust stable toolchain and wasm-pack.
+wasm-pack SHALL be provided by the workflow's toolchain install step (the `jetli/wasm-pack-action` action) and SHALL be resolvable on `PATH` when `build:wasm` runs. The project SHALL NOT declare wasm-pack as an npm dependency, because an npm wasm-pack package places a shim on `node_modules/.bin` that shadows the toolchain-provided binary during pnpm script execution and whose install script fails, breaking dependency installation.
 The workflow SHALL install Python 3 using `actions/setup-python@v5` and install Python dependencies from `requirements.txt` using `pip install -r requirements.txt`.
 The workflow SHALL install Node.js and pnpm (version from `packageManager` field in `package.json`).
 The workflow SHALL run `pnpm install` to install dependencies.
@@ -62,34 +63,10 @@ The Python setup step SHALL be placed before `pnpm build` so that the pool gener
 - **WHEN** the build step runs `pnpm build` which triggers `build:pools`
 - **THEN** the pool generation subprocess SHALL find all required Python packages and generate encrypted pool files without import errors
 
+#### Scenario: wasm-pack comes from the toolchain, not npm
 
-<!-- @trace
-source: declare-release-python-toolchain
-updated: 2026-04-04
-code:
-  - .vitepress/plugins/strip-generator.ts
-  - .vitepress/theme/components/editor/CodeEditor.vue
-  - requirements.txt
-  - testcase-generator/src/judge.rs
-  - .vitepress/theme/composables/useRemoteChallenge.ts
-  - testcase-generator/src/pool.rs
-  - .vitepress/theme/views/ChallengeView.vue
-  - scripts/generate-pools.ts
-  - scripts/generate-key-material.ts
-  - testcase-generator/src/lib.rs
-  - package.json
-  - tsconfig.node.json
-  - .github/workflows/release.yml
-  - README.md
-  - tsconfig.app.json
-  - .vitepress/theme/workers/pyodide.worker.ts
-  - .vitepress/theme/composables/useChallengeRunner.ts
-tests:
-  - .vitepress/theme/__tests__/ChallengeView-verdict-detail.spec.ts
-  - .vitepress/theme/__tests__/useChallengeRunner-dev.spec.ts
-  - .vitepress/theme/__tests__/useChallengeRunner-prod.spec.ts
-  - .vitepress/theme/__tests__/pyodide-worker-run-only.spec.ts
--->
+- **WHEN** the workflow installs dependencies and then runs the `build:wasm` stage of `pnpm build`
+- **THEN** the wasm-pack used SHALL be the binary installed by the toolchain step on `PATH`, and dependency installation SHALL NOT attempt to download a wasm-pack binary through an npm package
 
 ---
 ### Requirement: Dist packaging in dual formats
