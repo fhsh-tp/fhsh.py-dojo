@@ -10,6 +10,8 @@ Defines the WASM module's pool decryption, testcase selection, and judging capab
 
 The WASM module SHALL export a `load_pool(challenge_id: &str, encrypted_data: &[u8])` function that validates the pool binary format (magic bytes, version), extracts the nonce, reconstructs the AES-256-GCM key from obfuscated key material, and decrypts the payload. On successful decryption, the function SHALL verify that the `challenge_id` field embedded in the decrypted payload matches the `challenge_id` argument provided by the caller. If the identities do not match, `load_pool` SHALL return an error indicating the mismatch and SHALL NOT store the pool. On failure (format, decryption, or identity mismatch), the function SHALL return a descriptive error. On success, the pool data SHALL be stored in WASM linear memory indexed by `challenge_id`.
 
+The `challenge_id` argument and the embedded payload `challenge_id` SHALL be a per-challenge unique identifier (the challenge slug, equal to the markdown file basename without `.md`). Callers SHALL NOT pass a category-level identifier such as the frontmatter `algorithm` field when multiple challenges share that value, because doing so allows different challenges to load each other's pools and silently produces incorrect verdicts. The WASM module itself remains agnostic to the meaning of the string; this requirement is a contract on callers and on the build script that produces the encrypted payload.
+
 #### Scenario: Valid pool loads successfully
 
 - **WHEN** `load_pool` is called with a correctly encrypted pool file whose embedded `challenge_id` matches the caller-provided `challenge_id`
@@ -27,7 +29,7 @@ The WASM module SHALL export a `load_pool(challenge_id: &str, encrypted_data: &[
 
 #### Scenario: Mismatched challenge_id rejected
 
-- **WHEN** `load_pool` is called with `challenge_id` argument `"caesar_encrypt"` but the decrypted payload contains `challenge_id: "vigenere_encrypt"`
+- **WHEN** `load_pool` is called with `challenge_id` argument `"multiplication-table"` but the decrypted payload contains `challenge_id: "star-rectangle"`
 - **THEN** the function SHALL return an error indicating the identity mismatch between the expected and embedded challenge_id
 - **AND** the pool SHALL NOT be stored or available for subsequent operations
 
@@ -37,33 +39,73 @@ The WASM module SHALL export a `load_pool(challenge_id: &str, encrypted_data: &[
 - **THEN** the `challenge_id` field SHALL NOT carry an `#[allow(dead_code)]` attribute
 - **AND** it SHALL be actively read and compared during `load_pool`
 
+#### Scenario: Category-level identifier rejected for cross-challenge pool
+
+- **GIVEN** a pool encrypted with payload `challenge_id: "multiplication-table"`
+- **WHEN** a caller invokes `load_pool("nested-loop", data)` using the frontmatter algorithm value instead of the challenge slug
+- **THEN** the function SHALL return an identity mismatch error
+- **AND** the pool SHALL NOT be stored
+
 
 <!-- @trace
-source: harden-prod-pool-runner
-updated: 2026-04-04
+source: isolate-testcase-pools-per-challenge
+updated: 2026-07-04
 code:
-  - .vitepress/theme/composables/useRemoteChallenge.ts
-  - testcase-generator/src/pool.rs
-  - README.md
-  - .vitepress/theme/workers/pyodide.worker.ts
-  - testcase-generator/src/judge.rs
-  - .vitepress/plugins/strip-generator.ts
-  - tsconfig.app.json
-  - .vitepress/theme/views/ChallengeView.vue
-  - tsconfig.node.json
-  - testcase-generator/src/lib.rs
-  - .vitepress/theme/components/editor/CodeEditor.vue
-  - requirements.txt
-  - package.json
-  - .vitepress/theme/composables/useChallengeRunner.ts
-  - scripts/generate-pools.ts
-  - .github/workflows/release.yml
+  - AGENTS.md
+  - .github/prompts/spectra-propose.prompt.md
+  - CONTRIBUTE.md
+  - .vitepress/theme/composables/useApi.ts
   - scripts/generate-key-material.ts
+  - .github/prompts/spectra-drift.prompt.md
+  - tsconfig.vitest.json
+  - .vitepress/sidebar.ts
+  - .vitepress/theme/composables/useChallengeRunner.ts
+  - .github/prompts/spectra-apply.prompt.md
+  - testcase-generator/src/lib.rs
+  - tsconfig.node.json
+  - .github/skills/spectra-discuss/SKILL.md
+  - eslint.config.mjs
+  - .github/skills/spectra-ingest/SKILL.md
+  - .vitepress/theme/views/ChallengeView.vue
+  - scripts/gen-key-material.ts
+  - .github/workflows/release.yml
+  - CLAUDE.md
+  - .github/skills/spectra-drift/SKILL.md
+  - docs/challenge/hello-world.md
+  - scripts/new-tutor.ts
+  - docs/challenge/multiplication-table.md
+  - .vitepress/theme/composables/index.ts
+  - .spectra.yaml
+  - testcase-generator/Cargo.toml
+  - Usage.md
+  - .github/skills/spectra-apply/SKILL.md
+  - package.json
+  - scripts/new-challenge.ts
+  - docs/shared/tutor.data.ts
+  - docs/challenge/prime-check.md
+  - scripts/generate-pools.ts
+  - README.md
+  - docs/shared/exercise-type.ts
+  - docs/shared/challenge.data.ts
+  - CHANGELOG.md
+  - .github/skills/spectra-propose/SKILL.md
+  - GEMINI.md
+  - .github/workflows/ci.yml
+  - .github/prompts/spectra-discuss.prompt.md
+  - .github/prompts/spectra-ingest.prompt.md
 tests:
+  - docs/shared/exercise-type.test.ts
+  - .vitepress/plugins/markdown-mermaid.test.ts
+  - scripts/new-challenge.test.ts
+  - .vitepress/theme/__tests__/useApi.spec.ts
+  - scripts/generator-parity.test.ts
+  - .vitepress/theme/__tests__/ChallengeView.spec.ts
+  - testcase-generator/tests/param_conformance.rs
   - .vitepress/theme/__tests__/ChallengeView-verdict-detail.spec.ts
-  - .vitepress/theme/__tests__/pyodide-worker-run-only.spec.ts
-  - .vitepress/theme/__tests__/useChallengeRunner-prod.spec.ts
   - .vitepress/theme/__tests__/useChallengeRunner-dev.spec.ts
+  - .vitepress/theme/__tests__/useChallengeRunner-prod.spec.ts
+  - scripts/content-regression.test.ts
+  - scripts/generate-pools.test.ts
 -->
 
 ---
