@@ -92,12 +92,14 @@ describe('EditorSettingsPopover (Requirement: Editor settings entry point)', () 
     expect(panelEl()).toBeNull()
   })
 
-  it('closes on an outside click', async () => {
+  // Dismiss is bound to mousedown so that grabbing the bottom-panel drag handle
+  // (also a mousedown) closes the popover before the drag shifts the gear.
+  it('closes on an outside mousedown', async () => {
     const w = mountPopover()
     await w.find(GEAR).trigger('click')
     await flushPromises()
     expect(panelEl()).not.toBeNull()
-    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
     await flushPromises()
     expect(panelEl()).toBeNull()
   })

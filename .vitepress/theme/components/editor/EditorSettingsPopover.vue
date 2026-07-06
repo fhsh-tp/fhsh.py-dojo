@@ -52,7 +52,11 @@ function reset() {
   settings.value = { ...DEFAULT_EDITOR_SETTINGS }
 }
 
-function onDocumentClick(e: MouseEvent) {
+// Dismiss on `mousedown` (not `click`): the gear sits atop ChallengeView's
+// drag-resizable bottom panel, so grabbing the resize handle must close the
+// popover BEFORE the drag shifts the gear's position — otherwise the fixed
+// panel would detach from the (now-moved) gear for the duration of the drag.
+function onDocumentPointerDown(e: MouseEvent) {
   if (!isOpen.value) return
   const target = e.target as Node
   if (gearRef.value?.contains(target) || panelRef.value?.contains(target)) return
@@ -66,12 +70,12 @@ function onReposition() {
 }
 
 onMounted(() => {
-  document.addEventListener('click', onDocumentClick)
+  document.addEventListener('mousedown', onDocumentPointerDown)
   document.addEventListener('keydown', onKeydown)
   window.addEventListener('resize', onReposition)
 })
 onUnmounted(() => {
-  document.removeEventListener('click', onDocumentClick)
+  document.removeEventListener('mousedown', onDocumentPointerDown)
   document.removeEventListener('keydown', onKeydown)
   window.removeEventListener('resize', onReposition)
 })
