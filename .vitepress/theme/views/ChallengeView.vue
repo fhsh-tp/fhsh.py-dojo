@@ -12,6 +12,7 @@ import RunButton from '../components/editor/RunButton.vue'
 import RunModal from '../components/editor/RunModal.vue'
 import TestResultPanel from '../components/editor/TestResultPanel.vue'
 import DownloadRecordButton from '../components/editor/DownloadRecordButton.vue'
+import EditorSettingsPopover from '../components/editor/EditorSettingsPopover.vue'
 import { useExecutorStore } from '../stores/executor'
 import { useProgressStore } from '../stores/progress'
 import { allowedResult } from '../lib/progressExport'
@@ -244,6 +245,8 @@ function onRun(payload: { stdin: string; stdout: string; error?: string }) {
                     :title="frontmatter.title ?? slug"
                     :difficulty="frontmatter.difficulty"
                   />
+                  <!-- Gear ⚙ opens the editor-settings popover (opens upward from the action bar) -->
+                  <EditorSettingsPopover />
                 </div>
                 <TestResultPanel :results="executorStore.results" :status="executorStore.status" :verdict-detail="runner.verdictDetail.value" />
               </div>

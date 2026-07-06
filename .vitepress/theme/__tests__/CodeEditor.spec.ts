@@ -1,12 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
+import { ref, nextTick } from 'vue'
 import CodeEditor from '../components/editor/CodeEditor.vue'
 
 // ── Hoist spies so they are available inside vi.mock factories ────────────────
-const { closeBracketsSpy, autocompletionSpy } = vi.hoisted(() => ({
-  closeBracketsSpy: vi.fn(() => ({ extension: 'closeBrackets' })),
-  autocompletionSpy: vi.fn(() => ({ extension: 'autocompletion' })),
-}))
+const { closeBracketsSpy, autocompletionSpy, editorViewCtorSpy, dispatchSpy, settingsHolder } =
+  vi.hoisted(() => ({
+    closeBracketsSpy: vi.fn(() => ({ extension: 'closeBrackets' })),
+    autocompletionSpy: vi.fn(() => ({ extension: 'autocompletion' })),
+    editorViewCtorSpy: vi.fn(),
+    dispatchSpy: vi.fn(),
+    // Holds the reactive settings ref the mocked useEditorSettings hands back.
+    settingsHolder: { ref: null as ReturnType<typeof ref> | null },
+  }))
 
 // ── Stubs for CodeMirror modules (dynamically imported in onMounted) ─────────
 
@@ -24,8 +30,10 @@ vi.mock('@codemirror/view', () => {
     requestMeasure = vi.fn()
     destroy = vi.fn()
     state = { doc: { toString: () => '' } }
-    dispatch = vi.fn()
-    constructor() {}
+    dispatch = dispatchSpy
+    constructor() {
+      editorViewCtorSpy()
+    }
   }
   return {
     EditorView,
@@ -57,21 +65,54 @@ vi.mock('@codemirror/theme-one-dark', () => ({
   oneDark: {},
 }))
 
-vi.mock('@codemirror/state', () => ({
-  EditorState: {
-    create: vi.fn(() => ({})),
-    tabSize: { of: vi.fn(() => ({})) },
-  },
-}))
+vi.mock('@codemirror/state', () => {
+  class Compartment {
+    of(ext: unknown) {
+      return ext
+    }
+    reconfigure(ext: unknown) {
+      return { reconfigure: ext }
+    }
+  }
+  return {
+    EditorState: {
+      create: vi.fn(() => ({})),
+      tabSize: { of: vi.fn(() => ({})) },
+    },
+    Compartment,
+    Prec: { highest: (ext: unknown) => ext },
+  }
+})
 
-vi.mock('../../composables/pythonCompletions', () => ({
+// vi.mock paths resolve relative to THIS test file → composables is one level up.
+vi.mock('../composables/pythonCompletions', () => ({
   pythonStdlibCompletions: vi.fn(() => () => null),
 }))
 
-vi.stubGlobal('ResizeObserver', class {
-  observe = vi.fn()
-  disconnect = vi.fn()
-})
+// Controllable editor settings — each test starts from defaults (both enabled).
+// NOTE: vi.mock paths resolve relative to THIS test file, so the composables
+// dir is one level up (../composables), not two.
+vi.mock('../composables/useEditorSettings', () => ({
+  useEditorSettings: () => settingsHolder.ref,
+}))
+
+vi.stubGlobal(
+  'ResizeObserver',
+  class {
+    observe = vi.fn()
+    disconnect = vi.fn()
+  },
+)
+
+// Wait until the skeleton disappears — signals lazy imports resolved and editor built.
+async function waitForEditor(wrapper: ReturnType<typeof mount>) {
+  await vi.waitFor(
+    () => {
+      expect(wrapper.find('[class*="animate-pulse"]').exists()).toBe(false)
+    },
+    { timeout: 2000 },
+  )
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -79,6 +120,9 @@ describe('CodeEditor', () => {
   beforeEach(() => {
     closeBracketsSpy.mockClear()
     autocompletionSpy.mockClear()
+    editorViewCtorSpy.mockClear()
+    dispatchSpy.mockClear()
+    settingsHolder.ref = ref({ version: 1, autocomplete: true, closeBrackets: true })
   })
 
   it('shows skeleton while loading', () => {
@@ -86,20 +130,45 @@ describe('CodeEditor', () => {
     expect(wrapper.find('[class*="animate-pulse"]').exists()).toBe(true)
   })
 
-  it('calls closeBrackets during editor initialisation (Requirement: Bracket auto-closing)', async () => {
+  it('calls closeBrackets during editor initialisation when enabled (Requirement: Bracket auto-closing)', async () => {
     const wrapper = mount(CodeEditor, { props: { modelValue: '' } })
-    // Wait until the skeleton disappears — signals that lazy imports resolved and editor was built
-    await vi.waitFor(() => {
-      expect(wrapper.find('[class*="animate-pulse"]').exists()).toBe(false)
-    }, { timeout: 2000 })
+    await waitForEditor(wrapper)
     expect(closeBracketsSpy).toHaveBeenCalled()
   })
 
-  it('calls autocompletion during editor initialisation (Requirement: Automatic completion trigger)', async () => {
+  it('calls autocompletion during editor initialisation when enabled (Requirement: Automatic completion trigger)', async () => {
     const wrapper = mount(CodeEditor, { props: { modelValue: '' } })
-    await vi.waitFor(() => {
-      expect(wrapper.find('[class*="animate-pulse"]').exists()).toBe(false)
-    }, { timeout: 2000 })
+    await waitForEditor(wrapper)
     expect(autocompletionSpy).toHaveBeenCalled()
+  })
+
+  it('does NOT wire autocompletion when the setting is disabled (Requirement: Automatic completion trigger)', async () => {
+    settingsHolder.ref!.value = { version: 1, autocomplete: false, closeBrackets: true }
+    const wrapper = mount(CodeEditor, { props: { modelValue: '' } })
+    await waitForEditor(wrapper)
+    expect(autocompletionSpy).not.toHaveBeenCalled()
+  })
+
+  it('does NOT wire closeBrackets when the setting is disabled (Requirement: Bracket auto-closing)', async () => {
+    settingsHolder.ref!.value = { version: 1, autocomplete: true, closeBrackets: false }
+    const wrapper = mount(CodeEditor, { props: { modelValue: '' } })
+    await waitForEditor(wrapper)
+    expect(closeBracketsSpy).not.toHaveBeenCalled()
+  })
+
+  it('reconfigures without rebuilding the editor when a setting toggles (Requirement: Live application without editor rebuild)', async () => {
+    const wrapper = mount(CodeEditor, { props: { modelValue: '' } })
+    await waitForEditor(wrapper)
+    expect(editorViewCtorSpy).toHaveBeenCalledTimes(1)
+    dispatchSpy.mockClear()
+
+    // toggle autocomplete off
+    settingsHolder.ref!.value = { version: 1, autocomplete: false, closeBrackets: true }
+    await nextTick()
+    await flushPromises()
+
+    // no new EditorView was constructed; a reconfigure was dispatched instead
+    expect(editorViewCtorSpy).toHaveBeenCalledTimes(1)
+    expect(dispatchSpy).toHaveBeenCalled()
   })
 })

@@ -4,19 +4,35 @@
  *
  * Uses a div container for CodeMirror and syncs its value with a v-model.
  * CodeMirror is loaded lazily to avoid blocking the initial render; a grey
- * skeleton rectangle is shown while the import resolves (task 5.3).
+ * skeleton rectangle is shown while the import resolves.
+ *
+ * Toggleable behaviours (autocomplete, bracket auto-close) are wrapped in
+ * CodeMirror Compartments and driven by `useEditorSettings`. Changing a setting
+ * reconfigures the running editor in place — no rebuild, so cursor position and
+ * undo history are preserved.
  */
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import type { EditorView } from '@codemirror/view'
+import type { Compartment, Extension } from '@codemirror/state'
 import { pythonStdlibCompletions } from '../../composables/pythonCompletions'
+import { useEditorSettings } from '../../composables/useEditorSettings'
+import { AUTO_CLOSE_BRACKETS } from '../../composables/editorConfig'
 
 const props = defineProps<{ modelValue: string }>()
 const emit = defineEmits<{ (e: 'update:modelValue', value: string): void }>()
+
+const settings = useEditorSettings()
 
 const containerRef = ref<HTMLElement | null>(null)
 const isLoading = ref(true)
 let editor: EditorView | null = null
 let resizeObserver: ResizeObserver | null = null
+
+// Set once CodeMirror has lazy-loaded; referenced by the settings watcher below.
+let acCompartment: Compartment | null = null
+let bracketCompartment: Compartment | null = null
+let buildAutocomplete: ((on: boolean) => Extension) | null = null
+let buildCloseBrackets: ((on: boolean) => Extension) | null = null
 
 onMounted(async () => {
   if (!containerRef.value) return
@@ -27,7 +43,7 @@ onMounted(async () => {
     { defaultKeymap, history, historyKeymap, indentWithTab },
     { python, pythonLanguage },
     { oneDark },
-    { EditorState },
+    { EditorState, Compartment, Prec },
     { autocompletion, closeBrackets, closeBracketsKeymap },
   ] = await Promise.all([
     import('@codemirror/view'),
@@ -41,6 +57,25 @@ onMounted(async () => {
   // Re-check after the async import: the component may have unmounted.
   if (!containerRef.value) return
 
+  // Compartments make the toggleable extensions reconfigurable in place.
+  acCompartment = new Compartment()
+  bracketCompartment = new Compartment()
+
+  // "autocomplete on" registers both the completion UI and the stdlib source;
+  // "off" contributes nothing, so no dropdown can appear on any keystroke.
+  buildAutocomplete = (on: boolean): Extension =>
+    on ? [autocompletion(), pythonLanguage.data.of({ autocomplete: pythonStdlibCompletions() })] : []
+  // Override lang-python's closeBrackets language data (which includes quotes)
+  // so only real brackets auto-close — quotes must NOT (editor-autocomplete spec).
+  // Prec.highest guarantees this config wins over the language's default.
+  buildCloseBrackets = (on: boolean): Extension =>
+    on
+      ? [
+          closeBrackets(),
+          Prec.highest(pythonLanguage.data.of({ closeBrackets: { brackets: [...AUTO_CLOSE_BRACKETS] } })),
+        ]
+      : []
+
   editor = new EditorView({
     state: EditorState.create({
       doc: props.modelValue,
@@ -52,9 +87,8 @@ onMounted(async () => {
         rectangularSelection(),
         EditorState.tabSize.of(4),
         python(),
-        pythonLanguage.data.of({ autocomplete: pythonStdlibCompletions() }),
-        autocompletion(),
-        closeBrackets(),
+        acCompartment.of(buildAutocomplete(settings.value.autocomplete)),
+        bracketCompartment.of(buildCloseBrackets(settings.value.closeBrackets)),
         keymap.of([...closeBracketsKeymap, indentWithTab, ...defaultKeymap, ...historyKeymap]),
         oneDark,
         EditorView.updateListener.of((update) => {
@@ -79,6 +113,23 @@ onMounted(async () => {
 
   isLoading.value = false
 })
+
+// Live-apply setting changes by reconfiguring the compartments — never rebuild
+// the editor, so cursor position and undo history survive the toggle. Declared
+// at setup scope (not inside the async onMounted) so it disposes with the
+// component; it no-ops until the editor and compartments exist.
+watch(
+  () => [settings.value.autocomplete, settings.value.closeBrackets] as const,
+  ([ac, cb]) => {
+    if (!editor || !acCompartment || !bracketCompartment || !buildAutocomplete || !buildCloseBrackets) return
+    editor.dispatch({
+      effects: [
+        acCompartment.reconfigure(buildAutocomplete(ac)),
+        bracketCompartment.reconfigure(buildCloseBrackets(cb)),
+      ],
+    })
+  },
+)
 
 // Sync external model changes (e.g., when starter code is loaded)
 watch(
