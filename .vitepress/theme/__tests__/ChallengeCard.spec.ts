@@ -75,4 +75,16 @@ describe('ChallengeCard', () => {
     const wrapper = mountCard()
     expect(wrapper.text()).toContain('classical')
   })
+
+  // Completion badge (Requirement: Completion shown on catalogue)
+  it('shows the completion badge when completed', () => {
+    const wrapper = mount(ChallengeCard, {
+      props: { challenge: mockChallenge, completed: true },
+    })
+    expect(wrapper.find('[data-testid="completion-badge"]').exists()).toBe(true)
+  })
+
+  it('hides the completion badge when not completed', () => {
+    expect(mountCard().find('[data-testid="completion-badge"]').exists()).toBe(false)
+  })
 })

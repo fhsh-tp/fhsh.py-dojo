@@ -44,6 +44,24 @@ export const useExecutorStore = defineStore('executor', () => {
   const total = computed(() => _current.value.total)
   const passedCount = computed(() => _current.value.results.filter((r) => r.verdict === 'AC').length)
 
+  /**
+   * True only when the active challenge finished a *complete* judgment: status
+   * `done` AND every testcase produced a result (`results.length === total`).
+   *
+   * This is the authoritative "this was a real submission" signal, independent
+   * of dev/prod strategy. An aborted (Stop), crashed (worker error), or
+   * timed-out (wall-clock kill) submission also reaches `status === 'done'` but
+   * with `passed = 0` and `results` shorter than `total` (empty in prod), so it
+   * is correctly excluded — preventing a phantom 0/N "submission" from being
+   * recorded into progress or the downloadable session timeline.
+   */
+  const isFullyJudged = computed(
+    () =>
+      _current.value.status === 'done' &&
+      _current.value.total > 0 &&
+      _current.value.results.length === _current.value.total,
+  )
+
   function setRunning(count: number) {
     const id = activeChallengeId.value
     if (!id) return
@@ -86,6 +104,7 @@ export const useExecutorStore = defineStore('executor', () => {
     passed,
     total,
     passedCount,
+    isFullyJudged,
     setActiveChallenge,
     setRunning,
     addResult,

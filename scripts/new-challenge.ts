@@ -121,6 +121,48 @@ export function computeNextId(fileContents: string[]): number {
   return maxId + 1
 }
 
+export interface RetiredLedger {
+  slugs: string[]
+  ids: number[]
+}
+
+export function loadRetiredLedger(path: string): RetiredLedger {
+  if (!existsSync(path)) return { slugs: [], ids: [] }
+  let raw: Partial<RetiredLedger>
+  try {
+    raw = JSON.parse(readFileSync(path, 'utf-8')) as Partial<RetiredLedger>
+  } catch (err) {
+    // Fail closed: a corrupt ledger must NOT silently disable the reuse guard.
+    // Refuse to scaffold until it is fixed, rather than proceeding with the
+    // guard quietly turned off (which could let a retired slug/id be reused and
+    // inherit a former challenge's stored progress).
+    throw new Error(
+      `[new-challenge] retired ledger at ${path} is not valid JSON; refusing to scaffold. ` +
+        `Fix the file to re-enable the retired-slug/id reuse guard. ` +
+        `(${err instanceof Error ? err.message : String(err)})`,
+    )
+  }
+  return {
+    slugs: Array.isArray(raw.slugs) ? raw.slugs : [],
+    ids: Array.isArray(raw.ids) ? raw.ids : [],
+  }
+}
+
+/**
+ * Reject reuse of a retired slug or id. Because local student progress is keyed
+ * by slug (and, on the catalogue, by id), reusing a retired identifier would let
+ * a former challenge's stored progress silently inherit onto a new one.
+ */
+export function checkRetired(name: string, id: number, ledger: RetiredLedger): string | null {
+  if (ledger.slugs.includes(name)) {
+    return `[new-challenge] ERROR: slug '${name}' is retired; reusing it would inherit a former challenge's stored progress. Choose a different name.`
+  }
+  if (ledger.ids.includes(id)) {
+    return `[new-challenge] ERROR: id ${id} is retired; reusing it would inherit stale progress.`
+  }
+  return null
+}
+
 export interface BuildContentOptions {
   id: number
   name: string
@@ -146,6 +188,9 @@ type: ${type}
 tags: []
 algorithm: ${algorithm}
 testcase_count: 5
+# editor_capture_debounce_ms（選填）：卡關紀錄捕捉 editor 編輯快照的 debounce 間隔（毫秒）。
+# 全域預設 1000，可逐題覆寫（有效範圍 100–10000，非整數或超界值回退預設）。取消下列註解即可調整：
+# editor_capture_debounce_ms: 1000
 params:
   n:
     type: int
@@ -251,6 +296,19 @@ function main(): void {
       .map((f) => readFileSync(join(challengeDir, f), 'utf-8'))
   }
   const id = computeNextId(fileContents)
+
+  let ledger: RetiredLedger
+  try {
+    ledger = loadRetiredLedger(join(projectRoot, 'scripts', 'retired-challenges.json'))
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : String(err))
+    process.exit(1)
+  }
+  const retiredError = checkRetired(name, id, ledger)
+  if (retiredError) {
+    console.error(retiredError)
+    process.exit(1)
+  }
 
   const content = buildContent({ id, name, title, difficulty, algorithm, type })
 
