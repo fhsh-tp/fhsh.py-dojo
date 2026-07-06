@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vitepress'
 import type { Challenge } from '../../types.d/challenge.type.ts'
+import CompletionBadge from './CompletionBadge.vue'
 
-const props = defineProps<{ challenge: Challenge }>()
+const props = defineProps<{ challenge: Challenge; completed?: boolean }>()
 const router = useRouter()
 
 const difficultyClass: Record<string, string> = {
@@ -27,12 +28,15 @@ const difficultyLabel: Record<string, string> = {
   >
     <div class="flex items-start justify-between gap-2 mb-2">
       <h2 class="font-semibold text-gray-900 dark:text-gray-100 leading-tight">{{ props.challenge.title }}</h2>
+      <div class="flex items-center gap-1.5 shrink-0">
+      <CompletionBadge v-if="props.completed" />
       <span
         class="px-2 py-0.5 rounded border text-xs font-medium shrink-0"
         :class="difficultyClass[props.challenge.difficulty] ?? 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'"
       >
         {{ difficultyLabel[props.challenge.difficulty] ?? props.challenge.difficulty }}
       </span>
+      </div>
     </div>
     <div class="flex flex-wrap gap-1 mt-2">
       <span

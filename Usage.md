@@ -67,6 +67,7 @@ tags:                      # 選填：分類標籤陣列
   - 基礎演算法
 algorithm: my_algorithm    # snake_case，用於 WASM 產生測資的識別鍵
 testcase_count: 5          # 選填，預設 5，測試案例數量
+editor_capture_debounce_ms: 1000  # 選填，卡關紀錄的 editor 快照 debounce 間隔（見下方）
 params: ...                # 必填，定義 WASM 產生測資的參數規格（見下方）
 generator: |               # 必填，Python 程式，讀入參數並輸出正確答案
   ...
@@ -259,6 +260,16 @@ starter_code: |
 ```
 
 ---
+
+### editor_capture_debounce_ms 編輯捕捉間隔（選填）
+
+「卡關紀錄」功能會把學生在編輯器裡的作答歷程（編輯快照、執行、提交）記到瀏覽器本機（IndexedDB），供學生下載後交給 LLM／教師分析盲點。`editor_capture_debounce_ms` 控制**編輯快照的 debounce 間隔**：學生停止打字達此毫秒數才拍一張全文快照。
+
+- **預設 1000**（未設此欄位時）。
+- **有效範圍 100–10000**；非整數或超出範圍的值會**回退預設 1000**。
+- 可**逐題覆寫**：例如某題想更細地捕捉試錯過程可設 `editor_capture_debounce_ms: 500`。
+
+此紀錄純本機、匿名、可由學生主動清除；不含任何隱藏的期望輸出（答案金鑰）。
 
 ## Markdown 內文結構
 

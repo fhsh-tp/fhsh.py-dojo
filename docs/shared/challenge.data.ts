@@ -1,6 +1,7 @@
 import { createContentLoader, type ContentData } from 'vitepress'
 import type { Challenge } from '../../.vitepress/theme/types.d/challenge.type'
 import { resolveExerciseType, type ExerciseType } from './exercise-type'
+import { deriveChallengeSlug } from './challenge-slug'
 
 export type { ExerciseType }
 
@@ -32,6 +33,7 @@ const loader: {
       .map((challenge, idx) => {
         return {
           id: challenge.frontmatter.id ?? idx + 1,
+          slug: deriveChallengeSlug(challenge.url),
           title: challenge.frontmatter.title || `挑戰 #${idx + 1}`,
           url: challenge.url,
           difficulty: challenge.frontmatter.difficulty || 'mystery',

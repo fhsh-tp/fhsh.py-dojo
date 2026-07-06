@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useData, useRouter } from 'vitepress'
 import { useChallengeStore } from '../stores/challenge'
 import { useChallengeRunner, resolveVerdictDetail } from '../composables/useChallengeRunner'
+import { useSessionRecorder, resolveDebounceMs, type SessionRecorder } from '../composables/useSessionRecorder'
 import SplitPane from '../components/layout/SplitPane.vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import ProblemPanel from '../components/challenge/ProblemPanel.vue'
@@ -10,28 +11,35 @@ import CodeEditor from '../components/editor/CodeEditor.vue'
 import RunButton from '../components/editor/RunButton.vue'
 import RunModal from '../components/editor/RunModal.vue'
 import TestResultPanel from '../components/editor/TestResultPanel.vue'
+import DownloadRecordButton from '../components/editor/DownloadRecordButton.vue'
 import { useExecutorStore } from '../stores/executor'
+import { useProgressStore } from '../stores/progress'
+import { allowedResult } from '../lib/progressExport'
+import { deriveChallengeSlug } from '../../../docs/shared/challenge-slug'
 
 const { frontmatter, page } = useData()
 const router = useRouter()
 const challengeStore = useChallengeStore()
 const executorStore = useExecutorStore()
+const progressStore = useProgressStore()
 
 const code = ref('')
 const isRunModalOpen = ref(false)
+// Work-session recorder — created client-only in onMounted, torn down on unmount.
+let recorder: SessionRecorder | null = null
 
 // Build config from frontmatter
 const verdictDetail = resolveVerdictDetail(frontmatter.value.verdict_detail)
 const algorithm: string = frontmatter.value.algorithm ?? ''
 const starterCode: string = frontmatter.value.starter_code ?? ''
 
-// Derive per-challenge slug from the page path
-// (`challenge/<slug>.md` → `<slug>`). This is the canonical key for fetching
-// the encrypted pool and addressing the WASM session — independent of
-// `algorithm`, which is shared across multiple challenges.
-const slug = page.value.relativePath
-  .replace(/^challenge\//, '')
-  .replace(/\.md$/, '')
+// Derive the per-challenge slug from the page path via the single shared parser
+// (the same one the catalogue uses on `challenge.url`), so the slug ChallengeView
+// writes progress under can never diverge from the slug the list page reads it
+// back under. This is the canonical key for fetching the encrypted pool and
+// addressing the WASM session — independent of `algorithm`, which is shared
+// across multiple challenges.
+const slug = deriveChallengeSlug(`/${page.value.relativePath}`)
 
 const runner = useChallengeRunner({
   id: slug,
@@ -104,12 +112,26 @@ onMounted(() => {
   executorStore.setActiveChallenge(slug)
   code.value = starterCode
 
+  // Client-only: load persisted progress and start the work-session recorder
+  // (both open IndexedDB lazily and never run during SSR).
+  progressStore.init()
+  recorder = useSessionRecorder({
+    slug,
+    code,
+    debounceMs: resolveDebounceMs(frontmatter.value.editor_capture_debounce_ms),
+    // Getter, not a fixed value: the pool's own verdict_detail (the source of
+    // truth) is only known after the pool loads, later than this mount.
+    verdictDetail: () => runner.verdictDetail.value,
+  })
+
   // Fire-and-forget: load testcases in background
   runner.loadTestcases()
 })
 
 onUnmounted(() => {
   runner.cleanup()
+  recorder?.stop()
+  recorder = null
   ro?.disconnect()
   ro = null
   window.removeEventListener('mousemove', onMouseMove)
@@ -118,6 +140,38 @@ onUnmounted(() => {
 
 async function handleSubmit() {
   await runner.submit(code.value)
+  // Only a *complete* judgment is recorded. An aborted (Stop), crashed, or
+  // timed-out submission also reaches status 'done' but with fewer results than
+  // total (empty in prod) — recording it would write a phantom 0/N submission
+  // into progress and the downloadable timeline. `isFullyJudged` excludes those.
+  if (!executorStore.isFullyJudged) return
+  const at = Date.now()
+  await progressStore.recordSubmit(slug, executorStore.passed, executorStore.total, at)
+  // Record the submit event on the session timeline. Results are re-filtered at
+  // store time by the pool's own verdict_detail (the source of truth), so answer
+  // keys can never be persisted even if an upstream layer regressed.
+  const detail = runner.verdictDetail.value
+  recorder?.recordSubmit(
+    code.value,
+    { passed: executorStore.passed, total: executorStore.total },
+    executorStore.results.map((r) =>
+      allowedResult(
+        {
+          index: r.index,
+          verdict: r.verdict,
+          elapsed_ms: r.elapsed_ms,
+          error: r.error,
+          actual: r.actual,
+          expected: r.expected,
+        },
+        detail,
+      ),
+    ),
+  )
+}
+
+function onRun(payload: { stdin: string; stdout: string; error?: string }) {
+  recorder?.recordRun(payload.stdin, payload.stdout, payload.error)
 }
 </script>
 
@@ -184,6 +238,12 @@ async function handleSubmit() {
                   <span v-if="executorStore.status === 'done'" class="text-sm text-slate-500 dark:text-gray-400">
                     得分：{{ executorStore.passed }} / {{ executorStore.total }}
                   </span>
+                  <DownloadRecordButton
+                    class="ml-auto"
+                    :slug="slug"
+                    :title="frontmatter.title ?? slug"
+                    :difficulty="frontmatter.difficulty"
+                  />
                 </div>
                 <TestResultPanel :results="executorStore.results" :status="executorStore.status" :verdict-detail="runner.verdictDetail.value" />
               </div>
@@ -198,6 +258,7 @@ async function handleSubmit() {
       :default-stdin="defaultStdin"
       :is-open="isRunModalOpen"
       @close="isRunModalOpen = false"
+      @run="onRun"
     />
   </div>
 </template>

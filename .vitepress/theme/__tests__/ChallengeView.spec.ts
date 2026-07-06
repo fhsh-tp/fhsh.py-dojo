@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { ref } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import ChallengeView from '../views/ChallengeView.vue'
+import { useExecutorStore } from '../stores/executor'
+import { useProgressStore } from '../stores/progress'
 
 // --- vitepress mock ---
 vi.mock('vitepress', () => ({
@@ -143,6 +145,59 @@ describe('ChallengeView', () => {
     expect(runBtn.attributes('disabled')).toBeUndefined()
     // Click should not throw
     await runBtn.trigger('click')
+  })
+
+  // ── Submit gating (B1: no phantom submission on abort/crash/timeout) ────────
+  // The dev runner's submit() early-returns when no testcases loaded (WASM mock
+  // never resolves), so it leaves the executor state we pre-seed untouched —
+  // letting us drive `isFullyJudged` and assert the handleSubmit gate directly.
+  const SLUG = 'caesar-encrypt' // deriveChallengeSlug('/challenge/caesar-encrypt.md')
+
+  async function mountAndSubmit(seed: (exec: ReturnType<typeof useExecutorStore>) => void) {
+    const wrapper = mount(ChallengeView, {
+      global: { stubs: { CodeEditor: CodeEditorStub, Teleport: true } },
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
+    const exec = useExecutorStore()
+    const progress = useProgressStore()
+    const recordSpy = vi.spyOn(progress, 'recordSubmit')
+    seed(exec)
+    await wrapper.findComponent({ name: 'RunButton' }).vm.$emit('run')
+    await flushPromises()
+    return { wrapper, exec, recordSpy }
+  }
+
+  it('does NOT record progress when the submission was aborted (prod-abort: done, 0 results)', async () => {
+    const { exec, recordSpy } = await mountAndSubmit((exec) => {
+      exec.setActiveChallenge(SLUG)
+      exec.setRunning(3)
+      exec.setDone(3, 0) // Stop / crash / timeout: status 'done' but no results
+    })
+    expect(exec.isFullyJudged).toBe(false)
+    expect(recordSpy).not.toHaveBeenCalled()
+  })
+
+  it('does NOT record progress on a partial (timed-out mid-stream) judgment', async () => {
+    const { recordSpy } = await mountAndSubmit((exec) => {
+      exec.setActiveChallenge(SLUG)
+      exec.setRunning(3)
+      exec.addResult({ type: 'testcase_result', index: 0, verdict: 'AC', elapsed_ms: 1 })
+      exec.setDone(3, 1) // only 1 of 3 results streamed before the kill-timer
+    })
+    expect(recordSpy).not.toHaveBeenCalled()
+  })
+
+  it('records progress on a genuine complete judgment (incl. a fully-judged failing run)', async () => {
+    const { exec, recordSpy } = await mountAndSubmit((exec) => {
+      exec.setActiveChallenge(SLUG)
+      exec.setRunning(2)
+      exec.addResult({ type: 'testcase_result', index: 0, verdict: 'AC', elapsed_ms: 1 })
+      exec.addResult({ type: 'testcase_result', index: 1, verdict: 'WA', elapsed_ms: 1 })
+      exec.setDone(2, 1) // complete: results.length === total, but failing (1/2)
+    })
+    expect(exec.isFullyJudged).toBe(true)
+    expect(recordSpy).toHaveBeenCalledWith(SLUG, 1, 2, expect.any(Number))
   })
 
   it('Worker is terminated on unmount (Requirement: Worker is terminated on component unmount)', async () => {
