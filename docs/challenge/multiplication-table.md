@@ -15,8 +15,15 @@ generator: |
   n = int(input())
   for i in range(1, n + 1):
       for j in range(1, n + 1):
-          print(f"{i * j:4}", end="")
+          print(f"{i * j:>4}", end="")
       print()
+reference_solution: |
+  n = int(input())
+  for i in range(1, n + 1):
+      row = ""
+      for j in range(1, n + 1):
+          row += str(i * j).rjust(4)
+      print(row)
 starter_code: |
   n = int(input())
   # 用雙重 for 迴圈印出 N×N 乘法表

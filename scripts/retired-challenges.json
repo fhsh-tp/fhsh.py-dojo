@@ -1,0 +1,5 @@
+{
+  "_comment": "Retired challenge slugs/ids. Reusing one would let a former challenge's locally-stored student progress inherit onto a new, unrelated challenge. Add an entry when you delete or rename a challenge whose slug/id you do not want reused.",
+  "slugs": ["caesar-01", "caesar-02", "caesar-03"],
+  "ids": []
+}

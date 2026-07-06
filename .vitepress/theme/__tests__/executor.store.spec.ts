@@ -68,6 +68,60 @@ describe('useExecutorStore', () => {
     expect(store.passedCount).toBe(2)
   })
 
+  describe('isFullyJudged (real-submission signal)', () => {
+    function seed(count: number, resultCount: number) {
+      const store = useExecutorStore()
+      store.setActiveChallenge('test')
+      store.setRunning(count)
+      for (let i = 0; i < resultCount; i++) {
+        store.addResult({ type: 'testcase_result', index: i, verdict: 'AC', expected: 'X', elapsed_ms: 1 })
+      }
+      return store
+    }
+
+    it('is false while idle or running', () => {
+      const store = useExecutorStore()
+      store.setActiveChallenge('test')
+      expect(store.isFullyJudged).toBe(false) // idle
+      store.setRunning(2)
+      expect(store.isFullyJudged).toBe(false) // running
+    })
+
+    it('is true when done and every testcase produced a result', () => {
+      const store = seed(2, 2)
+      store.setDone(2, 2)
+      expect(store.isFullyJudged).toBe(true)
+    })
+
+    it('is true for a genuine fully-judged failing submission (total results, some WA)', () => {
+      const store = useExecutorStore()
+      store.setActiveChallenge('test')
+      store.setRunning(2)
+      store.addResult({ type: 'testcase_result', index: 0, verdict: 'AC', expected: 'X', elapsed_ms: 1 })
+      store.addResult({ type: 'testcase_result', index: 1, verdict: 'WA', expected: 'Y', elapsed_ms: 1 })
+      store.setDone(2, 1)
+      expect(store.isFullyJudged).toBe(true)
+    })
+
+    it('is false for a prod-path abort: done, 0 results, passed 0 (Stop / crash / timeout)', () => {
+      const store = seed(3, 0)
+      store.setDone(3, 0) // useProdRunner does this on !outputs
+      expect(store.isFullyJudged).toBe(false)
+    })
+
+    it('is false for a partial (timed-out mid-stream) judgment', () => {
+      const store = seed(5, 3)
+      store.setDone(5, 2)
+      expect(store.isFullyJudged).toBe(false)
+    })
+
+    it('is false for a vacuous 0/0 done', () => {
+      const store = seed(0, 0)
+      store.setDone(0, 0)
+      expect(store.isFullyJudged).toBe(false)
+    })
+  })
+
   describe('per-challenge execution state isolation', () => {
     it('shows idle state for a challenge that has not been run', () => {
       const store = useExecutorStore()

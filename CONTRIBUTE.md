@@ -21,12 +21,15 @@
 ## 🛠️ Phase 1: 環境準備 (Environment Setup)
 
 請確保你的電腦已安裝：
-- **Node.js (v20+)** 與 **pnpm**
-- **Rust & wasm-pack** (新增挑戰時，需要它來測試判定引擎)
+- **Node.js (v22+)** 與 **pnpm**
+- **Rust & wasm-pack** (新增挑戰時，需要它來測試判定引擎；wasm-pack 以 `cargo install wasm-pack` 安裝，由 cargo 提供，**不隨 `pnpm install` 安裝**)
 - **Python 3** (用於測試題目生成器)
 
 ```bash
-# 安裝依賴
+# 安裝 wasm-pack（由 cargo 提供，非 npm 相依）
+cargo install wasm-pack
+
+# 安裝 JS 依賴
 pnpm install
 ```
 
@@ -92,7 +95,7 @@ pnpm new-tutor py ch1 1-4 --title "迴圈的藝術" --challenge hello-world
 
 ---
 
-## 📤 Phase 5: 提交 PR 檢核表 (Checklist)
+## 📤 Phase 4: 提交 PR 檢核表 (Checklist)
 
 發起 PR 前，請逐一檢查：
 

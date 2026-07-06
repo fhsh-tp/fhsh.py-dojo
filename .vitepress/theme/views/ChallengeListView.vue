@@ -1,11 +1,18 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { Challenge } from '../types.d/challenge.type.ts'
 import ChallengeCard from '../components/challenge/ChallengeCard.vue'
+import { useProgressStore } from '../stores/progress'
 
 const props = defineProps<{
   challenges: Challenge[]
 }>()
+
+// Client-only: load persisted progress after mount (never during SSR).
+const progress = useProgressStore()
+onMounted(() => {
+  progress.init()
+})
 
 type Difficulty = 'all' | 'easy' | 'medium' | 'hard'
 const selectedDifficulty = ref<Difficulty>('all')
@@ -72,12 +79,25 @@ const SKELETON_COUNT = 6
         </button>
       </div>
 
+      <!-- Global completed count (independent of the active filter) -->
+      <p
+        data-testid="completed-count"
+        class="text-sm text-slate-500 dark:text-gray-400 mb-4"
+      >
+        已完成 {{ progress.completedCount }} / {{ props.challenges.length }}
+      </p>
+
       <!-- Challenge grid -->
       <div
         v-if="filtered.length > 0"
         class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
       >
-        <ChallengeCard v-for="challenge in filtered" :key="challenge.id" :challenge="challenge" />
+        <ChallengeCard
+          v-for="challenge in filtered"
+          :key="challenge.id"
+          :challenge="challenge"
+          :completed="progress.isCompleted(challenge.slug)"
+        />
       </div>
 
       <p v-else class="text-slate-400 dark:text-gray-500 text-center py-16">沒有符合條件的挑戰。</p>

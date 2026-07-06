@@ -12,7 +12,9 @@ import { writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 function toRustArray(buf: Buffer): string {
-  return `[${Array.from(buf).map((b) => `0x${b.toString(16).padStart(2, '0')}`).join(', ')}]`
+  return `[${Array.from(buf)
+    .map((b) => `0x${b.toString(16).padStart(2, '0')}`)
+    .join(', ')}]`
 }
 
 export function generateKeyMaterial(key: Buffer, projectRoot: string): void {

@@ -11,8 +11,17 @@
  */
 import { execFileSync } from 'node:child_process'
 import { createCipheriv, randomBytes } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
-import { resolve, join } from 'node:path'
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
+import { basename, resolve, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import { getPoolKey } from './pool-key.js'
 import { generateKeyMaterial } from './generate-key-material.js'
@@ -26,8 +35,8 @@ function preflightCheckPython(): void {
   } catch {
     console.error(
       '[generate-pools] ERROR: python3 is not available.\n' +
-      '  Pool generation requires Python 3.10+.\n' +
-      '  Please install Python 3 and ensure "python3" is on your PATH.',
+        '  Pool generation requires Python 3.10+.\n' +
+        '  Please install Python 3 and ensure "python3" is on your PATH.',
     )
     process.exit(1)
   }
@@ -38,7 +47,7 @@ function preflightCheckPython(): void {
   } catch {
     console.error(
       '[generate-pools] ERROR: Python package "PyYAML" is not installed.\n' +
-      '  Run: pip install -r requirements.txt',
+        '  Run: pip install -r requirements.txt',
     )
     process.exit(1)
   }
@@ -52,8 +61,8 @@ function preflightCheckPython(): void {
   } catch {
     console.warn(
       '[generate-pools] WARNING: Python package "pycryptodome" is not installed.\n' +
-      '  Challenges that require Crypto will fail.\n' +
-      '  Run: pip install -r requirements.txt',
+        '  Challenges that require Crypto will fail.\n' +
+        '  Run: pip install -r requirements.txt',
     )
   }
 }
@@ -64,17 +73,113 @@ const PROJECT_ROOT = resolve(import.meta.dirname, '..')
 const CHALLENGES_DIR = resolve(PROJECT_ROOT, 'docs/challenge')
 const POOLS_DIR = resolve(PROJECT_ROOT, 'docs/public/pools')
 const POOL_SIZE = 200 // testcases per pool
-const MAGIC = Buffer.from('CXPOOL', 'ascii')
-const VERSION = 0x01
+export const MAGIC = Buffer.from('CXPOOL', 'ascii')
+export const POOL_VERSION = 0x01
+
+// ── Slug helpers ───────────────────────────────────────────────────────────
+
+const SLUG_PATTERN = /^[a-z0-9-]+$/
+const SLUG_MAX_LEN = 64
+
+/**
+ * Derive a slug from a challenge markdown file path: the basename with the
+ * `.md` extension removed. Returns the full basename unchanged when the file
+ * does not end with `.md`; pair with `validateSlug` to reject such cases.
+ */
+export function deriveSlug(filePath: string): string {
+  return basename(filePath, '.md')
+}
+
+/**
+ * Throw if `slug` is unsafe for use as a pool filename. Rejects empty strings,
+ * path separators, parent traversal, characters outside `[a-z0-9-]`, and
+ * lengths exceeding `SLUG_MAX_LEN`. Error message always includes `filePath`
+ * to aid debugging.
+ */
+export function validateSlug(slug: string, filePath: string): void {
+  if (slug.length === 0) {
+    throw new Error(`Invalid slug: empty (from file ${filePath})`)
+  }
+  if (slug.length > SLUG_MAX_LEN) {
+    throw new Error(
+      `Invalid slug "${slug}" (from file ${filePath}): exceeds max length ${SLUG_MAX_LEN}`,
+    )
+  }
+  if (slug.includes('/') || slug.includes('\\') || slug.includes('..')) {
+    throw new Error(
+      `Invalid slug "${slug}" (from file ${filePath}): contains path separator or parent-directory token`,
+    )
+  }
+  if (!SLUG_PATTERN.test(slug)) {
+    throw new Error(`Invalid slug "${slug}" (from file ${filePath}): must match ${SLUG_PATTERN}`)
+  }
+}
+
+/**
+ * Build a `slug → fullPath` map for the given list of markdown filenames,
+ * rejecting any slug that fails `validateSlug` and any duplicate slug (where
+ * two filenames produce the same slug). Throws on the first violation so the
+ * caller can surface a single actionable error to CI.
+ */
+export function collectAndValidateSlugs(
+  files: string[],
+  challengesDir: string,
+): Map<string, string> {
+  const seen = new Map<string, string>()
+  for (const file of files) {
+    const fullPath = join(challengesDir, file)
+    if (!file.endsWith('.md')) {
+      // Defense in depth: even if `validateSlug`'s allowed-char regex is ever
+      // relaxed (e.g. to permit `.`), a non-markdown file SHALL never produce
+      // a pool.
+      throw new Error(`Challenge file must have .md extension: ${fullPath}`)
+    }
+    const slug = deriveSlug(fullPath)
+    validateSlug(slug, fullPath)
+    const prior = seen.get(slug)
+    if (prior !== undefined) {
+      throw new Error(`Duplicate slug "${slug}" produced by two files: ${prior} and ${fullPath}`)
+    }
+    seen.set(slug, fullPath)
+  }
+  return seen
+}
+
+/**
+ * Remove `*.bin` files in `poolsDir` whose basename (without `.bin`) is not in
+ * `validSlugs`. Skips non-`.bin` entries (such as `.gitkeep`) and subdirectories.
+ * Returns the list of deleted file names. No-op if `poolsDir` does not exist.
+ */
+export function cleanupObsoletePools(poolsDir: string, validSlugs: Set<string>): string[] {
+  if (!existsSync(poolsDir)) return []
+  const deleted: string[] = []
+  for (const entry of readdirSync(poolsDir)) {
+    if (!entry.endsWith('.bin')) continue
+    const full = join(poolsDir, entry)
+    if (lstatSync(full).isDirectory()) continue
+    const slug = entry.slice(0, -'.bin'.length)
+    if (validSlugs.has(slug)) continue
+    rmSync(full)
+    deleted.push(entry)
+  }
+  return deleted
+}
 
 // ── Frontmatter parsing ────────────────────────────────────────────────────
 
-interface ChallengeInfo {
+export interface ChallengeInfo {
+  slug: string
   algorithm: string
   generator: string
   params: Record<string, unknown>
   testcase_count?: number
   verdict_detail?: string
+  /**
+   * Optional Python reference solution (a full program that reads stdin and
+   * prints the correct answer). Independent of `generator`; used only by the
+   * content-layer regression test to verify a known-correct solution earns AC.
+   */
+  reference_solution?: string
 }
 
 function parseFrontmatter(content: string): Record<string, unknown> {
@@ -84,30 +189,39 @@ function parseFrontmatter(content: string): Record<string, unknown> {
   // since we already need Python for generators anyway.
   const yaml = match[1]!
   const result = JSON.parse(
-    execFileSync('python3', ['-c', `
+    execFileSync(
+      'python3',
+      [
+        '-c',
+        `
 import sys, yaml, json
 data = yaml.safe_load(sys.stdin.read())
 print(json.dumps(data))
-`], { input: yaml, encoding: 'utf-8', timeout: 10_000 }),
+`,
+      ],
+      { input: yaml, encoding: 'utf-8', timeout: 10_000 },
+    ),
   )
   return result
 }
 
-function readChallenge(filePath: string): ChallengeInfo {
+export function readChallenge(filePath: string): ChallengeInfo {
   const content = readFileSync(filePath, 'utf-8')
   const fm = parseFrontmatter(content)
 
+  const slug = deriveSlug(filePath)
   const algorithm = fm.algorithm as string
   const generator = fm.generator as string
   const params = fm.params as Record<string, unknown>
   const testcase_count = (fm.testcase_count as number) ?? 10
   const verdict_detail = (fm.verdict_detail as string) ?? 'hidden'
+  const reference_solution = fm.reference_solution as string | undefined
 
   if (!algorithm) throw new Error(`Missing 'algorithm' in ${filePath}`)
   if (!generator) throw new Error(`Missing 'generator' in ${filePath}`)
   if (!params) throw new Error(`Missing 'params' in ${filePath}`)
 
-  return { algorithm, generator, params, testcase_count, verdict_detail }
+  return { slug, algorithm, generator, params, testcase_count, verdict_detail, reference_solution }
 }
 
 // ── Input generation via Python ────────────────────────────────────────────
@@ -117,7 +231,7 @@ function readChallenge(filePath: string): ChallengeInfo {
  * param-based generation logic. This avoids needing to load the WASM
  * module at build time.
  */
-function generateInputs(params: Record<string, unknown>, count: number): string[] {
+export function generateInputs(params: Record<string, unknown>, count: number): string[] {
   const script = `
 import json, random, string, sys
 
@@ -146,6 +260,11 @@ def gen_value(spec):
         return ''.join(random.choices(string.ascii_lowercase, k=length))
     elif t == "alpha_mixed":
         length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
+        mul = spec.get("multiple_of", 1)
+        if mul > 1:
+            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
+            hi = spec.get("max_len", 10) // mul
+            length = random.randint(lo, hi) * mul
         return ''.join(random.choices(string.ascii_letters, k=length))
     elif t == "hex_string":
         length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
@@ -157,6 +276,11 @@ def gen_value(spec):
         return ''.join(random.choices('0123456789abcdef', k=length))
     elif t == "printable_ascii":
         length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
+        mul = spec.get("multiple_of", 1)
+        if mul > 1:
+            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
+            hi = spec.get("max_len", 10) // mul
+            length = random.randint(lo, hi) * mul
         chars = [chr(c) for c in range(0x21, 0x7f)]
         return ''.join(random.choices(chars, k=length))
     elif t == "enum":
@@ -197,12 +321,12 @@ for _ in range(count):
 
 // ── Generator execution ────────────────────────────────────────────────────
 
-interface TestcaseResult {
+export interface TestcaseResult {
   input: string
   expected_output: string
 }
 
-function runGenerator(generatorCode: string, inputs: string[]): TestcaseResult[] {
+export function runGenerator(generatorCode: string, inputs: string[]): TestcaseResult[] {
   // Build a Python script that runs the generator for each input
   const script = `
 import json, sys, io
@@ -255,7 +379,7 @@ for raw_input in inputs:
 
 // ── Encryption ─────────────────────────────────────────────────────────────
 
-function encryptPool(
+export function encryptPool(
   key: Buffer,
   challengeId: string,
   verdictDetail: string,
@@ -273,7 +397,7 @@ function encryptPool(
   const tag = cipher.getAuthTag()
 
   // [magic 6B][version 1B][nonce 12B][ciphertext][tag 16B]
-  return Buffer.concat([MAGIC, Buffer.from([VERSION]), nonce, encrypted, tag])
+  return Buffer.concat([MAGIC, Buffer.from([POOL_VERSION]), nonce, encrypted, tag])
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────
@@ -297,8 +421,21 @@ function main() {
   }
   const files = readdirSync(CHALLENGES_DIR).filter((f) => f.endsWith('.md'))
   if (files.length === 0) {
-    console.warn('[generate-pools] No challenge files found in', CHALLENGES_DIR, '— skipping pool generation')
+    console.warn(
+      '[generate-pools] No challenge files found in',
+      CHALLENGES_DIR,
+      '— skipping pool generation',
+    )
     return
+  }
+
+  // Validate slug shape + uniqueness BEFORE running Python, so a bad challenge
+  // filename fails fast without spending 30+s on input generation.
+  try {
+    collectAndValidateSlugs(files, CHALLENGES_DIR)
+  } catch (err) {
+    console.error('[generate-pools] ERROR:', err instanceof Error ? err.message : err)
+    process.exit(1)
   }
 
   // Verify Python runtime and packages are available (only needed for pool generation)
@@ -306,6 +443,7 @@ function main() {
 
   let success = 0
   let failed = 0
+  const producedSlugs = new Set<string>()
 
   for (const file of files) {
     const filePath = join(CHALLENGES_DIR, file)
@@ -322,24 +460,43 @@ function main() {
       const testcases = runGenerator(challenge.generator, inputs)
       console.log(`    Generated ${testcases.length} testcases`)
 
-      // Encrypt pool
+      // Encrypt pool — challenge_id is the per-challenge slug so multiple
+      // challenges sharing an `algorithm` value get independent pools.
       const encrypted = encryptPool(
         key,
-        challenge.algorithm,
+        challenge.slug,
         challenge.verdict_detail ?? 'hidden',
         testcases,
       )
 
-      // Write pool file
-      const outPath = join(POOLS_DIR, `${challenge.algorithm}.bin`)
+      // Write pool file at <slug>.bin (NOT <algorithm>.bin).
+      const outPath = join(POOLS_DIR, `${challenge.slug}.bin`)
       writeFileSync(outPath, encrypted)
       console.log(`    Written: ${outPath} (${encrypted.length} bytes)`)
 
+      producedSlugs.add(challenge.slug)
       success++
     } catch (err) {
       console.error(`    ERROR in ${file}:`, err instanceof Error ? err.message : err)
       failed++
     }
+  }
+
+  // Only clean up obsolete pools when EVERY challenge succeeded. A partial
+  // failure (some succeed, some fail) would otherwise silently delete pools
+  // for the failed challenges, leaving prod fetching 404s for them. Better
+  // to leave the previous pool in place until the failure is fixed.
+  if (success > 0 && failed === 0) {
+    const deleted = cleanupObsoletePools(POOLS_DIR, producedSlugs)
+    if (deleted.length > 0) {
+      console.log(
+        `[generate-pools] Removed ${deleted.length} obsolete pool(s): ${deleted.join(', ')}`,
+      )
+    }
+  } else if (failed > 0) {
+    console.warn(
+      `[generate-pools] Cleanup skipped — ${failed} challenge(s) failed; obsolete pools preserved to avoid wiping pools for failed challenges.`,
+    )
   }
 
   console.log(`[generate-pools] Done: ${success} pools generated, ${failed} failed`)
@@ -349,4 +506,6 @@ function main() {
   }
 }
 
-main()
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main()
+}

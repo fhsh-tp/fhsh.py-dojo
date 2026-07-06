@@ -22,7 +22,7 @@ export { data }
 /** Parse subject from URL path: /tutor/<subject>/... → subject */
 function subjectFromUrl(url: string): string {
   const match = url.match(/^\/tutor\/([^/]+)/)
-  return match ? match[1] : 'unknown'
+  return match ? match[1]! : 'unknown'
 }
 
 const loader: {

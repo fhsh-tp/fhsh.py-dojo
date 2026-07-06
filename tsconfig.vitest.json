@@ -6,11 +6,15 @@
     "**/*.spec.tsx",
     "**/*.test.tsx",
     "**/__tests__/**/*",
+    "scripts/**/*.ts",
+    "docs/shared/exercise-type.ts",
+    "docs/shared/challenge-slug.ts",
     "env.d.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "refs"
   ],
   "compilerOptions": {
     "composite": true,

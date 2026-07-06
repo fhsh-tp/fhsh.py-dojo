@@ -46,6 +46,192 @@ vi.mock('../composables/useWasm', () => ({
   }),
 }))
 
+describe('useChallengeRunner prod path - slug-as-pool-key', () => {
+  let originalProd: boolean
+
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    originalProd = import.meta.env.PROD
+    // @ts-expect-error - overriding read-only env for test
+    import.meta.env.PROD = true
+
+    mockSelectTestcases.mockReturnValue({
+      inputs: ['1\n'],
+      session_id: 's_slug',
+      verdict_detail: 'hidden',
+    })
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(10)),
+    })
+  })
+
+  afterEach(() => {
+    // @ts-expect-error - restoring read-only env
+    import.meta.env.PROD = originalProd
+    mockWorkerInstances.length = 0
+    vi.clearAllMocks()
+  })
+
+  it('fetches /pools/<id>.bin (slug), not /pools/<algorithm>.bin', async () => {
+    const { useChallengeRunner } = await import('../composables/useChallengeRunner')
+
+    const runner = useChallengeRunner({
+      id: 'multiplication-table',
+      algorithm: 'nested-loop',
+      params: {},
+      generator: '',
+      testcaseCount: 1,
+      starterCode: '',
+      verdictDetail: 'hidden',
+    })
+
+    await runner.loadTestcases()
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    expect(mockFetch.mock.calls[0]![0]).toBe('/pools/multiplication-table.bin')
+    expect(mockFetch.mock.calls[0]![0]).not.toBe('/pools/nested-loop.bin')
+  })
+
+  it('passes slug (not algorithm) to load_pool and select_testcases', async () => {
+    const { useChallengeRunner } = await import('../composables/useChallengeRunner')
+
+    const runner = useChallengeRunner({
+      id: 'multiplication-table',
+      algorithm: 'nested-loop',
+      params: {},
+      generator: '',
+      testcaseCount: 1,
+      starterCode: '',
+      verdictDetail: 'hidden',
+    })
+
+    await runner.loadTestcases()
+
+    expect(mockLoadPool).toHaveBeenCalledTimes(1)
+    expect(mockLoadPool.mock.calls[0]![0]).toBe('multiplication-table')
+    expect(mockSelectTestcases).toHaveBeenCalledTimes(1)
+    expect(mockSelectTestcases.mock.calls[0]![0]).toBe('multiplication-table')
+  })
+
+  it('passes slug to judge() and the next select_testcases on submit', async () => {
+    mockJudge.mockReturnValue([{ verdict: 'AC', elapsed_ms: 5 }])
+
+    const { useChallengeRunner } = await import('../composables/useChallengeRunner')
+
+    const runner = useChallengeRunner({
+      id: 'multiplication-table',
+      algorithm: 'nested-loop',
+      params: {},
+      generator: '',
+      testcaseCount: 1,
+      starterCode: '',
+      verdictDetail: 'hidden',
+    })
+
+    await runner.loadTestcases()
+
+    const submitPromise = runner.submit('print(1)')
+    await new Promise((r) => setTimeout(r, 0))
+
+    const submitWorker = mockWorkerInstances[mockWorkerInstances.length - 1]!
+    submitWorker.onmessage?.(new MessageEvent('message', {
+      data: { type: 'testcase_result', index: 0, stdout: '1\n', elapsed_ms: 5 },
+    }))
+    submitWorker.onmessage?.(new MessageEvent('message', {
+      data: { type: 'run_complete' },
+    }))
+
+    await submitPromise
+
+    expect(mockJudge).toHaveBeenCalledTimes(1)
+    expect(mockJudge.mock.calls[0]![0]).toBe('multiplication-table')
+    // After judge consumes the session, runner re-selects for the next submit.
+    expect(mockSelectTestcases).toHaveBeenCalledTimes(2)
+    expect(mockSelectTestcases.mock.calls[1]![0]).toBe('multiplication-table')
+  })
+
+  it('surfaces an error when load_pool rejects an identity mismatch', async () => {
+    // Simulate the WASM `load_pool` raising the identity-mismatch error that
+    // it would produce if the encrypted payload's challenge_id (slug) does
+    // NOT match the caller-supplied key (e.g. algorithm passed by mistake,
+    // or a manually renamed pool file). The runner SHALL surface this as a
+    // user-visible errorMessage rather than silently continuing.
+    mockLoadPool.mockImplementationOnce(() => {
+      throw new Error('challenge_id mismatch: expected "nested-loop" but pool contains "multiplication-table"')
+    })
+
+    const { useChallengeRunner } = await import('../composables/useChallengeRunner')
+
+    const runner = useChallengeRunner({
+      id: 'nested-loop', // wrong key: caller used algorithm, pool was built with slug
+      algorithm: 'nested-loop',
+      params: {},
+      generator: '',
+      testcaseCount: 1,
+      starterCode: '',
+      verdictDetail: 'hidden',
+    })
+
+    await runner.loadTestcases()
+
+    expect(runner.errorMessage.value).toMatch(/池|pool/i)
+    expect(mockSelectTestcases).not.toHaveBeenCalled()
+  })
+
+  it('does NOT retry the algorithm path when /pools/<id>.bin returns 404', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+    })
+
+    const { useChallengeRunner } = await import('../composables/useChallengeRunner')
+
+    const runner = useChallengeRunner({
+      id: 'multiplication-table',
+      algorithm: 'nested-loop',
+      params: {},
+      generator: '',
+      testcaseCount: 1,
+      starterCode: '',
+      verdictDetail: 'hidden',
+    })
+
+    await runner.loadTestcases()
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    expect(mockFetch.mock.calls[0]![0]).toBe('/pools/multiplication-table.bin')
+    // The runner must surface an error and stop — NOT retry with algorithm.
+    expect(runner.errorMessage.value).toMatch(/載入測資池|404/)
+    expect(mockLoadPool).not.toHaveBeenCalled()
+  })
+})
+
+describe('ChallengeConfig type contract', () => {
+  it('rejects configs missing the required id field at type-check time', async () => {
+    // Documents the spec scenario "Configuration without id fails at type-check".
+    // The `@ts-expect-error` directive triggers iff the line below has a type
+    // error — i.e. iff `id` is still required by ChallengeConfig. If someone
+    // relaxes the type, this test will fail at vitest type-check (and at
+    // `pnpm typecheck` when this file is reachable from the app tsconfig).
+    if (false) {
+      const { useChallengeRunner } = await import('../composables/useChallengeRunner')
+      // @ts-expect-error — id is required on ChallengeConfig
+      useChallengeRunner({
+        algorithm: 'caesar_encrypt',
+        params: {},
+        generator: '',
+        testcaseCount: 2,
+        starterCode: '',
+        verdictDetail: 'hidden',
+      })
+    }
+    expect(true).toBe(true)
+  })
+})
+
 describe('useChallengeRunner prod path - verdictDetail from pool', () => {
   let originalProd: boolean
 
@@ -78,6 +264,7 @@ describe('useChallengeRunner prod path - verdictDetail from pool', () => {
     const { useChallengeRunner } = await import('../composables/useChallengeRunner')
 
     const runner = useChallengeRunner({
+      id: 'caesar_encrypt',
       algorithm: 'caesar_encrypt',
       params: {},
       generator: '',
@@ -104,6 +291,7 @@ describe('useChallengeRunner prod path - verdictDetail from pool', () => {
     ])
 
     const runner = useChallengeRunner({
+      id: 'caesar_encrypt',
       algorithm: 'caesar_encrypt',
       params: {},
       generator: '',
@@ -167,6 +355,7 @@ describe('useChallengeRunner prod path - verdictDetail from pool', () => {
     ])
 
     const runner = useChallengeRunner({
+      id: 'caesar_encrypt',
       algorithm: 'caesar_encrypt',
       params: {},
       generator: '',
@@ -247,6 +436,7 @@ describe('useChallengeRunner prod path - stop/cancel semantics', () => {
     ])
 
     const runner = useChallengeRunner({
+      id: 'caesar_encrypt',
       algorithm: 'caesar_encrypt',
       params: {},
       generator: '',
@@ -285,6 +475,7 @@ describe('useChallengeRunner prod path - stop/cancel semantics', () => {
     ])
 
     const runner = useChallengeRunner({
+      id: 'caesar_encrypt',
       algorithm: 'caesar_encrypt',
       params: {},
       generator: '',
@@ -319,6 +510,7 @@ describe('useChallengeRunner prod path - stop/cancel semantics', () => {
     const { useChallengeRunner } = await import('../composables/useChallengeRunner')
 
     const runner = useChallengeRunner({
+      id: 'caesar_encrypt',
       algorithm: 'caesar_encrypt',
       params: {},
       generator: '',
@@ -342,6 +534,7 @@ describe('useChallengeRunner prod path - stop/cancel semantics', () => {
     ])
 
     const runner = useChallengeRunner({
+      id: 'caesar_encrypt',
       algorithm: 'caesar_encrypt',
       params: {},
       generator: '',
@@ -385,6 +578,7 @@ describe('useChallengeRunner prod path - stop/cancel semantics', () => {
     ])
 
     const runner = useChallengeRunner({
+      id: 'caesar_encrypt',
       algorithm: 'caesar_encrypt',
       params: {},
       generator: '',

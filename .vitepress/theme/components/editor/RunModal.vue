@@ -10,6 +10,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void
+  (e: 'run', payload: { stdin: string; stdout: string; error?: string }): void
 }>()
 
 const { execute } = useExecutor()
@@ -47,6 +48,8 @@ async function handleExecute() {
     stdout.value = result.stdout
   }
   isExecuting.value = false
+  // Surface the run so the session recorder (in ChallengeView) can capture it.
+  emit('run', { stdin: stdin.value, stdout: result.stdout, error: result.error })
 }
 </script>
 

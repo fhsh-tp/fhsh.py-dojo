@@ -43,6 +43,16 @@ describe('RunModal', () => {
     expect(wrapper.find('[data-testid="execute-btn"]').exists()).toBe(true)
   })
 
+  // Run seam (Requirement: Run activity captured through a dedicated seam)
+  it('emits a run event with stdin/stdout after executing', async () => {
+    const wrapper = mountModal({ code: 'print("hi")', defaultStdin: 'abc', isOpen: true })
+    await wrapper.find('[data-testid="execute-btn"]').trigger('click')
+    await flushPromises()
+    const runEvents = wrapper.emitted('run')
+    expect(runEvents).toBeTruthy()
+    expect(runEvents?.[0]?.[0]).toMatchObject({ stdin: 'abc', stdout: 'hello\n' })
+  })
+
   it('is hidden when isOpen is false', () => {
     const wrapper = mountModal({ code: 'print("hi")', defaultStdin: '', isOpen: false })
     expect(wrapper.find('[data-testid="run-modal"]').exists()).toBe(false)

@@ -6,7 +6,7 @@ import { mermaidPlugin } from './markdown-mermaid'
 
 function makeOriginalFence() {
   let called = false
-  const fn = (_tokens: unknown[], _idx: number) => {
+  const fn = (..._args: unknown[]) => {
     called = true
     return '<original-fence/>'
   }

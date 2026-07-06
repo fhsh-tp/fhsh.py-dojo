@@ -1,44 +1,82 @@
-import { describe, it, expect, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { mount, flushPromises, type VueWrapper } from '@vue/test-utils'
+import { createPinia, setActivePinia, type Pinia } from 'pinia'
+import { IDBFactory } from 'fake-indexeddb'
 import ChallengeListView from '../views/ChallengeListView.vue'
+import * as dbAdapter from '../persistence/db'
 
 vi.mock('vitepress', () => ({
   useRouter: () => ({ go: vi.fn() }),
 }))
 
 const mockChallenges = [
-  { id: 1, title: '凱薩加密', url: '/challenge/caesar-encrypt', difficulty: 'easy', tags: ['classical'] },
-  { id: 2, title: 'RSA', url: '/challenge/rsa', difficulty: 'hard', tags: ['asymmetric'] },
+  { id: 1, slug: 'caesar-encrypt', title: '凱薩加密', url: '/challenge/caesar-encrypt', difficulty: 'easy', tags: ['classical'] },
+  { id: 2, slug: 'rsa', title: 'RSA', url: '/challenge/rsa', difficulty: 'hard', tags: ['asymmetric'] },
 ]
+const completedRecord = {
+  slug: 'caesar-encrypt', status: 'completed' as const, lastAttemptAt: 1, bestPassed: 3, total: 3, firstCompletedAt: 1,
+}
+
+let pinia: Pinia
+let wrapper: VueWrapper | null = null
 
 function mountView() {
-  return mount(ChallengeListView, { props: { challenges: mockChallenges } })
+  wrapper = mount(ChallengeListView, {
+    props: { challenges: mockChallenges },
+    global: { plugins: [pinia] },
+  })
+  return wrapper
 }
+
+beforeEach(async () => {
+  pinia = createPinia()
+  setActivePinia(pinia)
+  vi.stubGlobal('indexedDB', new IDBFactory())
+  await dbAdapter._resetConnectionForTests()
+})
+afterEach(async () => {
+  wrapper?.unmount()
+  wrapper = null
+  await flushPromises()
+  await dbAdapter._resetConnectionForTests()
+  vi.unstubAllGlobals()
+})
 
 describe('ChallengeListView', () => {
   it('renders filter buttons', () => {
-    const wrapper = mountView()
-    expect(wrapper.findAll('button').length).toBeGreaterThan(0)
+    expect(mountView().findAll('button').length).toBeGreaterThan(0)
   })
 
   it('active filter button has bg-blue-600 as light mode base (Requirement: ChallengeListView filter buttons apply dual-theme styles)', () => {
-    const wrapper = mountView()
-    // First button ("全部") is active by default
-    const activeBtn = wrapper.find('button')
-    expect(activeBtn.classes()).toContain('bg-blue-600')
+    expect(mountView().find('button').classes()).toContain('bg-blue-600')
   })
 
   it('active filter button has dark:bg-emerald-500 for dark mode', () => {
-    const wrapper = mountView()
-    const activeBtn = wrapper.find('button')
-    expect(activeBtn.classes()).toContain('dark:bg-emerald-500')
+    expect(mountView().find('button').classes()).toContain('dark:bg-emerald-500')
   })
 
   it('inactive filter button has bg-blue-50 as light mode base', () => {
-    const wrapper = mountView()
-    const buttons = wrapper.findAll('button')
-    // Second button is inactive
-    const inactiveBtn = buttons[1]
-    expect(inactiveBtn.classes()).toContain('bg-blue-50')
+    expect(mountView().findAll('button')[1]?.classes()).toContain('bg-blue-50')
+  })
+
+  // Completion count (Requirement: Completion shown on catalogue)
+  it('shows a global completed count of X / total from stored progress', async () => {
+    await dbAdapter.upsertProgress(completedRecord)
+    const w = mountView()
+    await vi.waitFor(() => {
+      expect(w.find('[data-testid="completed-count"]').text()).toContain('1 / 2')
+    })
+  })
+
+  it('completed count stays global regardless of the active difficulty filter', async () => {
+    await dbAdapter.upsertProgress(completedRecord)
+    const w = mountView()
+    await vi.waitFor(() => {
+      expect(w.find('[data-testid="completed-count"]').text()).toContain('1 / 2')
+    })
+    const hardBtn = w.findAll('button').find((b) => b.text() === '困難')
+    await hardBtn?.trigger('click')
+    await flushPromises()
+    expect(w.find('[data-testid="completed-count"]').text()).toContain('1 / 2')
   })
 })

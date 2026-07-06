@@ -1,2 +1,3 @@
-allowBuilds:
-  wasm-pack: true
+# No dependencies currently require build-script approval (pnpm allowBuilds).
+# wasm-pack is provided by cargo for local development and by
+# jetli/wasm-pack-action in the release workflow — it is not an npm dependency.

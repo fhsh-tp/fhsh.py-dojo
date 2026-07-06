@@ -23,6 +23,16 @@ import type {
 export type { VerdictDetail }
 
 export interface ChallengeConfig {
+  /**
+   * Per-challenge unique slug — the markdown file basename with `.md` removed
+   * (e.g. `multiplication-table`). Used as the sole pool fetch / WASM session
+   * key. Required; there is intentionally no fallback to `algorithm` because
+   * multiple challenges share `algorithm` values and falling back would
+   * re-introduce the cross-challenge pool collision this type is designed to
+   * prevent.
+   */
+  id: string
+  /** Educational categorization (e.g. `nested-loop`). Metadata only — NOT used as a pool key. */
   algorithm: string
   params: Record<string, unknown>
   generator: string
@@ -294,8 +304,9 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
 
   async function loadTestcases() {
     try {
-      // Fetch encrypted pool
-      const resp = await fetch(`/pools/${config.algorithm}.bin`)
+      // Fetch encrypted pool by per-challenge slug (NOT by algorithm — multiple
+      // challenges share `algorithm` values, which would alias their pools).
+      const resp = await fetch(`/pools/${config.id}.bin`)
       if (!resp.ok) {
         errorMessage.value = `無法載入測資池 (${resp.status})`
         return
@@ -304,10 +315,10 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
 
       // Load & decrypt via WASM
       const wasm = await ensureWasmPool()
-      wasm.load_pool(config.algorithm, data)
+      wasm.load_pool(config.id, data)
 
       // Select testcases — verdict_detail from pool is the source of truth
-      const result = wasm.select_testcases(config.algorithm, config.testcaseCount)
+      const result = wasm.select_testcases(config.id, config.testcaseCount)
       sessionId = result.session_id
       inputs.value = result.inputs
       poolVerdictDetail.value = resolveVerdictDetail(result.verdict_detail)
@@ -337,10 +348,10 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
       return
     }
 
-    // Judge via WASM
+    // Judge via WASM — keyed by slug, matching the slug used at load time.
     try {
       const wasm = await ensureWasmPool()
-      const verdicts = wasm.judge(config.algorithm, sessionId, outputs) as Array<{
+      const verdicts = wasm.judge(config.id, sessionId, outputs) as Array<{
         verdict: string
         actual?: string
         expected?: string
@@ -364,7 +375,7 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
       executorStore.setDone(verdicts.length, passed)
 
       // Session is consumed; need fresh select for next submit
-      const result = wasm.select_testcases(config.algorithm, config.testcaseCount)
+      const result = wasm.select_testcases(config.id, config.testcaseCount)
       sessionId = result.session_id
       inputs.value = result.inputs
       poolVerdictDetail.value = resolveVerdictDetail(result.verdict_detail)

@@ -9,6 +9,7 @@ export default mergeConfig(
     plugins: [vue()],
     test: {
       environment: 'jsdom',
+      setupFiles: ['./.vitepress/theme/__tests__/setup-idb.ts'],
       exclude: [...configDefaults.exclude, 'e2e/**'],
       root: fileURLToPath(new URL('./', import.meta.url)),
       server: {

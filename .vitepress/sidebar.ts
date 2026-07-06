@@ -6,7 +6,7 @@ export function getFrontmatterTitle(filePath: string, fallback: string): string 
   try {
     const content = fs.readFileSync(filePath, 'utf8')
     const match = content.match(/^title:\s*(.+)$/m)
-    if (match) return match[1].trim()
+    if (match) return match[1]!.trim()
   } catch {
     // ignore
   }
