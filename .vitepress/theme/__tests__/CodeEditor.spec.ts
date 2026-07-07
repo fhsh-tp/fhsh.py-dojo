@@ -202,6 +202,7 @@ describe('CodeEditor', () => {
     await waitForEditor(wrapper)
     expect(editorViewCtorSpy).toHaveBeenCalledTimes(1)
     dispatchSpy.mockClear()
+    themeSpy.mockClear() // isolate theme calls to the upcoming reconfigure
 
     // bump the font size
     settingsHolder.ref!.value = {
@@ -216,6 +217,9 @@ describe('CodeEditor', () => {
     // no new EditorView was constructed; a reconfigure was dispatched instead
     expect(editorViewCtorSpy).toHaveBeenCalledTimes(1)
     expect(dispatchSpy).toHaveBeenCalled()
+    // the NEW font size actually reached the theme on the watch path (guards
+    // against a stale/hardcoded reconfigure value that would still dispatch)
+    expect(themeSpy).toHaveBeenCalledWith({ '&': { fontSize: '18px' } })
   })
 
   it('builds the font-size theme from settings.value.fontSize on init (Requirement: Adjustable editor font size)', async () => {

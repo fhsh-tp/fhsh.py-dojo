@@ -53,15 +53,19 @@ function reset() {
   settings.value = { ...DEFAULT_EDITOR_SETTINGS }
 }
 // Step the font size, writing a fresh object so the persisted ref updates.
-// Clamping here mirrors normalizeEditorSettings' bounds so the stepper can
-// never produce a value that a subsequent read would rewrite.
+// The bound guards make a click at the limit a true no-op; the buttons use
+// aria-disabled (not native `disabled`) so they stay focusable — a native
+// `disabled` applied to the focused button on reaching a bound would drop
+// document focus to <body>, ejecting keyboard users from the open popover.
 function decreaseFontSize() {
+  if (settings.value.fontSize <= FONT_SIZE_MIN) return
   settings.value = {
     ...settings.value,
     fontSize: Math.max(FONT_SIZE_MIN, settings.value.fontSize - FONT_SIZE_STEP),
   }
 }
 function increaseFontSize() {
+  if (settings.value.fontSize >= FONT_SIZE_MAX) return
   settings.value = {
     ...settings.value,
     fontSize: Math.min(FONT_SIZE_MAX, settings.value.fontSize + FONT_SIZE_STEP),
@@ -192,8 +196,8 @@ onUnmounted(() => {
             <button
               type="button"
               data-testid="font-size-decrease"
-              class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
-              :disabled="settings.fontSize <= FONT_SIZE_MIN"
+              class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-800 aria-disabled:opacity-40 aria-disabled:cursor-not-allowed aria-disabled:hover:bg-transparent dark:aria-disabled:hover:bg-transparent cursor-pointer transition-colors"
+              :aria-disabled="settings.fontSize <= FONT_SIZE_MIN"
               aria-label="縮小字型"
               @click="decreaseFontSize"
             >
@@ -208,8 +212,8 @@ onUnmounted(() => {
             <button
               type="button"
               data-testid="font-size-increase"
-              class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
-              :disabled="settings.fontSize >= FONT_SIZE_MAX"
+              class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-800 aria-disabled:opacity-40 aria-disabled:cursor-not-allowed aria-disabled:hover:bg-transparent dark:aria-disabled:hover:bg-transparent cursor-pointer transition-colors"
+              :aria-disabled="settings.fontSize >= FONT_SIZE_MAX"
               aria-label="放大字型"
               @click="increaseFontSize"
             >

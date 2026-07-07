@@ -148,7 +148,7 @@ describe('EditorSettingsPopover font-size stepper (Requirement: Adjustable edito
     expect((settingsHolder.ref!.value as { fontSize: number }).fontSize).toBe(13)
   })
 
-  it('disables the increase control at the maximum', async () => {
+  it('marks the increase control aria-disabled at the maximum, keeping it focusable', async () => {
     settingsHolder.ref!.value = {
       version: 2,
       autocomplete: true,
@@ -158,11 +158,17 @@ describe('EditorSettingsPopover font-size stepper (Requirement: Adjustable edito
     const w = mountPopover()
     await w.find(GEAR).trigger('click')
     await flushPromises()
-    expect((document.querySelector(FS_INC) as HTMLButtonElement).disabled).toBe(true)
-    expect((document.querySelector(FS_DEC) as HTMLButtonElement).disabled).toBe(false)
+    const inc = document.querySelector(FS_INC) as HTMLButtonElement
+    const dec = document.querySelector(FS_DEC) as HTMLButtonElement
+    expect(inc.getAttribute('aria-disabled')).toBe('true')
+    expect(dec.getAttribute('aria-disabled')).toBe('false')
+    // Native `disabled` is intentionally NOT used: a button that becomes disabled
+    // while focused (on reaching a bound via keyboard) drops focus to <body>,
+    // ejecting the user from the open popover. aria-disabled keeps it focusable.
+    expect(inc.disabled).toBe(false)
   })
 
-  it('disables the decrease control at the minimum', async () => {
+  it('marks the decrease control aria-disabled at the minimum, keeping it focusable', async () => {
     settingsHolder.ref!.value = {
       version: 2,
       autocomplete: true,
@@ -172,8 +178,11 @@ describe('EditorSettingsPopover font-size stepper (Requirement: Adjustable edito
     const w = mountPopover()
     await w.find(GEAR).trigger('click')
     await flushPromises()
-    expect((document.querySelector(FS_DEC) as HTMLButtonElement).disabled).toBe(true)
-    expect((document.querySelector(FS_INC) as HTMLButtonElement).disabled).toBe(false)
+    const inc = document.querySelector(FS_INC) as HTMLButtonElement
+    const dec = document.querySelector(FS_DEC) as HTMLButtonElement
+    expect(dec.getAttribute('aria-disabled')).toBe('true')
+    expect(inc.getAttribute('aria-disabled')).toBe('false')
+    expect(dec.disabled).toBe(false)
   })
 
   it('does not exceed the maximum when increasing at the bound', async () => {
@@ -186,7 +195,8 @@ describe('EditorSettingsPopover font-size stepper (Requirement: Adjustable edito
     const w = mountPopover()
     await w.find(GEAR).trigger('click')
     await flushPromises()
-    // The disabled button blocks clicks; the shared value stays clamped either way.
+    // aria-disabled buttons still receive clicks; the handler's bound guard makes
+    // it a no-op, so the shared value stays clamped at the maximum.
     await dom(FS_INC).trigger('click')
     expect((settingsHolder.ref!.value as { fontSize: number }).fontSize).toBe(FONT_SIZE_MAX)
   })
