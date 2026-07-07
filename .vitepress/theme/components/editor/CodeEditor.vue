@@ -16,7 +16,7 @@ import type { EditorView } from '@codemirror/view'
 import type { Compartment, Extension } from '@codemirror/state'
 import { pythonStdlibCompletions } from '../../composables/pythonCompletions'
 import { useEditorSettings } from '../../composables/useEditorSettings'
-import { AUTO_CLOSE_BRACKETS } from '../../composables/editorConfig'
+import { AUTO_CLOSE_BRACKETS, fontSizeThemeSpec } from '../../composables/editorConfig'
 
 const props = defineProps<{ modelValue: string }>()
 const emit = defineEmits<{ (e: 'update:modelValue', value: string): void }>()
@@ -31,8 +31,10 @@ let resizeObserver: ResizeObserver | null = null
 // Set once CodeMirror has lazy-loaded; referenced by the settings watcher below.
 let acCompartment: Compartment | null = null
 let bracketCompartment: Compartment | null = null
+let fontSizeCompartment: Compartment | null = null
 let buildAutocomplete: ((on: boolean) => Extension) | null = null
 let buildCloseBrackets: ((on: boolean) => Extension) | null = null
+let buildFontSize: ((px: number) => Extension) | null = null
 
 onMounted(async () => {
   if (!containerRef.value) return
@@ -60,11 +62,17 @@ onMounted(async () => {
   // Compartments make the toggleable extensions reconfigurable in place.
   acCompartment = new Compartment()
   bracketCompartment = new Compartment()
+  fontSizeCompartment = new Compartment()
+  // Font size lives in its own theme so it can be reconfigured live (no rebuild),
+  // keeping cursor position and undo history intact — like the toggles above.
+  buildFontSize = (px: number): Extension => EditorView.theme(fontSizeThemeSpec(px))
 
   // "autocomplete on" registers both the completion UI and the stdlib source;
   // "off" contributes nothing, so no dropdown can appear on any keystroke.
   buildAutocomplete = (on: boolean): Extension =>
-    on ? [autocompletion(), pythonLanguage.data.of({ autocomplete: pythonStdlibCompletions() })] : []
+    on
+      ? [autocompletion(), pythonLanguage.data.of({ autocomplete: pythonStdlibCompletions() })]
+      : []
   // Override lang-python's closeBrackets language data (which includes quotes)
   // so only real brackets auto-close — quotes must NOT (editor-autocomplete spec).
   // Prec.highest guarantees this config wins over the language's default.
@@ -72,7 +80,9 @@ onMounted(async () => {
     on
       ? [
           closeBrackets(),
-          Prec.highest(pythonLanguage.data.of({ closeBrackets: { brackets: [...AUTO_CLOSE_BRACKETS] } })),
+          Prec.highest(
+            pythonLanguage.data.of({ closeBrackets: { brackets: [...AUTO_CLOSE_BRACKETS] } }),
+          ),
         ]
       : []
 
@@ -89,6 +99,7 @@ onMounted(async () => {
         python(),
         acCompartment.of(buildAutocomplete(settings.value.autocomplete)),
         bracketCompartment.of(buildCloseBrackets(settings.value.closeBrackets)),
+        fontSizeCompartment.of(buildFontSize(settings.value.fontSize)),
         keymap.of([...closeBracketsKeymap, indentWithTab, ...defaultKeymap, ...historyKeymap]),
         oneDark,
         EditorView.updateListener.of((update) => {
@@ -97,7 +108,7 @@ onMounted(async () => {
           }
         }),
         EditorView.theme({
-          '&': { height: '100%', fontSize: '14px' },
+          '&': { height: '100%' },
           '.cm-scroller': { overflow: 'auto', fontFamily: 'monospace' },
         }),
       ],
@@ -119,13 +130,24 @@ onMounted(async () => {
 // at setup scope (not inside the async onMounted) so it disposes with the
 // component; it no-ops until the editor and compartments exist.
 watch(
-  () => [settings.value.autocomplete, settings.value.closeBrackets] as const,
-  ([ac, cb]) => {
-    if (!editor || !acCompartment || !bracketCompartment || !buildAutocomplete || !buildCloseBrackets) return
+  () =>
+    [settings.value.autocomplete, settings.value.closeBrackets, settings.value.fontSize] as const,
+  ([ac, cb, fs]) => {
+    if (
+      !editor ||
+      !acCompartment ||
+      !bracketCompartment ||
+      !fontSizeCompartment ||
+      !buildAutocomplete ||
+      !buildCloseBrackets ||
+      !buildFontSize
+    )
+      return
     editor.dispatch({
       effects: [
         acCompartment.reconfigure(buildAutocomplete(ac)),
         bracketCompartment.reconfigure(buildCloseBrackets(cb)),
+        fontSizeCompartment.reconfigure(buildFontSize(fs)),
       ],
     })
   },

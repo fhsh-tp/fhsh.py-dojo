@@ -15,6 +15,7 @@
  */
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useEditorSettings, DEFAULT_EDITOR_SETTINGS } from '../../composables/useEditorSettings'
+import { FONT_SIZE_MIN, FONT_SIZE_MAX, FONT_SIZE_STEP } from '../../composables/editorConfig'
 
 const settings = useEditorSettings()
 const isOpen = ref(false)
@@ -50,6 +51,21 @@ function toggleOpen() {
 }
 function reset() {
   settings.value = { ...DEFAULT_EDITOR_SETTINGS }
+}
+// Step the font size, writing a fresh object so the persisted ref updates.
+// Clamping here mirrors normalizeEditorSettings' bounds so the stepper can
+// never produce a value that a subsequent read would rewrite.
+function decreaseFontSize() {
+  settings.value = {
+    ...settings.value,
+    fontSize: Math.max(FONT_SIZE_MIN, settings.value.fontSize - FONT_SIZE_STEP),
+  }
+}
+function increaseFontSize() {
+  settings.value = {
+    ...settings.value,
+    fontSize: Math.min(FONT_SIZE_MAX, settings.value.fontSize + FONT_SIZE_STEP),
+  }
 }
 
 // Dismiss on `mousedown` (not `click`): the gear sits atop ChallengeView's
@@ -94,9 +110,20 @@ onUnmounted(() => {
       title="編輯器設定"
       @click="toggleOpen"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-5 h-5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        <path
+          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+        />
       </svg>
     </button>
 
@@ -113,10 +140,14 @@ onUnmounted(() => {
       >
         <h3 class="text-sm font-bold text-slate-800 dark:text-gray-100 mb-1">編輯器設定</h3>
 
-        <label class="flex items-center justify-between gap-3 py-2.5 cursor-pointer border-b border-slate-100 dark:border-gray-800">
+        <label
+          class="flex items-center justify-between gap-3 py-2.5 cursor-pointer border-b border-slate-100 dark:border-gray-800"
+        >
           <span class="text-sm text-slate-700 dark:text-gray-200">
             自動完成
-            <small class="block text-xs text-slate-400 dark:text-gray-500 mt-0.5">輸入時自動彈出候選字與型別提示</small>
+            <small class="block text-xs text-slate-400 dark:text-gray-500 mt-0.5"
+              >輸入時自動彈出候選字與型別提示</small
+            >
           </span>
           <input
             v-model="settings.autocomplete"
@@ -129,7 +160,9 @@ onUnmounted(() => {
         <label class="flex items-center justify-between gap-3 py-2.5 cursor-pointer">
           <span class="text-sm text-slate-700 dark:text-gray-200">
             括號自動閉合
-            <small class="block text-xs text-slate-400 dark:text-gray-500 mt-0.5">輸入 ( [ &#123; 時自動補上對應右括號</small>
+            <small class="block text-xs text-slate-400 dark:text-gray-500 mt-0.5"
+              >輸入 ( [ &#123; 時自動補上對應右括號</small
+            >
           </span>
           <input
             v-model="settings.closeBrackets"
@@ -138,6 +171,52 @@ onUnmounted(() => {
             class="w-4 h-4 shrink-0 accent-emerald-600 cursor-pointer"
           />
         </label>
+
+        <!-- A stepper of two buttons is NOT a single labeled control, so this row
+             is a role="group" div, not a <label>. A for-less <label> would make
+             its first labelable descendant (the − button) the implicit control,
+             and clicking the title/description/value text would silently forward
+             to it and shrink the font. -->
+        <div
+          class="flex items-center justify-between gap-3 py-2.5 border-t border-slate-100 dark:border-gray-800"
+          role="group"
+          aria-labelledby="editor-fontsize-label"
+        >
+          <span id="editor-fontsize-label" class="text-sm text-slate-700 dark:text-gray-200">
+            字型大小
+            <small class="block text-xs text-slate-400 dark:text-gray-500 mt-0.5"
+              >調整程式編輯器的文字大小</small
+            >
+          </span>
+          <span class="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              data-testid="font-size-decrease"
+              class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+              :disabled="settings.fontSize <= FONT_SIZE_MIN"
+              aria-label="縮小字型"
+              @click="decreaseFontSize"
+            >
+              −
+            </button>
+            <span
+              data-testid="font-size-value"
+              class="text-sm tabular-nums text-slate-700 dark:text-gray-200 w-12 text-center"
+              aria-live="polite"
+              >{{ settings.fontSize }}px</span
+            >
+            <button
+              type="button"
+              data-testid="font-size-increase"
+              class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+              :disabled="settings.fontSize >= FONT_SIZE_MAX"
+              aria-label="放大字型"
+              @click="increaseFontSize"
+            >
+              +
+            </button>
+          </span>
+        </div>
 
         <div class="pt-3 mt-1 border-t border-slate-100 dark:border-gray-800 flex justify-end">
           <button

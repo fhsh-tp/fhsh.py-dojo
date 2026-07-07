@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises, DOMWrapper, type VueWrapper } from '@vue/test-utils'
 import { ref } from 'vue'
 import EditorSettingsPopover from '../components/editor/EditorSettingsPopover.vue'
+import { FONT_SIZE_MIN, FONT_SIZE_MAX } from '../composables/editorConfig'
 
 // Controllable, shared editor-settings ref. vi.mock paths resolve relative to
 // THIS test file → composables is one level up (../composables).
@@ -11,7 +12,7 @@ const { settingsHolder } = vi.hoisted(() => ({
 
 vi.mock('../composables/useEditorSettings', () => ({
   useEditorSettings: () => settingsHolder.ref,
-  DEFAULT_EDITOR_SETTINGS: { version: 1, autocomplete: true, closeBrackets: true },
+  DEFAULT_EDITOR_SETTINGS: { version: 2, autocomplete: true, closeBrackets: true, fontSize: 14 },
 }))
 
 let wrapper: VueWrapper | null = null
@@ -26,13 +27,16 @@ const PANEL = '[data-testid="editor-settings-panel"]'
 const AC = '[data-testid="toggle-autocomplete"]'
 const CB = '[data-testid="toggle-close-brackets"]'
 const RESET = '[data-testid="editor-settings-reset"]'
+const FS_DEC = '[data-testid="font-size-decrease"]'
+const FS_INC = '[data-testid="font-size-increase"]'
+const FS_VAL = '[data-testid="font-size-value"]'
 
 // The panel is teleported to <body>, so it lives outside the wrapper's subtree.
 const panelEl = () => document.querySelector(PANEL)
 const dom = (sel: string) => new DOMWrapper(document.querySelector(sel) as Element)
 
 beforeEach(() => {
-  settingsHolder.ref = ref({ version: 1, autocomplete: true, closeBrackets: true })
+  settingsHolder.ref = ref({ version: 2, autocomplete: true, closeBrackets: true, fontSize: 14 })
 })
 afterEach(() => {
   wrapper?.unmount()
@@ -58,7 +62,12 @@ describe('EditorSettingsPopover (Requirement: Editor settings entry point)', () 
   })
 
   it('reflects a disabled setting as an unchecked toggle', async () => {
-    settingsHolder.ref!.value = { version: 1, autocomplete: false, closeBrackets: true }
+    settingsHolder.ref!.value = {
+      version: 2,
+      autocomplete: false,
+      closeBrackets: true,
+      fontSize: 14,
+    }
     const w = mountPopover()
     await w.find(GEAR).trigger('click')
     await flushPromises()
@@ -74,12 +83,22 @@ describe('EditorSettingsPopover (Requirement: Editor settings entry point)', () 
   })
 
   it('reset restores defaults', async () => {
-    settingsHolder.ref!.value = { version: 1, autocomplete: false, closeBrackets: false }
+    settingsHolder.ref!.value = {
+      version: 2,
+      autocomplete: false,
+      closeBrackets: false,
+      fontSize: 20,
+    }
     const w = mountPopover()
     await w.find(GEAR).trigger('click')
     await flushPromises()
     await dom(RESET).trigger('click')
-    expect(settingsHolder.ref!.value).toEqual({ version: 1, autocomplete: true, closeBrackets: true })
+    expect(settingsHolder.ref!.value).toEqual({
+      version: 2,
+      autocomplete: true,
+      closeBrackets: true,
+      fontSize: 14,
+    })
   })
 
   it('closes on Escape', async () => {
@@ -102,5 +121,85 @@ describe('EditorSettingsPopover (Requirement: Editor settings entry point)', () 
     document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
     await flushPromises()
     expect(panelEl()).toBeNull()
+  })
+})
+
+describe('EditorSettingsPopover font-size stepper (Requirement: Adjustable editor font size)', () => {
+  it('shows the current font size', async () => {
+    const w = mountPopover()
+    await w.find(GEAR).trigger('click')
+    await flushPromises()
+    expect((document.querySelector(FS_VAL) as HTMLElement).textContent).toContain('14px')
+  })
+
+  it('increase raises the shared font size by one step', async () => {
+    const w = mountPopover()
+    await w.find(GEAR).trigger('click')
+    await flushPromises()
+    await dom(FS_INC).trigger('click')
+    expect((settingsHolder.ref!.value as { fontSize: number }).fontSize).toBe(15)
+  })
+
+  it('decrease lowers the shared font size by one step', async () => {
+    const w = mountPopover()
+    await w.find(GEAR).trigger('click')
+    await flushPromises()
+    await dom(FS_DEC).trigger('click')
+    expect((settingsHolder.ref!.value as { fontSize: number }).fontSize).toBe(13)
+  })
+
+  it('disables the increase control at the maximum', async () => {
+    settingsHolder.ref!.value = {
+      version: 2,
+      autocomplete: true,
+      closeBrackets: true,
+      fontSize: FONT_SIZE_MAX,
+    }
+    const w = mountPopover()
+    await w.find(GEAR).trigger('click')
+    await flushPromises()
+    expect((document.querySelector(FS_INC) as HTMLButtonElement).disabled).toBe(true)
+    expect((document.querySelector(FS_DEC) as HTMLButtonElement).disabled).toBe(false)
+  })
+
+  it('disables the decrease control at the minimum', async () => {
+    settingsHolder.ref!.value = {
+      version: 2,
+      autocomplete: true,
+      closeBrackets: true,
+      fontSize: FONT_SIZE_MIN,
+    }
+    const w = mountPopover()
+    await w.find(GEAR).trigger('click')
+    await flushPromises()
+    expect((document.querySelector(FS_DEC) as HTMLButtonElement).disabled).toBe(true)
+    expect((document.querySelector(FS_INC) as HTMLButtonElement).disabled).toBe(false)
+  })
+
+  it('does not exceed the maximum when increasing at the bound', async () => {
+    settingsHolder.ref!.value = {
+      version: 2,
+      autocomplete: true,
+      closeBrackets: true,
+      fontSize: FONT_SIZE_MAX,
+    }
+    const w = mountPopover()
+    await w.find(GEAR).trigger('click')
+    await flushPromises()
+    // The disabled button blocks clicks; the shared value stays clamped either way.
+    await dom(FS_INC).trigger('click')
+    expect((settingsHolder.ref!.value as { fontSize: number }).fontSize).toBe(FONT_SIZE_MAX)
+  })
+
+  // Regression (round-1 finding): the row must be a role="group" div, NOT a
+  // for-less <label>. Under a <label>, a click on the non-interactive value text
+  // is forwarded by the browser to the first labelable descendant (the − button),
+  // silently shrinking and persisting the font size.
+  it('does not change the font size when the row value text is clicked (Requirement: Adjustable editor font size)', async () => {
+    const w = mountPopover()
+    await w.find(GEAR).trigger('click')
+    await flushPromises()
+    await dom(FS_VAL).trigger('click')
+    expect((settingsHolder.ref!.value as { fontSize: number }).fontSize).toBe(14)
   })
 })

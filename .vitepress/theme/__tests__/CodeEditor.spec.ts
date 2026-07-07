@@ -4,15 +4,24 @@ import { ref, nextTick } from 'vue'
 import CodeEditor from '../components/editor/CodeEditor.vue'
 
 // ── Hoist spies so they are available inside vi.mock factories ────────────────
-const { closeBracketsSpy, autocompletionSpy, editorViewCtorSpy, dispatchSpy, settingsHolder } =
-  vi.hoisted(() => ({
-    closeBracketsSpy: vi.fn(() => ({ extension: 'closeBrackets' })),
-    autocompletionSpy: vi.fn(() => ({ extension: 'autocompletion' })),
-    editorViewCtorSpy: vi.fn(),
-    dispatchSpy: vi.fn(),
-    // Holds the reactive settings ref the mocked useEditorSettings hands back.
-    settingsHolder: { ref: null as ReturnType<typeof ref> | null },
-  }))
+const {
+  closeBracketsSpy,
+  autocompletionSpy,
+  editorViewCtorSpy,
+  dispatchSpy,
+  themeSpy,
+  settingsHolder,
+} = vi.hoisted(() => ({
+  closeBracketsSpy: vi.fn(() => ({ extension: 'closeBrackets' })),
+  autocompletionSpy: vi.fn(() => ({ extension: 'autocompletion' })),
+  editorViewCtorSpy: vi.fn(),
+  dispatchSpy: vi.fn(),
+  // Records every EditorView.theme(spec) call so tests can assert the font-size
+  // theme is built from settings.value.fontSize (the real fontSizeThemeSpec is used).
+  themeSpy: vi.fn(() => ({})),
+  // Holds the reactive settings ref the mocked useEditorSettings hands back.
+  settingsHolder: { ref: null as ReturnType<typeof ref> | null },
+}))
 
 // ── Stubs for CodeMirror modules (dynamically imported in onMounted) ─────────
 
@@ -26,7 +35,7 @@ vi.mock('@codemirror/autocomplete', () => ({
 vi.mock('@codemirror/view', () => {
   class EditorView {
     static updateListener = { of: vi.fn(() => ({})) }
-    static theme = vi.fn(() => ({}))
+    static theme = themeSpy
     requestMeasure = vi.fn()
     destroy = vi.fn()
     state = { doc: { toString: () => '' } }
@@ -122,7 +131,8 @@ describe('CodeEditor', () => {
     autocompletionSpy.mockClear()
     editorViewCtorSpy.mockClear()
     dispatchSpy.mockClear()
-    settingsHolder.ref = ref({ version: 1, autocomplete: true, closeBrackets: true })
+    themeSpy.mockClear()
+    settingsHolder.ref = ref({ version: 2, autocomplete: true, closeBrackets: true, fontSize: 14 })
   })
 
   it('shows skeleton while loading', () => {
@@ -143,14 +153,24 @@ describe('CodeEditor', () => {
   })
 
   it('does NOT wire autocompletion when the setting is disabled (Requirement: Automatic completion trigger)', async () => {
-    settingsHolder.ref!.value = { version: 1, autocomplete: false, closeBrackets: true }
+    settingsHolder.ref!.value = {
+      version: 2,
+      autocomplete: false,
+      closeBrackets: true,
+      fontSize: 14,
+    }
     const wrapper = mount(CodeEditor, { props: { modelValue: '' } })
     await waitForEditor(wrapper)
     expect(autocompletionSpy).not.toHaveBeenCalled()
   })
 
   it('does NOT wire closeBrackets when the setting is disabled (Requirement: Bracket auto-closing)', async () => {
-    settingsHolder.ref!.value = { version: 1, autocomplete: true, closeBrackets: false }
+    settingsHolder.ref!.value = {
+      version: 2,
+      autocomplete: true,
+      closeBrackets: false,
+      fontSize: 14,
+    }
     const wrapper = mount(CodeEditor, { props: { modelValue: '' } })
     await waitForEditor(wrapper)
     expect(closeBracketsSpy).not.toHaveBeenCalled()
@@ -163,12 +183,51 @@ describe('CodeEditor', () => {
     dispatchSpy.mockClear()
 
     // toggle autocomplete off
-    settingsHolder.ref!.value = { version: 1, autocomplete: false, closeBrackets: true }
+    settingsHolder.ref!.value = {
+      version: 2,
+      autocomplete: false,
+      closeBrackets: true,
+      fontSize: 14,
+    }
     await nextTick()
     await flushPromises()
 
     // no new EditorView was constructed; a reconfigure was dispatched instead
     expect(editorViewCtorSpy).toHaveBeenCalledTimes(1)
     expect(dispatchSpy).toHaveBeenCalled()
+  })
+
+  it('reconfigures without rebuilding the editor when the font size changes (Requirement: Adjustable editor font size)', async () => {
+    const wrapper = mount(CodeEditor, { props: { modelValue: '' } })
+    await waitForEditor(wrapper)
+    expect(editorViewCtorSpy).toHaveBeenCalledTimes(1)
+    dispatchSpy.mockClear()
+
+    // bump the font size
+    settingsHolder.ref!.value = {
+      version: 2,
+      autocomplete: true,
+      closeBrackets: true,
+      fontSize: 18,
+    }
+    await nextTick()
+    await flushPromises()
+
+    // no new EditorView was constructed; a reconfigure was dispatched instead
+    expect(editorViewCtorSpy).toHaveBeenCalledTimes(1)
+    expect(dispatchSpy).toHaveBeenCalled()
+  })
+
+  it('builds the font-size theme from settings.value.fontSize on init (Requirement: Adjustable editor font size)', async () => {
+    settingsHolder.ref!.value = {
+      version: 2,
+      autocomplete: true,
+      closeBrackets: true,
+      fontSize: 22,
+    }
+    const wrapper = mount(CodeEditor, { props: { modelValue: '' } })
+    await waitForEditor(wrapper)
+    // The seeded font size flows through the real fontSizeThemeSpec into EditorView.theme.
+    expect(themeSpy).toHaveBeenCalledWith({ '&': { fontSize: '22px' } })
   })
 })
