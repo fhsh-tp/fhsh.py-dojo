@@ -6,49 +6,25 @@
  * (autocomplete, bracket auto-close) directly to the shared `useEditorSettings`
  * ref, so changes persist and apply live. Closes on outside click and Escape.
  *
- * The gear lives in ChallengeView's bottom action bar, which is inside an
- * `overflow-hidden`, height-clamped flex column. An in-flow popover would be
- * clipped by that ancestor (z-index cannot escape overflow clipping), so the
- * panel is teleported to <body> and positioned `fixed`, anchored to the gear's
- * on-screen rect. Swapping the settings surface later means replacing only this
- * component.
+ * Popover mechanics (teleported fixed positioning, outside-click/Escape
+ * dismissal, reposition, mutual exclusion) live in `useAnchoredPopover` — see
+ * that file's header for the clipping and mousedown-vs-click rationale.
+ * Swapping the settings surface later means replacing only this component.
  */
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref } from 'vue'
 import { useEditorSettings, DEFAULT_EDITOR_SETTINGS } from '../../composables/useEditorSettings'
 import { FONT_SIZE_MIN, FONT_SIZE_MAX, FONT_SIZE_STEP } from '../../composables/editorConfig'
+import { useAnchoredPopover } from '../../composables/useAnchoredPopover'
 
 const settings = useEditorSettings()
-const isOpen = ref(false)
 const gearRef = ref<HTMLElement | null>(null)
 const panelRef = ref<HTMLElement | null>(null)
-const panelStyle = ref<Record<string, string>>({})
+const {
+  isOpen,
+  panelStyle,
+  toggle: toggleOpen,
+} = useAnchoredPopover({ anchorRef: gearRef, panelRef })
 
-function positionPanel() {
-  const gear = gearRef.value
-  if (!gear) return
-  const rect = gear.getBoundingClientRect()
-  // Open upward from the gear: pin the panel's bottom just above the gear and
-  // align its right edge with the gear's right edge.
-  panelStyle.value = {
-    position: 'fixed',
-    bottom: `${Math.max(8, window.innerHeight - rect.top + 8)}px`,
-    right: `${Math.max(8, window.innerWidth - rect.right)}px`,
-  }
-}
-
-async function openPanel() {
-  positionPanel()
-  isOpen.value = true
-  await nextTick()
-  positionPanel()
-}
-function close() {
-  isOpen.value = false
-}
-function toggleOpen() {
-  if (isOpen.value) close()
-  else void openPanel()
-}
 function reset() {
   settings.value = { ...DEFAULT_EDITOR_SETTINGS }
 }
@@ -71,34 +47,6 @@ function increaseFontSize() {
     fontSize: Math.min(FONT_SIZE_MAX, settings.value.fontSize + FONT_SIZE_STEP),
   }
 }
-
-// Dismiss on `mousedown` (not `click`): the gear sits atop ChallengeView's
-// drag-resizable bottom panel, so grabbing the resize handle must close the
-// popover BEFORE the drag shifts the gear's position — otherwise the fixed
-// panel would detach from the (now-moved) gear for the duration of the drag.
-function onDocumentPointerDown(e: MouseEvent) {
-  if (!isOpen.value) return
-  const target = e.target as Node
-  if (gearRef.value?.contains(target) || panelRef.value?.contains(target)) return
-  close()
-}
-function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') close()
-}
-function onReposition() {
-  if (isOpen.value) positionPanel()
-}
-
-onMounted(() => {
-  document.addEventListener('mousedown', onDocumentPointerDown)
-  document.addEventListener('keydown', onKeydown)
-  window.addEventListener('resize', onReposition)
-})
-onUnmounted(() => {
-  document.removeEventListener('mousedown', onDocumentPointerDown)
-  document.removeEventListener('keydown', onKeydown)
-  window.removeEventListener('resize', onReposition)
-})
 </script>
 
 <template>
@@ -137,6 +85,7 @@ onUnmounted(() => {
         v-if="isOpen"
         ref="panelRef"
         :style="panelStyle"
+        tabindex="-1"
         data-testid="editor-settings-panel"
         class="w-72 rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl p-4 z-50"
         role="dialog"
