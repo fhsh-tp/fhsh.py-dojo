@@ -311,6 +311,9 @@ for _ in range(count):
     input: JSON.stringify(params),
     encoding: 'utf-8',
     timeout: 30_000,
+    // Big-integer answers (e.g. 2^N for N up to 10^4) across a 200-testcase
+    // pool can exceed Node's 1 MB default maxBuffer.
+    maxBuffer: 64 * 1024 * 1024,
   })
 
   return output
@@ -369,6 +372,9 @@ for raw_input in inputs:
     input: JSON.stringify(inputs),
     encoding: 'utf-8',
     timeout: 120_000, // 2 min for pycryptodome etc
+    // Big-integer answers (e.g. 2^N for N up to 10^4) across a 200-testcase
+    // pool can exceed Node's 1 MB default maxBuffer.
+    maxBuffer: 64 * 1024 * 1024,
   })
 
   return output
