@@ -112,6 +112,7 @@ WASM 產生的每筆測資為多行字串，每行對應一個參數，`generato
 | `alpha_mixed` | 大小寫混合英文字母（A–Za–z） | `min_len`, `max_len` |
 | `hex_string` | 十六進位字串（0–9a–f） | `min_len`, `max_len` |
 | `printable_ascii` | 可列印 ASCII 字元（空格至 ~） | `min_len`, `max_len` |
+| `enum` | 從固定清單中隨機挑選一個值 | `values`（非空字串陣列） |
 
 #### 範例
 
