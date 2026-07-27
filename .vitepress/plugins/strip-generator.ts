@@ -1,6 +1,9 @@
 /**
- * VitePress Vite plugin that strips the `generator` field from challenge
- * Markdown frontmatter during production builds.
+ * VitePress Vite plugin that strips answer-bearing fields from challenge
+ * Markdown frontmatter during production builds: `generator` (computes
+ * expected outputs) and `reference_solution` (a complete correct solution,
+ * used only by the offline content-regression test). Shipping either would
+ * hand students the answer.
  *
  * In dev mode the plugin is a no-op, preserving the current development flow.
  */
@@ -20,15 +23,21 @@ interface Plugin {
 const CHALLENGE_RE = /\/challenge\/[^/]+\.md$/
 
 /**
- * Match the `generator:` frontmatter field (YAML block scalar or inline).
- * Handles both `generator: |` (block scalar) and `generator: "..."` (inline).
- *
- * For block scalars, we match from `generator: |` (or `generator: >`)
- * until the next top-level key (a line starting with a non-space char followed by `:`)
- * or the frontmatter closing `---`.
+ * Frontmatter fields that must never reach the production bundle.
  */
-const GENERATOR_BLOCK_RE = /^generator:\s*[|>]-?\s*\n(?:[ \t]+.*\n?)*/m
-const GENERATOR_INLINE_RE = /^generator:\s*.+\n?/m
+const STRIPPED_FIELDS = ['generator', 'reference_solution'] as const
+
+/**
+ * Match a frontmatter field (YAML block scalar or inline). Handles both
+ * `field: |` / `field: >` (block scalar: matched until the next unindented
+ * line) and `field: "..."` (inline).
+ */
+function blockRe(field: string): RegExp {
+  return new RegExp(`^${field}:\\s*[|>]-?\\s*\\n(?:[ \\t]+.*\\n?)*`, 'm')
+}
+function inlineRe(field: string): RegExp {
+  return new RegExp(`^${field}:\\s*.+\\n?`, 'm')
+}
 
 export function stripGenerator(): Plugin {
   return {
@@ -48,9 +57,11 @@ export function stripGenerator(): Plugin {
       const fmEnd = fmStart + fmMatch[1]!.length
       let frontmatter = code.slice(fmStart, fmEnd)
 
-      // Try block scalar first, then inline
-      frontmatter = frontmatter.replace(GENERATOR_BLOCK_RE, '')
-      frontmatter = frontmatter.replace(GENERATOR_INLINE_RE, '')
+      // Try block scalar first, then inline, for every stripped field
+      for (const field of STRIPPED_FIELDS) {
+        frontmatter = frontmatter.replace(blockRe(field), '')
+        frontmatter = frontmatter.replace(inlineRe(field), '')
+      }
 
       // Reconstruct the file
       const result = '---\n' + frontmatter + '\n---' + code.slice(fmEnd + 4) // +4 for "\n---"
