@@ -7,6 +7,8 @@ type WasmMod = {
   default: () => Promise<void>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   generate_challenge: (params_json: string, count: number) => any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  generate_dev_inputs?: (spec_json: string) => any
 }
 
 // Module-level cache — shared across all composable instances
@@ -57,5 +59,25 @@ export function useWasm(loaderOverride?: () => Promise<WasmMod>) {
     }
   }
 
-  return { loadWasm, generateChallenge }
+  /**
+   * Generate one full testcase_plan round (dev mode for plan challenges).
+   * @param spec_json - JSON-serialised `{ params, testcase_plan }` object
+   */
+  async function generateDevInputs(spec_json: string): Promise<GeneratedInputs | null> {
+    await loadWasm()
+    if (!wasmModule) return null
+    if (typeof wasmModule.generate_dev_inputs !== 'function') {
+      console.error('[useWasm] generate_dev_inputs missing — stale WASM artifact, run pnpm build:wasm')
+      return null
+    }
+    try {
+      const result = wasmModule.generate_dev_inputs(spec_json)
+      return typeof result === 'object' ? result : JSON.parse(result)
+    } catch (e) {
+      console.error('[useWasm] generate_dev_inputs error:', e)
+      return null
+    }
+  }
+
+  return { loadWasm, generateChallenge, generateDevInputs }
 }

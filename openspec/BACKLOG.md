@@ -16,49 +16,26 @@
 
 ---
 
-## 1. testcase_plan — APCS 式測資分區(功能預留)
+## 1. testcase_plan — APCS 式測資分區(資料面已實作,計分面預留)
 
 ### 動機
 
 APCS 題型慣例:「測資 1–3 佔 30 分(N ≤ 100)、測資 4–6 佔 70 分(N ≤ 10⁵)」。
 資料面 = 同一輸入結構、不同 band 的參數值域;計分面 = 部分給分與 UI 呈現。
 
-### 已凍結的設計草案(兩層模型)
+### 現況(資料面已實作)
 
-頂層 spec 已為此預留:WASM `generate_pool_inputs` 的 spec 物件遇到
-`testcase_plan` 鍵會回報 "reserved, not yet implemented"(不靜默忽略)。
+資料面已由 change《implement-testcase-plan》完成實作(2026-07-27):band +
+literal 測資、池層 block 選取、dev 模式支援、逐 band 預算、plan 納入 seed
+雜湊。完整規格見 `openspec/specs/testcase-plan/spec.md`(archive 後存在)
+與 `Usage.md` 的 testcase_plan 章節。實作觸及 `pool.rs` 的
+`select_testcases`——此檔案與加密判題引擎同檔,屬安全敏感邏輯,故經獨立
+change、完整 review 與 staging 驗證後才落地。
 
-```yaml
-params:            # 基準輸入結構(已於 upgrade-testcase-engine 落地)
-  ...
-testcase_plan:     # 保留欄位;宣告時各 band 的 count 總和取代 testcase_count
-  - count: 3
-    override:                       # 鏡射 params 形狀的部分補丁
-      cases: { params: { n: { max: 100 } } }
-  - count: 2
-    override:
-      cases: { params: { n: { min: 1000, max: 100000 } } }
-  - literal: "1\n5\n"               # 手工釘死的邊界測資(期望輸出仍由 generator 算)
-```
+### 尚未實作:計分面
 
-設計要點:`override` 合併後跑同一套 parse 期驗證;`testcase_plan` 與
-`testcase_count` 並存為 parse 錯誤(不搞優先權猜謎)。
-
-### 為什麼延後(α 方案的池層代價)
-
-plan 與現行池架構正面相撞:池為 200 筆 iid 測資、prod 每場 session 隨機抽
-`testcase_count` 筆(`pool.rs:110` `select_testcases`、`generate-pools.ts` 的
-`POOL_SIZE`)。隨機子集沒有 band 結構,literal 邊界測資可能整場沒被抽到。
-
-**α 方案草案**(實作 plan 時的路線):池格式加選填 `plan_block_size` 欄位,
-plan 題的池改存「整組 block」(如 200÷6≈33 組),`select_testcases` 對 plan
-題改抽一整個 block;`judge.rs` 不動。估計 Rust 約 50–80 行 + 池格式版本欄位
-+ 測試。**風險**:動到池隔離這個安全敏感層(2026-07-04
-isolate-testcase-pools 特地加固的區域),必須獨立 change、完整 review、
-staging 驗證,不可與其他工作綁包。
-
-**邊界劃定**:計分面(部分給分、band 加總、UI)另屬 judge/前端範圍,與資料面
-分開評估;在那之前「此區測資佔 XX 分」以題目敘述文字表達。
+計分面(部分給分、band 加總、UI 呈現)仍屬 judge/前端範圍,與資料面分開
+評估,尚未實作。在此之前,「此區測資佔 XX 分」仍以題目敘述文字表達。
 
 ---
 
@@ -127,15 +104,25 @@ staging 驗證,不可與其他工作綁包。
 - **評估**:與 2.6 的 `select_testcases(slug, 200)` 能力完全重疊,邊際風險
   為零;feature-gated 雙 wasm target 的維運成本不值得。記錄備查。
 
-### 2.8 TLE 常數與大輸入(已由 input_budget 圍堵)
+### 2.8 TLE 常數與大輸入(已由 testcase_plan + input_budget 圍堵)
 
 - **背景**:`DEFAULT_OP_LIMIT = 10_000_000`、`WALL_CLOCK_MS = 5000`、
   `WALL_CLOCK_KILL_MS = 6000` 皆寫死且無 frontmatter 旋鈕
   (`pyodide.worker.ts:96,98`、`useChallengeRunner.ts:58`);worker 內
   wall-clock guard 對純運算迴圈實質失效(`pyodide.worker.ts:157-183`)。
-- **現狀**:輸入規模預算(預設 4096 bytes)使教學題不會逼近這些門檻;
-  若未來要出「效能感」題型(大 N 逼 O(n²) 超時),需先做 per-challenge
-  TLE 旋鈕並重測 settrace 下的實際 op/秒。
+- **實測數據(2026-07-27,sys.settrace 全事件計數,與判題 op-counter 同邏輯)**:
+  - 純 Python O(n²) 雙重迴圈在 n≈1600–2100 觸發 10,000,000 op 上限:單行
+    body 比較計數型解法 n≈2000 時 10,001,999 ops;bubble sort n≈2110;
+    雙 if 版 naive max/min n=2000 已達 16,000,175 ops。
+  - C 實作內建對 settrace 完全隱形:`sorted()`/`max()` 對百萬元素僅產生
+    8 個 trace 事件;`while lst: lst.pop(0)` 型解法(Python 迴圈 O(n) 行、
+    C 層 memmove O(n²))在 n=12000 僅約 24,005 ops,**不會** TLE。
+  - 教學解(deque 兩端淘汰兩輪)在單筆總元素 12,000 時約 108,033 ops,距
+    上限餘裕 92.6 倍。
+- **結論**:`testcase_plan` + `input_budget` 已可組出「效能感」題(大 band
+  讓純 Python O(n²) TLE),不再需要「per-challenge TLE 旋鈕」作為前置。
+  但 op-counter 抓不到 C 層複雜度這個結構性限制不變:list 線性掃描 /
+  `pop(0)` 型解法即使 n 很大也不會觸發 TLE。
 
 ### 2.9 .env.pool 檔案權限(M-R2-2)
 
