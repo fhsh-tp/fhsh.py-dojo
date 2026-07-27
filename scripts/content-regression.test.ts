@@ -20,7 +20,7 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 
-import { POOL_SIZE, readChallenge, generateInputs, runGenerator } from './generate-pools.js'
+import { buildPoolRequest, readChallenge, generateInputs, runGenerator } from './generate-pools.js'
 
 const CHALLENGES_DIR = resolve(import.meta.dirname, '../docs/challenge')
 const SAMPLE_INPUTS = 20
@@ -94,16 +94,15 @@ describe('content-layer regression: reference_solution earns AC against generato
     run(
       `${c.slug}: reference_solution matches generator on student-facing inputs`,
       async () => {
-        // Generate the FULL production pool (same seed as build:pools, so
-        // these are exactly the shipped inputs), then sample SAMPLE_INPUTS
+        // Generate the FULL production pool via the SAME request builder the
+        // pool build uses (spec incl. testcase_plan + plan-aware count), so
+        // these are exactly the shipped inputs. Then sample SAMPLE_INPUTS
         // entries across the whole range with an independent deterministic
         // index sequence. Plain prefix-taking would forever test only the
         // first 10% of every pool; unseeded sampling would make CI flaky.
-        const fullPool = await generateInputs(
-          { params: c.params, seed: c.slug, input_budget: c.input_budget },
-          POOL_SIZE,
-        )
-        const indices = sampleIndices(`${c.slug}::regression-sample`, POOL_SIZE, SAMPLE_INPUTS)
+        const { spec, count } = buildPoolRequest(c, c.slug)
+        const fullPool = await generateInputs(spec, count)
+        const indices = sampleIndices(`${c.slug}::regression-sample`, count, SAMPLE_INPUTS)
         const rawInputs = indices.map((i) => fullPool[i]!)
         // Reproducibility breadcrumb for failures.
         console.log(`[content-regression] ${c.slug} sampled indices: ${indices.join(',')}`)

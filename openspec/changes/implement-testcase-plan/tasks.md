@@ -22,9 +22,9 @@
 
 ## 5. 文件
 
-- [ ] 5.1 [P] `Usage.md` 新增「testcase_plan — 測資分區」章節:條目語法(band/literal)、順序保證(宣告順序 = 每場順序)、與 `testcase_count` 互斥、逐 band 預算語意、seed 重洗規則、dev/prod 行為、override 警告(只補丁值域勿改型別)、與 group 組合的完整 YAML 範例(標明數字為語法示範)。
-- [ ] 5.2 [P] `openspec/BACKLOG.md` 修正:§1 改記「資料面已實作(implement-testcase-plan),計分面(部分給分/UI)仍凍結」;刪除「2026-07-04 isolate-testcase-pools 特地加固」錯誤定性(該 change Non-Goals 明文排除 pool.rs、git 歷史證實未動),改為「與加密判題引擎同檔的敏感邏輯」;§2.8 更新實測數據(settrace op 計數下純 Python O(n²) 於 n≈1600–2100 觸發 10M 上限;C 內建不計 op;`while lst: lst.pop(0)` 於 n=12000 僅約 24k ops)。
+- [x] 5.1 [P] `Usage.md` 新增「testcase_plan — 測資分區」章節:條目語法(band/literal)、順序保證(宣告順序 = 每場順序)、與 `testcase_count` 互斥、逐 band 預算語意、seed 重洗規則、dev/prod 行為、override 警告(只補丁值域勿改型別)、與 group 組合的完整 YAML 範例(標明數字為語法示範)。
+- [x] 5.2 [P] `openspec/BACKLOG.md` 修正:§1 改記「資料面已實作(implement-testcase-plan),計分面(部分給分/UI)仍凍結」;刪除「2026-07-04 isolate-testcase-pools 特地加固」錯誤定性(該 change Non-Goals 明文排除 pool.rs、git 歷史證實未動),改為「與加密判題引擎同檔的敏感邏輯」;§2.8 更新實測數據(settrace op 計數下純 Python O(n²) 於 n≈1600–2100 觸發 10M 上限;C 內建不計 op;`while lst: lst.pop(0)` 於 n=12000 僅約 24k ops)。
 
 ## 6. 整體驗證
 
-- [ ] 6.1 全鏈驗證:`pnpm gen:keymaterial && pnpm build:wasm` 後 `cargo test`(testcase-generator)全綠;`pnpm test --run`、`pnpm typecheck`、`pnpm lint` 全綠;`pnpm build:pools` 成功。既有非 plan 題池 byte-identical 驗證:改動前後各產一次池,抽 `repeat-greeting`、`card-restack-count`、任一 ch1 題共 3 題 sha256 比對相同(建置前記錄基準)。樣本 plan 題夾具(不進 docs/challenge/)產池後解密驗證 block 結構:塊內順序 = 宣告順序、`plan_block_size` 正確。
+- [x] 6.1 全鏈驗證:`pnpm gen:keymaterial && pnpm build:wasm` 後 `cargo test`(testcase-generator)全綠;`pnpm test --run`、`pnpm typecheck`、`pnpm lint` 全綠;`pnpm build:pools` 成功。既有非 plan 題池 byte-identical 驗證:改動前後各產一次池,抽 `repeat-greeting`、`card-restack-count`、任一 ch1 題共 3 題 sha256 比對相同(建置前記錄基準)。樣本 plan 題夾具(不進 docs/challenge/)產池後解密驗證 block 結構:塊內順序 = 宣告順序、`plan_block_size` 正確。

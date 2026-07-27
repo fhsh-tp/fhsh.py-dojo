@@ -329,6 +329,41 @@ export function readChallenge(filePath: string): ChallengeInfo {
 // ── Input generation via WASM (single source of truth) ────────────────────
 
 /**
+ * Build the EXACT engine request the pool build uses for one challenge:
+ * the spec envelope (params + seed + budget + optional testcase_plan) and
+ * the request count (plan challenges: floor(POOL_SIZE / plan_total) blocks;
+ * others: POOL_SIZE). Every consumer that claims to reproduce "the shipped
+ * pool inputs" (main build, content-regression) MUST go through this helper —
+ * an inline reimplementation is exactly how a plan-unaware caller silently
+ * validates different data than production ships.
+ */
+export function buildPoolRequest(
+  challenge: ChallengeInfo,
+  filePath: string,
+): { spec: PoolSpec; count: number } {
+  const planTotal =
+    challenge.testcase_plan !== undefined
+      ? computePlanTotal(challenge.testcase_plan, filePath)
+      : undefined
+  const count = planTotal !== undefined ? Math.floor(POOL_SIZE / planTotal) * planTotal : POOL_SIZE
+  if (planTotal !== undefined && count < planTotal) {
+    throw new Error(
+      `'testcase_plan' total ${planTotal} exceeds POOL_SIZE ${POOL_SIZE} in ${filePath} — ` +
+        `the pool cannot hold even one block`,
+    )
+  }
+  return {
+    spec: {
+      params: challenge.params,
+      seed: challenge.slug,
+      input_budget: challenge.input_budget,
+      ...(challenge.testcase_plan !== undefined ? { testcase_plan: challenge.testcase_plan } : {}),
+    },
+    count,
+  }
+}
+
+/**
  * Generate random inputs with the SAME Rust/WASM engine the browser uses.
  * `seed` (the challenge slug) makes pool content deterministic for
  * identical challenge declarations; `input_budget` (optional frontmatter
@@ -489,18 +524,11 @@ async function main() {
       // carries plan_block_size so selection returns one whole block. The
       // engine independently enforces count % plan_total == 0, so a drift
       // between this computation and the engine's fails the build loudly.
+      const { spec, count: requestCount } = buildPoolRequest(challenge, file)
       const planTotal =
         challenge.testcase_plan !== undefined
           ? computePlanTotal(challenge.testcase_plan, file)
           : undefined
-      const requestCount =
-        planTotal !== undefined ? Math.floor(POOL_SIZE / planTotal) * planTotal : POOL_SIZE
-      if (planTotal !== undefined && requestCount < planTotal) {
-        throw new Error(
-          `'testcase_plan' total ${planTotal} exceeds POOL_SIZE ${POOL_SIZE} in ${file} — ` +
-            `the pool cannot hold even one block`,
-        )
-      }
 
       // Generate random inputs via the WASM engine. Any engine error
       // (parse validation, budget violation, or a trap) aborts the whole
@@ -508,17 +536,7 @@ async function main() {
       // and a bad spec must never ship a silently-degraded pool.
       let inputs: string[]
       try {
-        inputs = await generateInputs(
-          {
-            params: challenge.params,
-            seed: challenge.slug,
-            input_budget: challenge.input_budget,
-            ...(challenge.testcase_plan !== undefined
-              ? { testcase_plan: challenge.testcase_plan }
-              : {}),
-          },
-          requestCount,
-        )
+        inputs = await generateInputs(spec, requestCount)
       } catch (err) {
         console.error(
           `[generate-pools] FATAL: input generation failed for ${file}:`,

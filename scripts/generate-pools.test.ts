@@ -12,6 +12,7 @@ import {
   encryptPool,
   collectAndValidateSlugs,
   computePlanTotal,
+  buildPoolRequest,
   MAGIC,
   POOL_VERSION,
 } from './generate-pools.js'
@@ -225,6 +226,43 @@ describe('encryptPool', () => {
     const plainBuf = encryptPool(key, 'plain-ch', 'hidden', testcases)
     const plainPayload = decryptPool(plainBuf, key) as Record<string, unknown>
     expect('plan_block_size' in plainPayload).toBe(false)
+  })
+})
+
+describe('buildPoolRequest', () => {
+  const base = {
+    slug: 'deque-demo',
+    algorithm: 'deque-scan',
+    generator: 'print(input())',
+    params: { n: { type: 'int', min: 1, max: 9 } },
+    testcase_count: 10,
+    verdict_detail: 'hidden',
+  }
+
+  it('plan challenge: spec carries the plan and count is whole blocks', () => {
+    const plan = [{ count: 2 }, { literal: 'L\n' }]
+    const { spec, count } = buildPoolRequest(
+      { ...base, testcase_plan: plan, input_budget: 8192 },
+      'deque-demo.md',
+    )
+    expect(spec.testcase_plan).toBe(plan)
+    expect(spec.seed).toBe('deque-demo')
+    expect(spec.input_budget).toBe(8192)
+    // plan total 3 → floor(200 / 3) * 3 = 198
+    expect(count).toBe(198)
+  })
+
+  it('non-plan challenge: no plan field and POOL_SIZE count', () => {
+    const { spec, count } = buildPoolRequest({ ...base }, 'deque-demo.md')
+    expect('testcase_plan' in spec).toBe(false)
+    expect(count).toBe(200)
+  })
+
+  it('rejects a plan whose total exceeds POOL_SIZE', () => {
+    const plan = [{ count: 201 }]
+    expect(() => buildPoolRequest({ ...base, testcase_plan: plan }, 'big.md')).toThrow(
+      /cannot hold even one block/,
+    )
   })
 })
 

@@ -19,7 +19,7 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { afterAll, describe, expect, it } from 'vitest'
 
-import { computePlanTotal, readChallenge } from './generate-pools.js'
+import { buildPoolRequest, computePlanTotal, readChallenge } from './generate-pools.js'
 import { ensureWasmArtifact, generatePoolInputs } from './wasm-input-generator.js'
 
 const CHALLENGES_DIR = resolve(import.meta.dirname, '../docs/challenge')
@@ -36,15 +36,11 @@ async function smokeGenerate(filePath: string): Promise<string[]> {
     challenge.testcase_plan !== undefined
       ? computePlanTotal(challenge.testcase_plan, filePath)
       : undefined
-  const inputs = await generatePoolInputs(
-    {
-      params: challenge.params,
-      seed: challenge.slug,
-      input_budget: challenge.input_budget,
-      ...(challenge.testcase_plan !== undefined ? { testcase_plan: challenge.testcase_plan } : {}),
-    },
-    planTotal ?? 1,
-  )
+  // Spec comes from the SAME request builder the pool build uses; only the
+  // count differs (one sample / one block — this is a smoke gate, not a
+  // full pool build).
+  const { spec } = buildPoolRequest(challenge, filePath)
+  const inputs = await generatePoolInputs(spec, planTotal ?? 1)
   if (planTotal !== undefined) {
     // TS-side plan total and the engine's own computation must agree — a
     // full block came back, so the engine accepted count == planTotal as a
