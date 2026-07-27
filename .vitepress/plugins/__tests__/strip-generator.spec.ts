@@ -130,6 +130,17 @@ describe('C: fail-loud — 任何可疑狀態必須讓建置爆掉', () => {
     expect(() => transform(md(fm))).toThrow(/damaged|invalid YAML/)
   })
 
+  it('C6 frontmatter 只含被剝除欄位 → 剝除後為空,必須 throw 而非靜默放行', () => {
+    expect(() => transform(md(`generator: |\n  print("${SECRET}")`))).toThrow(
+      /empty or not a mapping/,
+    )
+  })
+
+  it('C7 巢狀在其他鍵下的 generator 副本 → 遞迴斷言攔截', () => {
+    const fm = `id: 1\ntitle: t\nmeta:\n  generator: "print('${SECRET}')"`
+    expect(() => transform(md(fm))).toThrow(/survived stripping/)
+  })
+
   it('C4 來源 frontmatter 本身是壞 YAML → throw 且訊息指向來源檔', () => {
     const fm = `id: 1\n  badindent: [\ngenerator: |\n  x = 1`
     expect(() => transform(md(fm))).toThrow(/invalid YAML/)

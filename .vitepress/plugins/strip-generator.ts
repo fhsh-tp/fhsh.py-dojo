@@ -115,15 +115,39 @@ export function stripGenerator(): Plugin {
             `(${(e as Error).message.split('\n')[0]}). Refusing to build.`,
         )
       }
-      if (after && typeof after === 'object' && before && typeof before === 'object') {
+      // Fail closed: a challenge frontmatter must parse to a mapping both
+      // before and after stripping — anything else (empty, scalar, null)
+      // means the file or the strip went wrong, and skipping the assertions
+      // here would contradict their whole purpose.
+      if (!before || typeof before !== 'object' || Array.isArray(before)) {
+        throw new Error(
+          `[strip-generator] ${id}: frontmatter did not parse to a mapping. Refusing to build.`,
+        )
+      }
+      if (!after || typeof after !== 'object' || Array.isArray(after)) {
+        throw new Error(
+          `[strip-generator] ${id}: frontmatter is empty or not a mapping after stripping. Refusing to build.`,
+        )
+      }
+      {
         const a = after as Record<string, unknown>
         const b = before as Record<string, unknown>
-        for (const f of STRIPPED_FIELDS) {
-          if (f in a) {
-            throw new Error(
-              `[strip-generator] ${id}: field "${f}" survived stripping. Refusing to build.`,
-            )
+        // Recursive: a nested copy of a stripped field (under any key, at any
+        // depth) still ships via the page chunk, so it must also refuse.
+        const containsStrippedKey = (v: unknown): string | null => {
+          if (!v || typeof v !== 'object') return null
+          for (const [k, inner] of Object.entries(v as Record<string, unknown>)) {
+            if ((STRIPPED_FIELDS as readonly string[]).includes(k)) return k
+            const hit = containsStrippedKey(inner)
+            if (hit) return hit
           }
+          return null
+        }
+        const survivor = containsStrippedKey(a)
+        if (survivor) {
+          throw new Error(
+            `[strip-generator] ${id}: field "${survivor}" survived stripping (possibly nested). Refusing to build.`,
+          )
         }
         for (const k of Object.keys(b)) {
           if ((STRIPPED_FIELDS as readonly string[]).includes(k)) continue

@@ -80,8 +80,10 @@ async function loadWasm(): Promise<WasmMod> {
  * Generate `count` pool input strings for one challenge.
  *
  * Any engine-side error (parse validation, budget violation) is rethrown
- * with the message intact — callers abort the build; the WASM instance is
- * never reused after a trap.
+ * with the message intact. Callers are expected to abort the whole build on
+ * error (generate-pools does process.exit(1)); the cached instance is NOT
+ * reset here, so a caller that swallowed an error and retried would reuse
+ * potentially trapped state — do not add such a caller.
  */
 export async function generatePoolInputs(spec: PoolSpec, count: number): Promise<string[]> {
   const mod = await loadWasm()

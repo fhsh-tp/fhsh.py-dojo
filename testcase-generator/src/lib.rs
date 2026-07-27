@@ -89,9 +89,15 @@ pub fn pool_inputs_from_spec(spec_json: &str, count: usize) -> Result<Vec<String
                 );
             }
             "input_budget" => {
-                budget = Some(val.as_u64().ok_or_else(|| {
-                    "pool spec: 'input_budget' must be a non-negative integer".to_string()
-                })?);
+                let n = val.as_u64().ok_or_else(|| {
+                    "pool spec: 'input_budget' must be a positive integer".to_string()
+                })?;
+                if n == 0 {
+                    return Err(
+                        "pool spec: 'input_budget' must be >= 1 (omit the field to use the default; 0 does not mean unlimited)".to_string()
+                    );
+                }
+                budget = Some(n);
             }
             "testcase_plan" => {
                 return Err(
@@ -110,9 +116,13 @@ pub fn pool_inputs_from_spec(spec_json: &str, count: usize) -> Result<Vec<String
     let params = parser::parse_params_value(params_v)?;
 
     let effective_budget = budget.unwrap_or(DEFAULT_INPUT_BUDGET);
-    if effective_budget > parser::HARD_CAP_BYTES {
+    // `>=` mirrors the parser's hard-cap check: accepted estimates are always
+    // strictly below HARD_CAP_BYTES, so a budget equal to the cap would be an
+    // accepted-yet-unreachable configuration (a silent cliff). The budget
+    // itself remains an inclusive bound (`total > effective_budget` below).
+    if effective_budget >= parser::HARD_CAP_BYTES {
         return Err(format!(
-            "pool spec: input_budget ({effective_budget}) exceeds the {} -byte hard cap",
+            "pool spec: input_budget ({effective_budget}) must be strictly below the {}-byte hard cap",
             parser::HARD_CAP_BYTES
         ));
     }
@@ -335,6 +345,23 @@ mod tests {
         let spec = r#"{"input_budget": 100000, "params": {"n": {"type": "int"}}}"#;
         let err = pool_inputs_from_spec(spec, 1).unwrap_err();
         assert!(err.contains("hard cap"), "got: {err}");
+    }
+
+    #[test]
+    fn pool_inputs_budget_equal_to_hard_cap_is_refused() {
+        // L-R3-3: parser rejects estimates >= cap, so a budget of exactly the
+        // cap would be accepted-yet-unreachable — refuse the cliff instead.
+        let spec = r#"{"input_budget": 65536, "params": {"n": {"type": "int"}}}"#;
+        let err = pool_inputs_from_spec(spec, 1).unwrap_err();
+        assert!(err.contains("strictly below"), "got: {err}");
+    }
+
+    #[test]
+    fn pool_inputs_budget_zero_is_refused_with_guidance() {
+        // L-R3-4: mirror the TS-side rule in the engine itself.
+        let spec = r#"{"input_budget": 0, "params": {"n": {"type": "int"}}}"#;
+        let err = pool_inputs_from_spec(spec, 1).unwrap_err();
+        assert!(err.contains("0 does not mean unlimited"), "got: {err}");
     }
 
     #[test]

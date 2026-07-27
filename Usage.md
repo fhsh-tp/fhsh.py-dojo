@@ -279,7 +279,7 @@ for _ in range(t):
 
 - 預設預算：**4096 bytes**／筆——教學題綽綽有餘
 - 可在 frontmatter 以 `input_budget` 調高
-- 硬上限：**65536 bytes**，不可覆寫（保護池檔大小與前端執行鏈）
+- 硬上限：**65536 bytes**，不可覆寫；`input_budget` 宣告值必須**小於**此數（保護池檔大小與前端執行鏈）
 
 > **注意**：瀏覽器 dev 模式的即時預覽只受 65536 硬上限保護、不套用此預算——本機看起來正常但 `pnpm build:pools` 報預算超標時，請先檢討 `params` 設計（例如降低 count 上界），而不是直接調大 `input_budget`。
 
