@@ -8,9 +8,9 @@ algorithm: repeat_greeting
 testcase_count: 5
 params:
   name:
-    type: str
-    min_length: 1
-    max_length: 20
+    type: alpha_mixed
+    min_len: 1
+    max_len: 20
   n:
     type: int
     min: 1

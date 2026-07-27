@@ -3,10 +3,11 @@
  * Build script: generate encrypted testcase pools for all challenges.
  *
  * 1. Read all docs/challenge/*.md files and parse frontmatter
- * 2. For each challenge, generate random inputs via Python (replicating WASM param logic)
+ * 2. For each challenge, generate random inputs via the Rust/WASM engine
+ *    (the same single source of truth the browser uses), seeded by slug
  * 3. Execute generator code via Python subprocess to produce expected outputs
  * 4. Encrypt each pool with AES-256-GCM
- * 5. Write to docs/public/pools/<algorithm>.bin
+ * 5. Write to docs/public/pools/<slug>.bin
  * 6. Generate key_material.rs for WASM embedding
  */
 import { execFileSync } from 'node:child_process'
@@ -24,7 +25,24 @@ import { basename, resolve, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { getPoolKey } from './pool-key.js'
-import { generateKeyMaterial } from './generate-key-material.js'
+import { ensureWasmArtifact, generatePoolInputs, type PoolSpec } from './wasm-input-generator.js'
+
+// ── WASM preflight check ──────────────────────────────────────────────────
+
+/**
+ * Input generation runs on the Rust/WASM engine (single source of truth
+ * with the browser runtime), so the artifact must exist before any
+ * challenge is processed. Build order: gen:keymaterial → build:wasm →
+ * build:pools.
+ */
+function preflightCheckWasm(): void {
+  try {
+    ensureWasmArtifact()
+  } catch (err) {
+    console.error('[generate-pools] ERROR:', err instanceof Error ? err.message : err)
+    process.exit(1)
+  }
+}
 
 // ── Python preflight check ────────────────────────────────────────────────
 
@@ -72,7 +90,7 @@ function preflightCheckPython(): void {
 const PROJECT_ROOT = resolve(import.meta.dirname, '..')
 const CHALLENGES_DIR = resolve(PROJECT_ROOT, 'docs/challenge')
 const POOLS_DIR = resolve(PROJECT_ROOT, 'docs/public/pools')
-const POOL_SIZE = 200 // testcases per pool
+export const POOL_SIZE = 200 // testcases per pool
 export const MAGIC = Buffer.from('CXPOOL', 'ascii')
 export const POOL_VERSION = 0x01
 
@@ -175,6 +193,11 @@ export interface ChallengeInfo {
   testcase_count?: number
   verdict_detail?: string
   /**
+   * Optional per-input worst-case byte budget override (bytes). Passed to
+   * the WASM engine, which enforces default 4096 and hard cap 65536.
+   */
+  input_budget?: number
+  /**
    * Optional Python reference solution (a full program that reads stdin and
    * prints the correct answer). Independent of `generator`; used only by the
    * content-layer regression test to verify a known-correct solution earns AC.
@@ -216,110 +239,44 @@ export function readChallenge(filePath: string): ChallengeInfo {
   const testcase_count = (fm.testcase_count as number) ?? 10
   const verdict_detail = (fm.verdict_detail as string) ?? 'hidden'
   const reference_solution = fm.reference_solution as string | undefined
+  const input_budget = fm.input_budget as number | undefined
 
   if (!algorithm) throw new Error(`Missing 'algorithm' in ${filePath}`)
   if (!generator) throw new Error(`Missing 'generator' in ${filePath}`)
   if (!params) throw new Error(`Missing 'params' in ${filePath}`)
 
-  return { slug, algorithm, generator, params, testcase_count, verdict_detail, reference_solution }
+  if (input_budget !== undefined && (!Number.isInteger(input_budget) || input_budget < 1)) {
+    throw new Error(
+      `'input_budget' must be a positive integer in ${filePath} ` +
+        `(omit the field to use the default; 0 does not mean "unlimited")`,
+    )
+  }
+
+  return {
+    slug,
+    algorithm,
+    generator,
+    params,
+    testcase_count,
+    verdict_detail,
+    reference_solution,
+    input_budget,
+  }
 }
 
-// ── Input generation via Python ────────────────────────────────────────────
+// ── Input generation via WASM (single source of truth) ────────────────────
 
 /**
- * Generate random inputs using a Python script that replicates the WASM
- * param-based generation logic. This avoids needing to load the WASM
- * module at build time.
+ * Generate random inputs with the SAME Rust/WASM engine the browser uses.
+ * `seed` (the challenge slug) makes pool content deterministic for
+ * identical challenge declarations; `input_budget` (optional frontmatter
+ * field) raises the per-input worst-case byte budget up to the engine's
+ * hard cap. Engine-side errors (parse validation, budget violations) are
+ * thrown to the caller — the build must abort, never continue on a
+ * possibly-trapped WASM instance.
  */
-export function generateInputs(params: Record<string, unknown>, count: number): string[] {
-  const script = `
-import json, random, string, sys
-
-params = json.loads(sys.stdin.read())
-count = ${count}
-
-def gen_value(spec):
-    t = spec.get("type", "")
-    if t == "int":
-        return str(random.randint(spec.get("min", 0), spec.get("max", 100)))
-    elif t == "alpha_upper":
-        length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
-        mul = spec.get("multiple_of", 1)
-        if mul > 1:
-            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
-            hi = spec.get("max_len", 10) // mul
-            length = random.randint(lo, hi) * mul
-        return ''.join(random.choices(string.ascii_uppercase, k=length))
-    elif t == "alpha_lower":
-        length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
-        mul = spec.get("multiple_of", 1)
-        if mul > 1:
-            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
-            hi = spec.get("max_len", 10) // mul
-            length = random.randint(lo, hi) * mul
-        return ''.join(random.choices(string.ascii_lowercase, k=length))
-    elif t == "alpha_mixed":
-        length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
-        mul = spec.get("multiple_of", 1)
-        if mul > 1:
-            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
-            hi = spec.get("max_len", 10) // mul
-            length = random.randint(lo, hi) * mul
-        return ''.join(random.choices(string.ascii_letters, k=length))
-    elif t == "hex_string":
-        length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
-        mul = spec.get("multiple_of", 1)
-        if mul > 1:
-            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
-            hi = spec.get("max_len", 10) // mul
-            length = random.randint(lo, hi) * mul
-        return ''.join(random.choices('0123456789abcdef', k=length))
-    elif t == "printable_ascii":
-        length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
-        mul = spec.get("multiple_of", 1)
-        if mul > 1:
-            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
-            hi = spec.get("max_len", 10) // mul
-            length = random.randint(lo, hi) * mul
-        chars = [chr(c) for c in range(0x21, 0x7f)]
-        return ''.join(random.choices(chars, k=length))
-    elif t == "enum":
-        return random.choice(spec.get("values", ["?"]))
-    else:
-        return "UNKNOWN_TYPE"
-
-def gen_param_line(spec):
-    count_spec = spec.get("count", {})
-    if isinstance(count_spec, dict):
-        mn = count_spec.get("min", 1)
-        mx = count_spec.get("max", 1)
-        sep = count_spec.get("separator", " ")
-    else:
-        mn = mx = 1
-        sep = " "
-    n = random.randint(mn, mx)
-    values = [gen_value(spec) for _ in range(n)]
-    return sep.join(values)
-
-for _ in range(count):
-    lines = []
-    for name in params:
-        lines.append(gen_param_line(params[name]))
-    print(json.dumps("\\n".join(lines)))
-`
-  const output = execFileSync('python3', ['-c', script], {
-    input: JSON.stringify(params),
-    encoding: 'utf-8',
-    timeout: 30_000,
-    // Big-integer answers (e.g. 2^N for N up to 10^4) across a 200-testcase
-    // pool can exceed Node's 1 MB default maxBuffer.
-    maxBuffer: 64 * 1024 * 1024,
-  })
-
-  return output
-    .trim()
-    .split('\n')
-    .map((line) => JSON.parse(line) as string)
+export async function generateInputs(spec: PoolSpec, count: number): Promise<string[]> {
+  return generatePoolInputs(spec, count)
 }
 
 // ── Generator execution ────────────────────────────────────────────────────
@@ -408,13 +365,15 @@ export function encryptPool(
 
 // ── Main ───────────────────────────────────────────────────────────────────
 
-function main() {
+async function main() {
   console.log('[generate-pools] Starting pool generation...')
 
-  // Read encryption key and generate key_material.rs unconditionally —
-  // WASM compilation depends on this file regardless of whether challenges exist.
+  // Read the encryption key. key_material.rs generation is NOT this
+  // script's job anymore — gen:keymaterial owns it as step 1 of the build
+  // chain (before build:wasm), so the compiled WASM and the pools always
+  // share the same key. Rewriting it here would also dirty the Rust crate
+  // on every pool build, forcing a full recompile next cargo run.
   const key = getPoolKey(PROJECT_ROOT)
-  generateKeyMaterial(key, PROJECT_ROOT)
 
   // Ensure output directory exists
   if (!existsSync(POOLS_DIR)) {
@@ -444,7 +403,8 @@ function main() {
     process.exit(1)
   }
 
-  // Verify Python runtime and packages are available (only needed for pool generation)
+  // Verify the WASM engine artifact and the Python runtime are available.
+  preflightCheckWasm()
   preflightCheckPython()
 
   let success = 0
@@ -458,8 +418,23 @@ function main() {
     try {
       const challenge = readChallenge(filePath)
 
-      // Generate random inputs
-      const inputs = generateInputs(challenge.params, POOL_SIZE)
+      // Generate random inputs via the WASM engine. Any engine error
+      // (parse validation, budget violation, or a trap) aborts the whole
+      // build immediately: a trapped WASM instance must never be reused,
+      // and a bad spec must never ship a silently-degraded pool.
+      let inputs: string[]
+      try {
+        inputs = await generateInputs(
+          { params: challenge.params, seed: challenge.slug, input_budget: challenge.input_budget },
+          POOL_SIZE,
+        )
+      } catch (err) {
+        console.error(
+          `[generate-pools] FATAL: input generation failed for ${file}:`,
+          err instanceof Error ? err.message : err,
+        )
+        process.exit(1)
+      }
       console.log(`    Generated ${inputs.length} inputs`)
 
       // Run generator to produce expected outputs
@@ -513,5 +488,8 @@ function main() {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  main()
+  main().catch((err) => {
+    console.error('[generate-pools] FATAL:', err instanceof Error ? err.message : err)
+    process.exit(1)
+  })
 }
