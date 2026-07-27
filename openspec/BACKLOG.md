@@ -104,7 +104,7 @@ change、完整 review 與 staging 驗證後才落地。
 - **評估**:與 2.6 的 `select_testcases(slug, 200)` 能力完全重疊,邊際風險
   為零;feature-gated 雙 wasm target 的維運成本不值得。記錄備查。
 
-### 2.8 TLE 常數與大輸入(已由 testcase_plan + input_budget 圍堵)
+### 2.8 TLE 常數與大輸入(⚠️ 2026-07-28 更正:存在兩個未修復的判題缺口,下方結論在修復前不成立)
 
 - **背景**:`DEFAULT_OP_LIMIT = 10_000_000`、`WALL_CLOCK_MS = 5000`、
   `WALL_CLOCK_KILL_MS = 6000` 皆寫死且無 frontmatter 旋鈕
@@ -123,6 +123,23 @@ change、完整 review 與 staging 驗證後才落地。
   讓純 Python O(n²) TLE),不再需要「per-challenge TLE 旋鈕」作為前置。
   但 op-counter 抓不到 C 層複雜度這個結構性限制不變:list 線性掃描 /
   `pop(0)` 型解法即使 n 很大也不會觸發 TLE。
+- **⚠️ 2026-07-28 更正(adversarial review 實測發現,雙獨立驗證)**:
+  1. 上方實測數字全部是「**函式包裝**」情境的量測值。正式判題 wrapper
+     (`worker-utils.ts` `buildWrappedCode`)在模組頂層呼叫 `sys.settrace`,
+     CPython 不回溯追蹤當下 frame——**扁平頂層學生程式碼(典型寫法)
+     op_count 恆為 0**,含 `while True: pass`(結局是外層 N×6s 總預算強殺
+     → prod 端零筆結果的靜默失敗)。最小修法:settrace 後補
+     `sys._getframe().f_trace = _tracer`(已實測有效)。
+  2. `testcase-generator/src/judge.rs` 的 `judge()` **沒有 TLE 分支**
+     (只有 AC/WA/RE;`wasm-pool-judge/spec.md` prose 有列 TLE 但無驗收
+     Scenario,實作照 Scenario 寫而蒸發)。正式站永遠不會出現 TLE 徽章,
+     op-limit 例外顯示為 RE。
+  因此「已可組出效能感題」的結論在上述兩缺口修復前**不成立**。建議修復
+  路線:Change 1《fix-op-counter-blind-spot》(含真正執行 Python 的整合
+  測試——現有測試全為字串/型別斷言,是缺口潛伏的根因;generator 路徑
+  豁免或獨立上限)→ Change 2《add-tle-verdict》(先補 spec Scenario,
+  worker 傳結構化 timed_out 欄位,勿用字串比對)。細節見 2026-07-28
+  RCA(deque 題 handoff 未決 0)。
 
 ### 2.9 .env.pool 檔案權限(M-R2-2)
 
