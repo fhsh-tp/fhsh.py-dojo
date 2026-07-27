@@ -203,6 +203,44 @@ export interface ChallengeInfo {
    * content-layer regression test to verify a known-correct solution earns AC.
    */
   reference_solution?: string
+  /**
+   * Optional testcase partition plan (band/literal entries). Passed verbatim
+   * to the WASM engine, which owns full validation; mutually exclusive with
+   * `testcase_count`. When present the pool is built as consecutive blocks
+   * and the payload carries `plan_block_size`.
+   */
+  testcase_plan?: unknown[]
+}
+
+const VALID_VERDICT_DETAILS = ['hidden', 'actual', 'full'] as const
+
+/**
+ * TS-side mirror of the engine's plan-total rule: Σ band counts + one per
+ * literal entry. Used to size the pool request; the engine independently
+ * recomputes and enforces the multiple-of-total contract, so any drift
+ * between the two fails the build loudly. Entry-shape validation belongs to
+ * the engine — this only rejects counts it cannot even sum.
+ */
+export function computePlanTotal(plan: unknown[], filePath: string): number {
+  let total = 0
+  for (const entry of plan) {
+    const e = entry as Record<string, unknown>
+    if (e !== null && typeof e === 'object' && 'literal' in e) {
+      total += 1
+    } else {
+      const c = e?.count
+      if (typeof c !== 'number' || !Number.isInteger(c) || c < 1) {
+        throw new Error(
+          `'testcase_plan' entry has invalid 'count' in ${filePath} (band entries need a positive integer count)`,
+        )
+      }
+      total += c
+    }
+  }
+  if (total < 1) {
+    throw new Error(`'testcase_plan' must contain at least one entry in ${filePath}`)
+  }
+  return total
 }
 
 function parseFrontmatter(content: string): Record<string, unknown> {
@@ -240,6 +278,7 @@ export function readChallenge(filePath: string): ChallengeInfo {
   const verdict_detail = (fm.verdict_detail as string) ?? 'hidden'
   const reference_solution = fm.reference_solution as string | undefined
   const input_budget = fm.input_budget as number | undefined
+  const testcase_plan = fm.testcase_plan as unknown[] | undefined
 
   if (!algorithm) throw new Error(`Missing 'algorithm' in ${filePath}`)
   if (!generator) throw new Error(`Missing 'generator' in ${filePath}`)
@@ -252,6 +291,28 @@ export function readChallenge(filePath: string): ChallengeInfo {
     )
   }
 
+  // Mutual exclusion is checked on the RAW frontmatter — `testcase_count`
+  // above has already been defaulted, which must not count as a declaration.
+  if (testcase_plan !== undefined && fm.testcase_count !== undefined) {
+    throw new Error(
+      `'testcase_plan' and 'testcase_count' are mutually exclusive in ${filePath} ` +
+        `(the plan's band counts already determine the per-session testcase count)`,
+    )
+  }
+  if (testcase_plan !== undefined && !Array.isArray(testcase_plan)) {
+    throw new Error(`'testcase_plan' must be a YAML list in ${filePath}`)
+  }
+
+  if (
+    fm.verdict_detail !== undefined &&
+    !VALID_VERDICT_DETAILS.includes(fm.verdict_detail as (typeof VALID_VERDICT_DETAILS)[number])
+  ) {
+    throw new Error(
+      `'verdict_detail' must be one of ${VALID_VERDICT_DETAILS.join(', ')} in ${filePath} ` +
+        `(got '${String(fm.verdict_detail)}')`,
+    )
+  }
+
   return {
     slug,
     algorithm,
@@ -261,6 +322,7 @@ export function readChallenge(filePath: string): ChallengeInfo {
     verdict_detail,
     reference_solution,
     input_budget,
+    testcase_plan,
   }
 }
 
@@ -347,11 +409,15 @@ export function encryptPool(
   challengeId: string,
   verdictDetail: string,
   testcases: TestcaseResult[],
+  planBlockSize?: number,
 ): Buffer {
   const payload = JSON.stringify({
     challenge_id: challengeId,
     verdict_detail: verdictDetail,
     testcases,
+    // Only plan pools carry the field — non-plan payloads stay shape-identical
+    // to the previous format.
+    ...(planBlockSize !== undefined ? { plan_block_size: planBlockSize } : {}),
   })
 
   const nonce = randomBytes(12)
@@ -418,6 +484,24 @@ async function main() {
     try {
       const challenge = readChallenge(filePath)
 
+      // testcase_plan challenges are built as consecutive blocks: the pool
+      // holds floor(POOL_SIZE / plan_total) full plan rounds and the payload
+      // carries plan_block_size so selection returns one whole block. The
+      // engine independently enforces count % plan_total == 0, so a drift
+      // between this computation and the engine's fails the build loudly.
+      const planTotal =
+        challenge.testcase_plan !== undefined
+          ? computePlanTotal(challenge.testcase_plan, file)
+          : undefined
+      const requestCount =
+        planTotal !== undefined ? Math.floor(POOL_SIZE / planTotal) * planTotal : POOL_SIZE
+      if (planTotal !== undefined && requestCount < planTotal) {
+        throw new Error(
+          `'testcase_plan' total ${planTotal} exceeds POOL_SIZE ${POOL_SIZE} in ${file} — ` +
+            `the pool cannot hold even one block`,
+        )
+      }
+
       // Generate random inputs via the WASM engine. Any engine error
       // (parse validation, budget violation, or a trap) aborts the whole
       // build immediately: a trapped WASM instance must never be reused,
@@ -425,8 +509,15 @@ async function main() {
       let inputs: string[]
       try {
         inputs = await generateInputs(
-          { params: challenge.params, seed: challenge.slug, input_budget: challenge.input_budget },
-          POOL_SIZE,
+          {
+            params: challenge.params,
+            seed: challenge.slug,
+            input_budget: challenge.input_budget,
+            ...(challenge.testcase_plan !== undefined
+              ? { testcase_plan: challenge.testcase_plan }
+              : {}),
+          },
+          requestCount,
         )
       } catch (err) {
         console.error(
@@ -448,6 +539,7 @@ async function main() {
         challenge.slug,
         challenge.verdict_detail ?? 'hidden',
         testcases,
+        planTotal,
       )
 
       // Write pool file at <slug>.bin (NOT <algorithm>.bin).

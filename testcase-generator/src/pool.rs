@@ -8,6 +8,7 @@ use std::sync::Mutex;
 
 use rand::rngs::SmallRng;
 use rand::seq::SliceRandom;
+use rand::Rng;
 use rand::SeedableRng;
 use serde::Deserialize;
 use zeroize::Zeroizing;
@@ -36,12 +37,19 @@ struct PoolPayload {
     challenge_id: String,
     verdict_detail: VerdictDetail,
     testcases: Vec<Testcase>,
+    /// Present only for `testcase_plan` challenges: the pool then consists of
+    /// consecutive blocks of this size and selection returns one whole block
+    /// in stored order. Absent (None) for all pre-plan pools — their
+    /// behavior is unchanged.
+    #[serde(default)]
+    plan_block_size: Option<usize>,
 }
 
 /// In-memory representation of a loaded pool.
 pub struct LoadedPool {
     pub verdict_detail: VerdictDetail,
     pub testcases: Vec<Testcase>,
+    pub plan_block_size: Option<usize>,
 }
 
 /// A session created by `select_testcases`.
@@ -96,6 +104,7 @@ pub fn load_pool(challenge_id: &str, encrypted_data: &[u8]) -> Result<(), String
     let loaded = LoadedPool {
         verdict_detail: payload.verdict_detail,
         testcases: payload.testcases,
+        plan_block_size: payload.plan_block_size,
     };
 
     with_state(|state| {
@@ -125,14 +134,38 @@ pub fn select_testcases(
         }
 
         let mut rng = SmallRng::from_entropy();
-        let mut indices: Vec<usize> = (0..pool.testcases.len()).collect();
-        indices.shuffle(&mut rng);
-        indices.truncate(count);
-
-        let selected: Vec<Testcase> = indices
-            .iter()
-            .map(|&i| pool.testcases[i].clone())
-            .collect();
+        let selected: Vec<Testcase> = match pool.plan_block_size {
+            // testcase_plan pool: pick one whole block uniformly at random and
+            // return it in stored order (declaration order). Every structural
+            // assumption is checked loudly — a malformed pool must never
+            // yield a partial or reordered block.
+            Some(k) => {
+                if k == 0 {
+                    return Err("Pool plan_block_size must be >= 1".to_string());
+                }
+                if pool.testcases.len() % k != 0 || pool.testcases.is_empty() {
+                    return Err(format!(
+                        "Pool has {} testcases, not a positive multiple of plan_block_size {k}",
+                        pool.testcases.len()
+                    ));
+                }
+                if count != k {
+                    return Err(format!(
+                        "Plan pool requires exactly {k} testcases per session, requested {count}"
+                    ));
+                }
+                let block_count = pool.testcases.len() / k;
+                let block = rng.gen_range(0..block_count);
+                pool.testcases[block * k..(block + 1) * k].to_vec()
+            }
+            // Non-plan pool: existing uniform shuffle-and-truncate selection.
+            None => {
+                let mut indices: Vec<usize> = (0..pool.testcases.len()).collect();
+                indices.shuffle(&mut rng);
+                indices.truncate(count);
+                indices.iter().map(|&i| pool.testcases[i].clone()).collect()
+            }
+        };
         let inputs: Vec<String> = selected.iter().map(|tc| tc.input.clone()).collect();
 
         state.session_counter += 1;
@@ -249,6 +282,92 @@ mod tests {
 
     fn make_encrypted_pool(verdict_detail: &str, testcases: &[(&str, &str)]) -> Vec<u8> {
         make_encrypted_pool_with_id("test", verdict_detail, testcases)
+    }
+
+    /// Like `make_encrypted_pool_with_id` but with `plan_block_size` in the
+    /// payload, for testcase_plan pool tests.
+    fn make_encrypted_plan_pool(
+        challenge_id: &str,
+        plan_block_size: usize,
+        testcases: &[(&str, &str)],
+    ) -> Vec<u8> {
+        let tc_json: Vec<serde_json::Value> = testcases
+            .iter()
+            .map(|(i, e)| serde_json::json!({ "input": i, "expected_output": e }))
+            .collect();
+        let payload = serde_json::json!({
+            "challenge_id": challenge_id,
+            "verdict_detail": "hidden",
+            "testcases": tc_json,
+            "plan_block_size": plan_block_size,
+        });
+        let plaintext = serde_json::to_vec(&payload).unwrap();
+
+        let key = key_material::reconstruct_key();
+        let cipher = Aes256Gcm::new_from_slice(key.as_ref()).unwrap();
+        let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
+        let ciphertext = cipher.encrypt(&nonce, plaintext.as_slice()).unwrap();
+
+        let mut out = Vec::new();
+        out.extend_from_slice(crypto::MAGIC);
+        out.push(crypto::VERSION);
+        out.extend_from_slice(nonce.as_slice());
+        out.extend_from_slice(&ciphertext);
+        out
+    }
+
+    /// 4 blocks × 2: inputs are labeled so a returned pair identifies its
+    /// block and in-block position unambiguously.
+    fn plan_pool_fixture(challenge_id: &str) -> Vec<u8> {
+        make_encrypted_plan_pool(
+            challenge_id,
+            2,
+            &[
+                ("b0-first", "o"), ("b0-second", "o"),
+                ("b1-first", "o"), ("b1-second", "o"),
+                ("b2-first", "o"), ("b2-second", "o"),
+                ("b3-first", "o"), ("b3-second", "o"),
+            ],
+        )
+    }
+
+    #[test]
+    fn plan_pool_returns_one_ordered_block() {
+        load_pool("plan_ordered", &plan_pool_fixture("plan_ordered")).unwrap();
+        for _ in 0..20 {
+            let (_sid, inputs, _) = select_testcases("plan_ordered", 2).unwrap();
+            assert_eq!(inputs.len(), 2);
+            let block = inputs[0].strip_suffix("-first").expect("first slot must be a block head");
+            assert_eq!(inputs[1], format!("{block}-second"), "block must stay in stored order");
+        }
+    }
+
+    #[test]
+    fn plan_pool_count_mismatch_is_refused() {
+        load_pool("plan_mismatch", &plan_pool_fixture("plan_mismatch")).unwrap();
+        let err = select_testcases("plan_mismatch", 4).unwrap_err();
+        assert!(err.contains("exactly 2"), "got: {err}");
+    }
+
+    #[test]
+    fn plan_pool_non_multiple_length_is_refused() {
+        // 5 testcases with block size 2 — corrupt structure must be refused.
+        let data = make_encrypted_plan_pool(
+            "plan_corrupt",
+            2,
+            &[("a", "o"), ("b", "o"), ("c", "o"), ("d", "o"), ("e", "o")],
+        );
+        load_pool("plan_corrupt", &data).unwrap();
+        let err = select_testcases("plan_corrupt", 2).unwrap_err();
+        assert!(err.contains("multiple of plan_block_size"), "got: {err}");
+    }
+
+    #[test]
+    fn plan_pool_zero_block_size_is_refused() {
+        let data = make_encrypted_plan_pool("plan_zero", 0, &[("a", "o")]);
+        load_pool("plan_zero", &data).unwrap();
+        let err = select_testcases("plan_zero", 1).unwrap_err();
+        assert!(err.contains(">= 1"), "got: {err}");
     }
 
     #[test]

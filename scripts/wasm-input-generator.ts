@@ -25,6 +25,8 @@ export interface PoolSpec {
   params: Record<string, unknown>
   seed?: string
   input_budget?: number
+  /** Band/literal partition plan — validated entirely by the engine. */
+  testcase_plan?: unknown[]
 }
 
 type WasmMod = {

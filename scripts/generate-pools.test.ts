@@ -11,6 +11,7 @@ import {
   readChallenge,
   encryptPool,
   collectAndValidateSlugs,
+  computePlanTotal,
   MAGIC,
   POOL_VERSION,
 } from './generate-pools.js'
@@ -212,6 +213,40 @@ describe('encryptPool', () => {
     expect(payload.challenge_id).toBe('star-rectangle')
     expect(payload.testcases).toEqual(testcases)
   })
+
+  it('includes plan_block_size only when supplied', () => {
+    const key = randomBytes(32)
+    const testcases = [{ input: '1', expected_output: 'a' }]
+
+    const planBuf = encryptPool(key, 'plan-ch', 'hidden', testcases, 5)
+    const planPayload = decryptPool(planBuf, key) as Record<string, unknown>
+    expect(planPayload.plan_block_size).toBe(5)
+
+    const plainBuf = encryptPool(key, 'plain-ch', 'hidden', testcases)
+    const plainPayload = decryptPool(plainBuf, key) as Record<string, unknown>
+    expect('plan_block_size' in plainPayload).toBe(false)
+  })
+})
+
+describe('computePlanTotal', () => {
+  it('sums band counts and counts each literal as one', () => {
+    const plan = [
+      { count: 3, override: { n: { max: 20 } } },
+      { count: 2, override: { n: { min: 2500 } } },
+      { literal: '1\n1\n-999\n' },
+    ]
+    expect(computePlanTotal(plan, 'deque.md')).toBe(6)
+  })
+
+  it('rejects a band without a positive integer count', () => {
+    expect(() => computePlanTotal([{ count: 0 }], 'x.md')).toThrow(/x\.md/)
+    expect(() => computePlanTotal([{ count: 1.5 }], 'x.md')).toThrow(/positive integer/)
+    expect(() => computePlanTotal([{}], 'x.md')).toThrow(/count/)
+  })
+
+  it('rejects an empty plan', () => {
+    expect(() => computePlanTotal([], 'x.md')).toThrow(/at least one/)
+  })
 })
 
 describe('readChallenge', () => {
@@ -250,5 +285,77 @@ body
     const ch = readChallenge(filePath)
     expect(ch.slug).toBe('multiplication-table')
     expect(ch.algorithm).toBe('nested-loop')
+  })
+
+  function writeChallenge(dir: string, name: string, extraFm: string): string {
+    const filePath = join(dir, name)
+    writeFileSync(
+      filePath,
+      `---
+algorithm: deque-scan
+${extraFm}
+params:
+  n:
+    type: int
+    min: 1
+    max: 9
+generator: |
+  n = int(input())
+  print(n)
+---
+
+body
+`,
+      'utf-8',
+    )
+    return filePath
+  }
+
+  it('reads testcase_plan through verbatim', () => {
+    const filePath = writeChallenge(
+      tmp,
+      'plan-ok.md',
+      `testcase_plan:
+  - count: 3
+    override:
+      n:
+        max: 5
+  - literal: "7\\n"`,
+    )
+    const ch = readChallenge(filePath)
+    expect(ch.testcase_plan).toEqual([
+      { count: 3, override: { n: { max: 5 } } },
+      { literal: '7\n' },
+    ])
+  })
+
+  it('rejects testcase_plan coexisting with testcase_count', () => {
+    const filePath = writeChallenge(
+      tmp,
+      'plan-conflict.md',
+      `testcase_count: 5
+testcase_plan:
+  - count: 3`,
+    )
+    expect(() => readChallenge(filePath)).toThrow(/mutually exclusive/)
+    expect(() => readChallenge(filePath)).toThrow(/plan-conflict\.md/)
+  })
+
+  it('accepts an absent testcase_plan with a declared testcase_count', () => {
+    const filePath = writeChallenge(tmp, 'plain.md', 'testcase_count: 5')
+    const ch = readChallenge(filePath)
+    expect(ch.testcase_plan).toBeUndefined()
+    expect(ch.testcase_count).toBe(5)
+  })
+
+  it('rejects an invalid verdict_detail with the allowed values', () => {
+    const filePath = writeChallenge(tmp, 'vd-typo.md', 'verdict_detail: ful')
+    expect(() => readChallenge(filePath)).toThrow(/hidden, actual, full/)
+    expect(() => readChallenge(filePath)).toThrow(/vd-typo\.md/)
+  })
+
+  it('defaults verdict_detail to hidden when absent', () => {
+    const filePath = writeChallenge(tmp, 'vd-absent.md', 'testcase_count: 5')
+    expect(readChallenge(filePath).verdict_detail).toBe('hidden')
   })
 })
