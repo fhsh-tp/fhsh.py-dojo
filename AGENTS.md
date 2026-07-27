@@ -69,7 +69,7 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 - `algorithm`（snake_case，WASM 產生測資的識別鍵）、`testcase_count`（選填，預設 5）
 - `params`（必填，輸入參數規格）、`generator`（必填，Python 正解，輸出期望答案）、`starter_code`（必填，使用者初始程式碼）
 - `reference_solution`（**選填**）：宣告後，`content-regression` 測試會驗證此正解在正式測資下與 generator 的期望輸出一致
-- 完整規格見 `Usage.md`。**注意**：測資產生邏輯的 Rust 端（`testcase-generator/src/rng.rs`）與 Python 複寫端（`scripts/generate-pools.ts`）必須保持一致，已由 `generator-parity` 測試守門。
+- 完整規格見 `Usage.md`。**注意**：測資輸入產生邏輯只有一份（Rust crate `testcase-generator`，建置期與瀏覽器共用同一份 WASM）；全部題目的 params 宣告由 `scripts/challenge-params.test.ts` 冒煙守門，任何引擎不認識的型別／欄位會指名該題失敗。
 
 ## 維護前必讀
 
@@ -80,4 +80,4 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 ## 禁區
 
 - 勿 commit gitignored 產物：`docs/public/pools/`、`testcase-generator/src/key_material.rs`、`.env.pool`、`.understand-anything/`。
-- 改動測資產生邏輯時，Rust 與 Python 兩端務必同步（否則正式池會悄悄產出錯誤測資）。
+- 建置順序固定為 gen:keymaterial → build:wasm → build:pools（build:pools 依賴 WASM 產物；順序寫在 package.json 的 dev/build，勿手動跳步）。

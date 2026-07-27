@@ -67,6 +67,7 @@ tags:                      # 選填：分類標籤陣列
   - 基礎演算法
 algorithm: my_algorithm    # snake_case，用於 WASM 產生測資的識別鍵
 testcase_count: 5          # 選填，預設 5，測試案例數量
+input_budget: 4096         # 選填，單筆測資 worst-case 位元組預算（見下方「輸入規模預算」）
 editor_capture_debounce_ms: 1000  # 選填，卡關紀錄的 editor 快照 debounce 間隔（見下方）
 params: ...                # 必填，定義 WASM 產生測資的參數規格（見下方）
 generator: |               # 必填，Python 程式，讀入參數並輸出正確答案
@@ -98,9 +99,9 @@ starter_code: |            # 必填，使用者初始程式碼範本
 
 ### params 參數型別
 
-`params` 是一個 YAML 物件，**每個鍵代表一個輸入參數**，順序即為 stdin 的行順序。
+`params` 是一個 YAML 物件，**每個鍵代表一個輸入參數，依宣告順序渲染為 stdin 的一個「區塊」**（預設一個區塊＝一行）。
 
-WASM 產生的每筆測資為多行字串，每行對應一個參數，`generator` 程式碼用 `input()` 依序讀取。
+WASM 產生的每筆測資為多行字串：純量參數渲染一行；`count` 大於 1 的參數以 `separator` 連接多個值（`separator` 為 `"\n"` 時跨多行）；`group` 參數則整段重複多次（見下方「group 群組」）。`generator` 程式碼用 `input()` 依宣告順序讀取。
 
 #### 型別一覽
 
@@ -113,6 +114,7 @@ WASM 產生的每筆測資為多行字串，每行對應一個參數，`generato
 | `hex_string` | 十六進位字串（0–9a–f） | `min_len`, `max_len` |
 | `printable_ascii` | 可列印 ASCII 字元（空格至 ~） | `min_len`, `max_len` |
 | `enum` | 從固定清單中隨機挑選一個值 | `values`（非空字串陣列） |
+| `group` | 巢狀參數區塊，重複 K 次（K 來自先前宣告的參數） | `repeat`, `params`（見下方「group 群組」） |
 
 #### 範例
 
@@ -178,6 +180,116 @@ params:
 ```
 
 省略 `count` 時等同於 `count: { min: 1, max: 1 }`，即只產生一個值。
+
+#### count.from — 個數連動另一個參數
+
+`count` 支援**連動模式**：以 `from` 指定「個數等於另一個參數實際抽出的值」。與 `min`/`max` **互斥**（同時宣告會在建置期報錯）。
+
+```yaml
+params:
+  n:
+    type: int
+    min: 1
+    max: 10
+  nums:
+    type: int
+    min: -999
+    max: 999
+    count:
+      from: n           # 個數 = n 抽到的值
+      separator: "\n"   # 每個值一行
+```
+
+產生的測資範例（n 抽到 3）：
+
+```
+3
+-42
+507
+-8
+```
+
+**引用規則**（違反任一條都是建置期錯誤，不會產出壞測資）：
+
+| 規則 | 說明 |
+|------|------|
+| 只能往回引用 | 被引用的參數必須宣告在前面（同層先宣告，或群組內引用頂層先宣告者）|
+| 只能引用單值 int | 被引用者必須是 `int` 且沒有 `count`（或 `count` 固定為 1）|
+| 值域不可為負 | 被引用者的 `min` 必須 ≥ 0 |
+| 不能引用 group | 群組不可被 `from` 或 `repeat` 引用 |
+
+連動個數解析為 0 時，該參數**整個區塊省略**（不會留下空行）——「N=0 代表接下來 0 行」。
+
+#### group 群組 — 競賽式多筆測資
+
+`group` 把一段巢狀 params **重複 K 次**，K 來自先前宣告的單值 int 參數（規則同上表）。群組**不可再包含群組**（深度上限 1）。群組內的參數可以引用「同一次重複內先宣告的兄弟參數」或「群組外先宣告的頂層參數」；每次重複各自獨立解析。`repeat` 解析為 0 時整個群組不產生任何行。
+
+> **同名遮蔽細節**：引用綁定看的是**宣告順序**，不是「是否在同一個群組內」。若群組內宣告了與頂層同名的參數（如 `n`），排在它**之前**的群組內引用會綁到頂層的 `n`、排在它**之後**的才綁到群組內的 `n`。建議直接避免同名，不要依賴此行為。
+
+完整範例——「第一行 T 筆測資，每筆第一行 Ni、接著 Ni 行整數」：
+
+```yaml
+params:
+  t:
+    type: int
+    min: 2
+    max: 5
+  cases:
+    type: group
+    repeat: t
+    params:
+      n:
+        type: int
+        min: 1
+        max: 10
+      nums:
+        type: int
+        min: -999
+        max: 999
+        count:
+          from: n
+          separator: "\n"
+```
+
+產生的測資範例（t=2，兩筆測資的 n 分別為 3、1）：
+
+```
+2
+3
+14
+-72
+891
+1
+-5
+```
+
+對應的 `generator` 讀法：
+
+```python
+t = int(input())
+for _ in range(t):
+    n = int(input())
+    nums = [int(input()) for _ in range(n)]
+    # ... 計算並 print 該筆答案
+```
+
+#### 輸入規模預算（input_budget）
+
+建置期會以宣告的上界計算**單筆測資的 worst-case 位元組數**（int 取最寬位數含負號、字串型別取 `max_len`、enum 取最長值，乘上 count 上界與 separator，群組再乘上 repeat 上界）。估算超過預算時**建置直接失敗**，並列出逐參數估算式。
+
+- 預設預算：**4096 bytes**／筆——教學題綽綽有餘
+- 可在 frontmatter 以 `input_budget` 調高
+- 硬上限：**65536 bytes**，不可覆寫（保護池檔大小與前端執行鏈）
+
+> **注意**：瀏覽器 dev 模式的即時預覽只受 65536 硬上限保護、不套用此預算——本機看起來正常但 `pnpm build:pools` 報預算超標時，請先檢討 `params` 設計（例如降低 count 上界），而不是直接調大 `input_budget`。
+
+#### 建置期驗證（fail loudly）
+
+所有規格錯誤都在**建置期／parse 期**以可讀錯誤失敗，不會產出壞測資，也不會在執行期 panic：未知欄位（拼錯的 `min_lenght` 會被拒收）、`min > max`、空的 enum `values`、非法引用、群組巢狀、預算超標。全部題目的 params 由 `scripts/challenge-params.test.ts` 冒煙守門——任何一題宣告了引擎不認識的型別或欄位，測試會指名該檔失敗。
+
+#### 測資決定性（seed）
+
+正式測資池以「題目 slug + params 內容」導出固定 seed：**同樣的宣告必產出同樣的池**，方便重現與比對；params 一有改動，池自動重新洗牌。瀏覽器 dev 模式的即時練習測資維持隨機（每次執行都不同）。
 
 ---
 

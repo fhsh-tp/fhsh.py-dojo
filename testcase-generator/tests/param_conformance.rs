@@ -116,3 +116,84 @@ fn int_count_produces_separated_values() {
         }
     }
 }
+
+// ── Group / count.from / seed / budget conformance (upgrade-testcase-engine) ──
+
+/// Competition-shape spec: first line t, then t repetitions of
+/// "n on one line, then n lines of ints".
+const DEQUE_PARAMS: &str = r#"{
+    "t": {"type": "int", "min": 1, "max": 4},
+    "cases": {"type": "group", "repeat": "t", "params": {
+        "n": {"type": "int", "min": 0, "max": 6},
+        "nums": {"type": "int", "min": -999, "max": 999, "count": {"from": "n", "separator": "\n"}}
+    }}
+}"#;
+
+#[test]
+fn group_competition_shape_conforms() {
+    let params = parse_params(DEQUE_PARAMS).expect("deque-shape params should parse");
+    for i in 0..N {
+        let input = generate_input(&params, &mut SmallRng::seed_from_u64(i as u64));
+        let lines: Vec<&str> = input.split('\n').collect();
+        let t: usize = lines[0].parse().expect("first line is t");
+        assert!((1..=4).contains(&t));
+        let mut idx = 1;
+        for _ in 0..t {
+            let n: usize = lines[idx].parse().expect("case header is n");
+            assert!(n <= 6);
+            idx += 1;
+            for _ in 0..n {
+                let v: i64 = lines[idx].parse().expect("data line is int");
+                assert!((-999..=999).contains(&v));
+                idx += 1;
+            }
+        }
+        assert_eq!(idx, lines.len(), "seed={i}: no trailing lines allowed");
+    }
+}
+
+#[test]
+fn count_from_line_count_tracks_reference() {
+    let json = r#"{
+        "n": {"type": "int", "min": 0, "max": 9},
+        "xs": {"type": "int", "min": 1, "max": 5, "count": {"from": "n", "separator": " "}}
+    }"#;
+    let params = parse_params(json).expect("linked params should parse");
+    for i in 0..N {
+        let input = generate_input(&params, &mut SmallRng::seed_from_u64(i as u64));
+        let lines: Vec<&str> = input.split('\n').collect();
+        let n: usize = lines[0].parse().unwrap();
+        if n == 0 {
+            assert_eq!(lines.len(), 1, "seed={i}: n=0 must contribute no data line");
+        } else {
+            assert_eq!(lines.len(), 2, "seed={i}");
+            assert_eq!(lines[1].split(' ').count(), n, "seed={i}: value count must equal n");
+        }
+    }
+}
+
+#[test]
+fn seeded_pool_inputs_are_deterministic() {
+    let spec = format!(r#"{{"seed": "conformance", "params": {}}}"#, DEQUE_PARAMS);
+    let a = testcase_generator::pool_inputs_from_spec(&spec, 20).unwrap();
+    let b = testcase_generator::pool_inputs_from_spec(&spec, 20).unwrap();
+    assert_eq!(a, b);
+}
+
+#[test]
+fn budget_violation_is_readable_error() {
+    let spec = r#"{"params": {"n": {"type": "int", "min": 1, "max": 9, "count": {"min": 1, "max": 5000}}}}"#;
+    let err = testcase_generator::pool_inputs_from_spec(spec, 1).unwrap_err();
+    assert!(err.contains("input budget"), "got: {err}");
+}
+
+#[test]
+fn invalid_reference_is_parse_error_not_panic() {
+    // Forward reference — must be a readable Err, never a panic.
+    let json = r#"{
+        "cases": {"type": "group", "repeat": "t", "params": {"x": {"type": "int"}}},
+        "t": {"type": "int", "min": 1, "max": 2}
+    }"#;
+    let err = parse_params(json).unwrap_err();
+    assert!(err.contains("previously-declared"), "got: {err}");
+}

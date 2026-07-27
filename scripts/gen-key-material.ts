@@ -16,5 +16,5 @@ import { getPoolKey } from './pool-key.js'
 import { generateKeyMaterial } from './generate-key-material.js'
 
 const root = resolve(import.meta.dirname, '..')
-generateKeyMaterial(getPoolKey(root), root)
+generateKeyMaterial(getPoolKey(root, { create: true }), root)
 console.log('[gen-key-material] wrote testcase-generator/src/key_material.rs')
