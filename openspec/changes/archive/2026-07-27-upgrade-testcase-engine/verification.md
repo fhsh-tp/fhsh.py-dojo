@@ -2,18 +2,17 @@
 
 ## A. 部署驗證清單(人工項,staging 部署時逐項勾記)
 
-- [ ] **Cloudflare Pages build command 更新**:dashboard → 專案設定 → Build
-  command,改為與 `package.json` 的 `build` 一致的三段順序:
-  `pnpm gen:keymaterial && pnpm build:wasm && pnpm build:pools && pnpm build:pyodide && pnpm docs:build`
-  (或直接 `pnpm build`)。**預期觀察**:build log 中 wasm-pack 完成於
-  generate-pools 之前;無 "WASM artifact not found" 錯誤。
-- [ ] **CF Node 版本 ≥ 22**:dashboard 環境變數 `NODE_VERSION`(或
-  `.node-version`)確認 ≥ 22。**預期觀察**:build log 開頭的 Node 版本;
-  `package.json` 的 `engines.node >= 22` 若不符會在 install 期警告。
-- [ ] **staging 部署綠燈**:push 後 CF build 全綠,站台可開、任一題可判題。
-- [ ] **池檔大小抽查**:`docs/public/pools/*.bin` 全部遠小於 25 MiB
-  (CF Pages 單檔上限)。**預期觀察**:本機建置全部池檔 < 100 KB
-  (2026-07-27 本機實測最大約 11 KB)。
+- [x] **Cloudflare Pages build command**:既有指令結尾即為 `pnpm build`,
+  新三段順序由 package.json 內部生效,dashboard 無須修改(2026-07-27 確認);
+  merge 後 CF 建置 Deploy successful。
+- [x] **CF Node 版本 ≥ 22**:Build system v3 預設 Node 22.16.0(2026-07-27
+  dashboard 截圖確認)。
+- [x] **staging 部署綠燈**(2026-07-27,merge commit 2ec86d9):GitHub Actions
+  verify(新 wasm-pack 流程首跑)與 Cloudflare Pages 皆 success;
+  staging.fhsh-py-dojo.pages.dev 以 agent-browser 實測 repeat-greeting
+  提交 5/5 AC,console 零 error。
+- [x] **池檔大小抽查**(staging deploy 實測):repeat-greeting.bin 112 KB、
+  card-restack-count.bin 1.96 MB(2^n 大數輸出所致),皆遠小於 25 MiB 上限。
 
 ## B. Implementation Contract 觀察點(design.md,7.1 執行紀錄,2026-07-27)
 
