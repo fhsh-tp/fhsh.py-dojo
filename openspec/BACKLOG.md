@@ -2,7 +2,17 @@
 
 > 本檔收錄「已討論收斂但刻意延後」的功能構想,以及 adversarial review 挖出、
 > 但不屬於當前 change 範圍的已知債務。每項含問題描述、證據位置、建議處理方向。
-> 來源:2026-07-26/27 `upgrade-testcase-engine` 的 discuss 與三輪 adversarial review。
+> 來源:2026-07-26/27 `upgrade-testcase-engine` 的 discuss 與多輪 adversarial review。
+
+## Audit finding ID 對照表
+
+| Audit ID | 章節 |
+|----------|------|
+| H1(R1,經 review 駁回降 Info) | 2.7 |
+| judge oracle(R1 review 發現) | 2.6 |
+| M-R2-2(.env.pool 權限) | 2.9 |
+| M-R2-3(content-regression 覆蓋率) | 2.10 |
+| L-R2-4(verdict_detail 白名單) | 2.11 |
 
 ---
 
@@ -126,3 +136,28 @@ staging 驗證,不可與其他工作綁包。
 - **現狀**:輸入規模預算(預設 4096 bytes)使教學題不會逼近這些門檻;
   若未來要出「效能感」題型(大 N 逼 O(n²) 超時),需先做 per-challenge
   TLE 旋鈕並重測 settrace 下的實際 op/秒。
+
+### 2.9 .env.pool 檔案權限(M-R2-2)
+
+- **問題**:`scripts/pool-key.ts` 的 `writeFileSync` 未指定 mode,金鑰檔以
+  umask 預設(通常 0644)落地,共用機器上全機可讀。
+- **評估**:此金鑰設計上本就會嵌入公開發佈的 WASM(XOR 混淆僅為 obfuscation),
+  威脅模型見 2.6——權限加固屬衛生性措施。修法一行(`{ mode: 0o600 }`),
+  另需手動 `chmod 600` 既有檔案。
+- **建議方向**:低優先;可與 2.6/2.7 的威脅模型文件化一併處理。
+
+### 2.10 content-regression 覆蓋率地板過低(M-R2-3)
+
+- **問題**:55 題僅 4 題宣告 `reference_solution`,coverage floor 僅要求
+  `> 0`;綠燈的內容保證有限。
+- **評估**:屬內容投入問題,非引擎問題;floor 貿然提高會立即紅燈。
+- **建議方向**:於 challenge-author skill/scaffold 將 `reference_solution`
+  列為新題預設必填;存量題目逐步補齊後再提高 floor 門檻。
+
+### 2.11 verdict_detail 建置期無白名單(L-R2-4)
+
+- **問題**:`generate-pools.ts` 的 `readChallenge` 不驗證 `verdict_detail`
+  值;拼錯會進加密池,至瀏覽器端 serde 反序列化才以可捕捉錯誤失敗
+  (fail-closed,前端顯示載入失敗訊息)——屬 DX/timing 問題。
+- **建議方向**:`readChallenge` 加 `['hidden','actual','full']` 白名單,
+  一行成本,適合夾帶在下一個觸碰該檔的 change。

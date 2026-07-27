@@ -59,16 +59,16 @@ async function loadWasm(): Promise<WasmMod> {
       // runtime only, so environments without the artifact can still import
       // this module (and the build script's pure helpers) safely.
       const mod: WasmMod = await import(`${GLUE_PATH}`)
-      await mod.default({ module_or_path: readFileSync(WASM_PATH) })
       // The template-literal import bypasses static typing, so verify the
-      // contract at load time: a Rust-side rename must fail HERE with a
-      // clear message, not mid-build with "not a function".
-      if (typeof mod.generate_pool_inputs !== 'function') {
+      // contract BEFORE calling into the module: a stale or renamed glue
+      // must fail here with a clear message, not with "not a function".
+      if (typeof mod.default !== 'function' || typeof mod.generate_pool_inputs !== 'function') {
         throw new Error(
-          '[wasm-input-generator] loaded WASM does not export generate_pool_inputs — ' +
-            'the artifact is stale. Run: pnpm build:wasm',
+          '[wasm-input-generator] loaded WASM glue is missing expected exports ' +
+            '(default init / generate_pool_inputs) — the artifact is stale. Run: pnpm build:wasm',
         )
       }
+      await mod.default({ module_or_path: readFileSync(WASM_PATH) })
       wasmMod = mod
       return mod
     })()

@@ -179,7 +179,12 @@ pub fn parse_params_value(v: &Value) -> Result<Params, String> {
     }
 
     let (total, items) = estimate_input_bytes(&params);
-    if total > HARD_CAP_BYTES {
+    // `>=` on purpose: MAX_COUNT equals HARD_CAP_BYTES, so a zero-width
+    // declaration floored at 1 byte/value can estimate EXACTLY the cap;
+    // a strict `>` would let that boundary case through. Rejecting the
+    // exact-cap estimate keeps the invariant "accepted specs estimate
+    // strictly below the cap" regardless of how the two constants move.
+    if total >= HARD_CAP_BYTES {
         return Err(budget_error(total, HARD_CAP_BYTES, &items, "hard cap"));
     }
 
@@ -1109,6 +1114,16 @@ mod tests {
         let json = r#"{"s": {"type": "alpha_lower", "min_len": 1, "max_len": 4294967297}}"#;
         let err = parse_params(json).unwrap_err();
         assert!(err.contains("exceeds the maximum of 65536"), "got: {err}");
+    }
+
+    #[test]
+    fn exact_cap_estimate_is_rejected() {
+        // L-R2-2 regression: MAX_COUNT == HARD_CAP_BYTES, so a zero-width
+        // enum at count 65536 estimates exactly 65536; the boundary must
+        // be rejected (`>=`), not admitted by a strict `>`.
+        let json = r#"{"x": {"type": "enum", "values": [""], "count": {"min": 65536, "max": 65536, "separator": ""}}}"#;
+        let err = parse_params(json).unwrap_err();
+        assert!(err.contains("hard cap"), "got: {err}");
     }
 
     #[test]

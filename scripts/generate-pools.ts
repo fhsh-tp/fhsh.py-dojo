@@ -245,8 +245,11 @@ export function readChallenge(filePath: string): ChallengeInfo {
   if (!generator) throw new Error(`Missing 'generator' in ${filePath}`)
   if (!params) throw new Error(`Missing 'params' in ${filePath}`)
 
-  if (input_budget !== undefined && (!Number.isInteger(input_budget) || input_budget < 0)) {
-    throw new Error(`'input_budget' must be a non-negative integer in ${filePath}`)
+  if (input_budget !== undefined && (!Number.isInteger(input_budget) || input_budget < 1)) {
+    throw new Error(
+      `'input_budget' must be a positive integer in ${filePath} ` +
+        `(omit the field to use the default; 0 does not mean "unlimited")`,
+    )
   }
 
   return {
