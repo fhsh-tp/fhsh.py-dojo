@@ -282,13 +282,18 @@ async function handleRunOnly(req: RunOnlyRequest): Promise<void> {
       })
     } catch (err: unknown) {
       const errMsg = String(err)
+      // Classify op-limit timeouts HERE (same signature the dev-mode `run`
+      // handler recognizes) — downstream the judge only reads the
+      // structured flag. The timeout message embeds the op limit, so a
+      // timed-out result carries no error field at all.
+      const isTle = errMsg.includes('TimeoutError') || errMsg.includes('Operation limit')
 
       self.postMessage({
         type: 'testcase_result',
         index: i,
         stdout: '',
         elapsed_ms: performance.now() - startTime,
-        error: errMsg,
+        ...(isTle ? { timed_out: true } : { error: errMsg }),
       })
     }
   }
