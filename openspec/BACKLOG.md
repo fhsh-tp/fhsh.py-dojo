@@ -62,12 +62,19 @@ change、完整 review 與 staging 驗證後才落地。
 
 ### 2.3 dev 模式 generator 無逾時且吞錯
 
-- **問題**:`runGenerator` 無 timeout(對比 `submit()` 的 kill timer);
-  generator 超過 op limit 時錯誤被 console.error 後照樣回傳空
+- **問題**:`runGenerator` 無 timeout(對比 `submit()` 的 kill timer)、
+  「生成中…」無停止鈕;generator 執行錯誤被 console.error 後照樣回傳空
   `expected_output`,dev 模式帶著全空期望輸出進判題→全部 WA 且 UI 無提示。
-- **證據**:`.vitepress/theme/composables/useChallengeRunner.ts:157-190`、
-  `.vitepress/theme/workers/pyodide.worker.ts:347`。
-- **建議方向**:generator 錯誤時設 `errorMessage` 而非靜默;補 kill timer。
+- **2026-07-28 更新(fix-op-counter-blind-spot 之後)**:generator 已豁免
+  op-counter(`opLimit: null`),「超過 op limit」不再是觸發條件;錯誤
+  來源剩一般 Python 例外,而**無限迴圈 generator 會掛住預覽頁直到手動
+  重新整理**(僅影響出題者本機;建置期 build:pools 的 runGenerator 有
+  120 秒 execFileSync timeout,會先在建置端逾時失敗暴露)。
+- **證據**:`.vitepress/theme/composables/useChallengeRunner.ts`(
+  runGenerator 無 timer)、`.vitepress/theme/workers/pyodide.worker.ts`
+  (handleGenerate 無 wall-clock)。
+- **建議方向**:generator 錯誤時設 `errorMessage` 而非靜默;比照
+  `submitKillTimerId` 補 main-thread kill timer。出 deque 題非前置。
 
 ### 2.4 池無 params 指紋、URL 無 content hash
 
@@ -146,12 +153,9 @@ change、完整 review 與 staging 驗證後才落地。
   `import sys; sys.settrace(None)` 主動關閉 op-counter——它是防意外無限
   迴圈的防線、非防蓄意繞過的沙盒,繞過者結局是撞外層 wall-clock/總預算;
   教學平台威脅模型下接受。
-- **延後改善(audit R2 記錄)**:dev 模式 generate 路徑(`runGenerator`/
-  `handleGenerate`)無任何計時器與停止鈕——generator 豁免 op-counter 後,
-  無限迴圈 generator 會掛住出題預覽頁直到手動重新整理(僅影響出題者本機;
-  建置期 build:pools 同樣無時限,會先在建置端暴露)。可比照
-  `submitKillTimerId` 補 main-thread kill timer,列停車場、出 deque 題非
-  前置。
+- **延後改善(audit R2 記錄)**:generator 豁免 op-counter 後,dev 模式
+  generate 路徑的無限迴圈 generator 會掛住預覽頁——細節與建議修法見
+  §2.3(同一根因,已於該條目 2026-07-28 更新段整併,勿重複記錄)。
 
 ### 2.9 .env.pool 檔案權限(M-R2-2)
 

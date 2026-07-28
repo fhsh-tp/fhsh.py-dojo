@@ -124,8 +124,10 @@ export const TRACE_RESET_SNIPPET = 'import sys\nsys.settrace(None)'
  * 'call' event — before its first line — with a NameError from the stale
  * tracer, falsely failing a correct testcase. Must run BEFORE
  * `globals.clear()`: while `_op_count` still exists the stale tracer stays
- * callable, so this line executes without relying on CPython's
- * clear-on-tracer-exception fallback (which the catch covers anyway).
+ * callable, so the reset normally executes cleanly. Edge case: if the
+ * leftover count is already near its limit, the reset's own events make
+ * the stale tracer raise — CPython then auto-clears tracing and the catch
+ * absorbs the error, so both paths end with clean trace state.
  */
 async function resetTraceState(): Promise<void> {
   try {

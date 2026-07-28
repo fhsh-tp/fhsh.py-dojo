@@ -93,7 +93,7 @@ wrapper 的 `sys.settrace(None)` teardown 物理上寫在 user code 之後,一�
 - [tracing 讓所有學生碼變慢] → 行事件 tracer 對 CPython 有 2–4 倍常數開銷;正常解 op 量級 ~10^5,絕對耗時仍在毫秒級,可接受。10M 上限的 wall-time 上界(3–5 秒/筆)不變,因為既往量測本就是 traced(函式包裝)情境。實機佐證:smallest-prime-factor(題庫中 N 上限最大者)dev 模式單筆最重 339ms,距 5 秒 wall-clock 旁路仍有 10 倍餘裕。
 - [學生主動 `import sys; sys.settrace(None)` 關閉計數] → op-counter 是防意外無限迴圈的防線,不是防蓄意繞過的沙盒;繞過者的結局是撞外層 wall-clock/總預算。教學平台威脅模型下接受,已記入 BACKLOG 已知限制。
 - [CPython 與 Pyodide 行為差異] → 測試用 python3 執行,理論上與瀏覽器 Pyodide 有落差;RCA 已對兩者雙重實測 frame 語意一致,且 e2e(PR 前)會在真 Pyodide 上驗證。
-- [generator 豁免後,出題者寫出無限迴圈 generator] → **dev 模式的 generate 路徑沒有任何計時器**(audit R2 查證:runGenerator 無 kill timer、handleGenerate 無 wall-clock、「生成中…」無停止鈕),無限迴圈 generator 會掛住預覽頁直到手動重新整理。接受理由:generator 是出題者可信碼;主流寫法是扁平碼、修復前同樣不設限(盲區),僅函式包裝式 generator 失去 10M 煞車;建置期 build:pools(裸 python3)同樣無時限,無限迴圈 generator 在進 dev 預覽前就會在建置端暴露。dev 側 generate kill timer 列 BACKLOG 延後改善。
+- [generator 豁免後,出題者寫出無限迴圈 generator] → **dev 模式的 generate 路徑沒有任何計時器**(audit R2 查證:runGenerator 無 kill timer、handleGenerate 無 wall-clock、「生成中…」無停止鈕),無限迴圈 generator 會掛住預覽頁直到手動重新整理。接受理由:generator 是出題者可信碼;主流寫法是扁平碼、修復前同樣不設限(盲區),僅函式包裝式 generator 失去 10M 煞車;建置期 build:pools 的 runGenerator 有 120 秒 execFileSync timeout,無限迴圈 generator 會先在建置端逾時失敗而暴露。dev 側 generate kill timer 列 BACKLOG(§2.3 既有條目)延後改善。
 - [修復後某些既有題的正解 op 量上升觸限] → 全題庫 content-regression + 手動 dev 冒煙守門;正解量級(10^5)距 10M 有兩個數量級餘裕。
 
 ## Migration Plan

@@ -169,5 +169,49 @@ sys.__stdout__.write(G["_output"])
       expect(res.status).toBe(0)
       expect(res.stdout).toBe('42\n')
     })
+
+    it('a leftover count near the limit cannot poison past the antidote either', () => {
+      // Edge path: when the leaked tracer's count sits close enough to the
+      // limit, the antidote's OWN events make the stale tracer raise
+      // TimeoutError mid-reset — CPython then auto-clears tracing and the
+      // handler's catch absorbs the error. Exact event arithmetic varies
+      // with code shape, so instead of calibrating one magic offset we
+      // sweep offsets 0..5 below the limit: every offset must end clean,
+      // and at least one must land in the raise window (the window is
+      // wider than one event, so the sweep always hits it).
+      const offsets = [0, 1, 2, 3, 4, 5]
+      for (const off of offsets) {
+        const bad = `_op_count = _op_limit - ${off}\nraise IndexError("boom")\n`
+        writeFileSync(join(tmp, `edge_w1_${off}.py`), buildWrappedCode(bad, '', LOW_OP_LIMIT), 'utf-8')
+      }
+      writeFileSync(join(tmp, 'edge_w2.py'), buildWrappedCode(FLAT_NORMAL, '21\n', LOW_OP_LIMIT), 'utf-8')
+
+      const driver = `
+import pathlib
+import sys
+
+w2 = pathlib.Path(${JSON.stringify(join(tmp, 'edge_w2.py'))}).read_text()
+for off in ${JSON.stringify(offsets)}:
+    G = {}
+    w1 = pathlib.Path(${JSON.stringify(tmp)} + f"/edge_w1_{off}.py").read_text()
+    try:
+        exec(compile(w1, "<w1>", "exec"), G)
+    except Exception:
+        pass
+    try:
+        exec(compile("import sys\\nsys.settrace(None)", "<antidote>", "exec"), G)
+    except Exception as e:
+        print(f"ANTIDOTE_RAISED off={off} {type(e).__name__}", file=sys.stderr)
+    G.clear()
+    exec(compile(w2, "<w2>", "exec"), G)
+    sys.__stdout__.write(f"OFF{off} " + G["_output"])
+`.trimStart()
+
+      const res = spawnSync('python3', ['-c', driver], { encoding: 'utf-8', timeout: 30_000 })
+      expect(res.status).toBe(0)
+      expect(res.stdout).toBe(offsets.map((o) => `OFF${o} 42\n`).join(''))
+      // The guarantee must hold on the raise path too — prove we hit it.
+      expect(res.stderr).toContain('ANTIDOTE_RAISED')
+    })
   })
 }
