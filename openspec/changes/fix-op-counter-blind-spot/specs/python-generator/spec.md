@@ -33,6 +33,29 @@ The Python wrapper produced by `buildWrappedCode` SHALL count operations execute
 - **WHEN** `buildWrappedCode` is called with `opLimit: null`
 - **THEN** the produced wrapper still blocks `js`/`pyodide` imports and still captures stdout into `_output`
 
+### Requirement: Worker resets interpreter trace state before each execution
+
+The wrapper's own `sys.settrace(None)` teardown executes only when user code completes normally; an ordinary user exception (the routine RE path) skips it and leaks the installed tracer into the shared interpreter. The leaked tracer — whose globals dict is cleared between runs — then kills the NEXT execution in its 'call' event with an unrelated NameError before its first line runs, falsely failing a correct testcase (self-healing after one poisoned run). To prevent this, every Worker handler (`run`, `run_only`, `execute`, `generate`) SHALL clear the interpreter's trace state by executing `sys.settrace(None)` before clearing globals and running the next wrapped code. The reset SHALL run before `globals.clear()` so the stale tracer's own state is still intact and the reset itself cannot be poisoned.
+
+#### Scenario: An errored testcase does not poison the next
+
+- **WHEN** testcase A raises an ordinary exception (e.g. IndexError) and testcase B with correct code runs next in the same interpreter
+- **THEN** testcase B SHALL produce its correct output instead of failing with a stale-tracer NameError
+
+#### Scenario: Reset precedes every execution
+
+- **WHEN** any handler processes multiple inputs in one request
+- **THEN** each input's execution SHALL be preceded by a trace-state reset followed by globals clearing
+
+### Requirement: Real challenge content passes through the judging wrapper
+
+The test suite SHALL execute the `reference_solution` of every challenge that declares one THROUGH `buildWrappedCode` (default op limit, tracing active) against sampled production-pool inputs, asserting the output matches the generator's expected output. This guards the actual judging execution path with real content — the content-regression suite runs solutions in a bare python3 subprocess and never exercises the wrapper.
+
+#### Scenario: Reference solution survives the wrapper on real inputs
+
+- **WHEN** a challenge declares `reference_solution` and the smoke suite runs it through the wrapper on sampled pool inputs
+- **THEN** execution completes without error and the output matches the generator's expected output
+
 ### Requirement: Op-count guard is verified by executing real Python
 
 The test suite SHALL include integration tests that execute the wrapper produced by `buildWrappedCode` with a real Python interpreter (system `python3`), asserting runtime behavior rather than wrapper string shape. The tests SHALL cover at minimum: a flat top-level loop exceeding the limit (fails with "Operation limit exceeded"), normal flat code (correct `_output`, no error), function-wrapped code exceeding the limit, and an exempt (`opLimit: null`) run of an over-limit loop completing normally. When `python3` is unavailable, these executions MAY be skipped following the same preflight pattern as the content-regression suite.

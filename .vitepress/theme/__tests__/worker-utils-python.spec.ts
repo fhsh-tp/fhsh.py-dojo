@@ -15,7 +15,10 @@
  * settrace/f_trace frame semantics, both verified during the RCA).
  */
 import { execFileSync, spawnSync } from 'node:child_process'
-import { describe, it, expect } from 'vitest'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterAll, describe, it, expect } from 'vitest'
 
 import { buildWrappedCode } from '../workers/worker-utils'
 
@@ -113,6 +116,58 @@ if (!hasPython) {
       expect(res.stderr).toBe('')
       expect(res.status).toBe(0)
       expect(res.stdout).toBe('4999950000\n')
+    })
+
+    it('the tracer does not alter program output (guarded vs exempt identical)', () => {
+      const guarded = runWrapped(FLAT_NORMAL, '21\n', LOW_OP_LIMIT)
+      const exempt = runWrapped(FLAT_NORMAL, '21\n', null)
+      expect(guarded.stdout).toBe('42\n')
+      expect(exempt.stdout).toBe(guarded.stdout)
+    })
+  })
+
+  describe('real-python execution: cross-run trace state', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'wrapper-trace-'))
+    afterAll(() => rmSync(tmp, { recursive: true, force: true }))
+
+    it('an errored run does not poison the next run under the handler sequence', () => {
+      // An ordinary user exception (the normal RE path) skips the wrapper's
+      // own settrace(None) teardown, leaking the tracer into the shared
+      // interpreter. The worker handlers guard this with resetTraceState()
+      // BEFORE globals.clear() — this test replays that exact sequence in
+      // one interpreter: errored run → antidote → clear → next run must be
+      // clean. Without the antidote step, the second exec dies in its
+      // 'call' event with a NameError from the stale tracer.
+      const wrappedBad = buildWrappedCode('lst = []\nprint(lst[5])\n', '', LOW_OP_LIMIT)
+      const wrappedGood = buildWrappedCode(FLAT_NORMAL, '21\n', LOW_OP_LIMIT)
+      writeFileSync(join(tmp, 'w1.py'), wrappedBad, 'utf-8')
+      writeFileSync(join(tmp, 'w2.py'), wrappedGood, 'utf-8')
+
+      const driver = `
+import pathlib
+import sys
+
+G = {}
+try:
+    exec(compile(pathlib.Path(${JSON.stringify(join(tmp, 'w1.py'))}).read_text(), "<w1>", "exec"), G)
+except Exception as e:
+    print("W1_ERR", type(e).__name__, file=sys.stderr)
+
+# resetTraceState() equivalent — must come BEFORE G.clear() (worker order)
+try:
+    exec(compile("import sys\\nsys.settrace(None)", "<antidote>", "exec"), G)
+except Exception:
+    pass
+G.clear()
+
+exec(compile(pathlib.Path(${JSON.stringify(join(tmp, 'w2.py'))}).read_text(), "<w2>", "exec"), G)
+sys.__stdout__.write(G["_output"])
+`.trimStart()
+
+      const res = spawnSync('python3', ['-c', driver], { encoding: 'utf-8', timeout: 30_000 })
+      expect(res.stderr.trim()).toBe('W1_ERR IndexError')
+      expect(res.status).toBe(0)
+      expect(res.stdout).toBe('42\n')
     })
   })
 }

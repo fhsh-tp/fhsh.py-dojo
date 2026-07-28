@@ -48,6 +48,16 @@
 
 10M ops/筆的預設上限維持不變。修復後全部學生碼(含扁平)開始付 tracing 成本,正常解(教學解 ~108k ops)毫無壓力;門檻調整屬出題期決策(deque 題的 band 值域),不在本 change。
 
+### D5:跨測資 trace 殘留 — JS 側解毒劑,置於 globals.clear() 之前(audit R1 新增)
+
+wrapper 的 `sys.settrace(None)` teardown 物理上寫在 user code 之後,一般例外(常態 RE)會跳過它;殘留 tracer 的 `__globals__` 在 `globals.clear()` 後被清空,下一次執行的第一個 'call' 事件即拋 `NameError` 毒殺正確測資(毒發一筆後因 tracer 拋例外自動解除而自癒)。真 Pyodide 0.29 實測:RE/AC 交錯 6 筆,成績 3/6 → 0/6。
+
+修法:worker 新增 `resetTraceState()`(執行 `import sys; sys.settrace(None)`,try/catch 包覆),4 個 handler 在每次執行前、`globals.clear()` **之前**呼叫。順序關鍵:clear 之前舊 tracer 的 `_op_count` 尚在,解毒劑本身不會被毒到(不依賴「tracer 拋例外自動解除」的間接保證);實測成本 0.29ms/次,最壞情況(解毒失效)行為退回現況、不會更糟。
+
+替代方案(駁回):(a) 把 user code 縮排包進 try/finally——會破壞使用者多行字串的內容(縮排改變字串值),語意不可接受;(b) Python 側 prologue 解毒——毒在 frame 建立的 'call' 事件就爆,prologue 第一行都跑不到,實測證死;(c) tracer 狀態改 default-arg 閉包——殘留 tracer 會把計數帶進下一筆,把硬性 RE 換成更難察覺的偽 TLE。
+
+此缺陷為既有(修復前後 settrace/teardown 位置相同,pre-fix wrapper 逐字重現同樣污染),非本次修復引入;本次修復讓 `handleGenerate` 改豁免反而少一個毒源。
+
 ## Implementation Contract
 
 **行為契約:**
@@ -55,7 +65,8 @@
 1. 扁平頂層 Python 碼(無函式定義)執行行數超過 opLimit 時,wrapper 拋出 `TimeoutError("Operation limit exceeded (N ops)")`——與函式包裝碼行為一致。
 2. `opLimit` 為 `null` 時,wrapper 產出不含 `sys.settrace` 呼叫與 `_tracer` 定義,執行不受 op 上限約束;sandbox guard 與 stdin/stdout 捕捉行為不變。
 3. `handleGenerate` 對 generator 碼一律以豁免模式(`opLimit: null`)執行;`run`/`run_only`/`execute` 維持預設 10,000,000。
-4. 正常(未超限)程式碼的 `_output` 內容與修復前 byte-identical——tracer 掛上當下 frame 不改變任何執行結果。
+4. 正常(未超限)程式碼的 `_output` 內容不受 tracer 影響——以「同一程式碼在 guarded(number)與 exempt(null)兩種模式下輸出 byte-identical」的對照測試坐實(tracer 只計數/拋例外,不觸碰 stdout)。
+5. 任一測資拋一般例外後,同一 worker 內下一次執行不受殘留 tracer 影響:4 個 handler 每次執行前先 `resetTraceState()`(在 `globals.clear()` 之前),errored → 下一筆正確碼仍得正確輸出。
 
 **介面形狀:**
 
@@ -79,7 +90,8 @@
 
 ## Risks / Trade-offs
 
-- [tracing 讓所有學生碼變慢] → 行事件 tracer 對 CPython 有 2–4 倍常數開銷;正常解 op 量級 ~10^5,絕對耗時仍在毫秒級,可接受。10M 上限的 wall-time 上界(3–5 秒/筆)不變,因為既往量測本就是 traced(函式包裝)情境。
+- [tracing 讓所有學生碼變慢] → 行事件 tracer 對 CPython 有 2–4 倍常數開銷;正常解 op 量級 ~10^5,絕對耗時仍在毫秒級,可接受。10M 上限的 wall-time 上界(3–5 秒/筆)不變,因為既往量測本就是 traced(函式包裝)情境。實機佐證:smallest-prime-factor(題庫中 N 上限最大者)dev 模式單筆最重 339ms,距 5 秒 wall-clock 旁路仍有 10 倍餘裕。
+- [學生主動 `import sys; sys.settrace(None)` 關閉計數] → op-counter 是防意外無限迴圈的防線,不是防蓄意繞過的沙盒;繞過者的結局是撞外層 wall-clock/總預算。教學平台威脅模型下接受,已記入 BACKLOG 已知限制。
 - [CPython 與 Pyodide 行為差異] → 測試用 python3 執行,理論上與瀏覽器 Pyodide 有落差;RCA 已對兩者雙重實測 frame 語意一致,且 e2e(PR 前)會在真 Pyodide 上驗證。
 - [generator 豁免後,出題者寫出無限迴圈 generator] → dev 模式會掛在 worker 內直到外層逾時;generator 是可信碼、建置期同樣無限制,風險與現況(盲區實質不設限)持平,未惡化。
 - [修復後某些既有題的正解 op 量上升觸限] → 全題庫 content-regression + 手動 dev 冒煙守門;正解量級(10^5)距 10M 有兩個數量級餘裕。

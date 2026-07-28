@@ -109,6 +109,27 @@ async function ensurePyodide(): Promise<void> {
   pyodide = await mod.loadPyodide({ indexURL: PYODIDE_CDN })
 }
 
+/**
+ * Clear any tracer left over from a previous run in this interpreter.
+ *
+ * The wrapper's own `sys.settrace(None)` teardown sits AFTER the user code,
+ * so any ordinary exception (the normal RE path) skips it and the tracer
+ * leaks into the shared interpreter. The next execution then dies in its
+ * 'call' event — before its first line — with a NameError from the stale
+ * tracer, falsely failing a correct testcase. Must run BEFORE
+ * `globals.clear()`: while `_op_count` still exists the stale tracer stays
+ * callable, so this line executes without relying on CPython's
+ * clear-on-tracer-exception fallback (which the catch covers anyway).
+ */
+async function resetTraceState(): Promise<void> {
+  try {
+    await pyodide.runPythonAsync('import sys\nsys.settrace(None)')
+  } catch {
+    // A stale tracer may throw mid-reset; CPython auto-clears tracing when
+    // the tracer itself raises, so trace state is clean either way.
+  }
+}
+
 // ── Message handler ────────────────────────────────────────────────────────
 
 self.onmessage = async (
@@ -159,6 +180,7 @@ self.onmessage = async (
     }, WALL_CLOCK_MS)
 
     // Namespace cleanup before each testcase (task 4.7)
+    await resetTraceState()
     try {
       pyodide.globals.clear()
     } catch {
@@ -231,6 +253,7 @@ async function handleRunOnly(req: RunOnlyRequest): Promise<void> {
     const input = inputs[i]!
     const startTime = performance.now()
 
+    await resetTraceState()
     try {
       pyodide.globals.clear()
     } catch {
@@ -275,6 +298,7 @@ async function handleExecute(req: ExecuteRequest): Promise<void> {
   const startTime = performance.now()
 
   // Namespace cleanup
+  await resetTraceState()
   try {
     pyodide.globals.clear()
   } catch {
@@ -314,6 +338,7 @@ async function handleGenerate(req: GenerateRequest): Promise<void> {
 
   for (const input of inputs) {
     // Clear namespace before each generator run
+    await resetTraceState()
     try {
       pyodide.globals.clear()
     } catch {

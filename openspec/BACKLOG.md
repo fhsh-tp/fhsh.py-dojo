@@ -140,6 +140,12 @@ change、完整 review 與 staging 驗證後才落地。
   豁免或獨立上限)→ Change 2《add-tle-verdict》(先補 spec Scenario,
   worker 傳結構化 timed_out 欄位,勿用字串比對)。細節見 2026-07-28
   RCA(deque 題 handoff 未決 0)。
+- **2026-07-28 進度**:Change 1《fix-op-counter-blind-spot》已實作(扁平碼
+  計數生效 + generator 豁免 + 跨測資 trace 殘留解毒 + 真 Python 整合測試
+  與真實內容過 wrapper 冒煙)。**已知限制(接受,不修)**:學生可
+  `import sys; sys.settrace(None)` 主動關閉 op-counter——它是防意外無限
+  迴圈的防線、非防蓄意繞過的沙盒,繞過者結局是撞外層 wall-clock/總預算;
+  教學平台威脅模型下接受。
 
 ### 2.9 .env.pool 檔案權限(M-R2-2)
 

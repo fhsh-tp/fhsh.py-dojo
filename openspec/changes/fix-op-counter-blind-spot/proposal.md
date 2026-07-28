@@ -26,7 +26,8 @@ sys._getframe().f_trace = _tracer
 
 1. **真 Python 執行的整合測試**:以 Node 端可執行的方式實際跑 wrapped code,驗證「扁平頂層無限/超量迴圈會觸發 Operation limit exceeded」與「正常扁平碼不受影響」。
 2. **generator 路徑豁免**:修復後 `handleGenerate` 跑 generator 也會開始計數(先前因盲區實質不設限)。generator 是可信程式碼(出題者寫的),但部分題目 generator 運算量大(`smallest-prime-factor` 最壞情境僅約 5 倍餘裕),須豁免計數或給予獨立高上限,避免修復反而弄壞建置/dev 測資產生。
-3. **全題庫回歸**:既有測試套件 + 全部題目的 content-regression 必須全綠,證明修復不影響正解與 generator。
+3. **跨測資 trace 殘留防護(audit R1 發現的既有缺陷,一併修)**:wrapper 的 `sys.settrace(None)` teardown 寫在 user code 之後,一般例外(常態 RE 路徑)會跳過它,殘留的 tracer 在共用直譯器的下一次執行的 'call' 事件以無關的 NameError 毒殺下一筆正確測資(毒發一筆後自癒;真 Pyodide 實測 RE/AC 交錯情境成績 3/6 → 0/6)。修法:每個 handler 在 `globals.clear()` **之前**先執行 `sys.settrace(None)` 解毒(此時舊 tracer 狀態尚完整,解毒劑本身不會被毒到;實測成本 0.29ms/次)。
+4. **真實內容過 wrapper 的冒煙**:content-regression 以裸 python3 執行、完全不經 wrapper,對本修復的執行路徑零覆蓋力——另建冒煙測試,把宣告 `reference_solution` 的題目全部經 `buildWrappedCode`(預設 10M 上限、tracing 生效)對正式池抽樣輸入執行,鎖住真實內容不被 wrapper 誤殺。
 
 ## Non-Goals
 
@@ -38,14 +39,18 @@ sys._getframe().f_trace = _tracer
 ## Success Criteria
 
 - 扁平頂層學生程式碼(無函式包裝)超過 op 上限時,dev 模式顯示 TLE、正式站回傳含「Operation limit exceeded」的 error(顯示為 RE),**不再是靜默零筆結果**。
-- 正常解(含扁平寫法)在所有既有題目上判題結果不變:`pnpm test --run` 全綠(含 content-regression 全題庫)。
-- generator 路徑(dev 測資產生與 `handleGenerate`)不因修復被 op 上限誤殺:全部題目 dev 模式測資產生正常。
+- 某筆測資拋一般例外(RE)後,同次提交的下一筆正確測資不被殘留 tracer 毒殺:真 Python 序列測試(errored → 解毒 → 正確碼)綠燈,且 4 個 handler 的解毒佈線有 mock 驅動測試守門。
+- 正常解不被修復誤殺——證據分層:(a) 宣告 `reference_solution` 的題目全部經 wrapper 對正式池抽樣輸入執行且輸出正確(自動化冒煙);(b) 其餘題目以架構推論(正解 op 量級 ~10^5 vs 上限 10^7,兩個數量級餘裕)+ 2 題 dev 實機抽測(vending-change 10/10 AC、smallest-prime-factor 6/6 AC)佐證。content-regression 全綠但它不經 wrapper 路徑,不作為本項證據。
+- generator 路徑(dev 測資產生與 `handleGenerate`)不因修復被 op 上限誤殺:豁免模式有真 Python 測試,dev 實機抽測 generator 重運算題正常。
 - 新增的整合測試「真正執行 Python」驗證扁平碼計數生效,取代純字串斷言的盲區。
 
 ## Impact
 
-- Affected specs: `python-generator`(op-limit enforcement 對扁平頂層碼生效、generator 執行豁免)
+- Affected specs: `python-generator`(op-limit enforcement 對扁平頂層碼生效、generator 執行豁免、trace 狀態重置、真實內容過 wrapper 冒煙)、`pyodide-sandbox-guard`(注入順序 requirement 增列豁免模式例外)
 - Affected code:
   - Modified: `.vitepress/theme/workers/worker-utils.ts`(buildWrappedCode 補掛當下 frame;generator 豁免參數)
-  - Modified: `.vitepress/theme/workers/pyodide.worker.ts`(handleGenerate 以豁免模式呼叫 wrapper)
-  - New: `.vitepress/theme/__tests__/worker-utils-python.spec.ts`(真 Python 執行整合測試)
+  - Modified: `.vitepress/theme/workers/pyodide.worker.ts`(handleGenerate 以豁免模式呼叫 wrapper;4 個 handler 執行前解毒 resetTraceState)
+  - Modified: `openspec/BACKLOG.md`(記錄學生主動 sys.settrace(None) 繞過 op-counter 的已知限制)
+  - New: `.vitepress/theme/__tests__/worker-utils-python.spec.ts`(真 Python 執行整合測試,含跨執行 trace 殘留序列)
+  - New: `.vitepress/theme/__tests__/pyodide-worker-trace-reset.spec.ts`(4 handler 解毒佈線守門,mock pyodide 驅動)
+  - New: `scripts/wrapper-content-smoke.test.ts`(reference_solution 全數經 wrapper 對正式池抽樣執行)
