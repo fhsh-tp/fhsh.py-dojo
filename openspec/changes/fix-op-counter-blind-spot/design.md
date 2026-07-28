@@ -24,7 +24,7 @@
 
 ### D1:修復方式 — settrace 後補掛當下 frame
 
-`sys.settrace(_tracer)` 之後補 `sys._getframe().f_trace = _tracer`。已於本機 CPython 3.13 與 repo 內建 Pyodide 0.29 雙重實測:扁平雙重迴圈 n=2500 從 op_count=0 變為正確拋 TimeoutError;tracer 拋例外時 CPython 自動解除 tracing,不洩漏到下一筆。
+`sys.settrace(_tracer)` 之後補 `sys._getframe().f_trace = _tracer`。已於本機 CPython 3.13 與 repo 內建 Pyodide 0.29 雙重實測(audit R2 另於 CPython 3.14 重驗;settrace/f_trace 的 frame 語意在現代 CPython 間穩定,CI 的 3.12 同樣適用,無版本鎖定需求):扁平雙重迴圈 n=2500 從 op_count=0 變為正確拋 TimeoutError;tracer 拋例外時 CPython 自動解除 tracing,不洩漏到下一筆。
 
 替代方案(駁回):(a) 把學生碼包進函式再呼叫——會改變學生程式的作用域語意(頂層變數變區域變數、`global` 行為改變),對教學平台是不可接受的語意破壞;(b) 改用 wall-clock per-case——依賴硬體速度,且無法在 Worker 內中斷同步執行的 Python。
 
@@ -52,7 +52,7 @@
 
 wrapper 的 `sys.settrace(None)` teardown 物理上寫在 user code 之後,一般例外(常態 RE)會跳過它;殘留 tracer 的 `__globals__` 在 `globals.clear()` 後被清空,下一次執行的第一個 'call' 事件即拋 `NameError` 毒殺正確測資(毒發一筆後因 tracer 拋例外自動解除而自癒)。真 Pyodide 0.29 實測:RE/AC 交錯 6 筆,成績 3/6 → 0/6。
 
-修法:worker 新增 `resetTraceState()`(執行 `import sys; sys.settrace(None)`,try/catch 包覆),4 個 handler 在每次執行前、`globals.clear()` **之前**呼叫。順序關鍵:clear 之前舊 tracer 的 `_op_count` 尚在,解毒劑本身不會被毒到(不依賴「tracer 拋例外自動解除」的間接保證);實測成本 0.29ms/次,最壞情況(解毒失效)行為退回現況、不會更糟。
+修法:worker 新增 `resetTraceState()`(執行 `import sys; sys.settrace(None)`,try/catch 包覆),4 個 handler 在每次執行前、`globals.clear()` **之前**呼叫。置於 clear 之前的理由:此時舊 tracer 的 `_op_count` 尚在,一般情況下解毒劑直接執行完成;**邊界情況**(殘留計數已逼近上限)解毒劑自身的事件仍可能觸發 stale tracer 拋 TimeoutError——此時 CPython 自動解除 trace、catch 吸收例外,終態同樣乾淨。兩條路徑都收斂於乾淨狀態(audit R2 以正反順序實測驗證);實測成本 0.29ms/次,最壞情況(解毒失效)行為退回現況、不會更糟。
 
 替代方案(駁回):(a) 把 user code 縮排包進 try/finally——會破壞使用者多行字串的內容(縮排改變字串值),語意不可接受;(b) Python 側 prologue 解毒——毒在 frame 建立的 'call' 事件就爆,prologue 第一行都跑不到,實測證死;(c) tracer 狀態改 default-arg 閉包——殘留 tracer 會把計數帶進下一筆,把硬性 RE 換成更難察覺的偽 TLE。
 
@@ -93,7 +93,7 @@ wrapper 的 `sys.settrace(None)` teardown 物理上寫在 user code 之後,一�
 - [tracing 讓所有學生碼變慢] → 行事件 tracer 對 CPython 有 2–4 倍常數開銷;正常解 op 量級 ~10^5,絕對耗時仍在毫秒級,可接受。10M 上限的 wall-time 上界(3–5 秒/筆)不變,因為既往量測本就是 traced(函式包裝)情境。實機佐證:smallest-prime-factor(題庫中 N 上限最大者)dev 模式單筆最重 339ms,距 5 秒 wall-clock 旁路仍有 10 倍餘裕。
 - [學生主動 `import sys; sys.settrace(None)` 關閉計數] → op-counter 是防意外無限迴圈的防線,不是防蓄意繞過的沙盒;繞過者的結局是撞外層 wall-clock/總預算。教學平台威脅模型下接受,已記入 BACKLOG 已知限制。
 - [CPython 與 Pyodide 行為差異] → 測試用 python3 執行,理論上與瀏覽器 Pyodide 有落差;RCA 已對兩者雙重實測 frame 語意一致,且 e2e(PR 前)會在真 Pyodide 上驗證。
-- [generator 豁免後,出題者寫出無限迴圈 generator] → dev 模式會掛在 worker 內直到外層逾時;generator 是可信碼、建置期同樣無限制,風險與現況(盲區實質不設限)持平,未惡化。
+- [generator 豁免後,出題者寫出無限迴圈 generator] → **dev 模式的 generate 路徑沒有任何計時器**(audit R2 查證:runGenerator 無 kill timer、handleGenerate 無 wall-clock、「生成中…」無停止鈕),無限迴圈 generator 會掛住預覽頁直到手動重新整理。接受理由:generator 是出題者可信碼;主流寫法是扁平碼、修復前同樣不設限(盲區),僅函式包裝式 generator 失去 10M 煞車;建置期 build:pools(裸 python3)同樣無時限,無限迴圈 generator 在進 dev 預覽前就會在建置端暴露。dev 側 generate kill timer 列 BACKLOG 延後改善。
 - [修復後某些既有題的正解 op 量上升觸限] → 全題庫 content-regression + 手動 dev 冒煙守門;正解量級(10^5)距 10M 有兩個數量級餘裕。
 
 ## Migration Plan

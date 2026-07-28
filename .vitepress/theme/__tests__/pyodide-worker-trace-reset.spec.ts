@@ -10,11 +10,13 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const RESET_SNIPPET = 'import sys\nsys.settrace(None)'
+// Captured from the worker module at dispatch time — a static import would
+// run the module's `self.onmessage = ...` before the `self` stub exists.
+let traceResetSnippet: string | undefined
 
 const calls: string[] = []
 const mockRunPythonAsync = vi.fn(async (code: string) => {
-  calls.push(code === RESET_SNIPPET ? '<reset>' : '<exec>')
+  calls.push(code === traceResetSnippet ? '<reset>' : '<exec>')
 })
 const mockClear = vi.fn(() => {
   calls.push('<clear>')
@@ -36,7 +38,8 @@ vi.stubGlobal('self', {
 })
 
 async function dispatch(data: unknown): Promise<void> {
-  await import('../workers/pyodide.worker')
+  const mod = await import('../workers/pyodide.worker')
+  traceResetSnippet = mod.TRACE_RESET_SNIPPET
   const handler = (self as unknown as { onmessage: (e: { data: unknown }) => Promise<void> })
     .onmessage
   await handler({ data })

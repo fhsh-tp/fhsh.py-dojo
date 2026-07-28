@@ -110,6 +110,12 @@ async function ensurePyodide(): Promise<void> {
 }
 
 /**
+ * Python snippet that clears interpreter trace state. Exported so the
+ * wiring-guard test asserts against the same constant instead of a copy.
+ */
+export const TRACE_RESET_SNIPPET = 'import sys\nsys.settrace(None)'
+
+/**
  * Clear any tracer left over from a previous run in this interpreter.
  *
  * The wrapper's own `sys.settrace(None)` teardown sits AFTER the user code,
@@ -123,7 +129,7 @@ async function ensurePyodide(): Promise<void> {
  */
 async function resetTraceState(): Promise<void> {
   try {
-    await pyodide.runPythonAsync('import sys\nsys.settrace(None)')
+    await pyodide.runPythonAsync(TRACE_RESET_SNIPPET)
   } catch {
     // A stale tracer may throw mid-reset; CPython auto-clears tracing when
     // the tracer itself raises, so trace state is clean either way.

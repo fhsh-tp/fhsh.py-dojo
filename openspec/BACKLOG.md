@@ -146,6 +146,12 @@ change、完整 review 與 staging 驗證後才落地。
   `import sys; sys.settrace(None)` 主動關閉 op-counter——它是防意外無限
   迴圈的防線、非防蓄意繞過的沙盒,繞過者結局是撞外層 wall-clock/總預算;
   教學平台威脅模型下接受。
+- **延後改善(audit R2 記錄)**:dev 模式 generate 路徑(`runGenerator`/
+  `handleGenerate`)無任何計時器與停止鈕——generator 豁免 op-counter 後,
+  無限迴圈 generator 會掛住出題預覽頁直到手動重新整理(僅影響出題者本機;
+  建置期 build:pools 同樣無時限,會先在建置端暴露)。可比照
+  `submitKillTimerId` 補 main-thread kill timer,列停車場、出 deque 題非
+  前置。
 
 ### 2.9 .env.pool 檔案權限(M-R2-2)
 
