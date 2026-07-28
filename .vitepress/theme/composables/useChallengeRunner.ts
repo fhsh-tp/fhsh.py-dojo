@@ -432,7 +432,12 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
   function runStudentCode(
     code: string,
     codeInputs: string[],
-  ): Promise<Array<{ stdout: string; error?: string; elapsed_ms: number }> | null> {
+  ): Promise<Array<{
+    stdout: string
+    error?: string
+    elapsed_ms: number
+    timed_out?: boolean
+  }> | null> {
     return new Promise((resolve) => {
       const worker = new Worker(new URL('../workers/pyodide.worker.ts', import.meta.url), {
         type: 'module',
@@ -446,7 +451,12 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
         prodInflightResolve = null
       }
 
-      const results: Array<{ stdout: string; error?: string; elapsed_ms: number }> = []
+      const results: Array<{
+        stdout: string
+        error?: string
+        elapsed_ms: number
+        timed_out?: boolean
+      }> = []
       const totalBudget = codeInputs.length * WALL_CLOCK_KILL_MS
 
       prodKillTimerId = setTimeout(() => {
@@ -462,6 +472,11 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
             stdout: msg.stdout ?? '',
             error: msg.error,
             elapsed_ms: msg.elapsed_ms,
+            // Attach ONLY when set: an explicit `timed_out: undefined` key
+            // is not "absent" to serde-wasm-bindgen — it reaches
+            // deserialize_bool and rejects the whole batch. (The Rust side
+            // is also Option<bool> as a second layer of defense.)
+            ...(msg.timed_out === true ? { timed_out: true } : {}),
           })
         } else if (msg.type === 'run_complete') {
           if (prodKillTimerId !== null) clearTimeout(prodKillTimerId)

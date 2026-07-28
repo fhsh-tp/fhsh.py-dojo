@@ -41,25 +41,30 @@ export function computeVerdict(actual: string, expected: string): Verdict {
 /**
  * Build the Python code that will be executed inside Pyodide.
  * Injects:
- *   1. sys.settrace op-counter (primary TLE guard)
+ *   1. sys.settrace op-counter (primary TLE guard) — skipped when
+ *      opLimit is null (trusted code, e.g. challenge generators)
  *   2. sys.stdin simulation via io.StringIO
  *   3. sys.stdout capture via io.StringIO
  *   4. User code
  *   5. sys.settrace removal + output extraction
+ *
+ * The tracer is attached to the CURRENT frame as well as installed
+ * globally: sys.settrace only hooks frames created afterwards, and the
+ * user code runs flat in this very module frame — without the f_trace
+ * line, flat top-level code is never counted (op_count stays 0).
  */
 export function buildWrappedCode(
   userCode: string,
   input: string,
-  opLimit: number,
+  opLimit: number | null,
 ): string {
   // Escape input for embedding in a Python string literal
   const escapedInput = input.replace(/\\/g, '\\\\').replace(/"""/g, '\\"\\"\\"')
 
-  return `
-import sys
-import sys as _sys
-import io
-
+  const opGuard =
+    opLimit === null
+      ? ''
+      : `
 # ── op-count TLE guard ────────────────────────────────────────────
 _op_count = 0
 _op_limit = ${opLimit}
@@ -72,7 +77,14 @@ def _tracer(frame, event, arg):
     return _tracer
 
 sys.settrace(_tracer)
+sys._getframe().f_trace = _tracer
+`
 
+  return `
+import sys
+import sys as _sys
+import io
+${opGuard}
 # ── sandbox guard ─────────────────────────────────────────────────
 class _SandboxFinder:
     def find_module(self, fullname, path=None):
@@ -98,7 +110,6 @@ sys.stdout = _captured_stdout
 ${userCode}
 
 # ── teardown ──────────────────────────────────────────────────────
-sys.settrace(None)
-_output = _captured_stdout.getvalue()
+${opLimit === null ? '' : 'sys.settrace(None)\n'}_output = _captured_stdout.getvalue()
 `.trimStart()
 }
