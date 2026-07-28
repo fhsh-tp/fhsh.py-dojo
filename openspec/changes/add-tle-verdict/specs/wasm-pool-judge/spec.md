@@ -2,7 +2,7 @@
 
 ### Requirement: WASM module judges student outputs internally
 
-The WASM module SHALL export a `judge(challenge_id: &str, session_id: &str, results: JsValue)` function. The `results` parameter SHALL be an array of `{stdout: string, error?: string, elapsed_ms: number, timed_out?: boolean}` objects, one per testcase in session order; a missing `timed_out` field SHALL deserialize as `false` so pre-existing callers keep their exact behavior. The function SHALL compare each `stdout` (trimmed trailing whitespace) against the corresponding `expected_output` from the session and return an array of verdict objects.
+The WASM module SHALL export a `judge(challenge_id: &str, session_id: &str, results: JsValue)` function. The `results` parameter SHALL be an array of `{stdout: string, error?: string, elapsed_ms: number, timed_out?: boolean}` objects, one per testcase in session order; a missing, `undefined`, or `null` `timed_out` SHALL all be treated as not timed out (the field deserializes as an optional boolean precisely because serde-wasm-bindgen does not treat an explicit `undefined`-valued key as absent), so pre-existing callers keep their exact behavior. The function SHALL compare each `stdout` (trimmed trailing whitespace) against the corresponding `expected_output` from the session and return an array of verdict objects.
 
 Verdict determination SHALL follow this precedence: `timed_out: true` → `TLE`; otherwise a non-empty `error` → `RE`; otherwise constant-time output comparison → `AC` or `WA`. The judge SHALL NOT inspect error message text to classify timeouts — the structured `timed_out` field is the only timeout signal.
 
@@ -44,6 +44,11 @@ The string comparison SHALL use constant-time comparison to prevent timing-based
 
 - **WHEN** the results array objects contain no `timed_out` field at all
 - **THEN** every verdict SHALL be identical to the pre-TLE behavior (AC/WA/RE only)
+
+#### Scenario: Explicit undefined timed_out keys do not poison the batch
+
+- **WHEN** result objects carry an explicit `timed_out` key whose value is `undefined` (a shape plain JS object literals naturally produce)
+- **THEN** deserialization SHALL succeed and those results SHALL judge as not timed out
 
 #### Scenario: Session invalidated after judging
 

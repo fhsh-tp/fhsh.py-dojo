@@ -14,9 +14,13 @@ pub struct StudentResult {
     pub error: Option<String>,
     pub elapsed_ms: f64,
     /// Structured timeout flag set by the Worker's run_only handler.
-    /// Defaults to false so pre-TLE callers keep their exact behavior.
+    /// `Option` (not plain bool + default) on purpose: serde-wasm-bindgen
+    /// only treats a field as absent when the JS object has NO such key —
+    /// an explicit `timed_out: undefined` key reaches `deserialize_bool`
+    /// and rejects the whole batch, while `deserialize_option` maps any
+    /// nullish value to `None`. Missing / undefined / null ⇒ not timed out.
     #[serde(default)]
-    pub timed_out: bool,
+    pub timed_out: Option<bool>,
 }
 
 /// Verdict for a single testcase, returned to the frontend.
@@ -73,7 +77,7 @@ pub fn judge(
             // Determine verdict — timed_out wins over error: the timeout
             // message embeds the op limit and must not leak (TLE carries
             // no error message at all).
-            let verdict = if result.timed_out {
+            let verdict = if result.timed_out.unwrap_or(false) {
                 "TLE"
             } else if result.error.is_some() {
                 "RE"
@@ -159,7 +163,7 @@ mod tests {
             stdout: "HELLO\n".to_string(),
             error: None,
             elapsed_ms: 10.0,
-            timed_out: false,
+            timed_out: None,
         }];
         let verdicts = judge("judge_ac", &sid, results).unwrap();
         assert_eq!(verdicts.len(), 1);
@@ -175,7 +179,7 @@ mod tests {
             stdout: "WRONG".to_string(),
             error: None,
             elapsed_ms: 10.0,
-            timed_out: false,
+            timed_out: None,
         }];
         let verdicts = judge("judge_wa", &sid, results).unwrap();
         assert_eq!(verdicts[0].verdict, "WA");
@@ -190,7 +194,7 @@ mod tests {
             stdout: String::new(),
             error: Some("NameError: x".to_string()),
             elapsed_ms: 5.0,
-            timed_out: false,
+            timed_out: None,
         }];
         let verdicts = judge("judge_re", &sid, results).unwrap();
         assert_eq!(verdicts[0].verdict, "RE");
@@ -204,7 +208,7 @@ mod tests {
             stdout: "out".to_string(),
             error: None,
             elapsed_ms: 1.0,
-            timed_out: false,
+            timed_out: None,
         }];
         judge("judge_inval", &sid, results).unwrap();
         // Second call should fail
@@ -215,7 +219,7 @@ mod tests {
                 stdout: "out".to_string(),
                 error: None,
                 elapsed_ms: 1.0,
-                timed_out: false,
+                timed_out: None,
             }],
         )
         .unwrap_err();
@@ -229,7 +233,7 @@ mod tests {
             stdout: "wrong".to_string(),
             error: None,
             elapsed_ms: 1.0,
-            timed_out: false,
+            timed_out: None,
         }];
         let verdicts = judge("judge_hidden", &sid, results).unwrap();
         assert_eq!(verdicts[0].verdict, "WA");
@@ -244,7 +248,7 @@ mod tests {
             stdout: "wrong".to_string(),
             error: None,
             elapsed_ms: 1.0,
-            timed_out: false,
+            timed_out: None,
         }];
         let verdicts = judge("judge_actual", &sid, results).unwrap();
         assert_eq!(verdicts[0].verdict, "WA");
@@ -266,7 +270,7 @@ mod tests {
             stdout: String::new(),
             error: None,
             elapsed_ms: 4000.0,
-            timed_out: true,
+            timed_out: Some(true),
         }];
         let verdicts = judge("judge_tle", &sid, results).unwrap();
         assert_eq!(verdicts[0].verdict, "TLE");
@@ -279,7 +283,7 @@ mod tests {
             stdout: String::new(),
             error: Some("TimeoutError: Operation limit exceeded (10000000 ops)".to_string()),
             elapsed_ms: 4000.0,
-            timed_out: true,
+            timed_out: Some(true),
         }];
         let verdicts = judge("judge_tle_noerr", &sid, results).unwrap();
         assert_eq!(verdicts[0].verdict, "TLE");
@@ -294,7 +298,7 @@ mod tests {
         let legacy: StudentResult =
             serde_json::from_str(r#"{"stdout":"","error":"NameError: x","elapsed_ms":5.0}"#)
                 .unwrap();
-        assert!(!legacy.timed_out);
+        assert!(legacy.timed_out.is_none());
 
         let sid = setup_pool("judge_legacy", "hidden", &[("in\n", "out")]);
         let verdicts = judge("judge_legacy", &sid, vec![legacy]).unwrap();
@@ -309,7 +313,7 @@ mod tests {
             stdout: String::new(),
             error: Some("anything".to_string()),
             elapsed_ms: 1.0,
-            timed_out: true,
+            timed_out: Some(true),
         }];
         let verdicts = judge("judge_tle_prec", &sid, results).unwrap();
         assert_eq!(verdicts[0].verdict, "TLE");

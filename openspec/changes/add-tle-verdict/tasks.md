@@ -12,3 +12,9 @@
 
 - [x] 3.1 `pnpm test --run` 全套 + `pnpm lint` 全綠(含 Change 1 的整合測試不受影響)。驗證:命令零失敗。
 - [x] 3.2 本機 `cargo test`(先 `pnpm gen:keymaterial`)全綠,證明 Rust 端與 CI verify 同步。驗證:命令零失敗。
+
+## 4. Audit R1 修正(confirmed findings 落地)
+
+- [x] 4.1 修復 serde-wasm-bindgen 毒批 critical(落實 design 決策「D2:StudentResult 以 Option<bool> + serde(default) 向後相容(audit R1 修訂)」與 spec「Explicit undefined timed_out keys do not poison the batch」場景):Rust `timed_out` 改 `Option<bool>` + `unwrap_or(false)`;`useChallengeRunner.runStudentCode` 只在值為 true 時附加 `timed_out` key(顯式 undefined key 會讓整批反序列化失敗)。驗證:新增 `scripts/judge-wasm-boundary.test.ts`(落實 design 決策「D5:真 wasm 邊界整合測試(audit R1 新增)」)——真 wasm-pack 產物 + 真加密池,顯式 undefined key 批次不炸、TLE/RE/WA 各就各位,全綠。
+- [x] 4.2 分類改 op-count 探測(落實 design 決策「D1:超時分類做在 worker 端,以 op counter 探測、非字串比對(audit R1 修訂)」與 spec「Student-raised TimeoutError is not a TLE」場景):worker 新增 `opLimitExceeded(opLimit)` 探測 `_op_count > limit`,`run_only` 與 dev `run` 的 catch 皆改用之——學生自拋 TimeoutError 維持 RE 且保留訊息。驗證:`pyodide-worker-run-only.spec.ts` 增 fake-tle 案例(mock `_op_count` 未超限 + TimeoutError 字樣 → RE),全綠。
+- [x] 4.3 型別與規格同步:worker 匯出具名 `RunOnlyTestcaseResult` 型別、兩處 postMessage 以 satisfies 收斂,測試檔改 import 該型別;delta specs(wasm-pool-judge 的 undefined-key 場景、python-generator 的探測式分類重寫)與 design(D1/D2/D5、契約、Risks 含 Pyodide 冷啟吃預算的 margin 修正)同步。驗證:`spectra validate` 通過、`pnpm typecheck` 通過。

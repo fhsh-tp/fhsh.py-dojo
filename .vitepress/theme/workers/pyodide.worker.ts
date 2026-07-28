@@ -73,6 +73,18 @@ export interface RunOnlyRequest {
   opLimit?: number
 }
 
+/** Per-testcase result for run_only — no verdict fields (prod judges in WASM). */
+export interface RunOnlyTestcaseResult {
+  type: 'testcase_result'
+  index: number
+  stdout: string
+  elapsed_ms: number
+  /** Set for non-timeout failures only. */
+  error?: string
+  /** Set (true) only for op-limit timeouts, classified in the Worker. */
+  timed_out?: boolean
+}
+
 /** Request to execute code with stdin, returning raw stdout (no verdict comparison). */
 export interface ExecuteRequest {
   type: 'execute'
@@ -114,6 +126,24 @@ async function ensurePyodide(): Promise<void> {
  * wiring-guard test asserts against the same constant instead of a copy.
  */
 export const TRACE_RESET_SNIPPET = 'import sys\nsys.settrace(None)'
+
+/**
+ * Did the just-failed run exceed its op limit? Probes the wrapper's
+ * `_op_count` left in globals (the errored run's namespace is still intact
+ * at catch time — cleanup happens before the NEXT run). The guard's
+ * TimeoutError fires only when count exceeds the limit, so `count > limit`
+ * identifies guard-raised timeouts without matching error-message text —
+ * a student raising their own TimeoutError stays an ordinary RE (their
+ * count is necessarily ≤ limit, or the guard would have fired first).
+ */
+function opLimitExceeded(opLimit: number): boolean {
+  try {
+    const count: unknown = pyodide.globals.get('_op_count')
+    return typeof count === 'number' && count > opLimit
+  } catch {
+    return false
+  }
+}
 
 /**
  * Clear any tracer left over from a previous run in this interpreter.
@@ -230,7 +260,10 @@ self.onmessage = async (
       clearTimeout(wallClock)
       const elapsed_ms = performance.now() - startTime
       const errMsg = String(err)
-      const isTle = errMsg.includes('TimeoutError') || errMsg.includes('Operation limit')
+      // Probe the op counter instead of matching error text — a student
+      // raising their own TimeoutError is an ordinary RE (dev and prod
+      // classify identically).
+      const isTle = opLimitExceeded(opLimit)
 
       self.postMessage({
         type: 'testcase_result',
@@ -279,14 +312,14 @@ async function handleRunOnly(req: RunOnlyRequest): Promise<void> {
         index: i,
         stdout,
         elapsed_ms: performance.now() - startTime,
-      })
+      } satisfies RunOnlyTestcaseResult)
     } catch (err: unknown) {
       const errMsg = String(err)
-      // Classify op-limit timeouts HERE (same signature the dev-mode `run`
-      // handler recognizes) — downstream the judge only reads the
-      // structured flag. The timeout message embeds the op limit, so a
-      // timed-out result carries no error field at all.
-      const isTle = errMsg.includes('TimeoutError') || errMsg.includes('Operation limit')
+      // Classify op-limit timeouts HERE by probing the actual op counter —
+      // downstream the judge only reads the structured flag. The timeout
+      // message embeds the op limit, so a timed-out result carries no
+      // error field at all.
+      const isTle = opLimitExceeded(opLimit)
 
       self.postMessage({
         type: 'testcase_result',
@@ -294,7 +327,7 @@ async function handleRunOnly(req: RunOnlyRequest): Promise<void> {
         stdout: '',
         elapsed_ms: performance.now() - startTime,
         ...(isTle ? { timed_out: true } : { error: errMsg }),
-      })
+      } satisfies RunOnlyTestcaseResult)
     }
   }
 

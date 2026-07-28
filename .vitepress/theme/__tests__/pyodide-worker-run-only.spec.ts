@@ -4,17 +4,7 @@
  * tests for the structured timeout classification (timed_out flag).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { RunOnlyRequest } from '../workers/pyodide.worker'
-
-interface RunOnlyTestcaseResult {
-  type: 'testcase_result'
-  index: number
-  stdout: string
-  error?: string
-  elapsed_ms: number
-  /** Set (true) only for op-limit timeouts, classified in the Worker. */
-  timed_out?: boolean
-}
+import type { RunOnlyRequest, RunOnlyTestcaseResult } from '../workers/pyodide.worker'
 
 describe('RunOnlyRequest type', () => {
   it('accepts a valid run_only request shape', () => {
@@ -104,25 +94,40 @@ describe('RunOnlyResult type', () => {
 
 // ── Mock-driven behavior: timeout classification happens in the Worker ─────
 
-const execOutcomes: Array<'ok' | 'tle' | 'error'> = []
+const DEFAULT_OP_LIMIT = 10_000_000
+const execOutcomes: Array<'ok' | 'tle' | 'error' | 'fake-tle'> = []
 let execIndex = 0
 let traceResetSnippet: string | undefined
+// Classification probes `_op_count` from globals — the mock exposes the
+// count each outcome would leave behind in a real run.
+let mockOpCount = 0
 
 const mockRunPythonAsync = vi.fn(async (code: string) => {
   if (code === traceResetSnippet) return
   const outcome = execOutcomes[execIndex++] ?? 'ok'
   if (outcome === 'tle') {
+    mockOpCount = DEFAULT_OP_LIMIT + 1
     throw new Error('PythonError: TimeoutError: Operation limit exceeded (10000000 ops)')
   }
   if (outcome === 'error') {
+    mockOpCount = 42
     throw new Error("PythonError: NameError: name 'x' is not defined")
   }
+  if (outcome === 'fake-tle') {
+    // Student raised their own TimeoutError — count stays under the limit.
+    mockOpCount = 42
+    throw new Error('PythonError: TimeoutError: my own timeout')
+  }
+  mockOpCount = 42
 })
 
 vi.mock('/pyodide/pyodide.mjs', () => ({
   loadPyodide: vi.fn(async () => ({
     runPythonAsync: mockRunPythonAsync,
-    globals: { clear: vi.fn(), get: vi.fn(() => 'out\n') },
+    globals: {
+      clear: vi.fn(),
+      get: vi.fn((key: string) => (key === '_op_count' ? mockOpCount : 'out\n')),
+    },
   })),
 }))
 
@@ -141,7 +146,9 @@ describe('run_only timeout classification (mock-driven)', () => {
     execIndex = 0
   })
 
-  async function dispatchRunOnly(outcomes: Array<'ok' | 'tle' | 'error'>): Promise<void> {
+  async function dispatchRunOnly(
+    outcomes: Array<'ok' | 'tle' | 'error' | 'fake-tle'>,
+  ): Promise<void> {
     execOutcomes.push(...outcomes)
     const mod = await import('../workers/pyodide.worker')
     traceResetSnippet = mod.TRACE_RESET_SNIPPET
@@ -167,6 +174,13 @@ describe('run_only timeout classification (mock-driven)', () => {
     await dispatchRunOnly(['error'])
     const [r] = testcaseResults()
     expect(r!.error).toContain('NameError')
+    expect(r).not.toHaveProperty('timed_out')
+  })
+
+  it('a student-raised TimeoutError stays RE — classification probes the op counter', async () => {
+    await dispatchRunOnly(['fake-tle'])
+    const [r] = testcaseResults()
+    expect(r!.error).toContain('my own timeout')
     expect(r).not.toHaveProperty('timed_out')
   })
 

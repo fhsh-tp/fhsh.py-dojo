@@ -9,9 +9,10 @@
 ## Proposed Solution
 
 1. **先補 spec Scenario**(治根因):`wasm-pool-judge` delta spec 增列 TLE 判定 Scenario;`python-generator` delta spec 增列 run_only 結構化超時欄位 Scenario。
-2. **worker 端結構化分類**:`handleRunOnly` 的 catch 依既有 dev `run` handler 同款特徵(errMsg 含 TimeoutError / Operation limit)分類,`testcase_result` 訊息增列 `timed_out: boolean`;超時時 `error` 不傳(比照 dev handler 隱藏 op 上限細節)。分類只發生在 worker 這一處——**judge.rs 不做字串比對**。
-3. **judge.rs 增 TLE 分支**:`StudentResult` 增 `#[serde(default)] timed_out: bool`(向後相容:舊呼叫端未傳此欄位時為 false,行為不變);verdict 判定順序 `timed_out → TLE`、`error → RE`、其餘比對 AC/WA;TLE 的 `error` 欄位輸出 `None`(比照 RE 以外 verdict)。
-4. **前端傳遞**:`useChallengeRunner.runStudentCode` 收集 `timed_out` 並隨結果陣列傳入 `wasm.judge`。UI 的 TLE 黃色徽章(`TestResultPanel.vue`)已存在,顯示層零改動;`useChallengeRunner` 既有的 `as 'AC'|'WA'|'TLE'|'RE'` 型別斷言自此成為真實可達的值域。
+2. **worker 端結構化分類(audit R1 修訂為探測式)**:`handleRunOnly` 與 dev `run` handler 的 catch 皆以 `opLimitExceeded(opLimit)` 探測殘留的 `_op_count` 是否超限來分類——**不比對錯誤訊息文字**,學生自拋 TimeoutError 維持 RE 且保留訊息。超時時 `testcase_result` 帶 `timed_out: true` 且不傳 `error`(隱藏 op 上限細節)。分類只發生在 worker——**judge.rs 不做字串比對**。
+3. **judge.rs 增 TLE 分支(audit R1 修訂為 Option)**:`StudentResult` 增 `#[serde(default)] timed_out: Option<bool>`(缺席/undefined/null 皆映為未超時——serde-wasm-bindgen 對「key 存在值 undefined」不視為缺席,裸 bool 會毒殺整批);verdict 判定順序 `timed_out → TLE`、`error → RE`、其餘比對 AC/WA;TLE 的 `error` 欄位輸出 `None`。
+4. **前端傳遞**:`useChallengeRunner.runStudentCode` 只在 `timed_out === true` 時附加該 key 隨結果陣列傳入 `wasm.judge`。UI 的 TLE 黃色徽章(`TestResultPanel.vue`)已存在,顯示層零改動;`useChallengeRunner` 既有的 `as 'AC'|'WA'|'TLE'|'RE'` 型別斷言自此成為真實可達的值域。
+5. **真 wasm 邊界整合測試(audit R1 新增)**:`scripts/judge-wasm-boundary.test.ts` 以真 wasm-pack 產物 + 真加密池驗證前端實際物件形狀(含顯式 undefined key)不毒批——Rust 原生測試與前端 mock 測試都跨不過 serde_wasm_bindgen 這層。
 
 ## Non-Goals
 
@@ -37,3 +38,4 @@
   - Modified: `.vitepress/theme/composables/useChallengeRunner.ts`(runStudentCode 傳遞 timed_out)
   - Modified: `.vitepress/theme/__tests__/pyodide-worker-run-only.spec.ts`(型別契約 + timed_out 案例)
   - Modified: `.vitepress/theme/__tests__/useChallengeRunner-prod.spec.ts`(timed_out 傳遞斷言)
+  - New: `scripts/judge-wasm-boundary.test.ts`(真 wasm-pack 產物 + 真加密池的 serde 邊界測試)

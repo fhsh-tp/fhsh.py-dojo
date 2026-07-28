@@ -472,9 +472,11 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
             stdout: msg.stdout ?? '',
             error: msg.error,
             elapsed_ms: msg.elapsed_ms,
-            // Preserved verbatim for the judge — TLE classification already
-            // happened in the Worker.
-            timed_out: msg.timed_out,
+            // Attach ONLY when set: an explicit `timed_out: undefined` key
+            // is not "absent" to serde-wasm-bindgen — it reaches
+            // deserialize_bool and rejects the whole batch. (The Rust side
+            // is also Option<bool> as a second layer of defense.)
+            ...(msg.timed_out === true ? { timed_out: true } : {}),
           })
         } else if (msg.type === 'run_complete') {
           if (prodKillTimerId !== null) clearTimeout(prodKillTimerId)
