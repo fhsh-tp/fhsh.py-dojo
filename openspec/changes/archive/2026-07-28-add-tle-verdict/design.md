@@ -37,7 +37,7 @@ judge.rs 新增測試:TLE 判定、TLE error 置空、`timed_out` 缺席時舊�
 
 ### D5:真 wasm 邊界整合測試(audit R1 新增)
 
-Rust 單元測試建原生 struct、前端測試 mock WASM 模組——兩者都跨不過 serde_wasm_bindgen 這一層,而 critical 缺陷恰好就住在這層。新增 `scripts/judge-wasm-boundary.test.ts`:載入真 wasm-pack 產物 + 真加密池(hello-world.bin),以前端實際可能產生的物件形狀(含顯式 `timed_out: undefined` key)呼叫 `judge`,斷言整批不炸、TLE/RE/WA 各就各位。比照 challenge-params 慣例不設 skip guard(建置順序保證產物存在)。
+Rust 單元測試建原生 struct、前端測試 mock WASM 模組——兩者都跨不過 serde_wasm_bindgen 這一層,而 critical 缺陷恰好就住在這層。新增 `scripts/judge-wasm-boundary.test.ts`:載入真 wasm-pack 產物,並以 build 同款 `encryptPool` + `getPoolKey` 路徑**自建**加密池(初版讀 docs/public/pools/hello-world.bin,但 CI verify 刻意不跑 build:pools——.github/workflows/ci.yml 明文——池檔在 CI 不存在,PR #15 首次 CI 即紅;2026-07-28 修正為自給自足),以前端實際可能產生的物件形狀(含顯式 `timed_out: undefined` key)呼叫 `judge`,斷言整批不炸、TLE/RE/WA 各就各位。比照 challenge-params 慣例不設 skip guard(WASM 產物由 CI 建置順序保證)。
 
 ## Implementation Contract
 
