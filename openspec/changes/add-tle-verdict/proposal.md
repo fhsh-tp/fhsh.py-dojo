@@ -17,7 +17,7 @@
 ## Non-Goals
 
 - 不改 op 上限數值、不加 per-case wall-clock、不動外層 N×6s 總預算(TLE 判定唯一來源是 op-counter 的 TimeoutError)。
-- 不改 dev 模式 `run` handler 的既有 TLE 邏輯(已正確)。
+- 不動 dev 模式 `run` handler 的 wall-clock 旁路與訊息協定(其 catch 分類已在 audit R1 改用與 prod 相同的 op-count 探測,見 Proposed Solution 第 2 點)。
 - 不做計分面(BACKLOG §1 凍結範圍)。
 - 不處理 wall-clock 型超時在正式站的顯示(prod 無 per-case wall-clock,總預算強殺仍是整批 resolve(null)——那是既有行為,非本 change 範圍)。
 

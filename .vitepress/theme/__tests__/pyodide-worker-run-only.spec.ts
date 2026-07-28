@@ -95,18 +95,24 @@ describe('RunOnlyResult type', () => {
 // ── Mock-driven behavior: timeout classification happens in the Worker ─────
 
 const DEFAULT_OP_LIMIT = 10_000_000
-const execOutcomes: Array<'ok' | 'tle' | 'error' | 'fake-tle'> = []
+const execOutcomes: Array<'ok' | 'tle' | 'tle-bigint' | 'error' | 'fake-tle'> = []
 let execIndex = 0
 let traceResetSnippet: string | undefined
 // Classification probes `_op_count` from globals — the mock exposes the
-// count each outcome would leave behind in a real run.
-let mockOpCount = 0
+// count each outcome would leave behind in a real run. Pyodide hands back
+// BigInt for Python ints above 2^53-1, so the mock covers both types.
+let mockOpCount: number | bigint = 0
 
 const mockRunPythonAsync = vi.fn(async (code: string) => {
   if (code === traceResetSnippet) return
   const outcome = execOutcomes[execIndex++] ?? 'ok'
   if (outcome === 'tle') {
     mockOpCount = DEFAULT_OP_LIMIT + 1
+    throw new Error('PythonError: TimeoutError: Operation limit exceeded (10000000 ops)')
+  }
+  if (outcome === 'tle-bigint') {
+    // e.g. a student set _op_count = 10**16 before the guard fired.
+    mockOpCount = 10_000_000_000_000_001n
     throw new Error('PythonError: TimeoutError: Operation limit exceeded (10000000 ops)')
   }
   if (outcome === 'error') {
@@ -147,7 +153,7 @@ describe('run_only timeout classification (mock-driven)', () => {
   })
 
   async function dispatchRunOnly(
-    outcomes: Array<'ok' | 'tle' | 'error' | 'fake-tle'>,
+    outcomes: Array<'ok' | 'tle' | 'tle-bigint' | 'error' | 'fake-tle'>,
   ): Promise<void> {
     execOutcomes.push(...outcomes)
     const mod = await import('../workers/pyodide.worker')
@@ -175,6 +181,13 @@ describe('run_only timeout classification (mock-driven)', () => {
     const [r] = testcaseResults()
     expect(r!.error).toContain('NameError')
     expect(r).not.toHaveProperty('timed_out')
+  })
+
+  it('a BigInt op count (beyond 2^53-1) still classifies as TLE', async () => {
+    await dispatchRunOnly(['tle-bigint'])
+    const [r] = testcaseResults()
+    expect(r).toMatchObject({ timed_out: true })
+    expect(r).not.toHaveProperty('error')
   })
 
   it('a student-raised TimeoutError stays RE — classification probes the op counter', async () => {

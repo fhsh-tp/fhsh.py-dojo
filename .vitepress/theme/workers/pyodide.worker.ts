@@ -139,6 +139,10 @@ export const TRACE_RESET_SNIPPET = 'import sys\nsys.settrace(None)'
 function opLimitExceeded(opLimit: number): boolean {
   try {
     const count: unknown = pyodide.globals.get('_op_count')
+    // Pyodide converts Python ints above 2^53-1 to BigInt — a count that
+    // large is still "exceeded", and missing it would misclassify a
+    // genuine guard timeout as RE (leaking the op-limit message).
+    if (typeof count === 'bigint') return count > BigInt(opLimit)
     return typeof count === 'number' && count > opLimit
   } catch {
     return false
