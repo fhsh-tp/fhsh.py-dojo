@@ -76,7 +76,7 @@ Rust 單元測試建原生 struct、前端測試 mock WASM 模組——兩者都
 
 - [學生操縱 `_op_count` 偽造/逃避 TLE] → 探測式分類依賴 wrapper 的 `_op_count` 全域;學生可 `_op_count = 10**9`(下一行事件即觸發 guard,判 TLE——他自己招的)或 `del _op_count`/歸零(慢解逃 TLE,結局撞外層總預算的靜默失敗)。皆屬蓄意自毀,與 `sys.settrace(None)` 同威脅類別,教學平台威脅模型下接受。
 - [舊 pool/舊 session 相容] → timed_out 只存在於 worker→judge 的即時訊息,不進池、不進 session,無持久化相容問題;Option + serde(default) 覆蓋唯一的輸入面(缺席/undefined/null 全部映為未超時)。
-- [TLE 與 wall-clock 總預算交互] → 全 TLE 情境:每筆在 op 上限(10M ops ≈ 3–5 秒/筆,dev 實測數字)觸發,N 筆合計可能逼近 N×6s 總預算;且 `runStudentCode` 每次提交新建 Worker、預算計時器先於 Worker 建立啟動,**Pyodide 冷啟(數秒)也吃同一份預算**——margin 比純 op 時間更薄(audit R1 指出,design 初版漏算)。每筆 TLE 是 worker 正常回訊(非卡死),但「run_complete 早於總預算」在真實瀏覽器的成立與否**必須由生產 e2e 實測**(驗收判準已列);若 margin 不足,處置是出題期下修 op 上限(handoff 既定方向),非本 change 內調 kill 預算。
+- [TLE 與 wall-clock 總預算交互] → 全 TLE 情境:每筆在 op 上限(10M ops ≈ 3–5 秒/筆,dev 實測數字)觸發,N 筆合計可能逼近 N×6s 總預算;且 `runStudentCode` 每次提交新建 Worker、預算計時器於 `new Worker(...)` 之後立即啟動(兩者同步近乎同刻;2026-07-28 handoff review 訂正原「先於 Worker 建立」的方向顛倒措辭),**Pyodide 冷啟(數秒)也吃同一份預算**——margin 比純 op 時間更薄(audit R1 指出,design 初版漏算)。每筆 TLE 是 worker 正常回訊(非卡死),但「run_complete 早於總預算」在真實瀏覽器的成立與否**必須由生產 e2e 實測**(驗收判準已列);若 margin 不足,處置是出題期下修 op 上限(handoff 既定方向),非本 change 內調 kill 預算。
 
 ## Migration Plan
 
