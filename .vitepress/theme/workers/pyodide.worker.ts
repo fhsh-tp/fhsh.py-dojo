@@ -321,7 +321,10 @@ async function handleGenerate(req: GenerateRequest): Promise<void> {
     }
 
     try {
-      const wrapped = buildWrappedCode(generatorCode, input, DEFAULT_OP_LIMIT)
+      // Generators are trusted authored code — exempt from the op-count
+      // guard (opLimit: null) so heavy but legitimate generators are not
+      // killed now that flat top-level code is actually counted.
+      const wrapped = buildWrappedCode(generatorCode, input, null)
       await pyodide.runPythonAsync(wrapped)
       const rawOutput: string = (pyodide.globals.get('_output') ?? '').trimEnd()
 
