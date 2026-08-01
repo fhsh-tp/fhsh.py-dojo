@@ -2,7 +2,7 @@
 
 ## Purpose
 
-TBD - created by archiving change 'add-two-end-elimination-challenge'. Update Purpose after archive.
+Content contract for the deque challenge series: literacy-oriented challenges whose most natural solution is double-ended access (collections.deque), specifying student-visible framing constraints, input/output formats, banded testcase plans, and the generator versus reference-solution division of labor.
 
 ## Requirements
 
