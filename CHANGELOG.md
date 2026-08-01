@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-08-01
+
+測資引擎全面升級:分區測資計畫、正式站 TLE 判定與素養導向資料結構新題,並修復判題計數盲區與收斂正解外洩面。
+
+### Added
+
+- **測資引擎競賽式宣告能力**:WASM 單一真相源(建置期與瀏覽器共用同一份測資產生邏輯),params 支援 group/repeat 多筆資料宣告(APCS 式 T 批輸入),seed 決定性與 input_budget 規模預算
+- **testcase_plan 測資分區**:題目 frontmatter 可分 band 宣告測資規模(count + override 深層合併與 literal 逐字測資,與 testcase_count 互斥),池以 block 儲存、判題整塊選取——教學小測資與壓力測資從此可在同一題並存
+- **正式站 TLE 判定**:超過運算量上限的提交會得到 TLE 而非誤判,以 op-count 探測分類;程式自行拋出 TimeoutError 仍正確判為 RE
+- **新挑戰題「緩衝區稽核日誌」**(id 56,medium/競賽題型):素養導向過程輸出題——邊緣裝置緩衝區兩端稽核情境,每批讀數輸出峰值輪與谷值輪兩行移除日誌(兩端相同一律移除最新端),三個測資分區共 6 筆
+
+### Changed
+
+- password-check 補上 reference_solution,content-regression 對全站 56 題的正解互驗覆蓋缺口歸零
+
+### Fixed
+
+- 修復 op-counter 對扁平頂層學生程式碼完全不計數的盲區(op_count 恆 0,運算量上限形同虛設);同時豁免 generator 計數、解毒跨測資 trace 殘留(單筆 RE 不再毒殺下一筆測資)
+
+### Security
+
+- dev 模式(vitepress dev)補剝 reference_solution,關閉本機 dev server 把完整正解送進瀏覽器模組的外洩面;正式站自 v1.2.0 前即於 build 期剝除、無外洩
+
 ## [1.2.0] - 2026-07-25
 
 新增可持久化的編輯器設定與資料結構挑戰題系列首題，並修復下載紀錄面板被裁切等多項 UI 問題。
