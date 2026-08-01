@@ -40,6 +40,15 @@ generator: |
   full_input = '\n'.join(lines)
   expected_output = 'OK' if correct_round >= 0 else 'LOCKED'
   print(json.dumps({"input": full_input, "expected_output": expected_output}))
+reference_solution: |
+  password = input()
+  k = int(input())
+  for _ in range(k):
+      if input() == password:
+          print('OK')
+          break
+  else:
+      print('LOCKED')
 starter_code: |
   # 第一行讀取正確密碼，第二行讀取最大嘗試次數 K
   # 接下來最多讀 K 行猜測，猜對印 OK 並結束；K 次都錯印 LOCKED
