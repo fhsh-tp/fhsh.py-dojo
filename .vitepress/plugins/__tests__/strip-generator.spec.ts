@@ -7,8 +7,9 @@
  * A: stripping correctness across YAML scalar styles
  * B: non-destructiveness for every other field
  * C: fail-loud assertions
- * D: applicability scope
+ * D: applicability scope and mount modes
  * E: architectural guards against bypassing the plugin entirely
+ * F: serve-mode instance — strips reference_solution only, generator intact
  */
 import { readFileSync, readdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
@@ -20,12 +21,23 @@ import { stripGenerator } from '../strip-generator'
 const CHALLENGE_ID = '/repo/docs/challenge/test-case.md'
 const SECRET = 'SECRET_ANSWER_TOKEN'
 
+const [buildPlugin, servePlugin] = stripGenerator()
+
 function transform(code: string, id: string = CHALLENGE_ID) {
-  return stripGenerator().transform!(code, id)
+  return buildPlugin!.transform!(code, id)
+}
+
+function serveTransform(code: string, id: string = CHALLENGE_ID) {
+  return servePlugin!.transform!(code, id)
 }
 
 function md(frontmatter: string, body = '\n## 題目\n內文\n'): string {
   return `---\n${frontmatter}\n---${body}`
+}
+
+function parseFm(code: string): Record<string, unknown> {
+  const fm = code.match(/^---\r?\n([\s\S]*?)\r?\n---/)![1]!
+  return yaml.load(fm.replace(/\r/g, '')) as Record<string, unknown>
 }
 
 /** Assert both fields gone, secret token gone, and YAML still valid. */
@@ -33,8 +45,7 @@ function expectClean(result: { code: string } | null) {
   expect(result).not.toBeNull()
   const out = result!.code
   expect(out).not.toContain(SECRET)
-  const fm = out.match(/^---\r?\n([\s\S]*?)\r?\n---/)![1]!
-  const parsed = yaml.load(fm.replace(/\r/g, '')) as Record<string, unknown>
+  const parsed = parseFm(out)
   expect(parsed).not.toHaveProperty('generator')
   expect(parsed).not.toHaveProperty('reference_solution')
   return parsed
@@ -116,8 +127,7 @@ describe('B: 其他欄位不可被破壞', () => {
       // transform 內部的 fail-loud 斷言會在任何欄位受損時 throw
       const result = transform(code, `/repo/docs/challenge/${f}`)
       expect(result, f).not.toBeNull()
-      const fm = result!.code.match(/^---\n([\s\S]*?)\n---/)![1]!
-      const parsed = yaml.load(fm) as Record<string, unknown>
+      const parsed = parseFm(result!.code)
       expect(parsed, f).not.toHaveProperty('generator')
       expect(parsed, f).not.toHaveProperty('reference_solution')
     }
@@ -147,7 +157,7 @@ describe('C: fail-loud — 任何可疑狀態必須讓建置爆掉', () => {
   })
 })
 
-describe('D: 適用範圍', () => {
+describe('D: 適用範圍與掛載模式', () => {
   it.each([
     ['D1 tutor 路徑', '/repo/docs/tutor/py/ch1/1-1.md'],
     ['D2 非 .md', '/repo/docs/challenge/x.vue'],
@@ -159,8 +169,15 @@ describe('D: 適用範圍', () => {
     expect(transform('# 只有內文\n')).toBeNull()
   })
 
-  it('D5 只在 build 模式掛載', () => {
-    expect(stripGenerator().apply).toBe('build')
+  it('D5 回傳兩實例:build 剝雙欄位、serve 只剝 reference_solution,各自宣告掛載模式', () => {
+    const plugins = stripGenerator()
+    expect(plugins).toHaveLength(2)
+    const [build, serve] = plugins
+    expect(build!.apply).toBe('build')
+    expect(serve!.apply).toBe('serve')
+    expect(build!.enforce).toBe('pre')
+    expect(serve!.enforce).toBe('pre')
+    expect(build!.name).not.toBe(serve!.name)
   })
 })
 
@@ -180,5 +197,64 @@ describe('E: 架構護欄 — 防止繞過 plugin 的資料路徑', () => {
 
   it('E2 challenge.data.ts 維持 includeSrc: false', () => {
     expect(dataLoaderSrc).toMatch(/includeSrc:\s*false/)
+  })
+})
+
+describe('F: serve 實例 — 只剝 reference_solution,generator 逐字放行', () => {
+  it('F1 剝 reference_solution、generator 與其他欄位無損', () => {
+    const fm = `id: 1\ntitle: 測試\ngenerator: |\n  print("GEN_TOKEN")\nreference_solution: |\n  print("${SECRET}")\ndifficulty: easy`
+    const result = serveTransform(md(fm))
+    expect(result).not.toBeNull()
+    expect(result!.code).not.toContain(SECRET)
+    const parsed = parseFm(result!.code)
+    expect(parsed).not.toHaveProperty('reference_solution')
+    expect(parsed.generator).toBe('print("GEN_TOKEN")\n')
+    expect(parsed).toMatchObject({ id: 1, title: '測試', difficulty: 'easy' })
+  })
+
+  it('F2 輸出 = 原文僅移除 reference_solution 節點(逐字保留其餘內容)', () => {
+    const without = `id: 1\ngenerator: |\n  x = 1\n  print(x)\ntitle: t`
+    const withRef = `id: 1\ngenerator: |\n  x = 1\n  print(x)\nreference_solution: |\n  print("${SECRET}")\ntitle: t`
+    expect(serveTransform(md(withRef))!.code).toBe(md(without))
+  })
+
+  it('F3 全部真實題目(serve):reference_solution 剝除、generator 無損', () => {
+    const dir = resolve(import.meta.dirname, '../../../docs/challenge')
+    const files = readdirSync(dir).filter((f) => f.endsWith('.md'))
+    expect(files.length).toBeGreaterThan(0)
+    for (const f of files) {
+      const code = readFileSync(join(dir, f), 'utf-8')
+      const result = serveTransform(code, `/repo/docs/challenge/${f}`)
+      expect(result, f).not.toBeNull()
+      const parsed = parseFm(result!.code)
+      expect(parsed, f).not.toHaveProperty('reference_solution')
+      const source = parseFm(code)
+      expect(parsed.generator, f).toEqual(source.generator)
+    }
+  })
+
+  it('F4 巢狀在其他鍵下的 reference_solution 副本 → 遞迴斷言攔截', () => {
+    const fm = `id: 1\ntitle: t\nmeta:\n  reference_solution: "print('${SECRET}')"`
+    expect(() => serveTransform(md(fm))).toThrow(/survived stripping/)
+  })
+
+  it('F5 斷言參數化不誤殺:巢狀 generator 副本在 serve 放行且無損', () => {
+    const fm = `id: 1\ntitle: t\nmeta:\n  generator: keep-me`
+    const result = serveTransform(md(fm))
+    expect(result).not.toBeNull()
+    const parsed = parseFm(result!.code) as { meta?: unknown }
+    expect(parsed.meta).toEqual({ generator: 'keep-me' })
+  })
+
+  it('F6 非 challenge 路徑 → 不處理(回傳 null)', () => {
+    expect(
+      serveTransform(md(`id: 1\nreference_solution: |\n  x = 1`), '/repo/docs/tutor/py/ch1/1-1.md'),
+    ).toBeNull()
+  })
+
+  it('F7 frontmatter 只含 reference_solution → 剝除後為空,必須 throw', () => {
+    expect(() => serveTransform(md(`reference_solution: |\n  print("${SECRET}")`))).toThrow(
+      /empty or not a mapping/,
+    )
   })
 })
