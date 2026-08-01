@@ -21,4 +21,4 @@
 
 ## 5. 生產建置 e2e(PR 更新前必做)
 
-- [ ] 5.1 pnpm build + pnpm docs:preview(port 4174)以 agent-browser 對 /challenge/buffer-audit-log 執行三場景:deque 正解 6/6 AC;舊語義單掃描解(每筆輸出一行 max min)全 WA(驗收 spec「Semantic separation between process-log solutions and result-only solutions」);亂序錯解(峰值輪誤用「移除較大端」方向)全 WA。驗證:agent-browser snapshot 的 verdict 統計逐場相符(正解 AC×6;兩種錯解各 WA×6)。
+- [x] 5.1 pnpm build + pnpm docs:preview(port 4174)以 agent-browser 對 /challenge/buffer-audit-log 執行三場景:deque 正解 6/6 AC;舊語義單掃描解(每筆輸出一行 max min)全 WA(驗收 spec「Semantic separation between process-log solutions and result-only solutions」);方向顛倒錯解(峰值輪誤用「移除較大端」)WA×5 + AC×1——單元素 band 那筆無任何比較發生,方向錯解輸出與正解必然相同,AC 為語義必然。驗證:agent-browser snapshot 的 verdict 統計逐場相符(正解 AC×6;舊語義解 WA×6;方向錯解 WA×5+AC×1)。
