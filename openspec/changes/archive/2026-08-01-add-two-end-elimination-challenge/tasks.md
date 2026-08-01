@@ -17,4 +17,4 @@
 
 ## 4. 生產建置 e2e(PR 前必做)
 
-- [ ] 4.1 pnpm build + pnpm docs:preview 起生產建置,以 agent-browser 對本題執行三場景:deque 正解 6/6 AC;錯解(輸出恆為 -1)得 WA 非 AC;純 Python O(n²) 扁平雙重迴圈慢解在大 band 2 筆顯示 TLE(驗收 spec「Performance separation between deque solution and quadratic solution」)。驗證:agent-browser snapshot 的 verdict 統計逐場相符(正解 AC×6;慢解含 TLE×2)。
+- [x] 4.1 pnpm build + pnpm docs:preview 起生產建置,以 agent-browser 對本題執行三場景:deque 正解 6/6 AC;錯解(輸出恆為 -1)得 WA 非 AC;純 Python O(n²) 扁平雙重迴圈慢解在大 band 2 筆顯示 TLE(驗收 spec「Performance separation between deque solution and quadratic solution」)。驗證:agent-browser snapshot 的 verdict 統計逐場相符(正解 AC×6;慢解含 TLE×2)。
