@@ -1,9 +1,29 @@
 /**
- * VitePress Vite plugin that strips the `generator` field from challenge
- * Markdown frontmatter during production builds.
+ * VitePress Vite plugin that strips answer-bearing fields from challenge
+ * Markdown frontmatter before they reach the browser. Two instances share
+ * one parameterized transform:
  *
- * In dev mode the plugin is a no-op, preserving the current development flow.
+ * - build instance (`vitepress build`): strips `generator` (computes
+ *   expected outputs) and `reference_solution` (a complete correct
+ *   solution, used only by the offline content-regression test). Shipping
+ *   either would hand students the answer.
+ * - serve instance (`vitepress dev`): strips only `reference_solution` —
+ *   it has no client-side consumer in any mode. `generator` must pass
+ *   through untouched because the dev judging strategy executes it in the
+ *   browser (there are no pools in dev).
+ *
+ * Stripping is structural (line scanning by YAML indentation), not
+ * scalar-style regex matching: block-scalar variants (`|`, `>`, `|-`, `|+`,
+ * `|2`), header comments, quoted keys, blank lines inside the block, and
+ * CRLF line endings are all handled uniformly. A post-strip assertion pass
+ * re-parses the frontmatter and refuses to proceed on ANY discrepancy —
+ * a stripped field surviving, another field damaged, or invalid YAML —
+ * because the failure mode of this plugin is "publish the answers". The
+ * assertions are parameterized per instance: the serve instance proves
+ * `generator` survives undamaged, the build instance proves it is gone.
  */
+import yaml from 'js-yaml'
+
 // Vite Plugin type — inlined to avoid pnpm hoisting dependency on vite package.
 // This file is consumed by .vitepress/config.mts where vite is available at runtime.
 interface Plugin {
@@ -20,41 +40,149 @@ interface Plugin {
 const CHALLENGE_RE = /\/challenge\/[^/]+\.md$/
 
 /**
- * Match the `generator:` frontmatter field (YAML block scalar or inline).
- * Handles both `generator: |` (block scalar) and `generator: "..."` (inline).
- *
- * For block scalars, we match from `generator: |` (or `generator: >`)
- * until the next top-level key (a line starting with a non-space char followed by `:`)
- * or the frontmatter closing `---`.
+ * Frontmatter fields that must never reach the production bundle.
  */
-const GENERATOR_BLOCK_RE = /^generator:\s*[|>]-?\s*\n(?:[ \t]+.*\n?)*/m
-const GENERATOR_INLINE_RE = /^generator:\s*.+\n?/m
+const BUILD_STRIPPED_FIELDS = ['generator', 'reference_solution'] as const
 
-export function stripGenerator(): Plugin {
+/**
+ * Frontmatter fields that must not even reach the dev server response —
+ * generator is deliberately absent (dev judging runs it in the browser).
+ */
+const SERVE_STRIPPED_FIELDS = ['reference_solution'] as const
+
+/**
+ * Column-0 key line for a stripped field, tolerating quoted keys
+ * (`generator:`, `"generator":`, `'generator':`) and space before the colon.
+ */
+function keyLineRe(field: string): RegExp {
+  return new RegExp(`^(?:${field}|"${field}"|'${field}')[ \\t]*:`)
+}
+
+/** A line that starts a new top-level frontmatter entry (not blank, not indented). */
+const TOP_LEVEL_LINE = /^[^ \t]/
+
+/**
+ * Structural, scalar-style-agnostic strip: delete the field's key line plus
+ * every following blank or indented line — i.e. the entire YAML node.
+ */
+function stripFields(frontmatter: string, fields: readonly string[]): string {
+  const lines = frontmatter.split('\n')
+  const out: string[] = []
+  let i = 0
+  while (i < lines.length) {
+    const line = lines[i]!
+    if (!fields.some((f) => keyLineRe(f).test(line))) {
+      out.push(line)
+      i++
+      continue
+    }
+    i++ // drop the key line
+    // drop the node body: every blank or indented line that follows
+    while (i < lines.length && (lines[i]!.trim() === '' || !TOP_LEVEL_LINE.test(lines[i]!))) i++
+  }
+  return out.join('\n')
+}
+
+function makeStripPlugin(apply: 'build' | 'serve', fields: readonly string[]): Plugin {
   return {
-    name: 'strip-generator',
+    name: `strip-generator:${apply}`,
     enforce: 'pre',
-    apply: 'build', // only in production builds
+    apply,
 
     transform(code: string, id: string) {
       if (!CHALLENGE_RE.test(id)) return null
       if (!id.endsWith('.md')) return null
 
-      // Find frontmatter boundaries
-      const fmMatch = code.match(/^---\n([\s\S]*?)\n---/)
-      if (!fmMatch) return null
+      // Find frontmatter boundaries (tolerate CRLF)
+      const fmMatch = code.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+      if (!fmMatch) {
+        // Fail loud: a challenge file whose frontmatter we cannot locate
+        // would ship its answer fields verbatim.
+        if (/^\uFEFF?\s*---/.test(code)) {
+          throw new Error(
+            `[strip-generator] ${id}: frontmatter delimiters found but not parseable; refusing to build.`,
+          )
+        }
+        return null
+      }
 
-      const fmStart = 4 // after "---\n"
-      const fmEnd = fmStart + fmMatch[1]!.length
-      let frontmatter = code.slice(fmStart, fmEnd)
+      const raw = fmMatch[1]!
+      const stripped = stripFields(raw, fields)
 
-      // Try block scalar first, then inline
-      frontmatter = frontmatter.replace(GENERATOR_BLOCK_RE, '')
-      frontmatter = frontmatter.replace(GENERATOR_INLINE_RE, '')
+      // --- fail-loud post-strip assertions --------------------------------
+      let before: unknown
+      try {
+        before = yaml.load(raw)
+      } catch (e) {
+        throw new Error(
+          `[strip-generator] ${id}: source frontmatter is already invalid YAML ` +
+            `(${(e as Error).message.split('\n')[0]}). Fix the file.`,
+        )
+      }
+      let after: unknown
+      try {
+        after = yaml.load(stripped)
+      } catch (e) {
+        throw new Error(
+          `[strip-generator] ${id}: frontmatter is not valid YAML after stripping ` +
+            `(${(e as Error).message.split('\n')[0]}). Refusing to build.`,
+        )
+      }
+      // Fail closed: a challenge frontmatter must parse to a mapping both
+      // before and after stripping — anything else (empty, scalar, null)
+      // means the file or the strip went wrong, and skipping the assertions
+      // here would contradict their whole purpose.
+      if (!before || typeof before !== 'object' || Array.isArray(before)) {
+        throw new Error(
+          `[strip-generator] ${id}: frontmatter did not parse to a mapping. Refusing to build.`,
+        )
+      }
+      if (!after || typeof after !== 'object' || Array.isArray(after)) {
+        throw new Error(
+          `[strip-generator] ${id}: frontmatter is empty or not a mapping after stripping. Refusing to build.`,
+        )
+      }
+      {
+        const a = after as Record<string, unknown>
+        const b = before as Record<string, unknown>
+        // Recursive: a nested copy of a stripped field (under any key, at any
+        // depth) still ships via the page chunk, so it must also refuse.
+        const containsStrippedKey = (v: unknown): string | null => {
+          if (!v || typeof v !== 'object') return null
+          for (const [k, inner] of Object.entries(v as Record<string, unknown>)) {
+            if (fields.includes(k)) return k
+            const hit = containsStrippedKey(inner)
+            if (hit) return hit
+          }
+          return null
+        }
+        const survivor = containsStrippedKey(a)
+        if (survivor) {
+          throw new Error(
+            `[strip-generator] ${id}: field "${survivor}" survived stripping (possibly nested). Refusing to build.`,
+          )
+        }
+        for (const k of Object.keys(b)) {
+          if (fields.includes(k)) continue
+          if (!(k in a) || JSON.stringify(a[k]) !== JSON.stringify(b[k])) {
+            throw new Error(
+              `[strip-generator] ${id}: field "${k}" was damaged by stripping. Refusing to build.`,
+            )
+          }
+        }
+      }
+      // --------------------------------------------------------------------
 
-      // Reconstruct the file
-      const result = '---\n' + frontmatter + '\n---' + code.slice(fmEnd + 4) // +4 for "\n---"
-      return { code: result, map: null }
+      const fmStart = code.indexOf('\n') + 1
+      const fmEnd = fmStart + raw.length
+      return { code: code.slice(0, fmStart) + stripped + code.slice(fmEnd), map: null }
     },
   }
+}
+
+export function stripGenerator(): Plugin[] {
+  return [
+    makeStripPlugin('build', BUILD_STRIPPED_FIELDS),
+    makeStripPlugin('serve', SERVE_STRIPPED_FIELDS),
+  ]
 }

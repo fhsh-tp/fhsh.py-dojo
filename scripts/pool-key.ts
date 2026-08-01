@@ -16,8 +16,17 @@ function envPath(root: string): string {
   return resolve(root, ENV_FILE)
 }
 
-/** Read or generate the pool encryption key (returns 32-byte Buffer). */
-export function getPoolKey(projectRoot: string): Buffer {
+/**
+ * Read the pool encryption key (returns 32-byte Buffer).
+ *
+ * Key creation is opt-in (`create: true`, used only by gen-key-material,
+ * the first step of the build chain). Every other caller — build:pools in
+ * particular — fails loudly when `.env.pool` is missing: silently minting
+ * a fresh key mid-chain would encrypt pools with a key the already-built
+ * WASM does not hold, and the mismatch would only surface in students'
+ * browsers.
+ */
+export function getPoolKey(projectRoot: string, opts: { create?: boolean } = {}): Buffer {
   const p = envPath(projectRoot)
 
   if (existsSync(p)) {
@@ -26,6 +35,13 @@ export function getPoolKey(projectRoot: string): Buffer {
       throw new Error(`.env.pool must contain a 64-char hex string, got ${hex.length} chars`)
     }
     return Buffer.from(hex, 'hex')
+  }
+
+  if (!opts.create) {
+    throw new Error(
+      `.env.pool not found at ${p}. The key must exist BEFORE the WASM is built ` +
+        '(the compiled WASM embeds it). Run: pnpm gen:keymaterial && pnpm build:wasm',
+    )
   }
 
   // First build: generate a random key

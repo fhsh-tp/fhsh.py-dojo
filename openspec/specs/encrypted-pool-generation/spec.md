@@ -8,11 +8,13 @@ Defines the build-time pipeline that generates encrypted testcase pool files for
 
 ### Requirement: Build script generates encrypted testcase pools
 
-A build script (`scripts/generate-pools.ts`) SHALL read all `docs/challenge/*.md` files, parse frontmatter to extract `params`, `generator`, `testcase_count`, `algorithm`, and `verdict_detail` fields. For each challenge, it SHALL derive a `slug` from the markdown file basename (the filename with the `.md` extension removed). The build script SHALL generate a configurable number of random inputs (default: 200) using the existing WASM `generate_challenge()` function or equivalent param-based generation, execute the `generator` Python code via subprocess for each input to produce `expected_output`, and package all `{input, expected_output}` pairs into an encrypted binary pool file. The pool file SHALL be named `<slug>.bin` (NOT `<algorithm>.bin`), ensuring each challenge owns an independent pool even when multiple challenges declare the same `algorithm` value.
+A build script (`scripts/generate-pools.ts`) SHALL read all `docs/challenge/*.md` files, parse frontmatter to extract `params`, `generator`, `testcase_count`, `algorithm`, `verdict_detail`, and optional `input_budget` fields. For each challenge, it SHALL derive a `slug` from the markdown file basename (the filename with the `.md` extension removed). The build script SHALL generate a configurable number of random inputs (default: 200) by calling the WASM `generate_pool_inputs` entry with a spec object whose `seed` is the challenge slug, making pool content deterministic for identical challenge declarations. Input generation SHALL have exactly one implementation (the Rust/WASM engine); the build script SHALL NOT embed a Python reimplementation of param-based input generation. The WASM module SHALL be loaded lazily in Node via dynamic import of the web-target glue and byte-buffer initialization; module resolution SHALL NOT use a static import path, so that unit tests of the build script's pure helpers run without the WASM artifact.
+
+The build script SHALL continue to execute the `generator` Python code via subprocess for each input to produce `expected_output`, and package all `{input, expected_output}` pairs into an encrypted binary pool file named `<slug>.bin` (NOT `<algorithm>.bin`), ensuring each challenge owns an independent pool even when multiple challenges declare the same `algorithm` value.
 
 The build script SHALL declare its Python runtime and third-party package dependencies via a `requirements.txt` file at the project root. The `requirements.txt` file SHALL list `PyYAML` with a version constraint. No third-party cryptography library (e.g., `pycryptodome`) SHALL be required as a standard dependency.
 
-Before processing any challenge files, the build script SHALL perform a preflight check that verifies the Python 3 runtime is available and the `yaml` package can be imported. If the preflight check fails, the build script SHALL exit with a non-zero code and print an actionable error message that includes the exact installation command (`pip install -r requirements.txt`).
+Before processing any challenge files, the build script SHALL perform a preflight check that verifies: (1) the Python 3 runtime is available and the `yaml` package can be imported; (2) the WASM artifact and its JS glue exist at the expected output location. If any preflight check fails, the build script SHALL exit with a non-zero code and print an actionable error message (for Python: the exact installation command `pip install -r requirements.txt`; for WASM: the exact build command `pnpm build:wasm`). Any input-generation error returned by the WASM engine (parse error, budget violation) SHALL abort the build with a non-zero exit code naming the challenge; the build SHALL NOT continue with a WASM instance that has trapped.
 
 #### Scenario: Pool file created per challenge slug
 
@@ -42,10 +44,15 @@ Before processing any challenge files, the build script SHALL perform a prefligh
 - **WHEN** a generator script raises a Python exception for any input
 - **THEN** the build script SHALL report the error with challenge name and input details, and exit with a non-zero code
 
-#### Scenario: Preflight check passes with Python and PyYAML installed
+#### Scenario: Deterministic pools across consecutive builds
 
-- **WHEN** the build script starts and Python 3 is available with `PyYAML` installed
-- **THEN** the preflight check SHALL pass silently and pool generation SHALL proceed
+- **WHEN** the build script runs twice with no change to any challenge file or engine source
+- **THEN** every produced pool's plaintext payload SHALL be byte-identical between the two runs
+
+#### Scenario: Preflight check fails when WASM artifact is missing
+
+- **WHEN** the build script starts and the WASM artifact has not been built
+- **THEN** the build script SHALL exit with a non-zero code and print a message that includes `pnpm build:wasm`
 
 #### Scenario: Preflight check fails when Python is missing
 
@@ -57,67 +64,10 @@ Before processing any challenge files, the build script SHALL perform a prefligh
 - **WHEN** the build script starts and `PyYAML` is not installed
 - **THEN** the build script SHALL exit with a non-zero code and print an error message that includes the command `pip install -r requirements.txt`
 
+#### Scenario: Budget violation aborts the build naming the challenge
 
-<!-- @trace
-source: isolate-testcase-pools-per-challenge
-updated: 2026-07-04
-code:
-  - AGENTS.md
-  - .github/prompts/spectra-propose.prompt.md
-  - CONTRIBUTE.md
-  - .vitepress/theme/composables/useApi.ts
-  - scripts/generate-key-material.ts
-  - .github/prompts/spectra-drift.prompt.md
-  - tsconfig.vitest.json
-  - .vitepress/sidebar.ts
-  - .vitepress/theme/composables/useChallengeRunner.ts
-  - .github/prompts/spectra-apply.prompt.md
-  - testcase-generator/src/lib.rs
-  - tsconfig.node.json
-  - .github/skills/spectra-discuss/SKILL.md
-  - eslint.config.mjs
-  - .github/skills/spectra-ingest/SKILL.md
-  - .vitepress/theme/views/ChallengeView.vue
-  - scripts/gen-key-material.ts
-  - .github/workflows/release.yml
-  - CLAUDE.md
-  - .github/skills/spectra-drift/SKILL.md
-  - docs/challenge/hello-world.md
-  - scripts/new-tutor.ts
-  - docs/challenge/multiplication-table.md
-  - .vitepress/theme/composables/index.ts
-  - .spectra.yaml
-  - testcase-generator/Cargo.toml
-  - Usage.md
-  - .github/skills/spectra-apply/SKILL.md
-  - package.json
-  - scripts/new-challenge.ts
-  - docs/shared/tutor.data.ts
-  - docs/challenge/prime-check.md
-  - scripts/generate-pools.ts
-  - README.md
-  - docs/shared/exercise-type.ts
-  - docs/shared/challenge.data.ts
-  - CHANGELOG.md
-  - .github/skills/spectra-propose/SKILL.md
-  - GEMINI.md
-  - .github/workflows/ci.yml
-  - .github/prompts/spectra-discuss.prompt.md
-  - .github/prompts/spectra-ingest.prompt.md
-tests:
-  - docs/shared/exercise-type.test.ts
-  - .vitepress/plugins/markdown-mermaid.test.ts
-  - scripts/new-challenge.test.ts
-  - .vitepress/theme/__tests__/useApi.spec.ts
-  - scripts/generator-parity.test.ts
-  - .vitepress/theme/__tests__/ChallengeView.spec.ts
-  - testcase-generator/tests/param_conformance.rs
-  - .vitepress/theme/__tests__/ChallengeView-verdict-detail.spec.ts
-  - .vitepress/theme/__tests__/useChallengeRunner-dev.spec.ts
-  - .vitepress/theme/__tests__/useChallengeRunner-prod.spec.ts
-  - scripts/content-regression.test.ts
-  - scripts/generate-pools.test.ts
--->
+- **WHEN** any challenge's params worst-case estimate exceeds its applicable input budget
+- **THEN** the build script SHALL exit non-zero with an error naming the challenge slug and the per-param byte estimates
 
 ---
 ### Requirement: Python dependency manifest exists at project root
@@ -467,3 +417,48 @@ tests:
   - scripts/content-regression.test.ts
   - scripts/generate-pools.test.ts
 -->
+
+---
+### Requirement: Build pipeline orders key material before WASM before pools
+
+The composite `dev` and `build` scripts in `package.json` SHALL execute in the order: key material generation, then `build:wasm`, then `build:pools`, then the remaining steps. This order SHALL also hold in CI workflows: the verify workflow SHALL install wasm-pack, generate key material, and build the WASM artifact before running the test suite, and the release workflow SHALL inherit the corrected order via the composite `build` script. Rationale: `build:wasm` requires the generated `testcase-generator/src/key_material.rs`, and `build:pools` requires the WASM artifact.
+
+#### Scenario: Clean checkout build succeeds end to end
+
+- **WHEN** `pnpm build` runs on a clean checkout with no generated artifacts present
+- **THEN** key material is generated first, the WASM artifact is built second, pools are built third, and the build completes without a missing-artifact failure
+
+#### Scenario: CI verify job provides the WASM artifact before tests
+
+- **WHEN** the CI verify job runs the JS test suite
+- **THEN** the WASM artifact has already been built in an earlier step of the same job, so WASM-dependent tests execute instead of failing for a missing artifact
+
+---
+### Requirement: Plan challenges produce blocked pools
+
+For a challenge declaring `testcase_plan`, the pool build SHALL request `count = floor(POOL_SIZE / plan_total) * plan_total` inputs from the WASM engine (where `plan_total` is the sum of band counts plus the number of literal entries, computed from the frontmatter), and the encrypted pool payload SHALL include `plan_block_size: plan_total`. Challenges without `testcase_plan` SHALL be built exactly as before, with no `plan_block_size` field in their payload.
+
+#### Scenario: plan pool carries block size
+
+- **WHEN** a challenge declares a plan with total 5 and POOL_SIZE is 200
+- **THEN** the pool contains 200 testcases (40 blocks of 5) and its payload declares `plan_block_size: 5`
+
+#### Scenario: non-plan pools are unchanged
+
+- **WHEN** a challenge without `testcase_plan` is built by the new pipeline
+- **THEN** its encrypted payload has no `plan_block_size` field and its pool content is byte-identical to the previous pipeline's output for the same declaration
+
+---
+### Requirement: readChallenge validates testcase_plan usage
+
+`readChallenge` SHALL read the optional `testcase_plan` frontmatter field and pass it through to the WASM pool spec. It SHALL throw a descriptive error naming the file when the frontmatter declares both `testcase_plan` and `testcase_count`.
+
+#### Scenario: plan passes through to the engine
+
+- **WHEN** a challenge declares `testcase_plan`
+- **THEN** the pool spec sent to the WASM engine contains the plan verbatim
+
+#### Scenario: coexistence with testcase_count fails the build
+
+- **WHEN** a challenge declares both `testcase_plan` and `testcase_count`
+- **THEN** the build fails with an error naming the file and the mutual-exclusion rule

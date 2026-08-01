@@ -59,7 +59,7 @@ node_modules/.bin/vitest --run scripts/content-regression.test.ts   # 若有 ref
 
 ## 陷阱
 
-- **Rust / Python 產生器一致性**：測資產生邏輯有 Rust 端（`testcase-generator/src/rng.rs`）與 Python 複寫端（`scripts/generate-pools.ts`）兩份，**必須同步**，否則正式池會悄悄產出錯誤測資。已由 `generator-parity` 測試守門——若你改動參數型別邏輯，兩端都要改並跑該測試。
+- **params 宣告守門**：測資輸入產生邏輯只有一份（Rust crate `testcase-generator`，建置期與瀏覽器共用同一份 WASM）。所有題目的 params 由 `scripts/challenge-params.test.ts` 冒煙測試守門——宣告了引擎不認識的型別或欄位（例如 `type: str`、拼錯的 `min_lenght`）會在測試與建置期指名該題失敗，不會靜默產出壞測資。新增輸入格式能力時只需改 Rust 端並跑 `cargo test`。
 - 勿 commit gitignored 產物（`docs/public/pools/`、`testcase-generator/src/key_material.rs`、`.env.pool`）。
 
 ## 參照

@@ -152,6 +152,42 @@ describe('useChallengeRunner prod path - slug-as-pool-key', () => {
     expect(mockSelectTestcases.mock.calls[1]![0]).toBe('multiplication-table')
   })
 
+  it('passes the worker timed_out flag through to judge verbatim', async () => {
+    mockJudge.mockReturnValue([{ verdict: 'TLE', elapsed_ms: 4000 }])
+
+    const { useChallengeRunner } = await import('../composables/useChallengeRunner')
+
+    const runner = useChallengeRunner({
+      id: 'multiplication-table',
+      algorithm: 'nested-loop',
+      params: {},
+      generator: '',
+      testcaseCount: 1,
+      starterCode: '',
+      verdictDetail: 'hidden',
+    })
+
+    await runner.loadTestcases()
+
+    const submitPromise = runner.submit('while True: pass')
+    await new Promise((r) => setTimeout(r, 0))
+
+    const submitWorker = mockWorkerInstances[mockWorkerInstances.length - 1]!
+    submitWorker.onmessage?.(new MessageEvent('message', {
+      data: { type: 'testcase_result', index: 0, stdout: '', elapsed_ms: 4000, timed_out: true },
+    }))
+    submitWorker.onmessage?.(new MessageEvent('message', {
+      data: { type: 'run_complete' },
+    }))
+
+    await submitPromise
+
+    expect(mockJudge).toHaveBeenCalledTimes(1)
+    const judgedResults = mockJudge.mock.calls[0]![2] as Array<Record<string, unknown>>
+    expect(judgedResults).toHaveLength(1)
+    expect(judgedResults[0]).toMatchObject({ stdout: '', timed_out: true })
+  })
+
   it('surfaces an error when load_pool rejects an identity mismatch', async () => {
     // Simulate the WASM `load_pool` raising the identity-mismatch error that
     // it would produce if the encrypted payload's challenge_id (slug) does

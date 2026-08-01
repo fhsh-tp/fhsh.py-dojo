@@ -15,8 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # clippy component is needed for the Rust lint step. Only unit tests run
-      # here (no wasm-pack / build:wasm), so a stable toolchain is sufficient.
+      # clippy component is needed for the Rust lint step; the same stable
+      # toolchain also backs the wasm-pack build below.
       - name: Install Rust toolchain (with clippy)
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -28,7 +28,8 @@ jobs:
           python-version: '3.12'
 
       # PyYAML is required by the content-regression and generate-pools code
-      # paths (frontmatter parsing + input generation).
+      # paths (frontmatter parsing + generator execution). Input generation
+      # runs on the WASM engine, not Python.
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
@@ -41,12 +42,23 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      # wasm-pack is not an npm dependency: it is provided by cargo for local
-      # development and by jetli/wasm-pack-action in the release workflow. This
-      # verify job builds no WASM, so a plain frozen install pulls only the JS
-      # deps and runs no dependency build scripts.
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # wasm-pack is not an npm dependency. The verify job needs the WASM
+      # artifact because the JS test suite exercises the engine directly
+      # (challenge-params conformance gate + content-regression inputs), so
+      # the pipeline mirrors the build order: gen:keymaterial → build:wasm →
+      # tests. The Rust crate has an unconditional `mod key_material;` and
+      # that file is gitignored, so it must be generated before build:wasm.
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Generate key material for Rust build
+        run: pnpm gen:keymaterial
+
+      - name: Build WASM engine
+        run: pnpm build:wasm
 
       - name: Type check
         run: pnpm typecheck
@@ -57,16 +69,10 @@ jobs:
       - name: Unit tests (Vitest)
         run: pnpm test --run
 
-      # The Rust crate has an unconditional `mod key_material;`, and that file is
-      # gitignored (only ever produced by build:pools). Generate it standalone so
-      # `cargo test` can compile — without running the full pool build.
-      - name: Generate key material for Rust build
-        run: pnpm gen:keymaterial
-
       - name: Rust tests
         run: cargo test --manifest-path testcase-generator/Cargo.toml
 
-      # NOTE: This job intentionally does NOT run build:wasm / build:pyodide /
-      # build:pools. Verification (jsdom vitest + Rust unit tests) does not need
-      # those artifacts; skipping them keeps CI fast. Full-build verification
-      # lives in the release workflow.
+      # NOTE: This job builds the WASM engine (required by the JS test suite)
+      # but intentionally does NOT run build:pyodide / build:pools — those
+      # artifacts are not needed for verification and skipping them keeps CI
+      # fast. Full-build verification lives in the release workflow.

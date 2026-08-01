@@ -3,10 +3,11 @@
  * Build script: generate encrypted testcase pools for all challenges.
  *
  * 1. Read all docs/challenge/*.md files and parse frontmatter
- * 2. For each challenge, generate random inputs via Python (replicating WASM param logic)
+ * 2. For each challenge, generate random inputs via the Rust/WASM engine
+ *    (the same single source of truth the browser uses), seeded by slug
  * 3. Execute generator code via Python subprocess to produce expected outputs
  * 4. Encrypt each pool with AES-256-GCM
- * 5. Write to docs/public/pools/<algorithm>.bin
+ * 5. Write to docs/public/pools/<slug>.bin
  * 6. Generate key_material.rs for WASM embedding
  */
 import { execFileSync } from 'node:child_process'
@@ -24,7 +25,24 @@ import { basename, resolve, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { getPoolKey } from './pool-key.js'
-import { generateKeyMaterial } from './generate-key-material.js'
+import { ensureWasmArtifact, generatePoolInputs, type PoolSpec } from './wasm-input-generator.js'
+
+// ── WASM preflight check ──────────────────────────────────────────────────
+
+/**
+ * Input generation runs on the Rust/WASM engine (single source of truth
+ * with the browser runtime), so the artifact must exist before any
+ * challenge is processed. Build order: gen:keymaterial → build:wasm →
+ * build:pools.
+ */
+function preflightCheckWasm(): void {
+  try {
+    ensureWasmArtifact()
+  } catch (err) {
+    console.error('[generate-pools] ERROR:', err instanceof Error ? err.message : err)
+    process.exit(1)
+  }
+}
 
 // ── Python preflight check ────────────────────────────────────────────────
 
@@ -72,7 +90,7 @@ function preflightCheckPython(): void {
 const PROJECT_ROOT = resolve(import.meta.dirname, '..')
 const CHALLENGES_DIR = resolve(PROJECT_ROOT, 'docs/challenge')
 const POOLS_DIR = resolve(PROJECT_ROOT, 'docs/public/pools')
-const POOL_SIZE = 200 // testcases per pool
+export const POOL_SIZE = 200 // testcases per pool
 export const MAGIC = Buffer.from('CXPOOL', 'ascii')
 export const POOL_VERSION = 0x01
 
@@ -175,11 +193,54 @@ export interface ChallengeInfo {
   testcase_count?: number
   verdict_detail?: string
   /**
+   * Optional per-input worst-case byte budget override (bytes). Passed to
+   * the WASM engine, which enforces default 4096 and hard cap 65536.
+   */
+  input_budget?: number
+  /**
    * Optional Python reference solution (a full program that reads stdin and
    * prints the correct answer). Independent of `generator`; used only by the
    * content-layer regression test to verify a known-correct solution earns AC.
    */
   reference_solution?: string
+  /**
+   * Optional testcase partition plan (band/literal entries). Passed verbatim
+   * to the WASM engine, which owns full validation; mutually exclusive with
+   * `testcase_count`. When present the pool is built as consecutive blocks
+   * and the payload carries `plan_block_size`.
+   */
+  testcase_plan?: unknown[]
+}
+
+const VALID_VERDICT_DETAILS = ['hidden', 'actual', 'full'] as const
+
+/**
+ * TS-side mirror of the engine's plan-total rule: Σ band counts + one per
+ * literal entry. Used to size the pool request; the engine independently
+ * recomputes and enforces the multiple-of-total contract, so any drift
+ * between the two fails the build loudly. Entry-shape validation belongs to
+ * the engine — this only rejects counts it cannot even sum.
+ */
+export function computePlanTotal(plan: unknown[], filePath: string): number {
+  let total = 0
+  for (const entry of plan) {
+    const e = entry as Record<string, unknown>
+    if (e !== null && typeof e === 'object' && 'literal' in e) {
+      total += 1
+    } else {
+      const c = e?.count
+      if (typeof c !== 'number' || !Number.isInteger(c) || c < 1) {
+        throw new Error(
+          `'testcase_plan' entry has invalid 'count' in ${filePath} (band entries need a positive integer count)`,
+        )
+      }
+      total += c
+    }
+  }
+  if (total < 1) {
+    throw new Error(`'testcase_plan' must contain at least one entry in ${filePath}`)
+  }
+  return total
 }
 
 function parseFrontmatter(content: string): Record<string, unknown> {
@@ -216,110 +277,103 @@ export function readChallenge(filePath: string): ChallengeInfo {
   const testcase_count = (fm.testcase_count as number) ?? 10
   const verdict_detail = (fm.verdict_detail as string) ?? 'hidden'
   const reference_solution = fm.reference_solution as string | undefined
+  const input_budget = fm.input_budget as number | undefined
+  const testcase_plan = fm.testcase_plan as unknown[] | undefined
 
   if (!algorithm) throw new Error(`Missing 'algorithm' in ${filePath}`)
   if (!generator) throw new Error(`Missing 'generator' in ${filePath}`)
   if (!params) throw new Error(`Missing 'params' in ${filePath}`)
 
-  return { slug, algorithm, generator, params, testcase_count, verdict_detail, reference_solution }
+  if (input_budget !== undefined && (!Number.isInteger(input_budget) || input_budget < 1)) {
+    throw new Error(
+      `'input_budget' must be a positive integer in ${filePath} ` +
+        `(omit the field to use the default; 0 does not mean "unlimited")`,
+    )
+  }
+
+  // Mutual exclusion is checked on the RAW frontmatter — `testcase_count`
+  // above has already been defaulted, which must not count as a declaration.
+  if (testcase_plan !== undefined && fm.testcase_count !== undefined) {
+    throw new Error(
+      `'testcase_plan' and 'testcase_count' are mutually exclusive in ${filePath} ` +
+        `(the plan's band counts already determine the per-session testcase count)`,
+    )
+  }
+  if (testcase_plan !== undefined && !Array.isArray(testcase_plan)) {
+    throw new Error(`'testcase_plan' must be a YAML list in ${filePath}`)
+  }
+
+  if (
+    fm.verdict_detail !== undefined &&
+    !VALID_VERDICT_DETAILS.includes(fm.verdict_detail as (typeof VALID_VERDICT_DETAILS)[number])
+  ) {
+    throw new Error(
+      `'verdict_detail' must be one of ${VALID_VERDICT_DETAILS.join(', ')} in ${filePath} ` +
+        `(got '${String(fm.verdict_detail)}')`,
+    )
+  }
+
+  return {
+    slug,
+    algorithm,
+    generator,
+    params,
+    testcase_count,
+    verdict_detail,
+    reference_solution,
+    input_budget,
+    testcase_plan,
+  }
 }
 
-// ── Input generation via Python ────────────────────────────────────────────
+// ── Input generation via WASM (single source of truth) ────────────────────
 
 /**
- * Generate random inputs using a Python script that replicates the WASM
- * param-based generation logic. This avoids needing to load the WASM
- * module at build time.
+ * Build the EXACT engine request the pool build uses for one challenge:
+ * the spec envelope (params + seed + budget + optional testcase_plan) and
+ * the request count (plan challenges: floor(POOL_SIZE / plan_total) blocks;
+ * others: POOL_SIZE). Every consumer that claims to reproduce "the shipped
+ * pool inputs" (main build, content-regression) MUST go through this helper —
+ * an inline reimplementation is exactly how a plan-unaware caller silently
+ * validates different data than production ships.
  */
-export function generateInputs(params: Record<string, unknown>, count: number): string[] {
-  const script = `
-import json, random, string, sys
+export function buildPoolRequest(
+  challenge: ChallengeInfo,
+  filePath: string,
+): { spec: PoolSpec; count: number } {
+  const planTotal =
+    challenge.testcase_plan !== undefined
+      ? computePlanTotal(challenge.testcase_plan, filePath)
+      : undefined
+  const count = planTotal !== undefined ? Math.floor(POOL_SIZE / planTotal) * planTotal : POOL_SIZE
+  if (planTotal !== undefined && count < planTotal) {
+    throw new Error(
+      `'testcase_plan' total ${planTotal} exceeds POOL_SIZE ${POOL_SIZE} in ${filePath} — ` +
+        `the pool cannot hold even one block`,
+    )
+  }
+  return {
+    spec: {
+      params: challenge.params,
+      seed: challenge.slug,
+      input_budget: challenge.input_budget,
+      ...(challenge.testcase_plan !== undefined ? { testcase_plan: challenge.testcase_plan } : {}),
+    },
+    count,
+  }
+}
 
-params = json.loads(sys.stdin.read())
-count = ${count}
-
-def gen_value(spec):
-    t = spec.get("type", "")
-    if t == "int":
-        return str(random.randint(spec.get("min", 0), spec.get("max", 100)))
-    elif t == "alpha_upper":
-        length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
-        mul = spec.get("multiple_of", 1)
-        if mul > 1:
-            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
-            hi = spec.get("max_len", 10) // mul
-            length = random.randint(lo, hi) * mul
-        return ''.join(random.choices(string.ascii_uppercase, k=length))
-    elif t == "alpha_lower":
-        length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
-        mul = spec.get("multiple_of", 1)
-        if mul > 1:
-            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
-            hi = spec.get("max_len", 10) // mul
-            length = random.randint(lo, hi) * mul
-        return ''.join(random.choices(string.ascii_lowercase, k=length))
-    elif t == "alpha_mixed":
-        length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
-        mul = spec.get("multiple_of", 1)
-        if mul > 1:
-            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
-            hi = spec.get("max_len", 10) // mul
-            length = random.randint(lo, hi) * mul
-        return ''.join(random.choices(string.ascii_letters, k=length))
-    elif t == "hex_string":
-        length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
-        mul = spec.get("multiple_of", 1)
-        if mul > 1:
-            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
-            hi = spec.get("max_len", 10) // mul
-            length = random.randint(lo, hi) * mul
-        return ''.join(random.choices('0123456789abcdef', k=length))
-    elif t == "printable_ascii":
-        length = random.randint(spec.get("min_len", 1), spec.get("max_len", 10))
-        mul = spec.get("multiple_of", 1)
-        if mul > 1:
-            lo = max(1, (spec.get("min_len", 1) + mul - 1) // mul)
-            hi = spec.get("max_len", 10) // mul
-            length = random.randint(lo, hi) * mul
-        chars = [chr(c) for c in range(0x21, 0x7f)]
-        return ''.join(random.choices(chars, k=length))
-    elif t == "enum":
-        return random.choice(spec.get("values", ["?"]))
-    else:
-        return "UNKNOWN_TYPE"
-
-def gen_param_line(spec):
-    count_spec = spec.get("count", {})
-    if isinstance(count_spec, dict):
-        mn = count_spec.get("min", 1)
-        mx = count_spec.get("max", 1)
-        sep = count_spec.get("separator", " ")
-    else:
-        mn = mx = 1
-        sep = " "
-    n = random.randint(mn, mx)
-    values = [gen_value(spec) for _ in range(n)]
-    return sep.join(values)
-
-for _ in range(count):
-    lines = []
-    for name in params:
-        lines.append(gen_param_line(params[name]))
-    print(json.dumps("\\n".join(lines)))
-`
-  const output = execFileSync('python3', ['-c', script], {
-    input: JSON.stringify(params),
-    encoding: 'utf-8',
-    timeout: 30_000,
-    // Big-integer answers (e.g. 2^N for N up to 10^4) across a 200-testcase
-    // pool can exceed Node's 1 MB default maxBuffer.
-    maxBuffer: 64 * 1024 * 1024,
-  })
-
-  return output
-    .trim()
-    .split('\n')
-    .map((line) => JSON.parse(line) as string)
+/**
+ * Generate random inputs with the SAME Rust/WASM engine the browser uses.
+ * `seed` (the challenge slug) makes pool content deterministic for
+ * identical challenge declarations; `input_budget` (optional frontmatter
+ * field) raises the per-input worst-case byte budget up to the engine's
+ * hard cap. Engine-side errors (parse validation, budget violations) are
+ * thrown to the caller — the build must abort, never continue on a
+ * possibly-trapped WASM instance.
+ */
+export async function generateInputs(spec: PoolSpec, count: number): Promise<string[]> {
+  return generatePoolInputs(spec, count)
 }
 
 // ── Generator execution ────────────────────────────────────────────────────
@@ -390,11 +444,15 @@ export function encryptPool(
   challengeId: string,
   verdictDetail: string,
   testcases: TestcaseResult[],
+  planBlockSize?: number,
 ): Buffer {
   const payload = JSON.stringify({
     challenge_id: challengeId,
     verdict_detail: verdictDetail,
     testcases,
+    // Only plan pools carry the field — non-plan payloads stay shape-identical
+    // to the previous format.
+    ...(planBlockSize !== undefined ? { plan_block_size: planBlockSize } : {}),
   })
 
   const nonce = randomBytes(12)
@@ -408,13 +466,15 @@ export function encryptPool(
 
 // ── Main ───────────────────────────────────────────────────────────────────
 
-function main() {
+async function main() {
   console.log('[generate-pools] Starting pool generation...')
 
-  // Read encryption key and generate key_material.rs unconditionally —
-  // WASM compilation depends on this file regardless of whether challenges exist.
+  // Read the encryption key. key_material.rs generation is NOT this
+  // script's job anymore — gen:keymaterial owns it as step 1 of the build
+  // chain (before build:wasm), so the compiled WASM and the pools always
+  // share the same key. Rewriting it here would also dirty the Rust crate
+  // on every pool build, forcing a full recompile next cargo run.
   const key = getPoolKey(PROJECT_ROOT)
-  generateKeyMaterial(key, PROJECT_ROOT)
 
   // Ensure output directory exists
   if (!existsSync(POOLS_DIR)) {
@@ -444,7 +504,8 @@ function main() {
     process.exit(1)
   }
 
-  // Verify Python runtime and packages are available (only needed for pool generation)
+  // Verify the WASM engine artifact and the Python runtime are available.
+  preflightCheckWasm()
   preflightCheckPython()
 
   let success = 0
@@ -458,8 +519,31 @@ function main() {
     try {
       const challenge = readChallenge(filePath)
 
-      // Generate random inputs
-      const inputs = generateInputs(challenge.params, POOL_SIZE)
+      // testcase_plan challenges are built as consecutive blocks: the pool
+      // holds floor(POOL_SIZE / plan_total) full plan rounds and the payload
+      // carries plan_block_size so selection returns one whole block. The
+      // engine independently enforces count % plan_total == 0, so a drift
+      // between this computation and the engine's fails the build loudly.
+      const { spec, count: requestCount } = buildPoolRequest(challenge, file)
+      const planTotal =
+        challenge.testcase_plan !== undefined
+          ? computePlanTotal(challenge.testcase_plan, file)
+          : undefined
+
+      // Generate random inputs via the WASM engine. Any engine error
+      // (parse validation, budget violation, or a trap) aborts the whole
+      // build immediately: a trapped WASM instance must never be reused,
+      // and a bad spec must never ship a silently-degraded pool.
+      let inputs: string[]
+      try {
+        inputs = await generateInputs(spec, requestCount)
+      } catch (err) {
+        console.error(
+          `[generate-pools] FATAL: input generation failed for ${file}:`,
+          err instanceof Error ? err.message : err,
+        )
+        process.exit(1)
+      }
       console.log(`    Generated ${inputs.length} inputs`)
 
       // Run generator to produce expected outputs
@@ -473,6 +557,7 @@ function main() {
         challenge.slug,
         challenge.verdict_detail ?? 'hidden',
         testcases,
+        planTotal,
       )
 
       // Write pool file at <slug>.bin (NOT <algorithm>.bin).
@@ -513,5 +598,8 @@ function main() {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  main()
+  main().catch((err) => {
+    console.error('[generate-pools] FATAL:', err instanceof Error ? err.message : err)
+    process.exit(1)
+  })
 }

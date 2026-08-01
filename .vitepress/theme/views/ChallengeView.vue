@@ -50,6 +50,9 @@ const runner = useChallengeRunner({
   testcaseCount: frontmatter.value.testcase_count ?? 5,
   starterCode,
   verdictDetail,
+  // testcase_plan challenges: the runner derives the effective count from the
+  // plan itself (testcase_count is mutually exclusive with a plan).
+  testcasePlan: frontmatter.value.testcase_plan,
 })
 
 const defaultStdin = computed(() => {

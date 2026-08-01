@@ -39,6 +39,39 @@ export interface ChallengeConfig {
   testcaseCount: number
   starterCode: string
   verdictDetail: VerdictDetail
+  /**
+   * Optional testcase partition plan from frontmatter (band/literal entries).
+   * When present the effective per-session testcase count is the plan total
+   * (band counts summed, one per literal) — `testcaseCount` is ignored — and
+   * both strategies switch to plan-aware WASM entries.
+   */
+  testcasePlan?: unknown[]
+}
+
+/**
+ * Plan total = Σ band counts + one per literal entry. Mirrors the engine's
+ * rule; the engine independently validates (count must equal the pool's
+ * plan_block_size in prod), so any drift here fails loudly instead of
+ * silently degrading. Invalid entries yield NaN, which also fails loudly.
+ */
+export function computePlanTotal(plan: unknown[]): number {
+  let total = 0
+  for (const entry of plan) {
+    const e = entry as Record<string, unknown>
+    if (e !== null && typeof e === 'object' && 'literal' in e) {
+      total += 1
+    } else {
+      total += typeof e?.count === 'number' ? (e.count as number) : NaN
+    }
+  }
+  return total
+}
+
+/** Effective per-session testcase count: plan total when a plan is declared. */
+function effectiveTestcaseCount(config: ChallengeConfig): number {
+  return config.testcasePlan !== undefined
+    ? computePlanTotal(config.testcasePlan)
+    : config.testcaseCount
 }
 
 /** Return type exposed to ChallengeView */
@@ -108,7 +141,7 @@ export function useChallengeRunner(config: ChallengeConfig): ChallengeRunner {
 function useDevRunner(config: ChallengeConfig): ChallengeRunner {
   const challengeStore = useChallengeStore()
   const executorStore = useExecutorStore()
-  const { generateChallenge } = useWasm()
+  const { generateChallenge, generateDevInputs } = useWasm()
 
   const inputs = ref<string[]>([])
   const isReady = ref(false)
@@ -128,11 +161,20 @@ function useDevRunner(config: ChallengeConfig): ChallengeRunner {
       return
     }
 
-    const paramsJson = JSON.stringify(config.params)
-    const generated = await generateChallenge(paramsJson, config.testcaseCount)
+    // Plan challenges preview one full plan round (declaration order, values
+    // random per load); non-plan challenges keep the historical entropy flow.
+    const generated =
+      config.testcasePlan !== undefined
+        ? await generateDevInputs(
+            JSON.stringify({ params: config.params, testcase_plan: config.testcasePlan }),
+          )
+        : await generateChallenge(JSON.stringify(config.params), config.testcaseCount)
 
     if (!generated) {
-      errorMessage.value = 'WASM 生成失敗，請確認 params 格式正確'
+      errorMessage.value =
+        config.testcasePlan !== undefined
+          ? 'WASM 生成失敗，請確認 params 與 testcase_plan 格式正確'
+          : 'WASM 生成失敗，請確認 params 格式正確'
       return
     }
 
@@ -318,7 +360,7 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
       wasm.load_pool(config.id, data)
 
       // Select testcases — verdict_detail from pool is the source of truth
-      const result = wasm.select_testcases(config.id, config.testcaseCount)
+      const result = wasm.select_testcases(config.id, effectiveTestcaseCount(config))
       sessionId = result.session_id
       inputs.value = result.inputs
       poolVerdictDetail.value = resolveVerdictDetail(result.verdict_detail)
@@ -375,7 +417,7 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
       executorStore.setDone(verdicts.length, passed)
 
       // Session is consumed; need fresh select for next submit
-      const result = wasm.select_testcases(config.id, config.testcaseCount)
+      const result = wasm.select_testcases(config.id, effectiveTestcaseCount(config))
       sessionId = result.session_id
       inputs.value = result.inputs
       poolVerdictDetail.value = resolveVerdictDetail(result.verdict_detail)
@@ -390,7 +432,12 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
   function runStudentCode(
     code: string,
     codeInputs: string[],
-  ): Promise<Array<{ stdout: string; error?: string; elapsed_ms: number }> | null> {
+  ): Promise<Array<{
+    stdout: string
+    error?: string
+    elapsed_ms: number
+    timed_out?: boolean
+  }> | null> {
     return new Promise((resolve) => {
       const worker = new Worker(new URL('../workers/pyodide.worker.ts', import.meta.url), {
         type: 'module',
@@ -404,7 +451,12 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
         prodInflightResolve = null
       }
 
-      const results: Array<{ stdout: string; error?: string; elapsed_ms: number }> = []
+      const results: Array<{
+        stdout: string
+        error?: string
+        elapsed_ms: number
+        timed_out?: boolean
+      }> = []
       const totalBudget = codeInputs.length * WALL_CLOCK_KILL_MS
 
       prodKillTimerId = setTimeout(() => {
@@ -420,6 +472,11 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
             stdout: msg.stdout ?? '',
             error: msg.error,
             elapsed_ms: msg.elapsed_ms,
+            // Attach ONLY when set: an explicit `timed_out: undefined` key
+            // is not "absent" to serde-wasm-bindgen — it reaches
+            // deserialize_bool and rejects the whole batch. (The Rust side
+            // is also Option<bool> as a second layer of defense.)
+            ...(msg.timed_out === true ? { timed_out: true } : {}),
           })
         } else if (msg.type === 'run_complete') {
           if (prodKillTimerId !== null) clearTimeout(prodKillTimerId)

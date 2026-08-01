@@ -67,16 +67,18 @@ tests:
 ---
 ### Requirement: Rust WASM generates random inputs only
 
-The `generate_challenge(params_json, count)` WASM function SHALL accept `params_json: &str` (JSON-serialized params object from frontmatter) and `count: usize` (number of testcases). It SHALL deserialize the params, generate `count` random input strings (one per testcase), and return an object containing only `inputs: Vec<String>`. It SHALL NOT compute `expected_output`. Param values SHALL be joined in the key order of the JSON object with newline separators to form each input string. `indexmap::IndexMap` SHALL be used to preserve key order.
+The `generate_challenge(params_json, count)` WASM function SHALL accept `params_json: &str` (JSON-serialized params object from frontmatter) and `count: usize` (number of testcases). It SHALL deserialize the params, generate `count` random input strings (one per testcase), and return an object containing only `inputs: Vec<String>`. It SHALL NOT compute `expected_output`. `indexmap::IndexMap` SHALL be used to preserve key order.
 
-Each `ParamSpec` variant SHALL support an optional `count` field of type `CountSpec`. `CountSpec` SHALL be a struct with three fields:
-- `min: usize` — minimum number of values to generate (default: 1)
-- `max: usize` — maximum number of values to generate (default: 1)
-- `separator: String` — delimiter used to join multiple values on the same line (default: `" "`)
+Rendering contract: each scalar param SHALL render as one block in declaration order, blocks joined by newline. A scalar param without `count` renders as a single line; a param with `count > 1` renders its values joined by `count.separator` (a separator of `"\n"` therefore spans multiple lines). A group param renders its inner params in declaration order once per repetition, repetitions joined by newline.
 
-The entire `count` field SHALL default to `CountSpec { min: 1, max: 1, separator: " " }` when omitted, preserving backward compatibility. For each param, the generator SHALL pick an actual count uniformly at random in `[count.min, count.max]`, generate that many values, and join them with `count.separator`.
+Each non-group `ParamSpec` variant SHALL support an optional `count` field of type `CountSpec`. `CountSpec` SHALL support two mutually exclusive sizing modes:
+- Range mode: `min: usize` (default 1), `max: usize` (default 1) — actual count picked uniformly at random in `[min, max]`.
+- Linked mode: `from: String` — actual count equals the value already generated for the referenced param (see the count linkage requirement).
+- `separator: String` — delimiter used to join multiple values (default: `" "`).
 
-The supported `ParamSpec` variants SHALL be: `Int`, `AlphaUpper`, `AlphaLower`, `AlphaMixed`, `HexString`, `PrintableAscii`, `Enum`, and optionally `Faker` (when the `faker` Cargo feature is enabled). Challenge frontmatter params MUST use only these valid type names: `int`, `alpha_upper`, `alpha_lower`, `alpha_mixed`, `hex_string`, `printable_ascii`, `enum`, and `faker`. Using any other type name (e.g., `string`, `hex`) SHALL result in a deserialization error.
+Declaring `from` together with an explicit `min` or `max` SHALL be a parse error. The entire `count` field SHALL default to range mode `{ min: 1, max: 1, separator: " " }` when omitted, preserving backward compatibility.
+
+The supported `ParamSpec` variants SHALL be: `Int`, `AlphaUpper`, `AlphaLower`, `AlphaMixed`, `HexString`, `PrintableAscii`, `Enum`, `Group`, and optionally `Faker` (when the `faker` Cargo feature is enabled). Challenge frontmatter params MUST use only these valid type names: `int`, `alpha_upper`, `alpha_lower`, `alpha_mixed`, `hex_string`, `printable_ascii`, `enum`, `group`, and `faker`. Using any other type name SHALL result in a deserialization error. Unknown fields on any param spec, count spec, or top-level pool spec object SHALL be rejected at parse time (deny unknown fields).
 
 #### Scenario: generate_challenge returns inputs in param order
 
@@ -93,11 +95,6 @@ The supported `ParamSpec` variants SHALL be: `Int`, `AlphaUpper`, `AlphaLower`, 
 - **WHEN** a param is declared with `count: { min: 2, max: 5 }`
 - **THEN** the generated line for that param contains between 2 and 5 values joined by separator (inclusive)
 
-#### Scenario: CountSpec with custom separator joins values correctly
-
-- **WHEN** a param is declared with `count: { min: 3, max: 3, separator: "," }`
-- **THEN** the generated line contains exactly 3 values joined by commas with no trailing separator
-
 #### Scenario: Omitting count preserves existing behavior
 
 - **WHEN** a param is declared without a `count` field
@@ -106,7 +103,17 @@ The supported `ParamSpec` variants SHALL be: `Int`, `AlphaUpper`, `AlphaLower`, 
 #### Scenario: Invalid type name causes deserialization error
 
 - **WHEN** frontmatter params contain `type: string` or `type: hex`
-- **THEN** `generate_challenge` returns an error indicating unknown variant with the list of valid variants
+- **THEN** parsing returns an error indicating unknown variant with the list of valid variants
+
+#### Scenario: Unknown field is rejected instead of silently ignored
+
+- **WHEN** a param declares `count: { from: "n" }` against a parser build that predates linked mode, or any spec carries a misspelled field such as `min_lenght`
+- **THEN** parsing SHALL fail with an unknown-field error rather than silently applying defaults
+
+#### Scenario: Newline separator renders one value per line
+
+- **WHEN** a param is declared with `count: { from: "n", separator: "\n" }` and the generated value of `n` is 4
+- **THEN** the rendered block for that param contains exactly 4 lines, one value per line
 
 ---
 ### Requirement: Pyodide Worker executes generator to produce expected outputs
@@ -327,3 +334,209 @@ An automated test SHALL, for each challenge that declares `reference_solution`, 
 
 - **WHEN** python3 or PyYAML is unavailable in the environment
 - **THEN** the content-layer regression test SHALL skip with a warning rather than failing
+
+---
+### Requirement: Group construct repeats a nested param block
+
+The params model SHALL support a `group` param: `{ "type": "group", "repeat": "<param-name>", "params": { ... } }`. The group's inner `params` object SHALL follow the same rules as top-level params except that a group MUST NOT contain another group (maximum nesting depth 1). The group SHALL render its inner params once per repetition; the repetition count SHALL equal the value already generated for the param referenced by `repeat`.
+
+Reference legality for `repeat` and `count.from` SHALL be validated at parse time:
+- The referenced param MUST be declared before the referencing host, in the same scope or (for hosts inside a group) at top level. Within one group repetition, inner params MAY reference earlier inner params of the same repetition; each repetition resolves independently.
+- The referenced param MUST be a scalar `int` (no `count` field, or a fixed `count` of exactly 1) with `min >= 0`.
+- Referencing a group, an undeclared name, or a later-declared name SHALL be a parse error.
+
+#### Scenario: Competition-style nested format is expressible
+
+- **WHEN** params declare `t` (int) followed by a group with `repeat: t` whose inner params are `n` (int) and `nums` (int with `count: { from: "n", separator: "\n" }`)
+- **THEN** each generated input renders as: first line `t`, then for each of the `t` repetitions one line `n` followed by exactly `n` lines each containing one integer
+
+#### Scenario: Zero repetitions renders an empty group block
+
+- **WHEN** a group's `repeat` references an int param whose generated value is 0
+- **THEN** the group contributes no lines to the rendered input
+
+#### Scenario: Forward reference is a parse error
+
+- **WHEN** a param declares `count: { from: "n" }` and `n` is declared after that param
+- **THEN** parsing SHALL fail with an error naming the illegal forward or unknown reference
+
+#### Scenario: Non-scalar-int reference is a parse error
+
+- **WHEN** `repeat` or `count.from` references a param that is not type `int`, or an int with `count.max > 1`, or an int with `min < 0`
+- **THEN** parsing SHALL fail with an error naming the violated reference rule
+
+#### Scenario: Nested group is a parse error
+
+- **WHEN** a group's inner params contain another `type: group` param
+- **THEN** parsing SHALL fail with a nesting-depth error
+
+#### Scenario: Nested params are validated recursively
+
+- **WHEN** a group's inner params contain an `enum` with an empty `values` array
+- **THEN** parsing SHALL fail with the same validation error that an equivalent top-level declaration produces
+
+---
+### Requirement: Pool input generation is deterministic and budget-enforced
+
+A WASM entry `generate_pool_inputs(spec_json, count)` SHALL accept a pool spec object `{ "params": { ... }, "seed": <string, optional>, "input_budget": <bytes, optional> }` and return `inputs: Vec<String>` like `generate_challenge`. When `seed` is present, the RNG SHALL be seeded from a stable 64-bit FNV-1a hash over the seed string, a zero byte, and the serialized params content, so that identical spec objects always produce identical inputs across builds and platforms. When `seed` is absent, entropy seeding SHALL be used. The top-level key `testcase_plan` SHALL be recognized as reserved: its presence SHALL produce an explicit "reserved, not yet implemented" error rather than silent acceptance, and any other unknown top-level key SHALL be an unknown-field parse error.
+
+Input size SHALL be governed by a worst-case estimate computed at parse time from declared bounds (digit width for ints including sign, `max_len` for string types, longest value for enums, multiplied by the count upper bound — `count.max` or the referenced param's `max` — plus separators, and group inner totals multiplied by the repeat reference's `max`). The estimate SHALL be an upper bound on actual rendered bytes. `parse_params` SHALL unconditionally reject specs whose estimate exceeds the hard cap of 65536 bytes. `generate_pool_inputs` SHALL additionally enforce the configurable budget: default 4096 bytes, overridable via `input_budget` up to the hard cap; declaring `input_budget` above the hard cap SHALL be a parse error. Budget violations SHALL fail with an error that itemizes the per-param estimate.
+
+#### Scenario: Same spec yields identical pools across builds
+
+- **WHEN** `generate_pool_inputs` is called twice with an identical spec object containing a `seed`
+- **THEN** both calls return byte-identical `inputs`
+
+#### Scenario: Changing params content changes the sequence
+
+- **WHEN** the same `seed` string is used but any params content differs
+- **THEN** the generated inputs differ (the effective seed incorporates params content)
+
+#### Scenario: Default budget rejects oversized declarations
+
+- **WHEN** a spec without `input_budget` declares bounds whose worst-case estimate exceeds 4096 bytes
+- **THEN** `generate_pool_inputs` fails with an error listing per-param byte estimates
+
+#### Scenario: Hard cap cannot be overridden
+
+- **WHEN** a spec declares `input_budget: 100000`
+- **THEN** parsing fails with an error stating the 65536-byte hard cap
+
+#### Scenario: Reserved testcase_plan key is refused loudly
+
+- **WHEN** a spec object contains a `testcase_plan` key
+- **THEN** `generate_pool_inputs` fails with an error stating the field is reserved and not yet implemented
+
+---
+### Requirement: Invalid specs fail at parse time instead of trapping at generation time
+
+All spec validation — inverted ranges (`min > max`, `min_len > max_len`, `count.min > count.max`), empty enum values, reference legality, nesting depth, unknown fields, and budget caps — SHALL be performed by `parse_params` (or the pool spec parser) and reported as readable errors. Generation SHALL NOT be reachable with a spec that can panic the WASM instance; the previously observed `RuntimeError: unreachable` trap for `min > max` SHALL be replaced by a parse error.
+
+#### Scenario: Inverted int range is a parse error, not a trap
+
+- **WHEN** a param declares `{ "type": "int", "min": 9, "max": 1 }`
+- **THEN** parsing returns a readable range error and no WASM trap occurs
+
+#### Scenario: WASM instance stays usable after a rejected spec
+
+- **WHEN** a call fails due to any parse-time validation error
+- **THEN** a subsequent call with a valid spec on the same instance succeeds
+
+---
+### Requirement: Every challenge params declaration passes the engine parser
+
+A test (`scripts/challenge-params.test.ts`) SHALL enumerate all `docs/challenge/*.md` files, extract each `params` declaration, and assert that the WASM parser accepts it and that its worst-case input estimate passes the applicable budget. The test SHALL fail (not skip) when the WASM artifact is missing, and SHALL fail when zero challenge files are found.
+
+#### Scenario: A challenge with an unsupported type is caught at test time
+
+- **WHEN** any challenge declares a param type or field the engine parser rejects
+- **THEN** the test fails naming the challenge file and the parse error
+
+#### Scenario: Missing WASM artifact is a failure, not a skip
+
+- **WHEN** the test runs in an environment where the WASM artifact has not been built
+- **THEN** the test fails with an actionable message instead of skipping
+
+---
+### Requirement: Op-count guard covers flat top-level code
+
+The Python wrapper produced by `buildWrappedCode` SHALL count operations executed in the module frame itself (flat top-level user code), not only in frames created after `sys.settrace` is installed. After installing the global tracer, the wrapper SHALL also attach the tracer to the currently executing frame so that line events in flat top-level code are counted. When the count exceeds `opLimit`, the wrapper SHALL raise `TimeoutError` with a message containing "Operation limit exceeded", identically for flat top-level code and function-wrapped code. For code that does not exceed the limit, the captured `_output` SHALL be byte-identical to the pre-fix wrapper's output.
+
+#### Scenario: Flat top-level loop exceeding the limit is terminated
+
+- **WHEN** flat top-level user code (no function definitions) executes more line events than `opLimit`
+- **THEN** execution raises `TimeoutError` containing "Operation limit exceeded" instead of running to completion or being silently killed by the outer wall-clock budget
+
+#### Scenario: Function-wrapped code behavior is unchanged
+
+- **WHEN** user code defines a function and calls it, exceeding `opLimit` inside the function
+- **THEN** execution raises `TimeoutError` containing "Operation limit exceeded", matching pre-fix behavior
+
+#### Scenario: Normal flat code output is unaffected
+
+- **WHEN** flat top-level user code completes within `opLimit`
+- **THEN** the captured `_output` equals the code's stdout exactly as before the fix
+
+---
+### Requirement: Generator execution is exempt from the op-count guard
+
+`buildWrappedCode` SHALL accept `opLimit: number | null`. When `opLimit` is `null`, the produced wrapper SHALL contain no tracer definition and no `sys.settrace` installation, while keeping the sandbox guard and stdin/stdout redirection unchanged. The Worker's `generate` handler SHALL execute generator code with `opLimit: null`. The `run`, `run_only`, and `execute` handlers SHALL keep the default limit of 10,000,000 operations.
+
+#### Scenario: Generator with heavy computation is not killed
+
+- **WHEN** the `generate` handler executes a trusted generator whose line-event count exceeds 10,000,000
+- **THEN** generation completes normally because no op-count guard is injected
+
+#### Scenario: Exempt wrapper keeps sandbox and I/O behavior
+
+- **WHEN** `buildWrappedCode` is called with `opLimit: null`
+- **THEN** the produced wrapper still blocks `js`/`pyodide` imports and still captures stdout into `_output`
+
+---
+### Requirement: Worker resets interpreter trace state before each execution
+
+The wrapper's own `sys.settrace(None)` teardown executes only when user code completes normally; an ordinary user exception (the routine RE path) skips it and leaks the installed tracer into the shared interpreter. The leaked tracer — whose globals dict is cleared between runs — then kills the NEXT execution in its 'call' event with an unrelated NameError before its first line runs, falsely failing a correct testcase (self-healing after one poisoned run). To prevent this, every Worker handler (`run`, `run_only`, `execute`, `generate`) SHALL clear the interpreter's trace state by executing `sys.settrace(None)` before clearing globals and running the next wrapped code. The reset SHALL run before `globals.clear()` so the stale tracer's own state is still intact and the reset normally executes cleanly; in the edge case where the leftover op count is already near its limit the stale tracer may raise during the reset itself, in which case CPython's clear-on-tracer-exception behavior leaves the trace state clean and the handler SHALL absorb the raised error.
+
+#### Scenario: An errored testcase does not poison the next
+
+- **WHEN** testcase A raises an ordinary exception (e.g. IndexError) and testcase B with correct code runs next in the same interpreter
+- **THEN** testcase B SHALL produce its correct output instead of failing with a stale-tracer NameError
+
+#### Scenario: Reset precedes every execution
+
+- **WHEN** any handler processes multiple inputs in one request
+- **THEN** each input's execution SHALL be preceded by a trace-state reset followed by globals clearing
+
+---
+### Requirement: Real challenge content passes through the judging wrapper
+
+The test suite SHALL execute the `reference_solution` of every challenge that declares one THROUGH `buildWrappedCode` (default op limit, tracing active) against sampled production-pool inputs, asserting the output matches the generator's expected output. This guards the actual judging execution path with real content — the content-regression suite runs solutions in a bare python3 subprocess and never exercises the wrapper.
+
+#### Scenario: Reference solution survives the wrapper on real inputs
+
+- **WHEN** a challenge declares `reference_solution` and the smoke suite runs it through the wrapper on sampled pool inputs
+- **THEN** execution completes without error and the output matches the generator's expected output
+
+---
+### Requirement: Op-count guard is verified by executing real Python
+
+The test suite SHALL include integration tests that execute the wrapper produced by `buildWrappedCode` with a real Python interpreter (system `python3`), asserting runtime behavior rather than wrapper string shape. The tests SHALL cover at minimum: a flat top-level loop exceeding the limit (fails with "Operation limit exceeded"), normal flat code (correct `_output`, no error), function-wrapped code exceeding the limit, and an exempt (`opLimit: null`) run of an over-limit loop completing normally. When `python3` is unavailable, these executions MAY be skipped following the same preflight pattern as the content-regression suite.
+
+#### Scenario: Flat-code enforcement is proven by execution
+
+- **WHEN** the integration test runs the wrapped flat over-limit loop under `python3`
+- **THEN** the process fails and its stderr contains "Operation limit exceeded"
+
+#### Scenario: String-shape assertions alone are insufficient
+
+- **WHEN** the op-count guard behavior changes such that flat code is no longer counted
+- **THEN** at least one integration test fails, even if the wrapper still textually contains `sys.settrace`
+
+---
+### Requirement: RunOnly results carry a structured timeout flag
+
+The Worker's `run_only` handler SHALL classify op-limit timeouts at the point where the execution error is first received, by probing the wrapper's op counter state (`_op_count` left in the interpreter globals by the just-failed run): the failure is a timeout if and only if the count exceeds the request's op limit. Classification SHALL NOT match error-message text — a student raising their own `TimeoutError` (whose count is necessarily within the limit) stays an ordinary runtime error with its message preserved. The dev-mode `run` handler SHALL use the same probe so dev and prod classify identically.
+
+When classified as a timeout, the posted `testcase_result` SHALL contain `timed_out: true` and SHALL NOT contain an `error` field (the timeout message embeds the op limit and must not reach the judging layer or the UI). Non-timeout failures SHALL keep the existing shape (`error` set, no `timed_out` key). Successful executions SHALL NOT report `timed_out: true`.
+
+Downstream, the frontend collector SHALL attach the `timed_out` key to the objects passed to the WASM `judge` ONLY when its value is `true` — an explicit `timed_out: undefined` key is not "absent" to serde-wasm-bindgen and would poison the whole batch. Consumers SHALL treat `timed_out` as an opaque boolean.
+
+#### Scenario: Op-limit timeout posts timed_out without error
+
+- **WHEN** a `run_only` testcase execution fails and the interpreter's op count exceeds the request's op limit
+- **THEN** the posted `testcase_result` contains `timed_out: true`, an empty `stdout`, and no `error` field
+
+#### Scenario: Ordinary failure keeps the error shape
+
+- **WHEN** a `run_only` testcase execution fails with the op count within the limit
+- **THEN** the posted `testcase_result` contains the `error` message and no `timed_out` key
+
+#### Scenario: Student-raised TimeoutError is not a TLE
+
+- **WHEN** student code raises its own `TimeoutError` (or prints timeout-like text) without exceeding the op limit
+- **THEN** the result is classified as an ordinary failure with the original error message preserved
+
+#### Scenario: Frontend passes the flag through to the judge
+
+- **WHEN** the production runner collects `run_only` results and calls the WASM `judge`
+- **THEN** each timed-out result carries `timed_out: true` and every other result carries NO `timed_out` key at all

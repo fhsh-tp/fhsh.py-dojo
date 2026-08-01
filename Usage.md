@@ -67,6 +67,8 @@ tags:                      # 選填：分類標籤陣列
   - 基礎演算法
 algorithm: my_algorithm    # snake_case，用於 WASM 產生測資的識別鍵
 testcase_count: 5          # 選填，預設 5，測試案例數量
+testcase_plan: ...         # 選填，測資分區（band／literal），與 testcase_count 互斥（見下方「testcase_plan — 測資分區」）
+input_budget: 4096         # 選填，單筆測資 worst-case 位元組預算（見下方「輸入規模預算」）
 editor_capture_debounce_ms: 1000  # 選填，卡關紀錄的 editor 快照 debounce 間隔（見下方）
 params: ...                # 必填，定義 WASM 產生測資的參數規格（見下方）
 generator: |               # 必填，Python 程式，讀入參數並輸出正確答案
@@ -98,9 +100,9 @@ starter_code: |            # 必填，使用者初始程式碼範本
 
 ### params 參數型別
 
-`params` 是一個 YAML 物件，**每個鍵代表一個輸入參數**，順序即為 stdin 的行順序。
+`params` 是一個 YAML 物件，**每個鍵代表一個輸入參數，依宣告順序渲染為 stdin 的一個「區塊」**（預設一個區塊＝一行）。
 
-WASM 產生的每筆測資為多行字串，每行對應一個參數，`generator` 程式碼用 `input()` 依序讀取。
+WASM 產生的每筆測資為多行字串：純量參數渲染一行；`count` 大於 1 的參數以 `separator` 連接多個值（`separator` 為 `"\n"` 時跨多行）；`group` 參數則整段重複多次（見下方「group 群組」）。`generator` 程式碼用 `input()` 依宣告順序讀取。
 
 #### 型別一覽
 
@@ -112,6 +114,8 @@ WASM 產生的每筆測資為多行字串，每行對應一個參數，`generato
 | `alpha_mixed` | 大小寫混合英文字母（A–Za–z） | `min_len`, `max_len` |
 | `hex_string` | 十六進位字串（0–9a–f） | `min_len`, `max_len` |
 | `printable_ascii` | 可列印 ASCII 字元（空格至 ~） | `min_len`, `max_len` |
+| `enum` | 從固定清單中隨機挑選一個值 | `values`（非空字串陣列） |
+| `group` | 巢狀參數區塊，重複 K 次（K 來自先前宣告的參數） | `repeat`, `params`（見下方「group 群組」） |
 
 #### 範例
 
@@ -177,6 +181,187 @@ params:
 ```
 
 省略 `count` 時等同於 `count: { min: 1, max: 1 }`，即只產生一個值。
+
+#### count.from — 個數連動另一個參數
+
+`count` 支援**連動模式**：以 `from` 指定「個數等於另一個參數實際抽出的值」。與 `min`/`max` **互斥**（同時宣告會在建置期報錯）。
+
+```yaml
+params:
+  n:
+    type: int
+    min: 1
+    max: 10
+  nums:
+    type: int
+    min: -999
+    max: 999
+    count:
+      from: n           # 個數 = n 抽到的值
+      separator: "\n"   # 每個值一行
+```
+
+產生的測資範例（n 抽到 3）：
+
+```
+3
+-42
+507
+-8
+```
+
+**引用規則**（違反任一條都是建置期錯誤，不會產出壞測資）：
+
+| 規則 | 說明 |
+|------|------|
+| 只能往回引用 | 被引用的參數必須宣告在前面（同層先宣告，或群組內引用頂層先宣告者）|
+| 只能引用單值 int | 被引用者必須是 `int` 且沒有 `count`（或 `count` 固定為 1）|
+| 值域不可為負 | 被引用者的 `min` 必須 ≥ 0 |
+| 不能引用 group | 群組不可被 `from` 或 `repeat` 引用 |
+
+連動個數解析為 0 時，該參數**整個區塊省略**（不會留下空行）——「N=0 代表接下來 0 行」。
+
+#### group 群組 — 競賽式多筆測資
+
+`group` 把一段巢狀 params **重複 K 次**，K 來自先前宣告的單值 int 參數（規則同上表）。群組**不可再包含群組**（深度上限 1）。群組內的參數可以引用「同一次重複內先宣告的兄弟參數」或「群組外先宣告的頂層參數」；每次重複各自獨立解析。`repeat` 解析為 0 時整個群組不產生任何行。
+
+> **同名遮蔽細節**：引用綁定看的是**宣告順序**，不是「是否在同一個群組內」。若群組內宣告了與頂層同名的參數（如 `n`），排在它**之前**的群組內引用會綁到頂層的 `n`、排在它**之後**的才綁到群組內的 `n`。建議直接避免同名，不要依賴此行為。
+
+完整範例——「第一行 T 筆測資，每筆第一行 Ni、接著 Ni 行整數」：
+
+```yaml
+params:
+  t:
+    type: int
+    min: 2
+    max: 5
+  cases:
+    type: group
+    repeat: t
+    params:
+      n:
+        type: int
+        min: 1
+        max: 10
+      nums:
+        type: int
+        min: -999
+        max: 999
+        count:
+          from: n
+          separator: "\n"
+```
+
+產生的測資範例（t=2，兩筆測資的 n 分別為 3、1）：
+
+```
+2
+3
+14
+-72
+891
+1
+-5
+```
+
+對應的 `generator` 讀法：
+
+```python
+t = int(input())
+for _ in range(t):
+    n = int(input())
+    nums = [int(input()) for _ in range(n)]
+    # ... 計算並 print 該筆答案
+```
+
+#### testcase_plan — 測資分區
+
+`testcase_plan` 是選填的頂層欄位，讓同一題的測資可以切成多個「分區」：部分測資值域小（暖身用）、部分值域大（壓力測試用），甚至手動釘死特定邊界情境。每場判題實際跑的測資，其**順序即為 `testcase_plan` 條目的宣告順序**——最典型的用法是「前幾筆值域小、後幾筆值域大」的 APCS 式配分。
+
+`testcase_plan` 是一個 YAML 清單，每個條目二選一種形態：
+
+| 條目形態 | 欄位 | 說明 |
+|----------|------|------|
+| band | `count`（必填） | 正整數，這個 band 在每一場測資中佔幾筆 |
+| band | `override`（選填） | 鏡射 `params` 形狀的部分補丁，與 base `params` 深層合併；省略或空物件 `{}` 等同直接沿用 base `params` |
+| literal | `literal`（必填） | 非空字串，逐字元作為這一筆測資的 stdin 原文；期望輸出仍由 `generator` 對這份輸入即時計算，不是手動指定 |
+
+**每場測資筆數** = 所有 band 的 `count` 加總 + literal 條目數。`testcase_plan` 與 `testcase_count` **互斥**：兩者同時宣告會在建置期直接報錯，請擇一使用。
+
+**override 合併規則：**
+
+- 與 base `params` 做**深層合併**：雙方同一鍵都是物件時遞迴合併，否則以 `override` 的值整個取代。
+- `override` 若引用了 base `params` 不存在的鍵，會在 parse 期報錯，錯誤訊息含鍵路徑。
+- 合併完成後的 params 會照跑一整套與 base `params` 完全相同的驗證（型別必要欄位、`min <= max`、`count.from` 引用規則……等）。
+
+> ⚠️ `override` 設計上只該用來補丁**值域**（`min`／`max`／`count` 上下界等），不要拿來改 `type`。改 `type` 只要合併後仍能通過驗證就不會被引擎擋下，但語意會變得混亂（例如同一參數在不同 band 忽然變成不同型別），請避免。
+
+**輸入規模預算：** 每個 band 以「合併後的 params」各自估算 worst-case 位元組數；每個 literal 條目則以其**實際位元組數**計入。全部條目都要通過 `input_budget`（未宣告 `testcase_plan` 時的預設 4096、硬上限 65536 不可覆寫）；超標建置直接失敗，錯誤訊息會標明是第幾個條目超標。宣告了 `testcase_plan` 的題目，base `params` 本身不再單獨受 `input_budget` 檢查（因為實際產生測資全部走各 band 合併後的結果），只還受 65536 硬上限保護。
+
+**測資決定性（seed）：** `testcase_plan` 的內容（band 值域、literal 內容）一併參與正式測資池的 seed 導出——改動任何 band 的值域或任何 literal 字串都會重新洗整個池。未宣告 `testcase_plan` 的題目，seed 行為完全不受影響。
+
+**正式池結構：** 正式測資池會存放 `floor(200 ÷ 每場測資筆數)` 個完整 block，每個 block 就是一輪照 `testcase_plan` 順序產生的完整測資組。每場判題會隨機抽出**一整個 block**，block 內部的測資順序固定不變（永遠照宣告順序）。
+
+**dev 模式：** 本機開發站（`pnpm dev`）的即時預覽會呈現一輪完整的 `testcase_plan`（順序照宣告）；band 的值每次重新整理頁面都會重新隨機，literal 的內容固定不變。
+
+**完整範例**（與 `group` 組合，deque 式「第一行 T、每筆第一行 Ni」結構，搭配兩個 band 與一條 literal；⚠️ 數字純屬語法示範）：
+
+```yaml
+params:
+  t:
+    type: int
+    min: 2
+    max: 5
+  cases:
+    type: group
+    repeat: t
+    params:
+      n:
+        type: int
+        min: 1
+        max: 10
+      nums:
+        type: int
+        min: -999
+        max: 999
+        count:
+          from: n
+          separator: "\n"
+testcase_plan:
+  - count: 3              # 暖身 band：沿用 base 的 n 值域（1~10）
+  - count: 2              # 壓力 band：override 把 n 值域拉大
+    override:
+      cases:
+        params:
+          n:
+            min: 500
+            max: 1000
+  - literal: |             # 手動釘死的邊界情境：t=1、單筆 n=0（空佇列）
+      1
+      0
+```
+
+上例每場測資共 `3 + 2 + 1 = 6` 筆：前 3 筆用 base 值域暖身、接著 2 筆用 override 拉大的值域壓力測試、最後固定附上一筆 `t=1、n=0` 的邊界情境（不隨機、每次都一樣）。
+
+---
+
+#### 輸入規模預算（input_budget）
+
+建置期會以宣告的上界計算**單筆測資的 worst-case 位元組數**（int 取最寬位數含負號、字串型別取 `max_len`、enum 取最長值，乘上 count 上界與 separator，群組再乘上 repeat 上界）。估算超過預算時**建置直接失敗**，並列出逐參數估算式。
+
+- 預設預算：**4096 bytes**／筆——教學題綽綽有餘
+- 可在 frontmatter 以 `input_budget` 調高
+- 硬上限：**65536 bytes**，不可覆寫；`input_budget` 宣告值必須**小於**此數（保護池檔大小與前端執行鏈）
+
+> **注意**：瀏覽器 dev 模式的即時預覽只受 65536 硬上限保護、不套用此預算——本機看起來正常但 `pnpm build:pools` 報預算超標時，請先檢討 `params` 設計（例如降低 count 上界），而不是直接調大 `input_budget`。
+
+#### 建置期驗證（fail loudly）
+
+所有規格錯誤都在**建置期／parse 期**以可讀錯誤失敗，不會產出壞測資，也不會在執行期 panic：未知欄位（拼錯的 `min_lenght` 會被拒收）、`min > max`、空的 enum `values`、非法引用、群組巢狀、預算超標。全部題目的 params 由 `scripts/challenge-params.test.ts` 冒煙守門——任何一題宣告了引擎不認識的型別或欄位，測試會指名該檔失敗。
+
+#### 測資決定性（seed）
+
+正式測資池以「題目 slug + params 內容」導出固定 seed：**同樣的宣告必產出同樣的池**，方便重現與比對；params 一有改動，池自動重新洗牌。瀏覽器 dev 模式的即時練習測資維持隨機（每次執行都不同）。
 
 ---
 

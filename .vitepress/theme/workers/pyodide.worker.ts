@@ -73,6 +73,18 @@ export interface RunOnlyRequest {
   opLimit?: number
 }
 
+/** Per-testcase result for run_only — no verdict fields (prod judges in WASM). */
+export interface RunOnlyTestcaseResult {
+  type: 'testcase_result'
+  index: number
+  stdout: string
+  elapsed_ms: number
+  /** Set for non-timeout failures only. */
+  error?: string
+  /** Set (true) only for op-limit timeouts, classified in the Worker. */
+  timed_out?: boolean
+}
+
 /** Request to execute code with stdin, returning raw stdout (no verdict comparison). */
 export interface ExecuteRequest {
   type: 'execute'
@@ -107,6 +119,57 @@ async function ensurePyodide(): Promise<void> {
   // Dynamic import from CDN — @vite-ignore prevents Vite from bundling the URL
   const mod = await import(/* @vite-ignore */ `${PYODIDE_CDN}pyodide.mjs`)
   pyodide = await mod.loadPyodide({ indexURL: PYODIDE_CDN })
+}
+
+/**
+ * Python snippet that clears interpreter trace state. Exported so the
+ * wiring-guard test asserts against the same constant instead of a copy.
+ */
+export const TRACE_RESET_SNIPPET = 'import sys\nsys.settrace(None)'
+
+/**
+ * Did the just-failed run exceed its op limit? Probes the wrapper's
+ * `_op_count` left in globals (the errored run's namespace is still intact
+ * at catch time — cleanup happens before the NEXT run). The guard's
+ * TimeoutError fires only when count exceeds the limit, so `count > limit`
+ * identifies guard-raised timeouts without matching error-message text —
+ * a student raising their own TimeoutError stays an ordinary RE (their
+ * count is necessarily ≤ limit, or the guard would have fired first).
+ */
+function opLimitExceeded(opLimit: number): boolean {
+  try {
+    const count: unknown = pyodide.globals.get('_op_count')
+    // Pyodide converts Python ints above 2^53-1 to BigInt — a count that
+    // large is still "exceeded", and missing it would misclassify a
+    // genuine guard timeout as RE (leaking the op-limit message).
+    if (typeof count === 'bigint') return count > BigInt(opLimit)
+    return typeof count === 'number' && count > opLimit
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Clear any tracer left over from a previous run in this interpreter.
+ *
+ * The wrapper's own `sys.settrace(None)` teardown sits AFTER the user code,
+ * so any ordinary exception (the normal RE path) skips it and the tracer
+ * leaks into the shared interpreter. The next execution then dies in its
+ * 'call' event — before its first line — with a NameError from the stale
+ * tracer, falsely failing a correct testcase. Must run BEFORE
+ * `globals.clear()`: while `_op_count` still exists the stale tracer stays
+ * callable, so the reset normally executes cleanly. Edge case: if the
+ * leftover count is already near its limit, the reset's own events make
+ * the stale tracer raise — CPython then auto-clears tracing and the catch
+ * absorbs the error, so both paths end with clean trace state.
+ */
+async function resetTraceState(): Promise<void> {
+  try {
+    await pyodide.runPythonAsync(TRACE_RESET_SNIPPET)
+  } catch {
+    // A stale tracer may throw mid-reset; CPython auto-clears tracing when
+    // the tracer itself raises, so trace state is clean either way.
+  }
 }
 
 // ── Message handler ────────────────────────────────────────────────────────
@@ -159,6 +222,7 @@ self.onmessage = async (
     }, WALL_CLOCK_MS)
 
     // Namespace cleanup before each testcase (task 4.7)
+    await resetTraceState()
     try {
       pyodide.globals.clear()
     } catch {
@@ -200,7 +264,10 @@ self.onmessage = async (
       clearTimeout(wallClock)
       const elapsed_ms = performance.now() - startTime
       const errMsg = String(err)
-      const isTle = errMsg.includes('TimeoutError') || errMsg.includes('Operation limit')
+      // Probe the op counter instead of matching error text — a student
+      // raising their own TimeoutError is an ordinary RE (dev and prod
+      // classify identically).
+      const isTle = opLimitExceeded(opLimit)
 
       self.postMessage({
         type: 'testcase_result',
@@ -231,6 +298,7 @@ async function handleRunOnly(req: RunOnlyRequest): Promise<void> {
     const input = inputs[i]!
     const startTime = performance.now()
 
+    await resetTraceState()
     try {
       pyodide.globals.clear()
     } catch {
@@ -248,17 +316,22 @@ async function handleRunOnly(req: RunOnlyRequest): Promise<void> {
         index: i,
         stdout,
         elapsed_ms: performance.now() - startTime,
-      })
+      } satisfies RunOnlyTestcaseResult)
     } catch (err: unknown) {
       const errMsg = String(err)
+      // Classify op-limit timeouts HERE by probing the actual op counter —
+      // downstream the judge only reads the structured flag. The timeout
+      // message embeds the op limit, so a timed-out result carries no
+      // error field at all.
+      const isTle = opLimitExceeded(opLimit)
 
       self.postMessage({
         type: 'testcase_result',
         index: i,
         stdout: '',
         elapsed_ms: performance.now() - startTime,
-        error: errMsg,
-      })
+        ...(isTle ? { timed_out: true } : { error: errMsg }),
+      } satisfies RunOnlyTestcaseResult)
     }
   }
 
@@ -275,6 +348,7 @@ async function handleExecute(req: ExecuteRequest): Promise<void> {
   const startTime = performance.now()
 
   // Namespace cleanup
+  await resetTraceState()
   try {
     pyodide.globals.clear()
   } catch {
@@ -314,6 +388,7 @@ async function handleGenerate(req: GenerateRequest): Promise<void> {
 
   for (const input of inputs) {
     // Clear namespace before each generator run
+    await resetTraceState()
     try {
       pyodide.globals.clear()
     } catch {
@@ -321,7 +396,10 @@ async function handleGenerate(req: GenerateRequest): Promise<void> {
     }
 
     try {
-      const wrapped = buildWrappedCode(generatorCode, input, DEFAULT_OP_LIMIT)
+      // Generators are trusted authored code — exempt from the op-count
+      // guard (opLimit: null) so heavy but legitimate generators are not
+      // killed now that flat top-level code is actually counted.
+      const wrapped = buildWrappedCode(generatorCode, input, null)
       await pyodide.runPythonAsync(wrapped)
       const rawOutput: string = (pyodide.globals.get('_output') ?? '').trimEnd()
 
