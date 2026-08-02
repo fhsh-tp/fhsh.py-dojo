@@ -72,18 +72,18 @@ The print-farm-schedule stdin SHALL be exactly three lines: line 1 the integer m
 ---
 ### Requirement: Testcase plan partitioning
 
-The print-farm-schedule challenge SHALL declare a testcase_plan of exactly 20 entries per run: 10 warm-up band cases (hand-computable scale), 8 stress band cases, and 2 literal boundary entries covering the more-printers-than-jobs boundary and the single-job boundary. The pillbox-reminder challenge SHALL declare a testcase_plan of exactly 6 entries per run: 3 warm-up band cases, 2 stress band cases, and 1 literal entry covering the simultaneous-tie boundary. The pillbox-reminder stress band SHALL be shaped so that a per-minute time-axis scan exceeds the 10M op budget (TLE) while both a linear scan over next-fire times and a heap-based solution stay below 500k ops (≥20× margin); the concrete stress bounds SHALL be pinned by an op-count probe measurement before finalization. The print-farm-schedule SHALL NOT impose any efficiency threshold.
+The print-farm-schedule challenge SHALL declare a testcase_plan of exactly 20 entries per run, in this declaration order: 1 statement-example literal entry first (m=2, n=4, durations `2 3 5 7`), then 9 warm-up band cases (hand-computable scale), then 8 stress band cases, then 2 literal boundary entries covering the more-printers-than-jobs boundary and the single-job boundary. The first entry SHALL be the statement example so that the run panel's default stdin (derived from the first testcase) equals the worked example in the statement. The pillbox-reminder challenge SHALL declare a testcase_plan of exactly 6 entries per run: 3 warm-up band cases, 2 stress band cases, and 1 literal entry covering the simultaneous-tie boundary. The pillbox-reminder stress band SHALL be shaped so that a per-minute time-axis scan exceeds the 10M op budget (TLE) while both a linear scan over next-fire times and a heap-based solution stay below 500k ops (≥20× margin); the concrete stress bounds SHALL be pinned by an op-count probe measurement before finalization. The print-farm-schedule SHALL NOT impose any efficiency threshold.
 
-#### Scenario: Print-farm run size and literal boundaries
+#### Scenario: Print-farm first testcase equals statement example
 
 - **WHEN** a judging run is assembled for print-farm-schedule
-- **THEN** it SHALL contain 20 testcases in declaration order (10 warm-up, then 8 stress, then 2 literals)
+- **THEN** the first testcase input SHALL be the statement example and the run SHALL contain 20 testcases in declaration order (1 example literal, 9 warm-up, 8 stress, 2 boundary literals)
 
-##### Example: Single-job literal entry
+##### Example: Statement example pinned first
 
-- **GIVEN** m=2, n=1, durations `7`
-- **WHEN** the simulation runs
-- **THEN** the output SHALL be `7`
+- **GIVEN** the first testcase of any run
+- **WHEN** its input is compared to the statement example
+- **THEN** it SHALL be exactly `2` / `4` / `2 3 5 7` with expected output `10`
 
 #### Scenario: Pillbox stress band rejects per-minute scanning
 
@@ -97,7 +97,7 @@ The print-farm-schedule challenge SHALL declare a testcase_plan of exactly 20 en
 
 
 <!-- @trace
-source: expand-print-farm-testcase-plan
+source: pin-print-farm-example-first
 updated: 2026-08-02
 code:
   - docs/challenge/print-farm-schedule.md

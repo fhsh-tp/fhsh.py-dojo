@@ -26,7 +26,11 @@ params:
       from: n
       separator: " "
 testcase_plan:
-  - count: 10
+  - literal: |
+      2
+      4
+      2 3 5 7
+  - count: 9
     override:
       m: { max: 3 }
       n: { min: 3, max: 8 }
