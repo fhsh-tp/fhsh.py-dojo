@@ -72,7 +72,7 @@ The print-farm-schedule stdin SHALL be exactly three lines: line 1 the integer m
 ---
 ### Requirement: Testcase plan partitioning
 
-The print-farm-schedule challenge SHALL declare a testcase_plan of exactly 20 entries per run, in this declaration order: 1 statement-example literal entry first (m=2, n=4, durations `2 3 5 7`), then 9 warm-up band cases (hand-computable scale), then 8 stress band cases, then 2 literal boundary entries covering the more-printers-than-jobs boundary and the single-job boundary. The pillbox-reminder challenge SHALL declare a testcase_plan of exactly 6 entries per run, in this declaration order: 1 statement-example literal entry first (Q=2, periods `3 5`, K=6), then 2 warm-up band cases, then 2 stress band cases, then 1 literal entry covering the simultaneous-tie boundary. For both challenges the first entry SHALL be the statement example so that the run panel's default stdin (derived from the first testcase) equals the worked example in the statement. The pillbox-reminder stress band SHALL be shaped so that a per-minute time-axis scan exceeds the 10M op budget (TLE) while both a linear scan over next-fire times and a heap-based solution stay below 500k ops (≥20× margin); the concrete stress bounds SHALL be pinned by an op-count probe measurement before finalization. The print-farm-schedule SHALL NOT impose any efficiency threshold.
+The print-farm-schedule challenge SHALL declare a testcase_plan of exactly 20 entries per run, in this declaration order: 1 statement-example literal entry first (m=2, n=4, durations `2 3 5 7`), then 9 warm-up band cases (hand-computable scale), then 8 stress band cases, then 2 literal boundary entries covering the more-printers-than-jobs boundary and the single-job boundary. The pillbox-reminder challenge SHALL declare a testcase_plan of exactly 20 entries per run, in this declaration order: 1 statement-example literal entry first (Q=2, periods `3 5`, K=6), then 9 warm-up band cases, then 8 stress band cases, then 2 literal boundary entries covering the single-reminder (K=1) boundary and the simultaneous-tie boundary. For both challenges the first entry SHALL be the statement example so that the run panel's default stdin (derived from the first testcase) equals the worked example in the statement. The pillbox-reminder stress band SHALL be shaped so that a per-minute time-axis scan exceeds the 10M op budget (TLE) while both a linear scan over next-fire times and a heap-based solution stay below 500k ops (≥20× margin); the concrete stress bounds SHALL be pinned by an op-count probe measurement before finalization. The print-farm-schedule SHALL NOT impose any efficiency threshold.
 
 #### Scenario: Print-farm first testcase equals statement example
 
@@ -88,13 +88,19 @@ The print-farm-schedule challenge SHALL declare a testcase_plan of exactly 20 en
 #### Scenario: Pillbox first testcase equals statement example
 
 - **WHEN** a judging run is assembled for pillbox-reminder
-- **THEN** the first testcase input SHALL be the statement example and the run SHALL contain 6 testcases in declaration order (1 example literal, 2 warm-up, 2 stress, 1 tie literal)
+- **THEN** the first testcase input SHALL be the statement example and the run SHALL contain 20 testcases in declaration order (1 example literal, 9 warm-up, 8 stress, 2 boundary literals)
 
 ##### Example: Pillbox statement example pinned first
 
 - **GIVEN** the first testcase of any run
 - **WHEN** its input is compared to the statement example
 - **THEN** it SHALL be exactly `2` / `3 5` / `6` with expected output lines `1 2 1 1 2 1`
+
+##### Example: Single-reminder literal entry
+
+- **GIVEN** Q=2, periods `7 9`, K=1
+- **WHEN** the simulation runs
+- **THEN** the output SHALL be the single line `1`
 
 #### Scenario: Pillbox stress band rejects per-minute scanning
 
@@ -108,7 +114,7 @@ The print-farm-schedule challenge SHALL declare a testcase_plan of exactly 20 en
 
 
 <!-- @trace
-source: pin-pillbox-example-first
+source: expand-pillbox-testcase-plan
 updated: 2026-08-02
 code:
   - docs/challenge/pillbox-reminder.md

@@ -30,15 +30,19 @@ testcase_plan:
       2
       3 5
       6
-  - count: 2
+  - count: 9
     override:
       periods: { max: 30 }
       k: { min: 5, max: 20 }
-  - count: 2
+  - count: 8
     override:
       q: { min: 3 }
       periods: { min: 30000 }
       k: { min: 300 }
+  - literal: |
+      2
+      7 9
+      1
   - literal: |
       3
       2 3 6
