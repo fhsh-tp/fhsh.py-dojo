@@ -26,7 +26,11 @@ params:
     min: 1
     max: 400
 testcase_plan:
-  - count: 3
+  - literal: |
+      2
+      3 5
+      6
+  - count: 2
     override:
       periods: { max: 30 }
       k: { min: 5, max: 20 }
