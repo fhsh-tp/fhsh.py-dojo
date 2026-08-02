@@ -26,18 +26,22 @@ params:
       from: n
       separator: " "
 testcase_plan:
-  - count: 3
+  - count: 10
     override:
       m: { max: 3 }
       n: { min: 3, max: 8 }
       times: { max: 20 }
-  - count: 2
+  - count: 8
     override:
       n: { min: 200 }
   - literal: |
       3
       2
       5 9
+  - literal: |
+      2
+      1
+      7
 generator: |
   m = int(input())
   n = int(input())
