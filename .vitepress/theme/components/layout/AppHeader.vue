@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { useRouter, useData } from 'vitepress'
+import type { CategoryListUrl } from '../../../../docs/shared/challenge-category'
 
-const props = defineProps<{
-  title: string
-  difficulty: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    title: string
+    difficulty: string
+    // Union of known catalogue pages — an arbitrary navigation target is
+    // unrepresentable, so a future caller cannot inject one.
+    backUrl?: CategoryListUrl
+  }>(),
+  { backUrl: '/challenges' },
+)
 
 const router = useRouter()
 const { isDark } = useData()
@@ -35,7 +42,7 @@ const difficultyLabel: Record<string, string> = {
     <button
       class="text-blue-200 hover:text-white dark:text-gray-400 dark:hover:text-gray-200 text-sm transition-colors cursor-pointer"
       aria-label="返回列表"
-      @click="router.go('/')"
+      @click="router.go(props.backUrl)"
     >
       ← 返回
     </button>

@@ -61,6 +61,7 @@ layout: challenge          # 固定值，觸發 ChallengeView 元件
 id: 16                     # 題目 ID，整數，全站唯一，依序遞增
 title: 題目名稱             # 顯示於題目清單的中文名稱
 difficulty: easy           # 難度：easy | medium | hard
+category: python           # 選填，分類：python | apcs，預設 python（見下方「分類 category」）
 type: basic                # 選填，題型，預設 basic（見下方「題型 type」）
 tags:                      # 選填：分類標籤陣列
   - 排序
@@ -77,6 +78,19 @@ starter_code: |            # 必填，使用者初始程式碼範本
   ...
 ---
 ```
+
+---
+
+### 分類 category
+
+`category` 為選填欄位，決定題目出現在哪個列表頁，預設 `python`。省略時視同 `python`，故既有題目無須修改。
+
+| `category` 值 | 列表頁 | 說明 |
+|---------------|--------|------|
+| `python` | `/challenges`（Python 挑戰） | 對應教學章節的自學題（預設） |
+| `apcs` | `/apcs-challenges`（APCS 挑戰） | 對接 APCS 檢測的資料結構／演算法題 |
+
+值域的單一真相來源是 `docs/shared/challenge-category.ts` 的 `CHALLENGE_CATEGORIES`。未知值（typo、大小寫錯誤）在 runtime 一律安全歸入 `python`（題目不會消失），但 `docs/shared/challenge-category.test.ts` 的全檔掃描會在測試期指名該檔案失敗，防止錯標上線。`pnpm new-challenge` 以 `--category python|apcs` 指定分類。
 
 ---
 

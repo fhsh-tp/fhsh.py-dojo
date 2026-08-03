@@ -3,6 +3,7 @@ layout: challenge
 id: 58
 title: 智慧藥盒提醒
 difficulty: hard
+category: apcs
 type: competition
 tags:
   - 模擬
