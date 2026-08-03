@@ -74,7 +74,7 @@ id 55《撲克牌重排計數》建立了「兩端抽出、疊放成堆」的機
 
 ## Risks / Trade-offs
 
-- **壓力筆體積（量化後知情接受）**：實測（基準 commit a517701；量測法＝frontmatter 自 `testcase_plan:` 至下一頂層鍵、gzip -9、KB 採 1000 B）testcase_plan 區約 184.3KB（gzip 約 56KB），佔題檔約 96%，三筆壓力 literal 各約 59.2KB。後續編輯僅在 ±1KB 內浮動，不改變本項知情接受的結論。成本形態＝每位開啟本題頁面的訪客一次性下載約 55.6KB（gzip），無執行期 CPU 開銷。界定：challenge.data.ts 白名單映射（includeSrc: false）使 plan 不進列表頁 chunk，重量僅限本題頁；prod 端 plan 唯一用途是推出測資總數 20，判題輸入來自加密池。literal 是「輸入」不是答案（generator/reference_solution 由 build 剝除），且 band 逐 block 隨機使硬編 16 筆答案無法 AC——同一份 literal 本就在公開 repo，進 bundle 未新增洩漏管道。若未來要減重，唯一不挖洞的槓桿是在 delta spec 內縮小壓力筆 N（指數解 n≈23 即超限）並重跑探針；不得在本 change 夾帶 build 期剝除。
+- **壓力筆體積（量化後知情接受）**：實測（基準 commit a517701；量測法＝frontmatter 自 `testcase_plan:` 至下一頂層鍵、gzip -9、KB 採 1000 B）testcase_plan 區約 184.3KB（gzip 約 56KB），佔題檔約 96%，三筆壓力 literal 各約 59.2KB。後續編輯僅在 ±1KB 內浮動，不改變本項知情接受的結論。成本形態＝上述體積即每位開啟本題頁面的訪客一次性下載量（同前，gzip 約 56KB），無執行期 CPU 開銷。界定：challenge.data.ts 白名單映射（includeSrc: false）使 plan 不進列表頁 chunk，重量僅限本題頁；prod 端 plan 唯一用途是推出測資總數 20，判題輸入來自加密池。literal 是「輸入」不是答案（generator/reference_solution 由 build 剝除），且 band 逐 block 隨機使硬編 16 筆答案無法 AC——同一份 literal 本就在公開 repo，進 bundle 未新增洩漏管道。若未來要減重，唯一不挖洞的槓桿是在 delta spec 內縮小壓力筆 N（指數解 n≈23 即超限）並重跑探針；不得在本 change 夾帶 build 期剝除。
 - **band 的防護邊界**：乙′ band 針對的是「盲背固定輸出序列」（通過率壓至 ≤1/10）；具備離線重建測資能力的攻擊面（公開 repo＋可解密池）屬站方既接受基線，本題未新增管道。
 - **乙′ 策展是手工資產**：候選庫品質決定 band 筆鑑別力；以 AC-3 的驗證腳本鎖住，不依賴人工目測。
 - **N² 線性掃描落在灰帶邊緣**：事件常數更重的 N² 變體（每迭代 3~5 事件）會落在 0.9~1.5×，個別學生可能不穩定；這是題形（座號值域×位元組預算）的固有限制，已以 0.58× worst 實測數據壓在穩定側。
