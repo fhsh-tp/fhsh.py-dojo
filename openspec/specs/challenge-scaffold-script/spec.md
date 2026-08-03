@@ -9,8 +9,9 @@ The script SHALL accept the following arguments:
 2. `--title <string>` (optional) — display title; defaults to title-cased version of `<name>`
 3. `--difficulty <easy|medium|hard>` (optional) — defaults to `easy`
 4. `--algorithm <snake_case>` (optional) — defaults to `<name>` with hyphens replaced by underscores
+5. `--category <python|apcs>` (optional) — defaults to `python`
 
-The generated frontmatter SHALL include all mandatory fields defined in `Usage.md`: `layout`, `id`, `title`, `difficulty`, `tags`, `algorithm`, `testcase_count`, `params`, `generator`, and `starter_code`. Each optional field SHALL use a sensible placeholder value so the file is immediately parseable by `scripts/generate-pools.ts`.
+The generated frontmatter SHALL include all mandatory fields defined in `Usage.md`: `layout`, `id`, `title`, `difficulty`, `tags`, `algorithm`, `testcase_count`, `params`, `generator`, and `starter_code`. The generated frontmatter SHALL always include an explicit `category` line carrying the resolved `--category` value. Each optional field SHALL use a sensible placeholder value so the file is immediately parseable by `scripts/generate-pools.ts`.
 
 The `id` field SHALL be set to the maximum existing `id` found across all `docs/challenge/*.md` files plus 1. If no challenge files exist, `id` SHALL default to `1`.
 
@@ -18,17 +19,18 @@ The script SHALL exit with a non-zero code and a descriptive error message if:
 - `<name>` is not provided
 - `<name>` contains characters other than lowercase letters, digits, and hyphens
 - `--difficulty` is not one of `easy`, `medium`, or `hard`
+- `--category` is not one of `python` or `apcs`
 - The output file already exists (to prevent accidental overwrite)
 
 #### Scenario: Generate scaffold with defaults
 
 - **WHEN** `pnpm new-challenge bubble-sort` is executed
-- **THEN** `docs/challenge/bubble-sort.md` is created with `algorithm: bubble_sort`, `difficulty: easy`, `id` set to max+1, and placeholder `generator` and `starter_code` blocks
+- **THEN** `docs/challenge/bubble-sort.md` is created with `algorithm: bubble_sort`, `difficulty: easy`, `category: python`, `id` set to max+1, and placeholder `generator` and `starter_code` blocks
 
 #### Scenario: Generate scaffold with explicit options
 
-- **WHEN** `pnpm new-challenge linear-search --title "線性搜尋" --difficulty medium --algorithm linear_search` is executed
-- **THEN** `docs/challenge/linear-search.md` is created with `title: 線性搜尋`, `difficulty: medium`, and `algorithm: linear_search`
+- **WHEN** `pnpm new-challenge linear-search --title "線性搜尋" --difficulty medium --algorithm linear_search --category apcs` is executed
+- **THEN** `docs/challenge/linear-search.md` is created with `title: 線性搜尋`, `difficulty: medium`, `algorithm: linear_search`, and `category: apcs`
 
 #### Scenario: Output file already exists
 
@@ -40,24 +42,15 @@ The script SHALL exit with a non-zero code and a descriptive error message if:
 - **WHEN** `--difficulty` is set to a value other than `easy`, `medium`, or `hard`
 - **THEN** the script exits with code 1 and prints `[new-challenge] ERROR: --difficulty must be one of: easy, medium, hard`
 
+#### Scenario: Invalid category value
+
+- **WHEN** `--category` is set to a value other than `python` or `apcs`
+- **THEN** the script exits with code 1 and prints `[new-challenge] ERROR: --category must be one of: python, apcs`
+
 #### Scenario: Invalid name format
 
 - **WHEN** `<name>` contains uppercase letters or non-kebab characters (e.g., `BubbleSort` or `bubble_sort`)
 - **THEN** the script exits with code 1 and prints `[new-challenge] ERROR: <name> must be kebab-case (lowercase letters, digits, hyphens only)`
-
-
-<!-- @trace
-source: challenge-template-generator
-updated: 2026-04-05
-code:
-  - package.json
-  - docs/shared/challenge.data.ts
-  - refs/Python-self_learning-outline.md
-  - scripts/generate-pools.ts
-  - scripts/new-challenge.ts
-tests:
-  - scripts/new-challenge.test.ts
--->
 
 ---
 ### Requirement: npm script entry runs the generator
@@ -102,17 +95,4 @@ The default `starter_code` SHALL define a stub function `def solve():` with a `p
 #### Scenario: All required frontmatter fields are present
 
 - **WHEN** the generated file is parsed with a YAML parser
-- **THEN** the fields `layout`, `id`, `title`, `difficulty`, `algorithm`, `testcase_count`, `params`, `generator`, and `starter_code` are all present and non-empty
-
-<!-- @trace
-source: challenge-template-generator
-updated: 2026-04-05
-code:
-  - package.json
-  - docs/shared/challenge.data.ts
-  - refs/Python-self_learning-outline.md
-  - scripts/generate-pools.ts
-  - scripts/new-challenge.ts
-tests:
-  - scripts/new-challenge.test.ts
--->
+- **THEN** the fields `layout`, `id`, `title`, `difficulty`, `category`, `algorithm`, `testcase_count`, `params`, `generator`, and `starter_code` are all present and non-empty
