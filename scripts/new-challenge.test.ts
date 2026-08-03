@@ -5,11 +5,13 @@ import {
   validateName,
   validateDifficulty,
   validateType,
+  validateCategory,
   computeNextId,
   buildContent,
   toTitleCase,
   toAlgorithmName,
   EXERCISE_TYPES,
+  CHALLENGE_CATEGORIES,
 } from './new-challenge.js'
 
 describe('toTitleCase', () => {
@@ -42,6 +44,7 @@ describe('parseArgs', () => {
       difficulty: 'easy',
       algorithm: 'bubble_sort',
       type: 'basic',
+      category: 'python',
     })
   })
 
@@ -63,6 +66,7 @@ describe('parseArgs', () => {
       difficulty: 'medium',
       algorithm: 'linear_search',
       type: 'basic',
+      category: 'python',
     })
   })
 
@@ -141,6 +145,7 @@ describe('buildContent', () => {
     difficulty: 'easy',
     algorithm: 'bubble_sort',
     type: 'basic',
+    category: 'python',
   }
 
   it('produces valid YAML frontmatter with all required fields', () => {
@@ -200,6 +205,16 @@ describe('buildContent', () => {
     expect(buildContent({ ...base, type: 'basic' })).toContain('type: basic')
     expect(buildContent({ ...base, type: 'competition' })).toContain('type: competition')
   })
+
+  it('emits the resolved category in frontmatter', () => {
+    expect(buildContent({ ...base, category: 'python' })).toContain('category: python')
+    expect(buildContent({ ...base, category: 'apcs' })).toContain('category: apcs')
+  })
+
+  it('places the category line right after the difficulty line', () => {
+    const content = buildContent(base)
+    expect(content).toMatch(/^difficulty: easy\ncategory: python$/m)
+  })
 })
 
 describe('validateType', () => {
@@ -250,9 +265,106 @@ describe('parseArgs --type', () => {
   })
 })
 
+describe('validateCategory', () => {
+  it('returns null for valid categories', () => {
+    expect(validateCategory('python')).toBeNull()
+    expect(validateCategory('apcs')).toBeNull()
+  })
+
+  it('returns exact error message for invalid category', () => {
+    expect(validateCategory('foo')).toBe(
+      '[new-challenge] ERROR: --category must be one of: python, apcs',
+    )
+    expect(validateCategory('')).not.toBeNull()
+    expect(validateCategory('Python')).not.toBeNull()
+  })
+})
+
+describe('parseArgs --category', () => {
+  it('defaults the category to python when --category is omitted', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge'])
+    expect(parsed?.category).toBe('python')
+  })
+
+  it('parses an explicit --category', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge', '--category', 'apcs'])
+    expect(parsed?.category).toBe('apcs')
+  })
+
+  it('parses the --category=value equals syntax (not silently dropped)', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge', '--category=apcs'])
+    expect(parsed?.category).toBe('apcs')
+  })
+})
+
+describe('trailing validated flag with no value fails its validator (no silent default)', () => {
+  // A forgotten value on a validated flag must not silently scaffold with the
+  // default: the sentinel value fails the flag's own validator, which prints
+  // the documented "must be one of" message and exits non-zero in main().
+  it('trailing --category is rejected by validateCategory', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge', '--category'])
+    expect(parsed).not.toBeNull()
+    expect(validateCategory(parsed!.category)).toBe(
+      '[new-challenge] ERROR: --category must be one of: python, apcs',
+    )
+  })
+
+  it('trailing --difficulty is rejected by validateDifficulty', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge', '--difficulty'])
+    expect(parsed).not.toBeNull()
+    expect(validateDifficulty(parsed!.difficulty)).toBe(
+      '[new-challenge] ERROR: --difficulty must be one of: easy, medium, hard',
+    )
+  })
+
+  it('trailing --type is rejected by validateType', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge', '--type'])
+    expect(parsed).not.toBeNull()
+    expect(validateType(parsed!.type)).not.toBeNull()
+  })
+
+  it('trailing --title keeps its documented default fallback', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge', '--title'])
+    expect(parsed?.title).toBe('My Challenge')
+  })
+})
+
+describe('--category scaffold scenarios', () => {
+  it('omitting --category scaffolds frontmatter containing category: python', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge'])
+    expect(parsed).not.toBeNull()
+    expect(validateCategory(parsed!.category)).toBeNull()
+    const content = buildContent({ id: 1, ...parsed! })
+    expect(content).toContain('category: python')
+  })
+
+  it('--category apcs scaffolds frontmatter containing category: apcs', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge', '--category', 'apcs'])
+    expect(parsed).not.toBeNull()
+    expect(validateCategory(parsed!.category)).toBeNull()
+    const content = buildContent({ id: 1, ...parsed! })
+    expect(content).toContain('category: apcs')
+  })
+
+  it('--category foo is rejected with the exact error message (main exits 1)', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'my-challenge', '--category', 'foo'])
+    expect(parsed?.category).toBe('foo')
+    expect(validateCategory(parsed!.category)).toBe(
+      '[new-challenge] ERROR: --category must be one of: python, apcs',
+    )
+  })
+})
+
 describe('EXERCISE_TYPES lockstep', () => {
   it('matches the data-layer exercise-type list', async () => {
     const shared = await import('../docs/shared/exercise-type.js')
     expect([...EXERCISE_TYPES]).toEqual([...shared.EXERCISE_TYPES])
+  })
+})
+
+describe('CHALLENGE_CATEGORIES lockstep', () => {
+  it('matches the data-layer challenge-category list', async () => {
+    const shared = await import('../docs/shared/challenge-category.js')
+    expect([...CHALLENGE_CATEGORIES]).toEqual([...shared.CHALLENGE_CATEGORIES])
   })
 })

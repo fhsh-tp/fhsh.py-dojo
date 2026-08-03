@@ -6,5 +6,7 @@
       link: /tutor/alg/
     - text: 資料結構
       link: /tutor/ds/
-- text: 挑戰題庫
+- text: Python 挑戰
   link: /challenges
+- text: APCS 挑戰
+  link: /apcs-challenges

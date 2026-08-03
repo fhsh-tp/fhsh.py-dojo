@@ -3,6 +3,7 @@ layout: challenge
 id: 55
 title: 撲克牌重排計數
 difficulty: hard
+category: apcs
 type: competition
 tags:
   - data structure

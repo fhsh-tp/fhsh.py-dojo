@@ -50,12 +50,34 @@ export function validateType(type: string): string | null {
   return null
 }
 
+/**
+ * Challenge categories accepted by the scaffold.
+ *
+ * `docs/shared/challenge-category.ts` is the data-layer single source of truth;
+ * this file keeps its own copy of the list for build-time scaffolding, and
+ * `scripts/new-challenge.test.ts` asserts the two stay in lockstep.
+ */
+export const CHALLENGE_CATEGORIES = ['python', 'apcs'] as const
+export type ChallengeCategory = (typeof CHALLENGE_CATEGORIES)[number]
+
+export function isChallengeCategory(v: string): v is ChallengeCategory {
+  return (CHALLENGE_CATEGORIES as readonly string[]).includes(v)
+}
+
+export function validateCategory(category: string): string | null {
+  if (!isChallengeCategory(category)) {
+    return `[new-challenge] ERROR: --category must be one of: ${CHALLENGE_CATEGORIES.join(', ')}`
+  }
+  return null
+}
+
 export interface ParsedArgs {
   name: string
   title: string
   difficulty: string
   algorithm: string
   type: string
+  category: string
 }
 
 export function parseArgs(argv: string[]): ParsedArgs | null {
@@ -65,6 +87,7 @@ export function parseArgs(argv: string[]): ParsedArgs | null {
   let difficulty = 'easy'
   let algorithm: string | null = null
   let type = 'basic'
+  let category = 'python'
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]!
@@ -85,14 +108,18 @@ export function parseArgs(argv: string[]): ParsedArgs | null {
       const v = takeValue()
       if (v !== null) title = v
     } else if (flag === '--difficulty') {
-      const v = takeValue()
-      if (v !== null) difficulty = v
+      // Validated flags treat a trailing flag with no value as an error, not a
+      // silent default: the sentinel fails the flag's own validator, which
+      // prints the documented "must be one of" message and exits non-zero.
+      // (`--title`/`--algorithm` keep their documented default fallback.)
+      difficulty = takeValue() ?? '<missing>'
     } else if (flag === '--algorithm') {
       const v = takeValue()
       if (v !== null) algorithm = v
     } else if (flag === '--type') {
-      const v = takeValue()
-      if (v !== null) type = v
+      type = takeValue() ?? '<missing>'
+    } else if (flag === '--category') {
+      category = takeValue() ?? '<missing>'
     } else if (!arg.startsWith('--')) {
       name = arg
     }
@@ -106,6 +133,7 @@ export function parseArgs(argv: string[]): ParsedArgs | null {
     difficulty,
     algorithm: algorithm ?? toAlgorithmName(name),
     type,
+    category,
   }
 }
 
@@ -170,6 +198,7 @@ export interface BuildContentOptions {
   difficulty: string
   algorithm: string
   type: string
+  category: string
 }
 
 export function buildContent({
@@ -178,12 +207,14 @@ export function buildContent({
   difficulty,
   algorithm,
   type,
+  category,
 }: BuildContentOptions): string {
   return `---
 layout: challenge
 id: ${id}
 title: ${title}
 difficulty: ${difficulty}
+category: ${category}
 type: ${type}
 tags: []
 algorithm: ${algorithm}
@@ -253,12 +284,12 @@ function main(): void {
 
   if (!parsed) {
     console.error(
-      'Usage: pnpm new-challenge <name> [--title <title>] [--difficulty easy|medium|hard] [--type basic|competition] [--algorithm <algorithm>]',
+      'Usage: pnpm new-challenge <name> [--title <title>] [--difficulty easy|medium|hard] [--category python|apcs] [--type basic|competition] [--algorithm <algorithm>]',
     )
     process.exit(1)
   }
 
-  const { name, title, difficulty, algorithm, type } = parsed
+  const { name, title, difficulty, algorithm, type, category } = parsed
 
   const nameError = validateName(name)
   if (nameError) {
@@ -275,6 +306,12 @@ function main(): void {
   const typeError = validateType(type)
   if (typeError) {
     console.error(typeError)
+    process.exit(1)
+  }
+
+  const categoryError = validateCategory(category)
+  if (categoryError) {
+    console.error(categoryError)
     process.exit(1)
   }
 
@@ -310,7 +347,7 @@ function main(): void {
     process.exit(1)
   }
 
-  const content = buildContent({ id, name, title, difficulty, algorithm, type })
+  const content = buildContent({ id, name, title, difficulty, algorithm, type, category })
 
   mkdirSync(challengeDir, { recursive: true })
   writeFileSync(outPath, content, 'utf-8')

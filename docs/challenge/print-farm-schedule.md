@@ -3,6 +3,7 @@ layout: challenge
 id: 57
 title: 列印工坊排程
 difficulty: medium
+category: apcs
 type: competition
 tags:
   - 模擬

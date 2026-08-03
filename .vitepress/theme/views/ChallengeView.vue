@@ -17,6 +17,7 @@ import { useExecutorStore } from '../stores/executor'
 import { useProgressStore } from '../stores/progress'
 import { allowedResult } from '../lib/progressExport'
 import { deriveChallengeSlug } from '../../../docs/shared/challenge-slug'
+import { CATEGORY_LIST_URL, resolveChallengeCategory } from '../../../docs/shared/challenge-category'
 
 const { frontmatter, page } = useData()
 const router = useRouter()
@@ -33,6 +34,10 @@ let recorder: SessionRecorder | null = null
 const verdictDetail = resolveVerdictDetail(frontmatter.value.verdict_detail)
 const algorithm: string = frontmatter.value.algorithm ?? ''
 const starterCode: string = frontmatter.value.starter_code ?? ''
+
+// Category-aware return target, derived from the exhaustive category → page
+// map: absent or unknown categories resolve to python and land on /challenges.
+const listUrl = CATEGORY_LIST_URL[resolveChallengeCategory(frontmatter.value.category)]
 
 // Derive the per-challenge slug from the page path via the single shared parser
 // (the same one the catalogue uses on `challenge.url`), so the slug ChallengeView
@@ -184,7 +189,7 @@ function onRun(payload: { stdin: string; stdout: string; error?: string }) {
     <div v-if="runner.errorMessage.value" class="flex items-center justify-center h-full">
       <div class="text-center">
         <p class="text-xl text-red-500 dark:text-red-400 mb-4">{{ runner.errorMessage.value }}</p>
-        <button class="px-4 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-gray-800 dark:hover:bg-gray-700 rounded" @click="router.go('/')">
+        <button class="px-4 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-gray-800 dark:hover:bg-gray-700 rounded" @click="router.go(listUrl)">
           返回列表
         </button>
       </div>
@@ -194,6 +199,7 @@ function onRun(payload: { stdin: string; stdout: string; error?: string }) {
       <AppHeader
         :title="frontmatter.title ?? '載入中...'"
         :difficulty="frontmatter.difficulty ?? ''"
+        :back-url="listUrl"
       />
 
       <div class="flex-1 overflow-hidden">

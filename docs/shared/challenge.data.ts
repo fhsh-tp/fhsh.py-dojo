@@ -1,6 +1,7 @@
 import { createContentLoader, type ContentData } from 'vitepress'
 import type { Challenge } from '../../.vitepress/theme/types.d/challenge.type'
 import { resolveExerciseType, type ExerciseType } from './exercise-type'
+import { resolveChallengeCategory } from './challenge-category'
 import { deriveChallengeSlug } from './challenge-slug'
 
 export type { ExerciseType }
@@ -37,6 +38,7 @@ const loader: {
           title: challenge.frontmatter.title || `挑戰 #${idx + 1}`,
           url: challenge.url,
           difficulty: challenge.frontmatter.difficulty || 'mystery',
+          category: resolveChallengeCategory(challenge.frontmatter.category),
           type: resolveExerciseType(challenge.frontmatter.type),
           algorithm: challenge.frontmatter.algorithm ?? '',
           params: challenge.frontmatter.params ?? {},

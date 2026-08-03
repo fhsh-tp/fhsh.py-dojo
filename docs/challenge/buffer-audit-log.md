@@ -3,6 +3,7 @@ layout: challenge
 id: 56
 title: 緩衝區稽核日誌
 difficulty: medium
+category: apcs
 type: competition
 tags:
   - data structure
