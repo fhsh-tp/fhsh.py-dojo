@@ -11,10 +11,12 @@ export const CHALLENGE_CATEGORIES = ['python', 'apcs'] as const
 export type ChallengeCategory = (typeof CHALLENGE_CATEGORIES)[number]
 
 /**
- * Category → catalogue-page URL. `Record<ChallengeCategory, …>` makes the
- * compiler reject a taxonomy extension that forgets its page for every `.vue`
- * consumer; the `.md` pages sit outside vue-tsc, so the page-existence scan in
- * `challenge-category.test.ts` covers that half of the contract.
+ * Category → catalogue-page URL. `satisfies Record<ChallengeCategory, …>`
+ * makes the compiler reject a map that forgets a URL entry — it does NOT
+ * guarantee consumer exhaustiveness (HomeView hardcodes its two sections).
+ * The `.md` pages sit outside vue-tsc, so the page-existence scan in
+ * `challenge-category.test.ts` and the nav lockstep in `nav.test.ts` are the
+ * loud counterparts for those surfaces.
  */
 export const CATEGORY_LIST_URL = {
   python: '/challenges',

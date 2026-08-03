@@ -22,6 +22,8 @@
 - [x] 4.2 [P] `Usage.md` 補 `category` 欄位契約：選填、值域 `python`/`apcs`、預設 `python`、未知值 runtime 歸 `python` 且測試層指名檔案失敗。完成判準：文件與 `challenge-category.ts` 值域一致。
 - [x] 4.3 [P] 四題 APCS frontmatter 各加一行 `category: apcs`：`docs/challenge/card-restack-count.md`、`docs/challenge/buffer-audit-log.md`、`docs/challenge/print-farm-schedule.md`、`docs/challenge/pillbox-reminder.md`。內文與其他欄位不動。完成判準：四題出現在 `/apcs-challenges`，`/challenges` 剩 54 題。
 
+- [x] 2.5 新增 `.vitepress/nav.test.ts`：讀取 `nav.yml` 並斷言每個 `CATEGORY_LIST_URL` 值都有對應 `link`（單向 lockstep，nav 可自由攜帶非 category 連結）。完成判準：`pnpm test --run .vitepress/nav.test.ts` 綠。（覆蓋 Requirement: nav.yml defines static top navigation）
+
 ## 5. 全站驗證
 
 - [x] 5.1 `pnpm typecheck`、`pnpm lint`、`pnpm test --run` 全綠；有紅修到綠。完成判準：三命令 exit 0。

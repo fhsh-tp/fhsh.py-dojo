@@ -327,6 +327,20 @@ describe('trailing validated flag with no value fails its validator (no silent d
     const parsed = parseArgs(['node', 'new-challenge', 'my-challenge', '--title'])
     expect(parsed?.title).toBe('My Challenge')
   })
+
+  it('an adjacent --flag is never swallowed as a value', () => {
+    // Regression: `foo --title --category apcs` used to yield title
+    // '--category', name 'apcs' (overwriting foo), category 'python'.
+    const parsed = parseArgs(['node', 'new-challenge', 'foo', '--title', '--category', 'apcs'])
+    expect(parsed?.name).toBe('foo')
+    expect(parsed?.title).toBe('Foo')
+    expect(parsed?.category).toBe('apcs')
+  })
+
+  it('--flag=value still passes a literal leading-dash value explicitly', () => {
+    const parsed = parseArgs(['node', 'new-challenge', 'foo', '--title=--weird'])
+    expect(parsed?.title).toBe('--weird')
+  })
 })
 
 describe('--category scaffold scenarios', () => {

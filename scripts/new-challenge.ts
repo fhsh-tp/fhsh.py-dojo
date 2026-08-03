@@ -101,8 +101,17 @@ export function parseArgs(argv: string[]): ParsedArgs | null {
       flag = arg.slice(0, eq)
       inlineVal = arg.slice(eq + 1)
     }
-    const takeValue = (): string | null =>
-      inlineVal !== null ? inlineVal : i + 1 < args.length ? args[++i]! : null
+    const takeValue = (): string | null => {
+      if (inlineVal !== null) return inlineVal
+      const next = i + 1 < args.length ? args[i + 1]! : null
+      // An adjacent `--flag` is never a value: consuming it would silently
+      // swallow the flag (`--title --category apcs` → title '--category').
+      // Leave it unconsumed so it is parsed as its own flag; the current flag
+      // falls back to its default or sentinel. Use `--flag=value` to pass a
+      // literal leading-dash value.
+      if (next === null || next.startsWith('--')) return null
+      return args[++i]!
+    }
 
     if (flag === '--title') {
       const v = takeValue()

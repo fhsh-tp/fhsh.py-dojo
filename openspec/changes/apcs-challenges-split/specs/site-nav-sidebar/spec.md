@@ -33,6 +33,11 @@ The former single `挑戰題庫` entry SHALL be replaced by the two sibling entr
 - **WHEN** a user views the top navigation on any page
 - **THEN** `Python 挑戰` and `APCS 挑戰` SHALL appear as two top-level entries, with `Python 挑戰` before `APCS 挑戰`, and no `挑戰題庫` entry SHALL remain
 
+#### Scenario: Catalogue nav entries stay in lockstep with the category map
+
+- **WHEN** the test suite runs
+- **THEN** a test SHALL assert that every URL value in `CATEGORY_LIST_URL` appears as a `link` in `.vitepress/nav.yml`, failing and naming the missing catalogue URL otherwise
+
 #### Scenario: nav.yml file is missing
 
 - **WHEN** `.vitepress/nav.yml` does not exist

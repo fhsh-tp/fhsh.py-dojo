@@ -66,18 +66,20 @@ describe('challenge category authoring gate', () => {
     expect(files.length).toBeGreaterThan(0)
   })
 
-  it('every declared category is a known value (typos fail naming the file)', () => {
-    const offenders: string[] = []
-    for (const file of files) {
-      const content = readFileSync(join(CHALLENGES_DIR, file), 'utf-8')
-      const frontmatterBlock = content.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1]
-      if (frontmatterBlock === undefined) continue
-      const fm = yaml.load(frontmatterBlock) as Record<string, unknown> | null
-      const category = fm?.category
-      if (category !== undefined && !(CHALLENGE_CATEGORIES as readonly unknown[]).includes(category)) {
-        offenders.push(`${file} (category: ${JSON.stringify(category)})`)
-      }
+  // One case per file (mirroring challenge-params.test.ts) so a broken
+  // frontmatter YAML fails with the file's name in the case title instead of
+  // an anonymous YAMLException.
+  it.each(files)('%s: declares a known category (or none)', (file) => {
+    const content = readFileSync(join(CHALLENGES_DIR, file), 'utf-8')
+    const frontmatterBlock = content.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1]
+    if (frontmatterBlock === undefined) return
+    const fm = yaml.load(frontmatterBlock) as Record<string, unknown> | null
+    const category = fm?.category
+    if (category !== undefined) {
+      expect(
+        [...CHALLENGE_CATEGORIES] as unknown[],
+        `unknown category ${JSON.stringify(category)} in ${file}`,
+      ).toContain(category)
     }
-    expect(offenders, `unknown category values in: ${offenders.join(', ')}`).toEqual([])
   })
 })

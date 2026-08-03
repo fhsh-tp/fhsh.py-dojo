@@ -145,7 +145,7 @@ const subjectLinkMap: Record<string, string> = {
           :challenge="c"
         />
       </div>
-      <p v-else class="home-empty">挑戰題庫尚未建立，敬請期待。</p>
+      <p v-else class="home-empty">Python 挑戰尚未建立，敬請期待。</p>
     </section>
 
     <!-- ── 最新 APCS 挑戰 ──────────────────────────────────────────────────── -->
@@ -161,7 +161,7 @@ const subjectLinkMap: Record<string, string> = {
           :challenge="c"
         />
       </div>
-      <p v-else class="home-empty">挑戰題庫尚未建立，敬請期待。</p>
+      <p v-else class="home-empty">APCS 挑戰尚未建立，敬請期待。</p>
     </section>
 
   </div>
