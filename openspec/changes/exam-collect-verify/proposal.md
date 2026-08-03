@@ -6,7 +6,7 @@ APCS 挑戰系列已有 id 55《撲克牌重排計數》問「兩端抽出疊放
 
 - 新增挑戰題《收卷順序驗證》（`docs/challenge/exam-collect-verify.md`，id 由 scaffold 自動配發，預期 59）：medium／competition／apcs，素養情境為「兩位監考老師從一排座位兩端收卷疊成一疊，驗證 M 份『由頂到底』回報的真偽」，全程不出現 deque／stack 術語。
 - 判定語意：回報反轉為收卷順序後，對來源做雙指標兩端貪婪比對；同排座號互不相同（題面明文保證），貪婪在此前提下嚴格正確。
-- testcase_plan 共 20 筆：範例 literal 置首 1 筆＋考點 literal 9 筆（每筆含「忘記反轉」陷阱行）＋乙′ enum 策展 band 4 筆（來源排列庫＋查詢候選庫，防裸背答案）＋壓力 literal 3 筆（T=1、N=800、M=18，`input_budget: 49152`）＋邊界 literal 3 筆。
+- testcase_plan 共 20 筆：範例 literal 置首 1 筆＋考點 literal 9 筆（每筆含「忘記反轉」陷阱行）＋乙′ enum 策展 band 4 筆（來源排列庫＋查詢候選庫，防裸背答案）＋壓力 literal 3 筆（T=1、N=800、M=18，`input_budget: 63488`）＋邊界 literal 3 筆。
 - generator（反轉＋雙指標貪婪）與 reference_solution（位置區間外擴法）雙實作零共用邏輯，供 content-regression 互驗。
 
 ## Capabilities

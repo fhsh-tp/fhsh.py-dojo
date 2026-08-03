@@ -1,7 +1,7 @@
 ## 1. 骨架與雙實作
 
 - [x] 1.1 以 `pnpm new-challenge exam-collect-verify --title 收卷順序驗證 --difficulty medium --category apcs --type competition` 建立骨架；確認自動配發的 id 未與現有題衝突、檔案位於 docs/challenge/exam-collect-verify.md。（覆蓋 Requirement: Exam-collection challenge content 的 frontmatter 基本欄位）
-- [x] 1.2 先寫互驗腳本再填實作（TDD）：scratchpad 腳本實作暴力 DFS 基準，接著撰寫 generator（反轉＋雙指標貪婪、每組輸出一行計數）與 reference_solution（位置區間外擴法，零共用遍歷邏輯），跑 N≤6 全排列窮舉與 3000 組 N=800 隨機互驗，驗收標準＝三方零不一致，且判定語意逐字對齊 Requirement: Report-verification semantics（含非排列回報不合法、輸出 T 行計數）。（覆蓋 Requirement: Exam-collection dual implementation and verification、Requirement: Report-verification semantics）
+- [x] 1.2 先寫互驗腳本再填實作（TDD）：scratchpad 腳本實作暴力 DFS 基準，接著撰寫 generator（反轉＋雙指標貪婪、每組輸出一行計數）與 reference_solution（位置區間外擴法，零共用遍歷邏輯），跑 N≤6 全排列窮舉與 3000 組 N=800 隨機互驗，驗收標準＝三方零不一致，且判定語意逐字對齊 Requirement: Exam-collection report-verification semantics（含非排列回報不合法、輸出 T 行計數）。（覆蓋 Requirement: Exam-collection dual implementation and verification、Requirement: Exam-collection report-verification semantics）
 
 ## 2. 題面
 
@@ -11,7 +11,7 @@
 
 - [x] 3.1 宣告 params 乙′ 形狀（t: int 1..1、header: enum ["6 8"]、src: enum 10 排列、q1..q8: 各 enum 10 候選）並撰寫離線策展腳本：生成排列庫與候選庫，驗證（a）所有候選皆為來源值域排列（b）策展保證——每個來源在八條候選庫聯集中至少一條正反語意判定不同（c）合法行出現率每筆期望 0.5~1.5 條。驗收＝腳本三項檢查全過。（覆蓋 Requirement: Exam-collection testcase plan with twenty entries 的 band 條款）
 - [x] 3.2 構造 20 筆 testcase_plan：範例 literal 置首＋考點 literal 9 筆（N=5..12、每筆至少一條反轉陷阱行，離線腳本驗證陷阱行存在且兩語意計數不同）＋乙′ band 4 筆＋壓力 literal 3 筆（T=1、N=800、M=18：全合法／長前綴近似／混合，`input_budget: 63488`）＋邊界 literal 3 筆（N=1、M=1、T=10 混排）。驗收＝腳本斷言 20 筆結構、各檔位型態與範圍宣告內含性，並逐列核對 design.md 型別×邊界矩陣（測資覆蓋）的每一格都有對應檔位。（覆蓋 Requirement: Exam-collection testcase plan with twenty entries 的檔位結構）
-- [x] 3.3 TLE 探針全角落網格：重現 worker-utils.ts settrace 計數，實測「最省事件全枚舉」與「Python 層 N² 逐步線性搜尋」在三筆壓力筆的 op 數 ≥2×10M，正解在全 20 筆各筆 ≤1/100×10M；不達標即上調 N 並回寫題面範圍。（覆蓋 Requirement: testcase plan 的 stress scenario）
+- [x] 3.3 TLE 探針全角落網格：重現 worker-utils.ts settrace 計數，驗收三項——「最省事件全枚舉」在三筆壓力筆 ≥2×10M（外插自倍率擬合）、「Python 層 N² 逐步線性搜尋」≤0.7×10M（穩定放行、不設 flaky 帶）、正解全 20 筆各筆 ≤1/100×10M；僅全枚舉項不達標時上調 N 並回寫題面範圍。實測數據見 design.md「AC 驗證程序（可重建）與實測數據」第 2 項（單一真相來源）。（覆蓋 Requirement: Exam-collection testcase plan with twenty entries 的 stress scenario）
 
 ## 4. 建置與守門
 
