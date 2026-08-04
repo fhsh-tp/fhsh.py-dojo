@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 4
+id: py004
 title: 自我介紹產生器
 difficulty: easy
 tags: [print, input, 字串]

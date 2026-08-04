@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 49
+id: py049
 title: 最大公因數（GCD）
 difficulty: medium
 tags: [while-loop, euclidean-algorithm, math]

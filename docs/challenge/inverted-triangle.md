@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 39
+id: py039
 title: 星號倒三角形
 difficulty: easy
 tags: [nested-loop, pattern, for-loop]

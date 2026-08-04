@@ -22,7 +22,7 @@
 
 ## 快速流程
 
-1. 執行 `pnpm new-challenge <name> --title "題目名稱" --difficulty easy` 產生題目骨架（`<name>` 為小寫 kebab-case；腳本會自動分配唯一的 `id`，並將檔案建立於 `docs/challenge/<name>.md`）
+1. 執行 `pnpm new-challenge <name> --title "題目名稱" --difficulty easy` 產生題目骨架（`<name>` 為小寫 kebab-case；腳本會自動分配唯一的 `id`——取該 category 前綴內現有最大序號 +1，例如 python 題現有至 `py054` 時新題配 `py055`——並將檔案建立於 `docs/challenge/<name>.md`）
    - **請勿手動建立題目檔**：手動建立容易造成 `id` 衝突。此為新增題目的首選方式，與 `CONTRIBUTE.md` 的 Phase 2 SOP 一致。
 2. 依下方「Frontmatter 欄位說明」編輯 `params`、`generator`、`starter_code` 等核心欄位
 3. 撰寫題目說明、輸入輸出規格與範例
@@ -38,7 +38,9 @@
 |------|------|------|
 | 檔案名稱 | `kebab-case.md` | `bubble-sort.md` |
 | `algorithm` | `snake_case` | `bubble_sort` |
-| `id` | 遞增整數 | `16`（由 `pnpm new-challenge` 自動分配，接續現有最大值） |
+| `id` | 字串：`<category 前綴><3 位零填充序號>`（python → `py`、apcs → `apcs`，各 category 自 1 起連號） | `py016`（由 `pnpm new-challenge` 自動分配，接續該 category 前綴內現有最大序號 +1） |
+
+`id` 全站唯一（由 category 前綴互斥＋前綴內序號唯一共同保證）。它會顯示在挑戰卡片與挑戰內頁頂欄上、可於目錄搜尋（輸入純數字比對序號、其餘輸入比對前綴），並提供 `/c/<id>` 短網址轉址別名（如 `/c/py001`）。
 
 **演算法名稱與檔名的對應：**
 
@@ -58,7 +60,7 @@ algorithm: binary_search  →  docs/challenge/binary-search.md
 ```yaml
 ---
 layout: challenge          # 固定值，觸發 ChallengeView 元件
-id: 16                     # 題目 ID，整數，全站唯一，依序遞增
+id: py016                  # 題目 ID，字串，全站唯一：category 前綴 + 3 位零填充序號
 title: 題目名稱             # 顯示於題目清單的中文名稱
 difficulty: easy           # 難度：easy | medium | hard
 category: python           # 選填，分類：python | apcs，預設 python（見下方「分類 category」）
@@ -517,7 +519,7 @@ frontmatter 之後的 Markdown 內文會顯示於題目說明面板（左側）�
 ```markdown
 ---
 layout: challenge
-id: 16
+id: py016
 title: 你的題目名稱
 difficulty: easy
 tags:

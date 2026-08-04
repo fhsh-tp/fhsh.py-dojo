@@ -1,4 +1,11 @@
 /**
+ * The slug character contract for challenge file basenames — the single
+ * definition both build scripts (pool generator, redirects generator) import,
+ * so the rule cannot drift into per-script copies.
+ */
+export const SLUG_PATTERN = /^[a-z0-9-]+$/
+
+/**
  * Derive the per-challenge slug (the markdown file basename, no extension)
  * from a content-loader `url`.
  *

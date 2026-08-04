@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 36
+id: py036
 title: 星星直角三角形
 difficulty: easy
 tags: [nested-loop, pattern, for-loop]

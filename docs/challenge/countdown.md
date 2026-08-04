@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 24
+id: py024
 title: 倒數計時器
 difficulty: easy
 tags: [for, range, step, 倒數]

@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 14
+id: py014
 title: 座標象限判斷
 difficulty: easy
 tags: [if-elif-else, 邏輯運算, 座標]

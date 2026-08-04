@@ -27,7 +27,12 @@ const difficultyLabel: Record<string, string> = {
     @click="router.go(props.challenge.url)"
   >
     <div class="flex items-start justify-between gap-2 mb-2">
-      <h2 class="font-semibold text-gray-900 dark:text-gray-100 leading-tight">{{ props.challenge.title }}</h2>
+      <h2 class="font-semibold text-gray-900 dark:text-gray-100 leading-tight">
+        <span
+          data-testid="challenge-id"
+          class="mr-1.5 font-mono text-xs font-medium text-slate-400 dark:text-gray-500"
+        >{{ props.challenge.id }}</span>{{ props.challenge.title }}
+      </h2>
       <div class="flex items-center gap-1.5 shrink-0">
       <CompletionBadge v-if="props.completed" />
       <span

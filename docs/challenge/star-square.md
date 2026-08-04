@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 46
+id: py046
 title: 星星正方形
 difficulty: easy
 tags: [for-loop, pattern, string-multiplication]

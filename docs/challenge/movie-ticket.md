@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 18
+id: py018
 title: 電影票價
 difficulty: medium
 tags: [if-elif-else, 邏輯運算, 多條件]

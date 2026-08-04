@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 42
+id: py042
 title: 菱形圖案
 difficulty: medium
 tags: [nested-loop, pattern, for-loop, spacing]

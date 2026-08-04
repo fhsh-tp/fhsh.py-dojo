@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 53
+id: py053
 title: 完美數搜尋
 difficulty: medium
 tags: [for-loop, factors, math, nested-logic]

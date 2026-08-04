@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 7
+id: py007
 title: 便利商店找零
 difficulty: easy
 tags: [變數, 運算, 減法]

@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 8
+id: py008
 title: 秒數轉換器
 difficulty: easy
 tags: [運算, 整數除法, 取餘數]

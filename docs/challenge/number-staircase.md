@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 45
+id: py045
 title: 數字階梯
 difficulty: easy
 tags: [for-loop, range, output]

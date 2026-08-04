@@ -11,7 +11,7 @@ vi.mock('vitepress', () => ({
   useData: () => ({ isDark: mockIsDark }),
 }))
 
-function mountHeader(isDarkVal = false, extraProps: { backUrl?: string } = {}) {
+function mountHeader(isDarkVal = false, extraProps: { backUrl?: string; id?: string } = {}) {
   mockIsDark.value = isDarkVal
   return mount(AppHeader, {
     props: { title: 'Test Challenge', difficulty: 'easy', ...extraProps },
@@ -73,5 +73,35 @@ describe('AppHeader', () => {
     const wrapper = mountHeader(false, { backUrl: '/apcs-challenges' })
     await wrapper.find('[aria-label="返回列表"]').trigger('click')
     expect(mockGo).toHaveBeenCalledWith('/apcs-challenges')
+  })
+
+  it('shows the challenge id verbatim before the title (Requirement: Challenge page header displays the challenge id)', () => {
+    const wrapper = mountHeader(false, { id: 'py001' })
+    const badge = wrapper.find('[data-testid="page-challenge-id"]')
+    expect(badge.exists()).toBe(true)
+    expect(badge.text()).toBe('py001')
+    // The badge must precede the title in document order.
+    const headerHtml = wrapper.find('header').html()
+    expect(headerHtml.indexOf('page-challenge-id')).toBeLessThan(headerHtml.indexOf('Test Challenge'))
+  })
+
+  it('renders no id badge when the id prop is absent (Requirement: Challenge page header displays the challenge id)', () => {
+    const wrapper = mountHeader()
+    expect(wrapper.find('[data-testid="page-challenge-id"]').exists()).toBe(false)
+  })
+
+  it('renders no id badge when the id prop is empty (Requirement: Challenge page header displays the challenge id)', () => {
+    const wrapper = mountHeader(false, { id: '' })
+    expect(wrapper.find('[data-testid="page-challenge-id"]').exists()).toBe(false)
+  })
+
+  it('title, difficulty, back button, and theme toggle render unchanged with and without an id (Requirement: Challenge page header displays the challenge id)', () => {
+    for (const extra of [{}, { id: 'py001' }]) {
+      const wrapper = mountHeader(false, extra)
+      expect(wrapper.find('h1').text()).toBe('Test Challenge')
+      expect(wrapper.text()).toContain('簡單')
+      expect(wrapper.find('[aria-label="返回列表"]').exists()).toBe(true)
+      expect(wrapper.find('[data-testid="theme-toggle"]').exists()).toBe(true)
+    }
   })
 })

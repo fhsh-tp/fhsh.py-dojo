@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 29
+id: py029
 title: 數字反轉器
 difficulty: easy
 tags: [while, 迴圈, 取餘數]

@@ -6,11 +6,14 @@ const props = withDefaults(
   defineProps<{
     title: string
     difficulty: string
+    // Validated upstream (ChallengeView sanitizes to '' on a malformed id);
+    // this component only decides render-or-hide on emptiness.
+    id?: string
     // Union of known catalogue pages — an arbitrary navigation target is
     // unrepresentable, so a future caller cannot inject one.
     backUrl?: CategoryListUrl
   }>(),
-  { backUrl: '/challenges' },
+  { id: '', backUrl: '/challenges' },
 )
 
 const router = useRouter()
@@ -48,6 +51,14 @@ const difficultyLabel: Record<string, string> = {
     </button>
 
     <span class="text-blue-700 dark:text-gray-600">|</span>
+
+    <!-- Same visual language as the ChallengeCard id badge: mono, muted, small.
+         Palette shifts to stay legible on the navy header background. -->
+    <span
+      v-if="props.id"
+      data-testid="page-challenge-id"
+      class="font-mono text-xs font-medium text-blue-300 dark:text-gray-500 shrink-0"
+    >{{ props.id }}</span>
 
     <h1 class="font-semibold text-blue-50 dark:text-gray-100 truncate">{{ props.title }}</h1>
 

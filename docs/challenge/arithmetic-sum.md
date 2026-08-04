@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 44
+id: py044
 title: 等差數列求和
 difficulty: easy
 tags: [for-loop, range, arithmetic-sequence, accumulation]

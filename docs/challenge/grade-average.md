@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 6
+id: py006
 title: 段考成績平均
 difficulty: easy
 tags: [變數, 運算, 除法]

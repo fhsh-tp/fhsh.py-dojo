@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 47
+id: py047
 title: 倒數偶數
 difficulty: easy
 tags: [for-loop, range, negative-step, even-numbers]
