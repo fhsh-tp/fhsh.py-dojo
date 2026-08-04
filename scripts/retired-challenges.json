@@ -1,5 +1,5 @@
 {
-  "_comment": "Retired challenge slugs/ids. Reusing one would let a former challenge's locally-stored student progress (keyed by slug) inherit onto a new, unrelated challenge, or revive a retired /challenge/<id> alias. Add an entry when you delete or rename a challenge whose slug/id you do not want reused. FORMAT: \"slugs\" holds file basenames (e.g. \"caesar-01\"); \"ids\" holds challenge id STRINGS (e.g. \"py059\", \"apcs003\") — never the bare number 59 or the string \"59\". scripts/new-challenge.ts refuses to scaffold if any entry is malformed.",
+  "_comment": "Retired challenge slugs/ids. Reusing one would let a former challenge's locally-stored student progress (keyed by slug) inherit onto a new, unrelated challenge, or revive a retired /c/<id> alias. Add an entry when you delete or rename a challenge whose slug/id you do not want reused. FORMAT: \"slugs\" holds file basenames (e.g. \"caesar-01\"); \"ids\" holds challenge id STRINGS (e.g. \"py059\", \"apcs003\") — never the bare number 59 or the string \"59\". scripts/new-challenge.ts refuses to scaffold if any entry is malformed.",
   "slugs": ["caesar-01", "caesar-02", "caesar-03"],
   "ids": []
 }

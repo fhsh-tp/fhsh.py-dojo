@@ -16,18 +16,28 @@ function lines(output: string): string[] {
 }
 
 describe('buildRedirects line format', () => {
-  it('emits `/challenge/<id> /challenge/<slug> 302` for each file', () => {
+  it('emits `/c/<id> /challenge/<slug> 302` for each file', () => {
     const output = buildRedirects([{ name: 'collatz-steps.md', content: fm('py031') }])
-    expect(lines(output)).toContain('/challenge/py031 /challenge/collatz-steps 302')
+    expect(lines(output)).toContain('/c/py031 /challenge/collatz-steps 302')
   })
 
-  it('every line is a 302 rule with source and target under /challenge/', () => {
+  it('every line is a 302 rule with a /c/<id> source and a /challenge/<slug> target', () => {
     const output = buildRedirects([
       { name: 'collatz-steps.md', content: fm('py031') },
       { name: 'two-sum.md', content: fm('apcs002') },
     ])
     for (const line of lines(output)) {
-      expect(line).toMatch(/^\/challenge\/(py|apcs)\d{3} \/challenge\/[^ ]+ 302$/)
+      expect(line).toMatch(/^\/c\/(py|apcs)\d{3} \/challenge\/[^ ]+ 302$/)
+    }
+  })
+
+  it('emits no /challenge/<id>-form source path — the pre-/c/ alias is fully replaced', () => {
+    const output = buildRedirects([
+      { name: 'collatz-steps.md', content: fm('py031') },
+      { name: 'two-sum.md', content: fm('apcs002') },
+    ])
+    for (const line of lines(output)) {
+      expect(line.split(' ')[0]).not.toMatch(/^\/challenge\/(py|apcs)\d{3}$/)
     }
   })
 })
@@ -65,9 +75,9 @@ describe('buildRedirects ordering', () => {
     ]
     const output = lines(buildRedirects(shuffled))
     expect(output).toEqual([
-      '/challenge/apcs002 /challenge/apple 302',
-      '/challenge/py002 /challenge/banana 302',
-      '/challenge/py010 /challenge/cherry 302',
+      '/c/apcs002 /challenge/apple 302',
+      '/c/py002 /challenge/banana 302',
+      '/c/py010 /challenge/cherry 302',
     ])
     // Same files in a different order must produce the identical payload.
     expect(buildRedirects([...shuffled].reverse())).toBe(buildRedirects(shuffled))
@@ -110,9 +120,10 @@ describe('buildRedirects fail-loud validation', () => {
     expect(() => buildRedirects([{ name: 'body-id.md', content: bodyOnly }])).toThrow(/body-id\.md/)
   })
 
-  it('throws naming the file when a filename is id-shaped (alias namespace collision)', () => {
-    // /challenge/py001 as a slug would be shadowed by (or loop with) the
-    // alias rule for the real py001.
+  it('throws naming the file when a filename is id-shaped (catalogue identity confusion)', () => {
+    // An id-shaped slug no longer collides with the /c/ alias rules, but
+    // /challenge/py001 (slug) and /c/py001 (alias) could then name two
+    // different challenges — reject at build time.
     const files = [{ name: 'py001.md', content: fm('py055') }]
     expect(() => buildRedirects(files)).toThrow(/py001\.md/)
   })

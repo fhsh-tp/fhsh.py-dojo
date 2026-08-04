@@ -40,7 +40,7 @@
 | `algorithm` | `snake_case` | `bubble_sort` |
 | `id` | 字串：`<category 前綴><3 位零填充序號>`（python → `py`、apcs → `apcs`，各 category 自 1 起連號） | `py016`（由 `pnpm new-challenge` 自動分配，接續該 category 前綴內現有最大序號 +1） |
 
-`id` 全站唯一（由 category 前綴互斥＋前綴內序號唯一共同保證）。它會顯示在挑戰卡片上、可於目錄搜尋（輸入純數字比對序號、其餘輸入比對前綴），並提供 `/challenge/<id>` 轉址別名。
+`id` 全站唯一（由 category 前綴互斥＋前綴內序號唯一共同保證）。它會顯示在挑戰卡片與挑戰內頁頂欄上、可於目錄搜尋（輸入純數字比對序號、其餘輸入比對前綴），並提供 `/c/<id>` 短網址轉址別名（如 `/c/py001`）。
 
 **演算法名稱與檔名的對應：**
 

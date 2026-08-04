@@ -26,12 +26,12 @@ export function validateName(name: string): string | null {
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(name)) {
     return `[new-challenge] ERROR: <name> must be kebab-case (lowercase letters, digits, hyphens only)`
   }
-  // Ids and slugs share the /challenge/ URL namespace: an id-shaped slug
-  // (e.g. py001) would collide with another challenge's alias rule in
-  // _redirects. generate-redirects fails the build on this too; rejecting it
-  // here stops the file from being scaffolded in the first place.
+  // An id-shaped slug (e.g. py001) would blur the catalogue identity: its
+  // /challenge/ page and the /c/ alias could name two different challenges.
+  // generate-redirects fails the build on this too; rejecting it here stops
+  // the file from being scaffolded in the first place.
   if (CHALLENGE_ID_PATTERN.test(name)) {
-    return `[new-challenge] ERROR: <name> must not be id-shaped (like py001); slugs and /challenge/<id> aliases share one URL namespace`
+    return `[new-challenge] ERROR: <name> must not be id-shaped (like py001); an id-shaped slug would blur the catalogue identity (its /challenge/ page and the /c/ alias could name different challenges)`
   }
   return null
 }
@@ -310,7 +310,7 @@ export function checkRetired(name: string, id: string, ledger: RetiredLedger): s
     return `[new-challenge] ERROR: slug '${name}' is retired; reusing it would inherit a former challenge's stored progress. Choose a different name.`
   }
   if (ledger.ids.includes(id)) {
-    return `[new-challenge] ERROR: id ${id} is retired; reusing it would revive a retired catalogue identity and its /challenge/<id> alias.`
+    return `[new-challenge] ERROR: id ${id} is retired; reusing it would revive a retired catalogue identity and its /c/<id> alias.`
   }
   return null
 }

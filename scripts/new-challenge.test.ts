@@ -96,7 +96,7 @@ describe('validateName', () => {
     expect(validateName('bubble_sort')).not.toBeNull()
   })
 
-  it('rejects id-shaped names (slug/alias namespace collision)', () => {
+  it('rejects id-shaped names (catalogue identity confusion)', () => {
     expect(validateName('py001')).toMatch(/id-shaped/)
     expect(validateName('apcs003')).toMatch(/id-shaped/)
     // Near misses stay valid: not matching ^(py|apcs)\d{3}$ exactly.
