@@ -65,7 +65,7 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 
 題目為 `docs/challenge/*.md`，主要 frontmatter 欄位：
 
-- `layout: challenge`（固定）、`id`（整數、全站唯一）、`title`、`difficulty`（easy | medium | hard）
+- `layout: challenge`（固定）、`id`（字串，格式 `<category 前綴><3 位零填充序號>`，例 `py001`／`apcs005`，全站唯一，由 scaffold 自動配號，勿手填）、`title`、`difficulty`（easy | medium | hard）
 - `algorithm`（snake_case，WASM 產生測資的識別鍵）、`testcase_count`（選填，預設 5）
 - `params`（必填，輸入參數規格）、`generator`（必填，Python 正解，輸出期望答案）、`starter_code`（必填，使用者初始程式碼）
 - `reference_solution`（**選填**）：宣告後，`content-regression` 測試會驗證此正解在正式測資下與 generator 的期望輸出一致

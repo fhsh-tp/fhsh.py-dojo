@@ -1,10 +1,4 @@
-# challenge-alias-redirects Specification
-
-## Purpose
-
-TBD - created by archiving change 'challenge-id-revamp'. Update Purpose after archive.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Build step generates the Cloudflare Pages redirects file
 
@@ -41,17 +35,6 @@ A script at `scripts/generate-redirects.ts` SHALL scan every markdown file under
 - **WHEN** two challenge files declare the same id
 - **THEN** the generator SHALL exit non-zero and its error message SHALL name both files
 
----
-### Requirement: Redirects file is generated output, not source
-
-docs/public/_redirects SHALL be listed in .gitignore and SHALL NOT be committed, following the same convention as docs/public/pools/.
-
-#### Scenario: Generated file stays out of version control
-
-- **WHEN** the generator has produced docs/public/_redirects and git status is inspected
-- **THEN** the file SHALL NOT appear as an untracked or modified path
-
----
 ### Requirement: Deployed alias URLs redirect to canonical slug URLs
 
 On the deployed site, a request to `/c/<id>` for any existing challenge SHALL receive an HTTP 3xx response whose Location header is the extensionless canonical slug path for that challenge (`/challenge/<slug>`). Verification SHALL assert the 3xx class and the Location value only; it SHALL NOT assert the exact status code of any subsequent platform-level URL normalization, because that code differs between Cloudflare Pages and Workers static assets. A request to `/challenge/<id>` SHALL NOT be redirected: the pre-`/c/` alias form never shipped to production and is removed rather than kept as a second namespace.

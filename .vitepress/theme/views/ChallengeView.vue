@@ -18,6 +18,7 @@ import { useProgressStore } from '../stores/progress'
 import { allowedResult } from '../lib/progressExport'
 import { deriveChallengeSlug } from '../../../docs/shared/challenge-slug'
 import { CATEGORY_LIST_URL, resolveChallengeCategory } from '../../../docs/shared/challenge-category'
+import { CHALLENGE_ID_PATTERN } from '../../../docs/shared/challenge-id'
 
 const { frontmatter, page } = useData()
 const router = useRouter()
@@ -34,6 +35,11 @@ let recorder: SessionRecorder | null = null
 const verdictDetail = resolveVerdictDetail(frontmatter.value.verdict_detail)
 const algorithm: string = frontmatter.value.algorithm ?? ''
 const starterCode: string = frontmatter.value.starter_code ?? ''
+// Sanitize-to-'' on a malformed id (same convention as challenge.data.ts):
+// the header badge hides itself rather than exposing a bad value.
+const challengeId = ((raw: string) => (CHALLENGE_ID_PATTERN.test(raw) ? raw : ''))(
+  String(frontmatter.value.id ?? ''),
+)
 
 // Category-aware return target, derived from the exhaustive category → page
 // map: absent or unknown categories resolve to python and land on /challenges.
@@ -199,6 +205,7 @@ function onRun(payload: { stdin: string; stdout: string; error?: string }) {
       <AppHeader
         :title="frontmatter.title ?? '載入中...'"
         :difficulty="frontmatter.difficulty ?? ''"
+        :id="challengeId"
         :back-url="listUrl"
       />
 

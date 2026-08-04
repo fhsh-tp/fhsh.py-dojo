@@ -224,6 +224,46 @@ describe('ChallengeView', () => {
     expect(wrapper.findComponent({ name: 'AppHeader' }).props('backUrl')).toBe('/apcs-challenges')
   })
 
+  // ── Page-level id badge gate ───────────────────────────────────────────────
+  // The CHALLENGE_ID_PATTERN sanitize gate lives in ChallengeView (AppHeader
+  // renders whatever it is handed), so the malformed-id scenarios can only be
+  // pinned at this level — AppHeader.spec.ts structurally cannot cover them.
+  async function mountForBadge() {
+    const wrapper = mount(ChallengeView, {
+      global: { stubs: { CodeEditor: CodeEditorStub, Teleport: true } },
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
+    return wrapper
+  }
+
+  it('passes a valid frontmatter id through to the header badge verbatim (Requirement: Challenge page header displays the challenge id)', async () => {
+    mockFrontmatter.value.id = 'py001'
+    const wrapper = await mountForBadge()
+    const badge = wrapper.find('[data-testid="page-challenge-id"]')
+    expect(badge.exists()).toBe(true)
+    expect(badge.text()).toBe('py001')
+  })
+
+  it.each([
+    ['a numeric legacy id', 59],
+    ['a wrong-case id', 'PY001'],
+    ['a numeric-string id', '59'],
+  ])(
+    'hides the badge but keeps the header when frontmatter id is %s (Requirement: Challenge page header displays the challenge id)',
+    async (_label, badId) => {
+      mockFrontmatter.value.id = badId
+      const wrapper = await mountForBadge()
+      expect(wrapper.find('[data-testid="page-challenge-id"]').exists()).toBe(false)
+      expect(wrapper.findComponent({ name: 'AppHeader' }).exists()).toBe(true)
+    },
+  )
+
+  it('renders no badge when frontmatter has no id at all (Requirement: Challenge page header displays the challenge id)', async () => {
+    const wrapper = await mountForBadge()
+    expect(wrapper.find('[data-testid="page-challenge-id"]').exists()).toBe(false)
+  })
+
   it('Worker is terminated on unmount (Requirement: Worker is terminated on component unmount)', async () => {
     const wrapper = mount(ChallengeView, {
       global: {

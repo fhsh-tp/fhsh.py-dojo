@@ -22,7 +22,7 @@ export interface ChallengeFile {
 
 /**
  * Build the Cloudflare Pages `_redirects` payload for the stable challenge
- * URLs: one `/challenge/<id> /challenge/<slug> 302` rule per challenge file.
+ * URLs: one `/c/<id> /challenge/<slug> 302` rule per challenge file.
  * Targets deliberately omit the `.html` extension so the rules keep working
  * under VitePress cleanUrls and plain static hosting alike.
  *
@@ -69,19 +69,19 @@ export function buildRedirects(files: ChallengeFile[]): string {
         `[generate-redirects] ERROR: ${name} has a filename outside the slug contract [a-z0-9-]; a space or control character here would corrupt the _redirects line format.`,
       )
     }
-    // Ids and slugs share the /challenge/ URL namespace: an id-shaped slug
-    // would be shadowed by (or loop with) another challenge's alias rule,
-    // shipping green through tests, build, and Cloudflare alike.
+    // An id-shaped slug no longer collides with the alias rules under /c/,
+    // but it would still blur the catalogue identity: /challenge/py001 (a
+    // slug) and /c/py001 (an alias) could then name two different challenges.
     if (CHALLENGE_ID_PATTERN.test(slug)) {
       throw new Error(
-        `[generate-redirects] ERROR: ${name} has an id-shaped filename; slugs must not collide with the /challenge/<id> alias namespace.`,
+        `[generate-redirects] ERROR: ${name} has an id-shaped filename; an id-shaped slug would blur the catalogue identity (its /challenge/ page and the /c/ alias could name different challenges).`,
       )
     }
     entries.push({ id, slug })
   }
 
   entries.sort((a, b) => compareChallengeId(a.id, b.id))
-  return entries.map(({ id, slug }) => `/challenge/${id} /challenge/${slug} 302\n`).join('')
+  return entries.map(({ id, slug }) => `/c/${id} /challenge/${slug} 302\n`).join('')
 }
 
 /** Read every challenge markdown file under `dir` as {name, content} pairs. */
