@@ -95,11 +95,13 @@ describe('AppHeader', () => {
     expect(wrapper.find('[data-testid="page-challenge-id"]').exists()).toBe(false)
   })
 
-  it('title and difficulty render unchanged with and without an id (Requirement: Challenge page header displays the challenge id)', () => {
+  it('title, difficulty, back button, and theme toggle render unchanged with and without an id (Requirement: Challenge page header displays the challenge id)', () => {
     for (const extra of [{}, { id: 'py001' }]) {
       const wrapper = mountHeader(false, extra)
       expect(wrapper.find('h1').text()).toBe('Test Challenge')
       expect(wrapper.text()).toContain('簡單')
+      expect(wrapper.find('[aria-label="返回列表"]').exists()).toBe(true)
+      expect(wrapper.find('[data-testid="theme-toggle"]').exists()).toBe(true)
     }
   })
 })

@@ -38,3 +38,34 @@ The script SHALL exit with a non-zero code and a descriptive error message if:
 
 - **WHEN** `pnpm new-challenge linear-search --title "線性搜尋" --difficulty medium --algorithm linear_search --category apcs` is executed
 - **THEN** `docs/challenge/linear-search.md` is created with `title: 線性搜尋`, `difficulty: medium`, `algorithm: linear_search`, and `category: apcs`
+
+#### Scenario: Output file already exists
+
+- **WHEN** the target `docs/challenge/<name>.md` file already exists
+- **THEN** the script exits with code 1 and prints `[new-challenge] ERROR: docs/challenge/<name>.md already exists. Aborting to prevent overwrite.`
+
+#### Scenario: Invalid difficulty value
+
+- **WHEN** `--difficulty` is set to a value other than `easy`, `medium`, or `hard`
+- **THEN** the script exits with code 1 and prints `[new-challenge] ERROR: --difficulty must be one of: easy, medium, hard`
+
+#### Scenario: Invalid category value
+
+- **WHEN** `--category` is set to a value other than `python` or `apcs`
+- **THEN** the script exits with code 1 and prints `[new-challenge] ERROR: --category must be one of: python, apcs`
+
+#### Scenario: Invalid name format
+
+- **WHEN** `<name>` contains uppercase letters or non-kebab characters (e.g., `BubbleSort` or `bubble_sort`)
+- **THEN** the script exits with code 1 and prints `[new-challenge] ERROR: <name> must be kebab-case (lowercase letters, digits, hyphens only)`
+
+#### Scenario: Id-shaped name is rejected
+
+- **WHEN** `pnpm new-challenge py001` is executed
+- **THEN** the script exits with code 1 and its error message states that id-shaped names are not allowed because an id-shaped slug would blur the catalogue identity (its `/challenge/<slug>` page and the `/c/<same-token>` alias could name two different challenges)
+
+#### Scenario: Unparseable existing id fails loudly
+
+- **WHEN** any existing `docs/challenge/*.md` file carries an id that does not match the challenge id format
+- **THEN** the script exits non-zero and its error message names that file
+
