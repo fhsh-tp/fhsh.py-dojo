@@ -142,7 +142,7 @@ const subjectLinkMap: Record<string, string> = {
       <div v-if="latestPythonChallenges.length > 0" class="home-challenge-grid">
         <ChallengeCard
           v-for="c in latestPythonChallenges"
-          :key="c.id"
+          :key="c.slug"
           :challenge="c"
         />
       </div>
@@ -158,7 +158,7 @@ const subjectLinkMap: Record<string, string> = {
       <div v-if="latestApcsChallenges.length > 0" class="home-challenge-grid">
         <ChallengeCard
           v-for="c in latestApcsChallenges"
-          :key="c.id"
+          :key="c.slug"
           :challenge="c"
         />
       </div>

@@ -109,6 +109,17 @@ describe('buildRedirects fail-loud validation', () => {
       '---\nlayout: challenge\ntitle: nope\n---\n\n```yaml\nid: py099\n```\nid: py098\n'
     expect(() => buildRedirects([{ name: 'body-id.md', content: bodyOnly }])).toThrow(/body-id\.md/)
   })
+
+  it('throws naming the file when a filename is id-shaped (alias namespace collision)', () => {
+    // /challenge/py001 as a slug would be shadowed by (or loop with) the
+    // alias rule for the real py001.
+    const files = [{ name: 'py001.md', content: fm('py055') }]
+    expect(() => buildRedirects(files)).toThrow(/py001\.md/)
+  })
+
+  it('throws instead of emitting an empty redirects payload when no files are found', () => {
+    expect(() => buildRedirects([])).toThrow(/no challenge markdown files/)
+  })
 })
 
 describe('buildRedirects against the real docs/challenge/', () => {

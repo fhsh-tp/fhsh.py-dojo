@@ -18,6 +18,7 @@ The `id` field SHALL be a string in the challenge id format: the category's pref
 The script SHALL exit with a non-zero code and a descriptive error message if:
 - `<name>` is not provided
 - `<name>` contains characters other than lowercase letters, digits, and hyphens
+- `<name>` is itself id-shaped (matches the challenge id pattern, e.g. py001) — slugs and /challenge/<id> aliases share one URL namespace
 - `--difficulty` is not one of `easy`, `medium`, or `hard`
 - `--category` is not one of `python` or `apcs`
 - The output file already exists (to prevent accidental overwrite)
@@ -57,6 +58,11 @@ The script SHALL exit with a non-zero code and a descriptive error message if:
 
 - **WHEN** `<name>` contains uppercase letters or non-kebab characters (e.g., `BubbleSort` or `bubble_sort`)
 - **THEN** the script exits with code 1 and prints `[new-challenge] ERROR: <name> must be kebab-case (lowercase letters, digits, hyphens only)`
+
+#### Scenario: Id-shaped name is rejected
+
+- **WHEN** `pnpm new-challenge py001` is executed
+- **THEN** the script exits with code 1 and its error message states that id-shaped names are not allowed because slugs and aliases share the /challenge/ namespace
 
 #### Scenario: Unparseable existing id fails loudly
 

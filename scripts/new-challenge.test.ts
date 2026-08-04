@@ -96,6 +96,14 @@ describe('validateName', () => {
     expect(validateName('bubble_sort')).not.toBeNull()
   })
 
+  it('rejects id-shaped names (slug/alias namespace collision)', () => {
+    expect(validateName('py001')).toMatch(/id-shaped/)
+    expect(validateName('apcs003')).toMatch(/id-shaped/)
+    // Near misses stay valid: not matching ^(py|apcs)\d{3}$ exactly.
+    expect(validateName('py0001')).toBeNull()
+    expect(validateName('python-basics')).toBeNull()
+  })
+
   it('returns error for names with spaces', () => {
     expect(validateName('bubble sort')).not.toBeNull()
   })

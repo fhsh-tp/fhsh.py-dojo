@@ -26,6 +26,7 @@ import { fileURLToPath } from 'node:url'
 
 import { getPoolKey } from './pool-key.js'
 import { ensureWasmArtifact, generatePoolInputs, type PoolSpec } from './wasm-input-generator.js'
+import { SLUG_PATTERN } from '../docs/shared/challenge-slug.js'
 
 // ── WASM preflight check ──────────────────────────────────────────────────
 
@@ -96,7 +97,6 @@ export const POOL_VERSION = 0x01
 
 // ── Slug helpers ───────────────────────────────────────────────────────────
 
-const SLUG_PATTERN = /^[a-z0-9-]+$/
 const SLUG_MAX_LEN = 64
 
 /**

@@ -7,16 +7,11 @@ import {
   compareChallengeId,
   extractFrontmatterId,
 } from '../docs/shared/challenge-id.js'
-
-/**
- * Same slug contract as `SLUG_PATTERN` in scripts/generate-pools.ts — the
- * authoritative rule for challenge file basenames. `_redirects` is a
- * whitespace/newline-delimited format, so an unvalidated filename could break
- * a rule line (space) or inject extra rules (newline). Deliberately NOT the
- * stricter scaffold-input pattern in new-challenge.ts: a third, incompatible
- * slug rule is exactly the kind of contract split this guard exists to avoid.
- */
-const SLUG_PATTERN = /^[a-z0-9-]+$/
+// `_redirects` is a whitespace/newline-delimited format, so an unvalidated
+// filename could break a rule line (space) or inject extra rules (newline).
+// The slug contract is imported, not copied — a local literal is how a
+// second (then third) incompatible slug rule drifts into existence.
+import { SLUG_PATTERN } from '../docs/shared/challenge-slug.js'
 
 // ── Pure helpers ──────────────────────────────────────────────────────────
 
@@ -37,6 +32,13 @@ export interface ChallengeFile {
  * silently skipped file would ship a catalogue with a dead stable URL.
  */
 export function buildRedirects(files: ChallengeFile[]): string {
+  // Zero challenges means the catalogue directory was moved or emptied — a
+  // banner-only _redirects that silently kills every alias must never ship.
+  if (files.length === 0) {
+    throw new Error(
+      '[generate-redirects] ERROR: no challenge markdown files found; refusing to write an empty redirects file.',
+    )
+  }
   const entries: { id: string; slug: string }[] = []
   const fileById = new Map<string, string>()
 
@@ -65,6 +67,14 @@ export function buildRedirects(files: ChallengeFile[]): string {
     if (!SLUG_PATTERN.test(slug)) {
       throw new Error(
         `[generate-redirects] ERROR: ${name} has a filename outside the slug contract [a-z0-9-]; a space or control character here would corrupt the _redirects line format.`,
+      )
+    }
+    // Ids and slugs share the /challenge/ URL namespace: an id-shaped slug
+    // would be shadowed by (or loop with) another challenge's alias rule,
+    // shipping green through tests, build, and Cloudflare alike.
+    if (CHALLENGE_ID_PATTERN.test(slug)) {
+      throw new Error(
+        `[generate-redirects] ERROR: ${name} has an id-shaped filename; slugs must not collide with the /challenge/<id> alias namespace.`,
       )
     }
     entries.push({ id, slug })

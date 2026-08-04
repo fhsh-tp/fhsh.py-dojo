@@ -109,7 +109,7 @@ const SKELETON_COUNT = 6
       >
         <ChallengeCard
           v-for="challenge in filtered"
-          :key="challenge.id"
+          :key="challenge.slug"
           :challenge="challenge"
           :completed="progress.isCompleted(challenge.slug)"
         />

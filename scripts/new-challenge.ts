@@ -26,6 +26,13 @@ export function validateName(name: string): string | null {
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(name)) {
     return `[new-challenge] ERROR: <name> must be kebab-case (lowercase letters, digits, hyphens only)`
   }
+  // Ids and slugs share the /challenge/ URL namespace: an id-shaped slug
+  // (e.g. py001) would collide with another challenge's alias rule in
+  // _redirects. generate-redirects fails the build on this too; rejecting it
+  // here stops the file from being scaffolded in the first place.
+  if (CHALLENGE_ID_PATTERN.test(name)) {
+    return `[new-challenge] ERROR: <name> must not be id-shaped (like py001); slugs and /challenge/<id> aliases share one URL namespace`
+  }
   return null
 }
 
