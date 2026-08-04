@@ -107,6 +107,23 @@ pnpm new-tutor py ch1 1-4 --title "迴圈的藝術" --challenge hello-world
 
 ---
 
+## 🗑️ 刪除或重新命名題目：登記退役帳本
+
+刪掉或改名一道已上線的題目時，**必須**把它的舊 slug（檔名）與舊 id 登記到 `scripts/retired-challenges.json`，否則日後 `pnpm new-challenge` 可能把同一個 slug 配給不相干的新題目，讓學生的本機進度（以 slug 為 key）錯誤地繼承過去。
+
+```json
+{
+  "slugs": ["caesar-01"],
+  "ids": ["py059"]
+}
+```
+
+- `slugs`：檔名去掉 `.md`，字串。
+- `ids`：**字串**格式的挑戰 id（`"py059"`、`"apcs003"`），**不是**數字 `59`、也不是 `"59"`。
+- 格式寫錯時 `pnpm new-challenge` 會直接拒絕執行並指名出錯的那一筆——這是刻意的，帳本不能在無人察覺的情況下失效。
+
+---
+
 ## 🆘 常見衝突處理：ID 衝突
 
 如果你在 PR 過程中發現 `docs/challenge/` 下的題目 `id` 與其他人重複了：

@@ -13,12 +13,9 @@ describe('CHALLENGE_ID_PATTERN', () => {
     expect(CHALLENGE_ID_PATTERN.test(id)).toBe(true)
   })
 
-  it.each(['py1', 'py0001', '3', '003', 'PY001', 'apcs01', 'py001x', ''])(
-    'rejects %s',
-    (id) => {
-      expect(CHALLENGE_ID_PATTERN.test(id)).toBe(false)
-    },
-  )
+  it.each(['py1', 'py0001', '3', '003', 'PY001', 'apcs01', 'py001x', ''])('rejects %s', (id) => {
+    expect(CHALLENGE_ID_PATTERN.test(id)).toBe(false)
+  })
 })
 
 describe('CATEGORY_ID_PREFIX', () => {
@@ -39,6 +36,12 @@ describe('CATEGORY_ID_PREFIX', () => {
       for (const b of prefixes) {
         if (a !== b) expect(a.startsWith(b)).toBe(false)
       }
+    }
+  })
+
+  it('no prefix contains a digit (challengeIdOrdinal strips leading non-digits)', () => {
+    for (const prefix of Object.values(CATEGORY_ID_PREFIX)) {
+      expect(/^\D+$/.test(prefix), `prefix '${prefix}' must be digit-free`).toBe(true)
     }
   })
 })
@@ -62,12 +65,7 @@ describe('challengeIdOrdinal', () => {
 describe('compareChallengeId', () => {
   it('orders same-prefix ids by ordinal (zero-padding makes lexicographic = numeric)', () => {
     const shuffled = ['py010', 'py002', 'py054', 'py001']
-    expect([...shuffled].sort(compareChallengeId)).toEqual([
-      'py001',
-      'py002',
-      'py010',
-      'py054',
-    ])
+    expect([...shuffled].sort(compareChallengeId)).toEqual(['py001', 'py002', 'py010', 'py054'])
   })
 
   it('descending sort yields highest ordinals first (homepage latest lists)', () => {

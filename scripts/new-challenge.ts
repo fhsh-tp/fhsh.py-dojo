@@ -209,25 +209,94 @@ export interface RetiredLedger {
   ids: string[]
 }
 
+/** Same "refusing to scaffold" contract as the corrupt-JSON path below. */
+function ledgerError(path: string, detail: string): Error {
+  return new Error(
+    `[new-challenge] retired ledger at ${path} ${detail}; refusing to scaffold. ` +
+      `Fix the file to re-enable the retired-slug/id reuse guard.`,
+  )
+}
+
+function readLedgerField(
+  path: string,
+  raw: Record<string, unknown>,
+  field: 'slugs' | 'ids',
+  isValid: (v: string) => boolean,
+  expected: string,
+): string[] {
+  const value = raw[field]
+  // An ABSENT field is legitimate (nothing retired yet) and defaults to [].
+  // A field that is PRESENT but not an array is not: silently defaulting it
+  // to [] is the same disarmed guard this function exists to prevent.
+  if (value === undefined) return []
+  if (!Array.isArray(value)) {
+    throw ledgerError(path, `has a "${field}" field that is present but not an array`)
+  }
+  const out: string[] = []
+  for (let i = 0; i < value.length; i++) {
+    const entry: unknown = value[i]
+    if (typeof entry !== 'string' || !isValid(entry)) {
+      throw ledgerError(
+        path,
+        `has an invalid "${field}"[${i}] entry ${JSON.stringify(entry)}; expected ${expected}`,
+      )
+    }
+    out.push(entry)
+  }
+  return out
+}
+
+/**
+ * Read the retired ledger, failing closed on anything it cannot trust.
+ *
+ * The guard is only as strong as the parse. `JSON.parse` returns `any`, so a
+ * ledger carrying pre-migration entries (`"ids": [59]`, `"59"`, `"PY059"`) or
+ * a non-array field (`"ids": "py059"`) used to sail through an
+ * `Array.isArray` check and then never match `includes` — turning BOTH the
+ * scaffold guard and the content-regression assertion into silent no-ops at
+ * once. Every layer is therefore checked: root object, field container,
+ * element type, element format.
+ *
+ * Unknown keys (`_comment`) are ignored by design — the ledger is
+ * hand-edited. This is the single choke point: any future reader of the
+ * ledger JSON must go through here rather than parsing the file itself.
+ */
 export function loadRetiredLedger(path: string): RetiredLedger {
   if (!existsSync(path)) return { slugs: [], ids: [] }
-  let raw: Partial<RetiredLedger>
+  let raw: unknown
   try {
-    raw = JSON.parse(readFileSync(path, 'utf-8')) as Partial<RetiredLedger>
+    raw = JSON.parse(readFileSync(path, 'utf-8'))
   } catch (err) {
     // Fail closed: a corrupt ledger must NOT silently disable the reuse guard.
-    // Refuse to scaffold until it is fixed, rather than proceeding with the
-    // guard quietly turned off (which could let a retired slug/id be reused and
-    // inherit a former challenge's stored progress).
     throw new Error(
       `[new-challenge] retired ledger at ${path} is not valid JSON; refusing to scaffold. ` +
         `Fix the file to re-enable the retired-slug/id reuse guard. ` +
         `(${err instanceof Error ? err.message : String(err)})`,
     )
   }
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    // Without this, a `null` root threw a bare TypeError ("Cannot read
+    // properties of null") that told the author nothing actionable.
+    throw ledgerError(path, 'is not a JSON object')
+  }
+  const obj = raw as Record<string, unknown>
   return {
-    slugs: Array.isArray(raw.slugs) ? raw.slugs : [],
-    ids: Array.isArray(raw.ids) ? raw.ids : [],
+    // Retired slugs are HISTORICAL records: validated as non-empty strings
+    // only, deliberately NOT against SLUG_PATTERN. Tightening the live slug
+    // contract must never retroactively brick the scaffold on an entry that
+    // was correct when it was retired.
+    slugs: readLedgerField(path, obj, 'slugs', (s) => s.length > 0, 'a non-empty slug string'),
+    // Ids ARE format-checked, because the failure this guards against is
+    // exactly a `59` / `"59"` / `"PY059"` entry that `includes` can never
+    // match. This is not a new class of risk: computeNextId and
+    // buildRedirects already refuse any id outside CHALLENGE_ID_PATTERN.
+    ids: readLedgerField(
+      path,
+      obj,
+      'ids',
+      (s) => CHALLENGE_ID_PATTERN.test(s),
+      'a challenge id string like "py059" (NOT a number)',
+    ),
   }
 }
 
@@ -241,7 +310,7 @@ export function checkRetired(name: string, id: string, ledger: RetiredLedger): s
     return `[new-challenge] ERROR: slug '${name}' is retired; reusing it would inherit a former challenge's stored progress. Choose a different name.`
   }
   if (ledger.ids.includes(id)) {
-    return `[new-challenge] ERROR: id ${id} is retired; reusing it would inherit stale progress.`
+    return `[new-challenge] ERROR: id ${id} is retired; reusing it would revive a retired catalogue identity and its /challenge/<id> alias.`
   }
   return null
 }

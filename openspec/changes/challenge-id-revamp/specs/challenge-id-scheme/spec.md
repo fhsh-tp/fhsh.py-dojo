@@ -2,7 +2,7 @@
 
 ### Requirement: Challenge id is a category-prefixed zero-padded string
 
-Every challenge frontmatter `id` SHALL be a string matching `^(py|apcs)\d{3}$`: a category prefix followed by a 3-digit zero-padded ordinal. The prefix SHALL map one-to-one to the challenge's resolved category (`python` maps to `py`, `apcs` maps to `apcs`). The ordinal of an id SHALL be defined as the decimal integer obtained by stripping all leading non-digit characters. Ids SHALL be unique across the whole site; uniqueness within a prefix combined with distinct prefixes guarantees this.
+Every challenge frontmatter `id` SHALL be a string matching `^(py|apcs)\d{3}$`: a category prefix followed by a 3-digit zero-padded ordinal. The prefix SHALL map one-to-one to the challenge's resolved category (`python` maps to `py`, `apcs` maps to `apcs`). The ordinal of an id SHALL be defined as the decimal integer obtained by stripping all leading non-digit characters. Ids SHALL be unique across the whole site; uniqueness within a prefix combined with distinct prefixes guarantees this. Category prefixes SHALL contain no digits, so that stripping leading non-digit characters yields exactly the zero-padded ordinal.
 
 #### Scenario: Valid ids
 

@@ -16,15 +16,22 @@ export const CHALLENGE_ID_PATTERN = /^(py|apcs)\d{3}$/
  * Category → id prefix. Adding a category means registering its prefix here
  * first — the pattern above, the scaffold's per-category numbering, and the
  * redirects generator all key off this map. Prefixes must never be a prefix
- * of one another, or startsWith id search stops distinguishing them; the
- * challenge-id gate test pins that invariant.
+ * of one another, or startsWith id search stops distinguishing them; and no
+ * prefix may contain a digit, because challengeIdOrdinal strips leading
+ * non-digits — a prefix like `cs2` would fold its own digit into the ordinal
+ * (cs2001 parses as 2001), silently breaking pure-number catalogue search.
+ * The challenge-id gate test pins both invariants.
  */
 export const CATEGORY_ID_PREFIX = {
   python: 'py',
   apcs: 'apcs',
 } as const satisfies Record<ChallengeCategory, string>
 
-/** Ordinal of an id: the decimal integer after the leading non-digit prefix. */
+/**
+ * Ordinal of an id: the decimal integer after the leading non-digit prefix.
+ * Precondition: every registered CATEGORY_ID_PREFIX is digit-free (pinned by
+ * the gate test) — otherwise the prefix's own digits leak into the ordinal.
+ */
 export function challengeIdOrdinal(id: string): number {
   return parseInt(id.replace(/^\D*/, ''), 10)
 }
