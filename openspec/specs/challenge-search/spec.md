@@ -135,7 +135,14 @@ code:
 ---
 ### Requirement: Search filters challenges by text matching across multiple fields
 
-When the user types in the search input, the challenge list SHALL be filtered in real time. A challenge matches the search query if the lowercased query string is contained within any of the following lowercased fields: `title`, `description`, `tags` (joined as a single string), or `chapter`.
+When the user types in the search input, the challenge list SHALL be filtered in real time. The query SHALL be normalized by trimming surrounding whitespace and lowercasing before matching. A challenge matches the search query if the normalized query is contained within any of the following lowercased fields: `title`, `description`, `tags` (joined as a single string), or `chapter` — or if the query matches the challenge `id` under the id matching rules below.
+
+Id matching SHALL apply exactly one of two rules, chosen by the shape of the normalized query:
+
+1. If the normalized query consists solely of decimal digits, it SHALL match a challenge whose id ordinal (the decimal integer obtained by stripping the id's leading non-digit characters) equals the query parsed as a decimal integer.
+2. Otherwise, it SHALL match a challenge whose id starts with the normalized query.
+
+Text-field matching and id matching SHALL be combined with OR: a challenge is shown when either matches. Because each catalogue page receives a category-filtered challenge list, id matching never crosses categories on a page.
 
 #### Scenario: Search matches by title
 
@@ -157,57 +164,34 @@ When the user types in the search input, the challenge list SHALL be filtered in
 - **WHEN** the user types "收銀" in the search input
 - **THEN** challenges whose description contains "收銀" SHALL be displayed
 
+#### Scenario: Pure-digit query matches id ordinal exactly
+
+- **WHEN** the user types "3", "03", or "003" on the Python catalogue page
+- **THEN** the challenge with id py003 SHALL be displayed via the id rule, together with any challenge whose text fields contain the query
+
+##### Example: Digit query matrix on the Python page
+
+| query | id-rule matches |
+| --- | --- |
+| 3 | py003 |
+| 03 | py003 |
+| 003 | py003 |
+| 55 | (none — Python page has ordinals 1–54) |
+
+#### Scenario: Non-digit query matches id by prefix
+
+- **WHEN** the user types "py00" on the Python catalogue page
+- **THEN** challenges py001 through py009 SHALL be displayed via the id rule
+
+#### Scenario: Unpadded prefixed query does not match via id
+
+- **WHEN** the user types "py3" on the Python catalogue page
+- **THEN** no challenge SHALL be displayed via the id rule, because "py3" is not a prefix of any zero-padded id and is not a pure-digit query
+
 #### Scenario: Search with no matches
 
 - **WHEN** the user types a query that matches no challenge
 - **THEN** the empty state message "沒有符合條件的挑戰。" SHALL be displayed
-
-
-<!-- @trace
-source: add-challenge-search
-updated: 2026-04-10
-code:
-  - docs/challenge/repeat-greeting.md
-  - docs/challenge/leap-year.md
-  - docs/challenge/countdown.md
-  - .vitepress/theme/types.d/challenge.type.ts
-  - docs/challenge/parrot-echo.md
-  - docs/challenge/digit-counter.md
-  - .vitepress/theme/views/ChallengeListView.vue
-  - docs/challenge/quadratic-discriminant.md
-  - docs/challenge/seconds-converter.md
-  - docs/challenge/triangle-check.md
-  - docs/challenge/odd-numbers.md
-  - docs/challenge/vending-change.md
-  - assets/banner.png
-  - docs/challenge/digit-sum-skip.md
-  - docs/challenge/quadrant-classifier.md
-  - docs/challenge/change-calculator.md
-  - docs/challenges.md
-  - docs/challenge/hello-world.md
-  - docs/challenge/sign-check.md
-  - docs/challenge/bmi-classifier.md
-  - docs/challenge/movie-ticket.md
-  - docs/challenge/number-reverse.md
-  - docs/challenge/grade-level.md
-  - docs/challenge/factorial.md
-  - docs/challenge/odd-even.md
-  - docs/challenge/grade-average.md
-  - docs/challenge/beverage-cashier.md
-  - docs/challenge/sum-skip-fives.md
-  - docs/challenge/skip-multiples.md
-  - docs/challenge/range-sum.md
-  - docs/shared/challenge.data.ts
-  - docs/challenge/target-sum.md
-  - docs/challenge/triangle-classify.md
-  - docs/challenge/collatz-steps.md
-  - docs/challenge/first-divisor.md
-  - docs/challenge/date-validator.md
-  - docs/challenge/self-introduction.md
-  - docs/challenge/taxi-fare.md
-  - docs/challenge/number-sum.md
-  - docs/challenge/password-check.md
--->
 
 ---
 ### Requirement: Search and difficulty filter work together as intersection

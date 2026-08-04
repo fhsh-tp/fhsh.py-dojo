@@ -122,53 +122,17 @@ code:
 ---
 ### Requirement: Challenge ID continuity across Module 2
 
-All challenge files referenced from Module 2 sections SHALL have sequential IDs with no gaps or duplicates when sorted numerically. Module 2 challenge IDs SHALL form a contiguous block that starts immediately after Module 1's last ID.
+All challenge files referenced from Module 2 sections SHALL carry string ids in the challenge id format, and their ordinals (the decimal integer after the category prefix) SHALL be sequential with no gaps or duplicates when sorted numerically within the `py` prefix. Module 2 challenge ordinals SHALL form a contiguous block that starts immediately after Module 1's last ordinal.
 
-#### Scenario: Challenge IDs form continuous sequence
+#### Scenario: Challenge ordinals form continuous sequence
 
-- **WHEN** all challenge IDs referenced from Module 2 are collected and sorted
-- **THEN** the IDs SHALL form a continuous integer sequence with no gaps
+- **WHEN** all challenge ids referenced from Module 2 are collected and their ordinals sorted
+- **THEN** the ordinals SHALL form a continuous integer sequence with no gaps
 
-#### Scenario: Per-chapter ID blocks are contiguous
+#### Scenario: Per-chapter ordinal blocks are contiguous
 
-- **WHEN** challenge IDs are grouped by chapter and sorted
-- **THEN** each chapter's IDs SHALL form a contiguous block with no interleaving from other chapters
-
-
-<!-- @trace
-source: renumber-challenge-ids
-updated: 2026-04-15
-code:
-  - docs/tutor/py/ch2/2-4.md
-  - docs/challenge/digit-sum-skip.md
-  - docs/challenge/number-reverse.md
-  - docs/challenge/date-validator.md
-  - docs/challenge/skip-multiples.md
-  - docs/challenge/sign-check.md
-  - docs/challenge/odd-even.md
-  - docs/challenge/vending-change.md
-  - docs/tutor/py/ch2/2-5.md
-  - docs/challenge/bmi-classifier.md
-  - docs/challenge/collatz-steps.md
-  - docs/challenge/movie-ticket.md
-  - docs/challenge/repeat-greeting.md
-  - docs/tutor/py/ch2/2-3.md
-  - docs/challenge/triangle-classify.md
-  - docs/challenge/factorial.md
-  - docs/challenge/digit-counter.md
-  - docs/tutor/py/ch2/2-1.md
-  - docs/challenge/quadrant-classifier.md
-  - docs/challenge/target-sum.md
-  - docs/challenge/quadratic-discriminant.md
-  - docs/challenge/first-divisor.md
-  - docs/challenge/range-sum.md
-  - docs/challenge/taxi-fare.md
-  - docs/challenge/countdown.md
-  - docs/challenge/password-check.md
-  - docs/challenge/odd-numbers.md
-  - docs/challenge/number-sum.md
-  - docs/challenge/sum-skip-fives.md
--->
+- **WHEN** challenge ordinals are grouped by chapter and sorted
+- **THEN** each chapter's ordinals SHALL form a contiguous block with no interleaving from other chapters
 
 ---
 ### Requirement: Image numbering continuity across Module 2
