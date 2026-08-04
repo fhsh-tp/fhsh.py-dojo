@@ -28,10 +28,12 @@
     - .vitepress/theme/components/layout/AppHeader.vue
     - .vitepress/theme/views/ChallengeView.vue
     - .vitepress/theme/__tests__/AppHeader.spec.ts
+    - .vitepress/theme/__tests__/ChallengeView.spec.ts
     - scripts/generate-redirects.ts
     - scripts/generate-redirects.test.ts
     - scripts/new-challenge.ts
     - scripts/new-challenge.test.ts
+    - scripts/retired-challenges.json
     - Usage.md
   - New:
     - (none)

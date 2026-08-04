@@ -49,7 +49,8 @@ challenge-id-revamp(已 archive)引入字串 id(py001/apcs001):id 顯示於目�
 
 **Acceptance criteria**
 
-- 擴充既有 `.vitepress/theme/__tests__/AppHeader.spec.ts`:合法 id → badge 顯示且文字 verbatim;空字串/未傳 → badge 不存在;標題與難度不受 id 影響
+- 擴充既有 `.vitepress/theme/__tests__/AppHeader.spec.ts`:合法 id → badge 顯示且文字 verbatim;空字串/未傳 → badge 不存在;標題、難度、返回鈕、主題切換不受 id 影響
+- 擴充既有 `.vitepress/theme/__tests__/ChallengeView.spec.ts`:頁面層 gate 測試 — frontmatter.id 為 py001 → badge verbatim;59/PY001/"59"/缺 id → badge 不 render 且 header 照常(sanitize gate 的唯一頁面層 pin)
 - `generate-redirects.test.ts` 既有 13 測全數改斷言 `/c/` 行格式後通過;id-shaped、零檔案、重複 id 等 fail-loud 測試不變
 - `new-challenge.test.ts` 若有 pin 到 `/challenge/<id>` 字樣的訊息斷言,同步更新
 - `pnpm test --run`、`pnpm typecheck`、`pnpm lint` 全綠
