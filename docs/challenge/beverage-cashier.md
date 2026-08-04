@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 2
+id: py002
 title: 飲料店的收銀機
 difficulty: easy
 tags: [變數, 運算, input, int]

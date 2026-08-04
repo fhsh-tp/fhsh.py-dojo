@@ -2,6 +2,12 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import {
+  CHALLENGE_ID_PATTERN,
+  CATEGORY_ID_PREFIX,
+  challengeIdOrdinal,
+  extractFrontmatterId,
+} from '../docs/shared/challenge-id.js'
 
 // ── Pure helpers ──────────────────────────────────────────────────────────
 
@@ -146,21 +152,54 @@ export function parseArgs(argv: string[]): ParsedArgs | null {
   }
 }
 
-export function computeNextId(fileContents: string[]): number {
-  let maxId = 0
-  for (const content of fileContents) {
-    const match = content.match(/^id:\s*(\d+)/m)
-    if (match) {
-      const id = parseInt(match[1]!, 10)
-      if (id > maxId) maxId = id
+export interface ChallengeFile {
+  name: string
+  content: string
+}
+
+/**
+ * Next id for a category prefix: max existing ordinal within that prefix + 1,
+ * zero-padded to 3 digits. Fails loudly (naming the file) on a missing or
+ * malformed id — a silently skipped file would corrupt the numbering, the
+ * exact failure mode the old integer regex had after the string-id migration.
+ */
+export function computeNextId(files: ChallengeFile[], prefix: string): string {
+  let maxOrdinal = 0
+  for (const { name, content } of files) {
+    // Scoped to the frontmatter block, so an `id:` line in body text or a
+    // fenced code block can never be picked up.
+    const id = extractFrontmatterId(content)
+    if (id === null) {
+      throw new Error(
+        `[new-challenge] ERROR: ${name} has no id line; fix the file before scaffolding.`,
+      )
+    }
+    if (!CHALLENGE_ID_PATTERN.test(id)) {
+      throw new Error(
+        `[new-challenge] ERROR: ${name} has id '${id}' which does not match the challenge id format (e.g. py001); fix the file before scaffolding.`,
+      )
+    }
+    if (id.startsWith(prefix) && /^\d/.test(id.slice(prefix.length))) {
+      const ordinal = challengeIdOrdinal(id)
+      if (ordinal > maxOrdinal) maxOrdinal = ordinal
     }
   }
-  return maxId + 1
+  const next = `${prefix}${String(maxOrdinal + 1).padStart(3, '0')}`
+  // Output-side guard: closes both silent-invalid paths at once — an
+  // unregistered/undefined prefix ("undefined001") and prefix exhaustion past
+  // 999 ("py1000"). Without this the bad id is written to disk and only
+  // explodes later in build:redirects or the ledger gate.
+  if (!CHALLENGE_ID_PATTERN.test(next)) {
+    throw new Error(
+      `[new-challenge] ERROR: computed next id '${next}' does not match the challenge id format; the '${prefix}' prefix is invalid or its 999-ordinal capacity is exhausted.`,
+    )
+  }
+  return next
 }
 
 export interface RetiredLedger {
   slugs: string[]
-  ids: number[]
+  ids: string[]
 }
 
 export function loadRetiredLedger(path: string): RetiredLedger {
@@ -186,11 +225,11 @@ export function loadRetiredLedger(path: string): RetiredLedger {
 }
 
 /**
- * Reject reuse of a retired slug or id. Because local student progress is keyed
- * by slug (and, on the catalogue, by id), reusing a retired identifier would let
- * a former challenge's stored progress silently inherit onto a new one.
+ * Reject reuse of a retired slug or id. Local student progress is keyed by
+ * slug; a reused slug would silently inherit a former challenge's stored
+ * progress, and a reused id would revive a retired catalogue identity.
  */
-export function checkRetired(name: string, id: number, ledger: RetiredLedger): string | null {
+export function checkRetired(name: string, id: string, ledger: RetiredLedger): string | null {
   if (ledger.slugs.includes(name)) {
     return `[new-challenge] ERROR: slug '${name}' is retired; reusing it would inherit a former challenge's stored progress. Choose a different name.`
   }
@@ -201,7 +240,7 @@ export function checkRetired(name: string, id: number, ledger: RetiredLedger): s
 }
 
 export interface BuildContentOptions {
-  id: number
+  id: string
   name: string
   title: string
   difficulty: string
@@ -335,13 +374,20 @@ function main(): void {
     process.exit(1)
   }
 
-  let fileContents: string[] = []
+  let challengeFiles: ChallengeFile[] = []
   if (existsSync(challengeDir)) {
-    fileContents = readdirSync(challengeDir)
+    challengeFiles = readdirSync(challengeDir)
       .filter((f) => f.endsWith('.md'))
-      .map((f) => readFileSync(join(challengeDir, f), 'utf-8'))
+      .map((f) => ({ name: f, content: readFileSync(join(challengeDir, f), 'utf-8') }))
   }
-  const id = computeNextId(fileContents)
+  const prefix = CATEGORY_ID_PREFIX[category as keyof typeof CATEGORY_ID_PREFIX]
+  let id: string
+  try {
+    id = computeNextId(challengeFiles, prefix)
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : String(err))
+    process.exit(1)
+  }
 
   let ledger: RetiredLedger
   try {

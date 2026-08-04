@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 48
+id: py048
 title: 加總達標步數
 difficulty: easy
 tags: [while-loop, accumulation, counting]

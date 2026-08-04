@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 12
+id: py012
 title: 正負零判斷
 difficulty: easy
 tags: [if-elif-else, 比較運算]

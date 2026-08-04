@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 54
+id: py054
 title: 最小質因數
 difficulty: easy
 tags: [for-loop, break, prime, factorization]

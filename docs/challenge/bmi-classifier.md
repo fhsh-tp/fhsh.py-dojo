@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 13
+id: py013
 title: BMI 健康分級
 difficulty: easy
 tags: [if-elif-else, 運算, 公式]

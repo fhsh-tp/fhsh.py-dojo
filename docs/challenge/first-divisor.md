@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 30
+id: py030
 title: 第一個因數
 difficulty: easy
 tags: [for, break, 迴圈控制, 因數]

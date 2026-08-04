@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 15
+id: py015
 title: 三角形分類器
 difficulty: medium
 tags: [if-elif-else, 邏輯運算, 幾何]

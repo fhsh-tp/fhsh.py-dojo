@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 5
+id: py005
 title: 鸚鵡學舌
 difficulty: easy
 tags: [print, input, 字串]

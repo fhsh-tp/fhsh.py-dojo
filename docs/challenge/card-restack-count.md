@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 55
+id: apcs001
 title: 撲克牌重排計數
 difficulty: hard
 category: apcs

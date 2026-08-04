@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 58
+id: apcs004
 title: 智慧藥盒提醒
 difficulty: hard
 category: apcs

@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 52
+id: py052
 title: 質數判斷
 difficulty: easy
 tags: [for-loop, break, prime, math]

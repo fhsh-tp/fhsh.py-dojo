@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 19
+id: py019
 title: 日期合法性檢查
 difficulty: medium
 tags: [if-elif-else, 巢狀判斷, 邏輯運算]

@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 56
+id: apcs002
 title: 緩衝區稽核日誌
 difficulty: medium
 category: apcs

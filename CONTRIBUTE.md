@@ -12,7 +12,7 @@
 
 1. **`staging` 是唯一目標**：所有 PR 必須發給 `staging` 分支。
 2. **Rebase 是強制性的**：
-   - **為什麼？** 因為挑戰題目的 `id` 是由腳本根據目前檔案數自動計算的。如果兩個人同時基於舊的進度開發，會產生重複的 `id`，導致系統崩潰。
+   - **為什麼？** 因為挑戰題目的 `id` 是由腳本取該 category 前綴內現有最大序號 +1 自動計算的（例如 python 題現有至 `py054` 時新題配 `py055`）。如果兩個人同時基於舊的進度開發，會產生重複的 `id`，導致系統崩潰。
    - **時機 A**：在執行 `new-challenge` 或 `new-tutor` 腳本**之前**，必須先同步最新的 `staging`。
    - **時機 B**：在發起 PR **之前**，建議再次 Rebase 以確保歷史紀錄整潔。
 
@@ -45,7 +45,7 @@ git checkout -b content/challenge-<name>
 ```
 
 ### Step 2: 執行生成腳本
-**重要**：請勿手動建立檔案，請使用腳本以自動分配唯一的 `id`。
+**重要**：請勿手動建立檔案，請使用腳本以自動分配唯一的 `id`（字串格式 `<category 前綴><3 位零填充序號>`，取該 category 前綴內現有最大序號 +1，例如 `py055`、`apcs006`）。
 ```bash
 # <name> 必須是小寫 kebab-case (例如: hello-world)
 pnpm new-challenge <name> --title "你的題目名稱" --difficulty easy
@@ -111,7 +111,7 @@ pnpm new-tutor py ch1 1-4 --title "迴圈的藝術" --challenge hello-world
 
 如果你在 PR 過程中發現 `docs/challenge/` 下的題目 `id` 與其他人重複了：
 1. 先 `git rebase upstream/staging`。
-2. 手動修改你的 `.md` 檔案，將 `id` 改為目前最大的 `id + 1`。
+2. 手動修改你的 `.md` 檔案，將 `id` 改為該 category 前綴內目前最大序號 +1（3 位零填充，例如 python 題現有至 `py054` 時改為 `py055`）。
 3. `git add .` -> `git rebase --continue`。
 4. `git push -f origin <your-branch>`。
 

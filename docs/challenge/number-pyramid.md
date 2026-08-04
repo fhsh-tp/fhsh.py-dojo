@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 41
+id: py041
 title: 數字金字塔
 difficulty: easy
 tags: [nested-loop, pattern, for-loop, numbers]

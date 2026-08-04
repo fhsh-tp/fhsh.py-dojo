@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 51
+id: py051
 title: 完美數判斷
 difficulty: medium
 tags: [for-loop, factors, math]

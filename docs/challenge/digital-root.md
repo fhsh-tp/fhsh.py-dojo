@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 50
+id: py050
 title: 數位根
 difficulty: medium
 tags: [while-loop, digit-operations, math]

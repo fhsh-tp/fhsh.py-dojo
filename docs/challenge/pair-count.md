@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 43
+id: py043
 title: 配對計數
 difficulty: easy
 tags: [nested-loop, counting, for-loop, conditional]

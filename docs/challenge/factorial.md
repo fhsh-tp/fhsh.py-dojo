@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 23
+id: py023
 title: 階乘計算機
 difficulty: easy
 tags: [for, range, 迴圈, 累乘]

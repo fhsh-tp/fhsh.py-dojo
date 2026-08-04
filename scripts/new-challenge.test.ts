@@ -118,28 +118,57 @@ describe('validateDifficulty', () => {
 })
 
 describe('computeNextId', () => {
-  it('returns 1 when no files exist', () => {
-    expect(computeNextId([])).toBe(1)
+  it('returns <prefix>001 when no file carries the prefix', () => {
+    expect(computeNextId([], 'py')).toBe('py001')
+    expect(
+      computeNextId([{ name: 'foo.md', content: '---\nid: py012\ntitle: foo\n---' }], 'apcs'),
+    ).toBe('apcs001')
   })
 
-  it('returns max id + 1 from file contents', () => {
-    const contents = [
-      '---\nid: 3\ntitle: foo\n---',
-      '---\nid: 1\ntitle: bar\n---',
-      '---\nid: 7\ntitle: baz\n---',
+  it('returns max ordinal + 1 within the prefix, zero-padded', () => {
+    const files = [
+      { name: 'a.md', content: '---\nid: py003\ntitle: foo\n---' },
+      { name: 'b.md', content: '---\nid: py001\ntitle: bar\n---' },
+      { name: 'c.md', content: '---\nid: py007\ntitle: baz\n---' },
     ]
-    expect(computeNextId(contents)).toBe(8)
+    expect(computeNextId(files, 'py')).toBe('py008')
   })
 
-  it('handles files without id field gracefully', () => {
-    const contents = ['---\ntitle: no-id\n---', '---\nid: 5\ntitle: with-id\n---']
-    expect(computeNextId(contents)).toBe(6)
+  it('counts categories independently (spec example: py001–py054 + apcs001–apcs005 → apcs006)', () => {
+    const files = [
+      { name: 'a.md', content: '---\nid: py054\ntitle: a\n---' },
+      { name: 'b.md', content: '---\nid: apcs005\ntitle: b\n---' },
+    ]
+    expect(computeNextId(files, 'apcs')).toBe('apcs006')
+    expect(computeNextId(files, 'py')).toBe('py055')
+  })
+
+  it('fails loudly, naming the file, when an existing id does not match the id format', () => {
+    const files = [{ name: 'legacy.md', content: '---\nid: 12\ntitle: old\n---' }]
+    expect(() => computeNextId(files, 'py')).toThrow(/legacy\.md/)
+  })
+
+  it('fails loudly, naming the file, when a challenge file has no id line', () => {
+    const files = [{ name: 'no-id.md', content: '---\ntitle: nope\n---' }]
+    expect(() => computeNextId(files, 'py')).toThrow(/no-id\.md/)
+  })
+
+  it('ignores id lines outside the frontmatter block', () => {
+    const files = [
+      { name: 'body-id.md', content: '---\ntitle: nope\n---\n\n```yaml\nid: py099\n```\n' },
+    ]
+    expect(() => computeNextId(files, 'py')).toThrow(/body-id\.md/)
+  })
+
+  it('fails loudly instead of emitting an out-of-format id when the prefix is exhausted at 999', () => {
+    const files = [{ name: 'max.md', content: '---\nid: py999\ntitle: max\n---' }]
+    expect(() => computeNextId(files, 'py')).toThrow(/py1000/)
   })
 })
 
 describe('buildContent', () => {
   const base = {
-    id: 1,
+    id: 'py001',
     name: 'bubble-sort',
     title: 'Bubble Sort',
     difficulty: 'easy',
@@ -151,7 +180,7 @@ describe('buildContent', () => {
   it('produces valid YAML frontmatter with all required fields', () => {
     const content = buildContent(base)
     expect(content).toContain('layout: challenge')
-    expect(content).toContain('id: 1')
+    expect(content).toContain('id: py001')
     expect(content).toContain('title: Bubble Sort')
     expect(content).toContain('difficulty: easy')
     expect(content).toContain('algorithm: bubble_sort')
@@ -348,7 +377,7 @@ describe('--category scaffold scenarios', () => {
     const parsed = parseArgs(['node', 'new-challenge', 'my-challenge'])
     expect(parsed).not.toBeNull()
     expect(validateCategory(parsed!.category)).toBeNull()
-    const content = buildContent({ id: 1, ...parsed! })
+    const content = buildContent({ id: 'py001', ...parsed! })
     expect(content).toContain('category: python')
   })
 
@@ -356,7 +385,7 @@ describe('--category scaffold scenarios', () => {
     const parsed = parseArgs(['node', 'new-challenge', 'my-challenge', '--category', 'apcs'])
     expect(parsed).not.toBeNull()
     expect(validateCategory(parsed!.category)).toBeNull()
-    const content = buildContent({ id: 1, ...parsed! })
+    const content = buildContent({ id: 'py001', ...parsed! })
     expect(content).toContain('category: apcs')
   })
 

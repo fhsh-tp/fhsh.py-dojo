@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 10
+id: py010
 title: 三角形判斷
 difficulty: easy
 tags: [if-else, 邏輯運算, and]

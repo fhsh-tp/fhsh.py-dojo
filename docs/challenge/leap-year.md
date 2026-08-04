@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 3
+id: py003
 title: 閏年判斷器
 difficulty: easy
 tags: [if-else, 布林, 邏輯運算]
