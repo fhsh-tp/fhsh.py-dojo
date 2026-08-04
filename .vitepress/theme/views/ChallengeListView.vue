@@ -38,6 +38,13 @@ const filtered = computed(() => {
   return result
 })
 
+// Page-scoped, so a challenge only ever counts toward the catalogue page it
+// belongs to. Never use the store-wide `completedCount` getter as a page
+// numerator — pairing it with a page-scoped denominator misreports (12 / 4).
+const completedInPage = computed(
+  () => props.challenges.filter((c) => progress.isCompleted(c.slug)).length,
+)
+
 const difficulties: Difficulty[] = ['all', 'easy', 'medium', 'hard']
 const difficultyLabel: Record<Difficulty, string> = {
   all: '全部',
@@ -79,12 +86,12 @@ const SKELETON_COUNT = 6
         </button>
       </div>
 
-      <!-- Global completed count (independent of the active filter) -->
+      <!-- Page-scoped completed count (independent of the active filter) -->
       <p
         data-testid="completed-count"
         class="text-sm text-slate-500 dark:text-gray-400 mb-4"
       >
-        已完成 {{ progress.completedCount }} / {{ props.challenges.length }}
+        已完成 {{ completedInPage }} / {{ props.challenges.length }}
       </p>
 
       <!-- Challenge grid -->

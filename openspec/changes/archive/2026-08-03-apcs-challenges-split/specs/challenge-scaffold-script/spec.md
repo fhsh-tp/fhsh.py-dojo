@@ -1,4 +1,4 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: CLI script scaffolds a new challenge file
 
@@ -52,31 +52,6 @@ The script SHALL exit with a non-zero code and a descriptive error message if:
 - **WHEN** `<name>` contains uppercase letters or non-kebab characters (e.g., `BubbleSort` or `bubble_sort`)
 - **THEN** the script exits with code 1 and prints `[new-challenge] ERROR: <name> must be kebab-case (lowercase letters, digits, hyphens only)`
 
----
-### Requirement: npm script entry runs the generator
-
-`package.json` SHALL contain a script entry named `new-challenge` that executes `scripts/new-challenge.ts` via `npx tsx`, passing all additional CLI arguments through.
-
-#### Scenario: Invocation via pnpm
-
-- **WHEN** `pnpm new-challenge <name>` is run from the project root
-- **THEN** `scripts/new-challenge.ts` executes with `<name>` as the first positional argument
-
-
-<!-- @trace
-source: challenge-template-generator
-updated: 2026-04-05
-code:
-  - package.json
-  - docs/shared/challenge.data.ts
-  - refs/Python-self_learning-outline.md
-  - scripts/generate-pools.ts
-  - scripts/new-challenge.ts
-tests:
-  - scripts/new-challenge.test.ts
--->
-
----
 ### Requirement: Generated skeleton is valid and parseable
 
 The generated `docs/challenge/<name>.md` file SHALL be immediately parseable by `scripts/generate-pools.ts` without modification, meaning the frontmatter SHALL be valid YAML with all required fields present.

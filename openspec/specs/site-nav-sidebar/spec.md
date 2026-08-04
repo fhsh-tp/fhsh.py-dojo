@@ -176,14 +176,28 @@ The `nav.yml` SHALL define the following structure:
       link: /tutor/alg/
     - text: 資料結構
       link: /tutor/ds/
-- text: 挑戰題庫
-  link: /challenge/
+- text: Python 挑戰
+  link: /challenges
+- text: APCS 挑戰
+  link: /apcs-challenges
 ```
+
+The former single `挑戰題庫` entry SHALL be replaced by the two sibling entries `Python 挑戰` (linking to `/challenges`) and `APCS 挑戰` (linking to `/apcs-challenges`), in that order.
 
 #### Scenario: nav.yml is loaded by config.mts
 
 - **WHEN** VitePress builds the site
 - **THEN** the top navigation SHALL display the items defined in `.vitepress/nav.yml`
+
+#### Scenario: Both catalogue entries are shown as siblings
+
+- **WHEN** a user views the top navigation on any page
+- **THEN** `Python 挑戰` and `APCS 挑戰` SHALL appear as two top-level entries, with `Python 挑戰` before `APCS 挑戰`, and no `挑戰題庫` entry SHALL remain
+
+#### Scenario: Catalogue nav entries stay in lockstep with the category map
+
+- **WHEN** the test suite runs
+- **THEN** a test SHALL assert that every URL value in `CATEGORY_LIST_URL` appears as a `link` in `.vitepress/nav.yml`, failing and naming the missing catalogue URL otherwise
 
 #### Scenario: nav.yml file is missing
 

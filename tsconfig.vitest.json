@@ -9,6 +9,7 @@
     "scripts/**/*.ts",
     ".vitepress/theme/workers/worker-utils.ts",
     "docs/shared/exercise-type.ts",
+    "docs/shared/challenge-category.ts",
     "docs/shared/challenge-slug.ts",
     "env.d.ts"
   ],

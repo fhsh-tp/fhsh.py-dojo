@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import type { Challenge } from '../types.d/challenge.type.ts'
 import type { TutorArticle } from '../../../docs/shared/tutor.data'
+import { CATEGORY_LIST_URL } from '../../../docs/shared/challenge-category'
 import ChallengeCard from '../components/challenge/ChallengeCard.vue'
 
 const props = defineProps<{
@@ -53,9 +54,20 @@ const groupedTutorials = computed((): SubjectGroup[] => {
   }))
 })
 
-// ── 最新挑戰：依 id 降序，取前 3 ─────────────────────────────────────────────
-const latestChallenges = computed(() =>
-  [...props.challenges].sort((a, b) => b.id - a.id).slice(0, 3)
+// ── 最新 Python 挑戰：category=python，依 id 降序，取前 3 ────────────────────
+const latestPythonChallenges = computed(() =>
+  props.challenges
+    .filter(c => c.category === 'python')
+    .sort((a, b) => b.id - a.id)
+    .slice(0, 3)
+)
+
+// ── 最新 APCS 挑戰：category=apcs，依 id 降序，取前 3 ────────────────────────
+const latestApcsChallenges = computed(() =>
+  props.challenges
+    .filter(c => c.category === 'apcs')
+    .sort((a, b) => b.id - a.id)
+    .slice(0, 3)
 )
 
 const subjectLinkMap: Record<string, string> = {
@@ -120,20 +132,36 @@ const subjectLinkMap: Record<string, string> = {
       <p v-else class="home-empty">教學分類尚無內容，敬請期待。</p>
     </section>
 
-    <!-- ── 最新挑戰 ────────────────────────────────────────────────────────── -->
+    <!-- ── 最新 Python 挑戰 ─────────────────────────────────────────────────── -->
     <section class="home-section">
       <h2 class="home-section__title">
-        最新挑戰
-        <a href="/challenges" class="home-section__more">查看全部 →</a>
+        最新 Python 挑戰
+        <a :href="CATEGORY_LIST_URL.python" class="home-section__more">查看全部 →</a>
       </h2>
-      <div v-if="latestChallenges.length > 0" class="home-challenge-grid">
+      <div v-if="latestPythonChallenges.length > 0" class="home-challenge-grid">
         <ChallengeCard
-          v-for="c in latestChallenges"
+          v-for="c in latestPythonChallenges"
           :key="c.id"
           :challenge="c"
         />
       </div>
-      <p v-else class="home-empty">挑戰題庫尚未建立，敬請期待。</p>
+      <p v-else class="home-empty">Python 挑戰尚未建立，敬請期待。</p>
+    </section>
+
+    <!-- ── 最新 APCS 挑戰 ──────────────────────────────────────────────────── -->
+    <section class="home-section">
+      <h2 class="home-section__title">
+        最新 APCS 挑戰
+        <a :href="CATEGORY_LIST_URL.apcs" class="home-section__more">查看全部 →</a>
+      </h2>
+      <div v-if="latestApcsChallenges.length > 0" class="home-challenge-grid">
+        <ChallengeCard
+          v-for="c in latestApcsChallenges"
+          :key="c.id"
+          :challenge="c"
+        />
+      </div>
+      <p v-else class="home-empty">APCS 挑戰尚未建立，敬請期待。</p>
     </section>
 
   </div>

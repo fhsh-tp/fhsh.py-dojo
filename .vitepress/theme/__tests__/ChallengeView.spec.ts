@@ -6,18 +6,19 @@ import ChallengeView from '../views/ChallengeView.vue'
 import { useExecutorStore } from '../stores/executor'
 import { useProgressStore } from '../stores/progress'
 
-// --- vitepress mock ---
+// --- vitepress mock (frontmatter is mutable so tests can vary `category`) ---
+const baseFrontmatter = (): Record<string, unknown> => ({
+  algorithm: 'caesar_encrypt',
+  testcase_count: 3,
+  generator: 'print(42)',
+  starter_code: '# write code here',
+  params: { n: { type: 'int', min: 1, max: 10 } },
+})
+const mockFrontmatter = { value: baseFrontmatter() }
+
 vi.mock('vitepress', () => ({
   useData: () => ({
-    frontmatter: {
-      value: {
-        algorithm: 'caesar_encrypt',
-        testcase_count: 3,
-        generator: 'print(42)',
-        starter_code: '# write code here',
-        params: { n: { type: 'int', min: 1, max: 10 } },
-      },
-    },
+    frontmatter: mockFrontmatter,
     page: { value: { relativePath: 'challenge/caesar-encrypt.md' } },
   }),
   useRouter: () => ({ go: vi.fn() }),
@@ -75,6 +76,7 @@ describe('ChallengeView', () => {
     setActivePinia(createPinia())
     resolveWasm = null
     mockWorkerInstances.length = 0
+    mockFrontmatter.value = baseFrontmatter()
   })
 
   afterEach(() => {
@@ -198,6 +200,28 @@ describe('ChallengeView', () => {
     })
     expect(exec.isFullyJudged).toBe(true)
     expect(recordSpy).toHaveBeenCalledWith(SLUG, 1, 2, expect.any(Number))
+  })
+
+  // ── Category-aware back navigation ─────────────────────────────────────────
+  it('passes /challenges as back-url to AppHeader when category is absent (Requirement: default track returns to /challenges)', async () => {
+    const wrapper = mount(ChallengeView, {
+      global: { stubs: { CodeEditor: CodeEditorStub, Teleport: true } },
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findComponent({ name: 'AppHeader' }).props('backUrl')).toBe('/challenges')
+  })
+
+  it('passes /apcs-challenges as back-url to AppHeader for category: apcs (Requirement: apcs challenges return to /apcs-challenges)', async () => {
+    mockFrontmatter.value.category = 'apcs'
+    const wrapper = mount(ChallengeView, {
+      global: { stubs: { CodeEditor: CodeEditorStub, Teleport: true } },
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findComponent({ name: 'AppHeader' }).props('backUrl')).toBe('/apcs-challenges')
   })
 
   it('Worker is terminated on unmount (Requirement: Worker is terminated on component unmount)', async () => {

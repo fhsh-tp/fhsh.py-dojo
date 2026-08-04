@@ -4,20 +4,24 @@ import { ref } from 'vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 
 const mockIsDark = ref(false)
+const mockGo = vi.fn()
 
 vi.mock('vitepress', () => ({
-  useRouter: () => ({ go: vi.fn() }),
+  useRouter: () => ({ go: mockGo }),
   useData: () => ({ isDark: mockIsDark }),
 }))
 
-function mountHeader(isDarkVal = false) {
+function mountHeader(isDarkVal = false, extraProps: { backUrl?: string } = {}) {
   mockIsDark.value = isDarkVal
-  return mount(AppHeader, { props: { title: 'Test Challenge', difficulty: 'easy' } })
+  return mount(AppHeader, {
+    props: { title: 'Test Challenge', difficulty: 'easy', ...extraProps },
+  })
 }
 
 describe('AppHeader', () => {
   beforeEach(() => {
     mockIsDark.value = false
+    mockGo.mockClear()
   })
 
   it('renders a theme toggle button (Requirement: AppHeader provides a dark/light mode toggle)', () => {
@@ -57,5 +61,17 @@ describe('AppHeader', () => {
   it('applies dark:bg-transparent in dark mode via class attribute (Requirement: AppHeader applies dual-theme styles)', () => {
     const wrapper = mountHeader(true)
     expect(wrapper.find('header').classes()).toContain('dark:bg-transparent')
+  })
+
+  it('back button navigates to /challenges by default (Requirement: back button targets the list page)', async () => {
+    const wrapper = mountHeader()
+    await wrapper.find('[aria-label="返回列表"]').trigger('click')
+    expect(mockGo).toHaveBeenCalledWith('/challenges')
+  })
+
+  it('back button navigates to the provided back-url (Requirement: apcs challenges return to /apcs-challenges)', async () => {
+    const wrapper = mountHeader(false, { backUrl: '/apcs-challenges' })
+    await wrapper.find('[aria-label="返回列表"]').trigger('click')
+    expect(mockGo).toHaveBeenCalledWith('/apcs-challenges')
   })
 })

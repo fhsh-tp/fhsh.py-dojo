@@ -59,8 +59,8 @@ describe('ChallengeListView', () => {
     expect(mountView().findAll('button')[1]?.classes()).toContain('bg-blue-50')
   })
 
-  // Completion count (Requirement: Completion shown on catalogue)
-  it('shows a global completed count of X / total from stored progress', async () => {
+  // Completion count (Requirement: Page-scoped completion count)
+  it('shows a page-scoped completed count of X / total from stored progress', async () => {
     await dbAdapter.upsertProgress(completedRecord)
     const w = mountView()
     await vi.waitFor(() => {
@@ -68,7 +68,16 @@ describe('ChallengeListView', () => {
     })
   })
 
-  it('completed count stays global regardless of the active difficulty filter', async () => {
+  it('ignores completed records whose slug is not on this page', async () => {
+    await dbAdapter.upsertProgress({ ...completedRecord, slug: 'not-on-this-page' })
+    const w = mountView()
+    await flushPromises()
+    await vi.waitFor(() => {
+      expect(w.find('[data-testid="completed-count"]').text()).toContain('0 / 2')
+    })
+  })
+
+  it('completed count stays page-scoped regardless of the active difficulty filter', async () => {
     await dbAdapter.upsertProgress(completedRecord)
     const w = mountView()
     await vi.waitFor(() => {

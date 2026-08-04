@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-08-04
+
+挑戰題庫雙軌化:拆分為「Python 挑戰」與「APCS 挑戰」兩個列表頁,並新增 deque 系列驗證向姊妹題「收卷順序驗證」。
+
+### Added
+
+- **新挑戰題「收卷順序驗證」**(id 59,medium/競賽題型):deque 系列驗證向姊妹題——兩位監考老師從一排座位兩端收卷疊成一疊,驗證 M 份「由頂到底」回報單真偽的校園素養情境(全篇不出現 deque/stack 術語);判定語意=回報反轉後對來源做雙指標兩端貪婪,generator 與 reference_solution 雙實作零共用邏輯互驗;20 筆測資含「忘記反轉」陷阱判別筆、enum 策展 band(裸背答案通過率 ≤1/10)與 TLE 壓力筆(全枚舉解 N=800 絕殺、線性判定解放行)([#23])
+- **APCS 挑戰獨立列表頁 `/apcs-challenges`**:APCS 系列題(id 55–59)自原題庫獨立成頁,備考學生可聚焦練習;零基礎學生留在 Python 挑戰頁不再誤入進階題。題目檔案零搬動,學生作答進度完全不受影響([#22])
+- **題目 frontmatter 新增選填欄位 `category`**(`python` | `apcs`,預設 `python`):資料層 resolver 統一補值並擋未知值;`pnpm new-challenge` 同步新增 `--category` 旗標;並以三道守門測試(category 全檔掃描、category→頁面存在性契約、nav lockstep)防止分類漂移([#22])
+
+### Changed
+
+- **導覽列改為平級雙入口**:「挑戰題庫」拆為「Python 挑戰」與「APCS 挑戰」;`/challenges` 頁面標題改為「Python 挑戰」([#22])
+- **首頁「最新挑戰」拆為雙區塊**:「最新 Python 挑戰」與「最新 APCS 挑戰」各取該類最新 3 題([#22])
+- **完成進度與返回導向依分類分流**:「已完成 X / Y」改為頁內自算(一題只計入所屬頁);挑戰頁「← 返回」與錯誤態「返回列表」依 category 回到所屬列表頁(原為回首頁)([#22])
+
 ## [1.4.0] - 2026-08-03
 
 排程系列素養題上線:「列印工坊排程」與「智慧藥盒提醒」兩道新題,並首度引入效能斷崖測資設計(暴力解 TLE、事件驅動解放行)。
