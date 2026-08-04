@@ -47,10 +47,10 @@ git checkout -b content/challenge-<name>
 ### Step 2: 執行生成腳本
 **重要**：請勿手動建立檔案，請使用腳本以自動分配唯一的 `id`（字串格式 `<category 前綴><3 位零填充序號>`，取該 category 前綴內現有最大序號 +1，例如 `py055`、`apcs006`）。
 ```bash
-# <name> 必須是小寫 kebab-case (例如: hello-world)
-pnpm new-challenge <name> --title "你的題目名稱" --difficulty easy
+# <name> 必須是小寫 kebab-case (例如: hello-world)，且不可是 id 形狀（如 py001，腳本會拒絕）
+pnpm new-challenge <name> --title "你的題目名稱" --difficulty easy --category python|apcs
 ```
-檔案會建立在 `docs/challenge/<name>.md`。
+檔案會建立在 `docs/challenge/<name>.md`。`--category` 決定 `id` 前綴與上架頁面：省略時預設 `python`（`py` 前綴、`/challenges`）；**APCS 題務必指定 `--category apcs`**（`apcs` 前綴、`/apcs-challenges`）。
 
 ### Step 3: 編輯內容與 YAML Metadata
 打開建立的 `.md` 檔案，編輯以下核心區塊：

@@ -21,11 +21,12 @@ metadata:
 ### 1. 用 scaffold 建立骨架（勿手動建檔）
 
 ```bash
-pnpm new-challenge <name> --title "題目名稱" --difficulty easy|medium|hard --type basic|competition
+pnpm new-challenge <name> --title "題目名稱" --difficulty easy|medium|hard --category python|apcs --type basic|competition
 ```
 
-- `<name>`：小寫 kebab-case（例 `bubble-sort`）；`algorithm` 預設為底線版（`bubble_sort`），檔案建於 `docs/challenge/<name>.md`。
+- `<name>`：小寫 kebab-case（例 `bubble-sort`）；`algorithm` 預設為底線版（`bubble_sort`），檔案建於 `docs/challenge/<name>.md`。`<name>` **不可是 id 形狀**（如 `py001`、`apcs003`）——scaffold 會直接拒絕，因為 id 形狀的 slug 會讓 `/challenge/<slug>` 頁面與 `/c/<id>` 短網址別名指向混淆的目錄身分。
 - 腳本會**自動分配唯一 `id`**。`id` 為字串，格式為 `<category 前綴><3 位零填充序號>`（例 `py001`、`apcs005`），各 category 自 1 起連號；腳本取該 category 前綴內現有最大序號 +1 配號。手動建檔容易造成 `id` 衝突，故一律用腳本（與 `CONTRIBUTE.md` Phase 2 SOP 一致）。
+- `--category` 決定 id 前綴與題目歸屬頁：省略時預設 `python`（前綴 `py`、上架於 `/challenges`）；**出 APCS 題務必加 `--category apcs`**（前綴 `apcs`、上架於 `/apcs-challenges`），事後改 category 需同步手改 id 前綴，成本高。
 - `--type` 省略時預設 `basic`。目前只接受 `basic`（基礎）與 `competition`（競賽）；`fill_in_blank` / `gamified` 為 deferred、`guided` 為 future placeholder，尚未實作，指定會被拒絕。
 
 ### 2. 編輯 frontmatter 核心欄位
