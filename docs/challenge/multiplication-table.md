@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 37
+id: py037
 title: 九九乘法表
 difficulty: easy
 tags: [nested-loop, multiplication, for-loop, formatting]

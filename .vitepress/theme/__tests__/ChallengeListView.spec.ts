@@ -4,14 +4,20 @@ import { createPinia, setActivePinia, type Pinia } from 'pinia'
 import { IDBFactory } from 'fake-indexeddb'
 import ChallengeListView from '../views/ChallengeListView.vue'
 import * as dbAdapter from '../persistence/db'
+import type { Challenge } from '../types.d/challenge.type'
 
 vi.mock('vitepress', () => ({
   useRouter: () => ({ go: vi.fn() }),
 }))
 
-const mockChallenges = [
-  { id: 1, slug: 'caesar-encrypt', title: '凱薩加密', url: '/challenge/caesar-encrypt', difficulty: 'easy', tags: ['classical'] },
-  { id: 2, slug: 'rsa', title: 'RSA', url: '/challenge/rsa', difficulty: 'hard', tags: ['asymmetric'] },
+const mockChallenges: Challenge[] = [
+  // Chapter values deliberately digit-free so the id-search matrix below can
+  // assert the id rule in isolation (a digit query must not leak in via the
+  // chapter text-field OR branch).
+  { id: 'py001', slug: 'caesar-encrypt', title: '凱薩加密', url: '/challenge/caesar-encrypt', difficulty: 'easy', category: 'python', tags: ['classical'], chapter: 'intro', description: '古典加密入門' },
+  { id: 'py002', slug: 'rsa', title: 'RSA', url: '/challenge/rsa', difficulty: 'hard', category: 'python', tags: ['asymmetric'], chapter: 'crypto', description: '非對稱加密' },
+  { id: 'py003', slug: 'vigenere', title: '維吉尼亞密碼', url: '/challenge/vigenere', difficulty: 'medium', category: 'python', tags: ['classical'], chapter: 'crypto', description: '多表代換' },
+  { id: 'py010', slug: 'hash-basics', title: '雜湊入門', url: '/challenge/hash-basics', difficulty: 'easy', category: 'python', tags: ['hash'], chapter: 'hash', description: '單向函式' },
 ]
 const completedRecord = {
   slug: 'caesar-encrypt', status: 'completed' as const, lastAttemptAt: 1, bestPassed: 3, total: 3, firstCompletedAt: 1,
@@ -64,7 +70,7 @@ describe('ChallengeListView', () => {
     await dbAdapter.upsertProgress(completedRecord)
     const w = mountView()
     await vi.waitFor(() => {
-      expect(w.find('[data-testid="completed-count"]').text()).toContain('1 / 2')
+      expect(w.find('[data-testid="completed-count"]').text()).toContain('1 / 4')
     })
   })
 
@@ -73,7 +79,7 @@ describe('ChallengeListView', () => {
     const w = mountView()
     await flushPromises()
     await vi.waitFor(() => {
-      expect(w.find('[data-testid="completed-count"]').text()).toContain('0 / 2')
+      expect(w.find('[data-testid="completed-count"]').text()).toContain('0 / 4')
     })
   })
 
@@ -81,11 +87,59 @@ describe('ChallengeListView', () => {
     await dbAdapter.upsertProgress(completedRecord)
     const w = mountView()
     await vi.waitFor(() => {
-      expect(w.find('[data-testid="completed-count"]').text()).toContain('1 / 2')
+      expect(w.find('[data-testid="completed-count"]').text()).toContain('1 / 4')
     })
     const hardBtn = w.findAll('button').find((b) => b.text() === '困難')
     await hardBtn?.trigger('click')
     await flushPromises()
-    expect(w.find('[data-testid="completed-count"]').text()).toContain('1 / 2')
+    expect(w.find('[data-testid="completed-count"]').text()).toContain('1 / 4')
+  })
+
+  // Ordinal-aware id search (Requirement: Search filters challenges by text matching across multiple fields)
+  describe('id search', () => {
+    async function search(q: string) {
+      const w = mountView()
+      await w.find('input[type="search"]').setValue(q)
+      await flushPromises()
+      return w
+    }
+
+    function shownIds(w: VueWrapper) {
+      return w.findAll('[data-testid="challenge-id"]').map((s) => s.text())
+    }
+
+    it.each(['3', '03', '003'])('pure-digit query "%s" matches ordinal 3 exactly', async (q) => {
+      expect(shownIds(await search(q))).toEqual(['py003'])
+    })
+
+    it('pure-digit query "10" matches only py010 (exact ordinal, not substring)', async () => {
+      expect(shownIds(await search('10'))).toEqual(['py010'])
+    })
+
+    it('pure-digit query "1" matches only py001 (not py010)', async () => {
+      expect(shownIds(await search('1'))).toEqual(['py001'])
+    })
+
+    it('prefix query "py00" matches py001–py009 style ids only', async () => {
+      expect(shownIds(await search('py00'))).toEqual(['py001', 'py002', 'py003'])
+    })
+
+    it('prefix query "py" matches every id on the page', async () => {
+      expect(shownIds(await search('py'))).toEqual(['py001', 'py002', 'py003', 'py010'])
+    })
+
+    it('unpadded query "py3" matches nothing via the id rule', async () => {
+      const w = await search('py3')
+      expect(shownIds(w)).toEqual([])
+      expect(w.text()).toContain('沒有符合條件的挑戰。')
+    })
+
+    it('text-field matching still works alongside id matching', async () => {
+      expect(shownIds(await search('凱薩'))).toEqual(['py001'])
+    })
+
+    it('query is trimmed before matching', async () => {
+      expect(shownIds(await search('  003  '))).toEqual(['py003'])
+    })
   })
 })

@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 35
+id: py035
 title: 跳零位數和
 difficulty: medium
 tags: [while, continue, 迴圈控制, 位數]

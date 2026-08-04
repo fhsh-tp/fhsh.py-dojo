@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import type { Challenge } from '../types.d/challenge.type.ts'
 import ChallengeCard from '../components/challenge/ChallengeCard.vue'
 import { useProgressStore } from '../stores/progress'
+import { challengeIdOrdinal } from '../../../docs/shared/challenge-id'
 
 const props = defineProps<{
   challenges: Challenge[]
@@ -25,13 +26,20 @@ const filtered = computed(() => {
     result = result.filter((c) => c.difficulty === selectedDifficulty.value)
   }
 
-  const q = searchQuery.value.toLowerCase()
+  const q = searchQuery.value.trim().toLowerCase()
   if (q) {
+    // Ordinal-aware id rule: a pure-digit query matches the id's ordinal
+    // exactly (3/03/003 all hit ordinal 3); anything else prefix-matches the
+    // id string. Combined with the text fields below via OR.
+    const idMatches = /^\d+$/.test(q)
+      ? (c: Challenge) => challengeIdOrdinal(c.id) === parseInt(q, 10)
+      : (c: Challenge) => c.id.startsWith(q)
     result = result.filter((c) =>
       c.title.toLowerCase().includes(q)
       || c.description.toLowerCase().includes(q)
       || c.tags.some(t => t.toLowerCase().includes(q))
       || c.chapter.toLowerCase().includes(q)
+      || idMatches(c)
     )
   }
 
@@ -63,7 +71,7 @@ const SKELETON_COUNT = 6
       <input
         v-model="searchQuery"
         type="search"
-        placeholder="搜尋題目名稱、說明、標籤、章節..."
+        placeholder="搜尋題目名稱、編號、說明、標籤、章節..."
         class="w-full mb-4 px-4 py-2 rounded-lg border border-blue-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:ring-emerald-500 transition-colors"
         maxlength="100"
         aria-label="搜尋挑戰題目"
@@ -101,7 +109,7 @@ const SKELETON_COUNT = 6
       >
         <ChallengeCard
           v-for="challenge in filtered"
-          :key="challenge.id"
+          :key="challenge.slug"
           :challenge="challenge"
           :completed="progress.isCompleted(challenge.slug)"
         />

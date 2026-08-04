@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 59
+id: apcs005
 title: 收卷順序驗證
 difficulty: medium
 category: apcs

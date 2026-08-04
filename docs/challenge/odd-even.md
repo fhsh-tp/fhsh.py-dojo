@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 11
+id: py011
 title: 奇偶數判斷
 difficulty: easy
 tags: [if-else, 取餘數]

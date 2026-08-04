@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 34
+id: py034
 title: 跳五累加器
 difficulty: easy
 tags: [for, continue, 迴圈控制, 累加]

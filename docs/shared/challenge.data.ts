@@ -3,6 +3,7 @@ import type { Challenge } from '../../.vitepress/theme/types.d/challenge.type'
 import { resolveExerciseType, type ExerciseType } from './exercise-type'
 import { resolveChallengeCategory } from './challenge-category'
 import { deriveChallengeSlug } from './challenge-slug'
+import { CHALLENGE_ID_PATTERN, compareChallengeId } from './challenge-id'
 
 export type { ExerciseType }
 
@@ -33,7 +34,14 @@ const loader: {
     const challenges = rawData
       .map((challenge, idx) => {
         return {
-          id: challenge.frontmatter.id ?? idx + 1,
+          // A missing or malformed id is a content error; the fail-loud gates
+          // are build:redirects (in the dev/build pipeline) and the ledger
+          // test. The loader stays total and sanitizes to '' so a mid-edit
+          // frontmatter never renders garbage (e.g. "[object Object]") into
+          // the card badge during dev hot reload.
+          id: ((raw) => (CHALLENGE_ID_PATTERN.test(raw) ? raw : ''))(
+            String(challenge.frontmatter.id ?? ''),
+          ),
           slug: deriveChallengeSlug(challenge.url),
           title: challenge.frontmatter.title || `挑戰 #${idx + 1}`,
           url: challenge.url,
@@ -47,7 +55,7 @@ const loader: {
           chapter: challenge.frontmatter.chapter || '',
           description: challenge.frontmatter.description || '',
         }
-      }).sort((a, b) => a.id - b.id)
+      }).sort((a, b) => compareChallengeId(a.id, b.id))
 
     return challenges
   },

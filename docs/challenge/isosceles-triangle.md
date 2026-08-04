@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 40
+id: py040
 title: 等腰三角形
 difficulty: medium
 tags: [nested-loop, pattern, for-loop, spacing]

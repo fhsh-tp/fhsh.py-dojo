@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 33
+id: py033
 title: 跳過倍數
 difficulty: easy
 tags: [for, continue, 迴圈控制, 倍數]

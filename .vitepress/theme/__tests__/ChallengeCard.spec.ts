@@ -1,17 +1,22 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ChallengeCard from '../components/challenge/ChallengeCard.vue'
+import type { Challenge } from '../types.d/challenge.type'
 
 vi.mock('vitepress', () => ({
   useRouter: () => ({ go: vi.fn() }),
 }))
 
-const mockChallenge = {
-  id: 1,
+const mockChallenge: Challenge = {
+  id: 'py001',
+  slug: 'caesar-encrypt',
   title: '凱薩加密',
   url: '/challenge/caesar-encrypt',
   difficulty: 'easy',
+  category: 'python',
   tags: ['classical'],
+  chapter: 'ch1',
+  description: '古典加密入門',
 }
 
 function mountCard() {
@@ -74,6 +79,12 @@ describe('ChallengeCard', () => {
   it('renders tags', () => {
     const wrapper = mountCard()
     expect(wrapper.text()).toContain('classical')
+  })
+
+  // Id badge (Requirement: ChallengeCard displays the challenge id)
+  it('renders the challenge id verbatim', () => {
+    const wrapper = mountCard()
+    expect(wrapper.find('[data-testid="challenge-id"]').text()).toBe('py001')
   })
 
   // Completion badge (Requirement: Completion shown on catalogue)

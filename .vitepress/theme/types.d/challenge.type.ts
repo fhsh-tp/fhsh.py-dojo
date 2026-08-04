@@ -1,7 +1,8 @@
 import type { ChallengeCategory } from '../../../docs/shared/challenge-category'
 
 export interface Challenge {
-  id: number
+  /** String id: `<category prefix><3-digit ordinal>` (py001, apcs003). See docs/shared/challenge-id.ts. */
+  id: string
   /** Per-challenge slug (markdown file basename). Primary key for local progress persistence. */
   slug: string
   title: string

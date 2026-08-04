@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 57
+id: apcs003
 title: 列印工坊排程
 difficulty: medium
 category: apcs

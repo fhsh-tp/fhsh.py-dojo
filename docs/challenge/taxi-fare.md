@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 17
+id: py017
 title: 計程車費計算
 difficulty: medium
 tags: [if-else, 運算, 數學建模]

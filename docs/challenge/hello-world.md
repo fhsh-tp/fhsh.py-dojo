@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 1
+id: py001
 title: 哈囉，世界！
 difficulty: easy
 tags: [print, input, 字串]

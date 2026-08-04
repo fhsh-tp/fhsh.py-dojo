@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 26
+id: py026
 title: 區間累加器
 difficulty: medium
 tags: [for, range, start, stop, 累加]

@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import type { Challenge } from '../types.d/challenge.type.ts'
 import type { TutorArticle } from '../../../docs/shared/tutor.data'
 import { CATEGORY_LIST_URL } from '../../../docs/shared/challenge-category'
+import { compareChallengeId } from '../../../docs/shared/challenge-id'
 import ChallengeCard from '../components/challenge/ChallengeCard.vue'
 
 const props = defineProps<{
@@ -54,19 +55,19 @@ const groupedTutorials = computed((): SubjectGroup[] => {
   }))
 })
 
-// ── 最新 Python 挑戰：category=python，依 id 降序，取前 3 ────────────────────
+// ── 最新 Python 挑戰：category=python，依 id 序號降序，取前 3 ────────────────
 const latestPythonChallenges = computed(() =>
   props.challenges
     .filter(c => c.category === 'python')
-    .sort((a, b) => b.id - a.id)
+    .sort((a, b) => compareChallengeId(b.id, a.id))
     .slice(0, 3)
 )
 
-// ── 最新 APCS 挑戰：category=apcs，依 id 降序，取前 3 ────────────────────────
+// ── 最新 APCS 挑戰：category=apcs，依 id 序號降序，取前 3 ────────────────────
 const latestApcsChallenges = computed(() =>
   props.challenges
     .filter(c => c.category === 'apcs')
-    .sort((a, b) => b.id - a.id)
+    .sort((a, b) => compareChallengeId(b.id, a.id))
     .slice(0, 3)
 )
 
@@ -141,7 +142,7 @@ const subjectLinkMap: Record<string, string> = {
       <div v-if="latestPythonChallenges.length > 0" class="home-challenge-grid">
         <ChallengeCard
           v-for="c in latestPythonChallenges"
-          :key="c.id"
+          :key="c.slug"
           :challenge="c"
         />
       </div>
@@ -157,7 +158,7 @@ const subjectLinkMap: Record<string, string> = {
       <div v-if="latestApcsChallenges.length > 0" class="home-challenge-grid">
         <ChallengeCard
           v-for="c in latestApcsChallenges"
-          :key="c.id"
+          :key="c.slug"
           :challenge="c"
         />
       </div>

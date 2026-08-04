@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 21
+id: py021
 title: 數字累加器
 difficulty: easy
 tags: [for, range, 迴圈, 累加]

@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 38
+id: py038
 title: 星號長方形
 difficulty: easy
 tags: [nested-loop, pattern, for-loop]

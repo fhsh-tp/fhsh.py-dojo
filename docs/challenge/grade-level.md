@@ -1,6 +1,6 @@
 ---
 layout: challenge
-id: 9
+id: py009
 title: 成績等第
 difficulty: easy
 tags: [if-elif-else, 流程控制]
