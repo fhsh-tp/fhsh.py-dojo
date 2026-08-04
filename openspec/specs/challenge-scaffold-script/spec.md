@@ -18,7 +18,7 @@ The `id` field SHALL be a string in the challenge id format: the category's pref
 The script SHALL exit with a non-zero code and a descriptive error message if:
 - `<name>` is not provided
 - `<name>` contains characters other than lowercase letters, digits, and hyphens
-- `<name>` is itself id-shaped (matches the challenge id pattern, e.g. py001) — slugs and /challenge/<id> aliases share one URL namespace
+- `<name>` is itself id-shaped (matches the challenge id pattern, e.g. py001) — an id-shaped slug would blur the catalogue identity, because the `/challenge/<slug>` page and the `/c/<same-token>` alias could name two different challenges
 - `--difficulty` is not one of `easy`, `medium`, or `hard`
 - `--category` is not one of `python` or `apcs`
 - The output file already exists (to prevent accidental overwrite)
@@ -62,7 +62,7 @@ The script SHALL exit with a non-zero code and a descriptive error message if:
 #### Scenario: Id-shaped name is rejected
 
 - **WHEN** `pnpm new-challenge py001` is executed
-- **THEN** the script exits with code 1 and its error message states that id-shaped names are not allowed because slugs and aliases share the /challenge/ namespace
+- **THEN** the script exits with code 1 and its error message states that id-shaped names are not allowed because an id-shaped slug would blur the catalogue identity (its `/challenge/<slug>` page and the `/c/<same-token>` alias could name two different challenges)
 
 #### Scenario: Unparseable existing id fails loudly
 
