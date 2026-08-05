@@ -151,8 +151,15 @@ change、完整 review 與 staging 驗證後才落地。
   計數生效 + generator 豁免 + 跨測資 trace 殘留解毒 + 真 Python 整合測試
   與真實內容過 wrapper 冒煙)。**已知限制(接受,不修)**:學生可
   `import sys; sys.settrace(None)` 主動關閉 op-counter——它是防意外無限
-  迴圈的防線、非防蓄意繞過的沙盒,繞過者結局是撞外層 wall-clock/總預算;
-  教學平台威脅模型下接受。
+  迴圈的防線、非防蓄意繞過的沙盒,繞過者結局是撞外層總預算硬殺
+  (useExecutor N×6s 一次性 timer);教學平台威脅模型下接受。
+  **⚠️ 2026-08-05 更正(gem-blast-playtest dev 實測)**:上句原寫「撞外層
+  wall-clock/總預算」——其中 worker 內 `WALL_CLOCK_MS` 5s 軟旗標經實測對
+  **同步**學生碼結構性失效(setTimeout macrotask 永遠輸給 runPythonAsync
+  await 接續的 clearTimeout;60KB 單筆實測 6984ms 仍判 AC),故單筆層級
+  無任何牆鐘防線,唯一殘餘上限是整批 N×6s 總預算。修復候選:run 完成後
+  以 elapsed 補判 TLE;細節見
+  `openspec/changes/add-gem-blast-playtest-challenge/design.md` Decisions 2。
 - **延後改善(audit R2 記錄)**:generator 豁免 op-counter 後,dev 模式
   generate 路徑的無限迴圈 generator 會掛住預覽頁——細節與建議修法見
   §2.3(同一根因,已於該條目 2026-07-28 更新段整併,勿重複記錄)。
@@ -181,3 +188,21 @@ change、完整 review 與 staging 驗證後才落地。
   (fail-closed,前端顯示載入失敗訊息)——屬 DX/timing 問題。
 - **建議方向**:`readChallenge` 加 `['hidden','actual','full']` 白名單,
   一行成本,適合夾帶在下一個觸碰該檔的 change。
+
+### 2.12 testcase_plan literal 值於 production bundle 的內容遮蔽(2026-08-05,gem-blast audit R3)
+
+- **問題**:strip-generator plugin 的 `BUILD_STRIPPED_FIELDS` 只涵蓋
+  generator/reference_solution;`testcase_plan` 連同 literal 原文整包進
+  production 頁面 bundle。prod runner 的 `computePlanTotal` 只讀
+  `e.count` 與 `'literal' in e`、從不讀 literal 字串——故「只遮值、保留
+  key」(literal 值 → 1-byte 佔位)可在不破壞筆數推導下移除頁內測資
+  明文。影響題目:gem-blast-playtest(3 筆 30~38KB)、exam-collect-verify
+  (16 筆)、print-farm-schedule/pillbox-reminder/buffer-audit-log(各數筆)。
+- **為何不在 gem-blast change 內修**:值遮蔽違反 generator-strip-plugin
+  baseline spec 的「testcase_plan …… remain intact with unchanged values」
+  條款,需 MODIFIED capability delta,且波及全部含 literal 題目與 plugin
+  斷言——屬獨立 change。公開 repo 本就可見同一批 literal,此項是縱深
+  改善非洩漏修補。
+- **建議方向**:新 change 修改 strip plugin 增加 build 期 literal 值遮蔽
+  模式＋同步 MODIFIED generator-strip-plugin spec;驗收:bundle 無 literal
+  明文、prod 判題筆數不變、dev 模式不受影響。
