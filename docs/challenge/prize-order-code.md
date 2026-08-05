@@ -140,15 +140,13 @@ reference_solution: |
       r = 1
       bal = 0
       for x in range(n - m + 1, n + 1):
-          while x % 10 == 0:
-              x //= 10
           while x % 2 == 0:
               x //= 2
               bal += 1
           while x % 5 == 0:
               x //= 5
               bal -= 1
-          r = r * (x % 10) % 10
+          r = r * x % 10
       if bal > 0:
           return r * [2, 4, 8, 6][(bal - 1) % 4] % 10
       if bal < 0:

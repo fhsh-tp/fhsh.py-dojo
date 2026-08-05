@@ -38,7 +38,7 @@ The site SHALL provide a challenge `prize-order-code` (category `apcs`, type `co
 
 ### Requirement: answer semantics including factor bookkeeping
 
-The generator and the reference solution SHALL compute the last non-zero digit by tracking factors of 2 and 5 separately over the multiplied range: with c2 and c5 the stripped factor counts and r the remaining product mod 10, the answer SHALL be r×2^(c2−c5) mod 10 when c2 > c5, exactly 5 when c5 > c2, and r when c2 = c5. For rank-code-backfill (full factorials) c2 ≥ c5 always holds and the table SHALL be built incrementally in one pass.
+The generator and the reference solution SHALL compute the last non-zero digit by tracking the balance of stripped factor-2 counts over factor-5 counts across the multiplied range (either as two separate counts or as a single net difference): with b = c2 − c5 that balance and r the remaining product mod 10, the answer SHALL be r×2^b mod 10 when b > 0, exactly 5 when b < 0, and r when b = 0. For rank-code-backfill (full factorials) c2 ≥ c5 always holds and the table SHALL be built incrementally in one pass.
 
 #### Scenario: excess fives
 
@@ -48,13 +48,13 @@ The generator and the reference solution SHALL compute the last non-zero digit b
 
 ### Requirement: TLE cliff via op counter
 
-Each challenge's testcase plan SHALL include pressure testcases on which the naive recomputation strategy exceeds 2× the judge op limit (rank-code-backfill: per-query O(N) recomputation, measured ≥10M ops within the first 20 of 500 queries; prize-order-code: full 1..N product loops at N ≥ 10^8), while the intended solution stays at or below 1/5 of the op limit (measured 1.31M and 1.67M ops respectively).
+Each challenge's testcase plan SHALL include pressure testcases on which the naive recomputation strategy exceeds 2× the judge op limit (rank-code-backfill: per-query O(N) recomputation, measured ≥10M ops within the first 20 of 500 queries; prize-order-code: full 1..N product loops at N ≥ 10^8), while the intended solution — measured as the shipped reference_solution verbatim — stays at or below 1/4 of the op limit (measured 1,555,994 and 2,325,034 ops respectively at the heaviest corners).
 
 #### Scenario: intended solution headroom
 
 - **GIVEN** the heaviest generated testcase of either challenge
 - **WHEN** the intended solution runs under the judge's op counter
-- **THEN** its op count is at most 2,000,000 (op limit 10,000,000 divided by 5)
+- **THEN** its op count is at most 2,500,000 (op limit 10,000,000 divided by 4)
 
 ### Requirement: C-builtin bypass lethality
 

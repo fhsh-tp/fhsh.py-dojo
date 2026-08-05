@@ -4,13 +4,13 @@
 
 ## 2. rank-code-backfill（568 版）
 
-- [x] 2.1 （spec: rank-code-backfill challenge contract、TLE cliff via op counter）依 design「D3 參數與範圍」撰寫 params（t int 1..500；group repeat t 內含 n int 1..200000）與「D4 testcase_plan 結構」的 testcase_plan 20 筆（第 1 筆＝題面範例 literal、暖身 band、壓力 band ≥6 筆、N=1 與 N=200000 邊界 literal）；驗證：`pnpm build:pools` 成功且該題 20 筆。
+- [x] 2.1 （spec: rank-code-backfill challenge contract、TLE cliff via op counter）依 design「D3 參數與範圍」撰寫 params（t int 1..500；group repeat t 內含 n int 1..200000）與「D4 testcase_plan 結構」的 testcase_plan 20 筆（第 1 筆＝題面範例 literal、暖身 band、中段 band、壓力 band ≥6 筆、N=1 與 N=200000 邊界 literal）；驗證：`pnpm build:pools` 成功且該題 20 筆。
 - [x] 2.2 （spec: answer semantics including factor bookkeeping、independent reference solutions）依 design「D5 演算法契約」撰寫 generator（增量建表，r mod 10＋twos 盈餘）與獨立寫法的 reference_solution（例如逐查詢後綴週期還原、與 generator 不同簿記），starter_code 留空；驗證：兩者對 spec R3 範例（5→2、1→1、10→8）輸出一致。
 - [x] 2.3 （spec: literacy-style problem statements）依 design「D1 考點轉譯與語義」撰寫題面：檢查碼引言、輸入輸出說明、範圍（T ≤ 500、N ≤ 200000、大值警語）、範例區塊與第 1 筆 literal 逐字一致、零資料結構術語；驗證：對照 spec R7 禁字清單掃描通過。
 
 ## 3. prize-order-code（10212 版）
 
-- [x] 3.1 （spec: prize-order-code challenge contract、TLE cliff via op counter）依 design「D3 參數與範圍」撰寫 params（t int 1..3；group repeat t 內含 n int 100000..1000000000、m int 0..100000）與「D4 testcase_plan 結構」testcase_plan 20 筆（範例 literal、暖身 band、壓力 band ≥6 筆、M=0／P(25,1)／P(26,2)／M=N=100000 literal）；驗證：`pnpm build:pools` 成功且該題 20 筆。
+- [x] 3.1 （spec: prize-order-code challenge contract、TLE cliff via op counter）依 design「D3 參數與範圍」撰寫 params（t int 1..3；group repeat t 內含 n int 100000..1000000000、m int 0..100000）與「D4 testcase_plan 結構」testcase_plan 20 筆（範例 literal、暖身 band、中段 band、壓力 band ≥6 筆、M=0／P(25,1)／P(26,2)／M=N=100000 literal）；驗證：`pnpm build:pools` 成功且該題 20 筆。
 - [x] 3.2 （spec: answer semantics including factor bookkeeping、independent reference solutions）依 design「D5 演算法契約」撰寫 generator（c2/c5 分開追蹤）與獨立寫法 reference_solution（不同簿記，如 2 的冪次週期表），starter_code 留空；驗證：對 spec R3 範例（P(10,2)→9、P(25,1)→5、M=0→1）輸出一致。
 - [x] 3.3 （spec: literacy-style problem statements）依 design「D1 考點轉譯與語義」撰寫題面（同 2.3 標準，範圍明示 N ≤ 10⁹、M ≤ 100000、M ≤ N）；驗證：禁字掃描通過。
 
