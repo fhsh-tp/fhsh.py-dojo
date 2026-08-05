@@ -22,3 +22,18 @@
 | 15 | R1 | statement | （零 findings——題面維度乾淨） | — | 無缺陷 | — |
 
 **R1 小結**：must-fix 1 根（#1/#2 同根）、should-fix 成立 5（#3~#7）、駁回 4、降級 nit 2。收斂條件（無 must-fix）尚未於本輪達成，R2 覆核修正後狀態。
+
+| # | Round | 維度 | Finding 摘要 | 對抗驗證 | 終局裁決 | 處置（commit） |
+|---|-------|------|--------------|----------|----------|----------------|
+| 16 | R2 | fixverify＋sidefx＋freshcliff（三 finder 同報） | proposal.md What Changes 殘留作廢舊數字（1.31M/7.6×、1.67M/6.0×）——#1/#2 修正漏改矩陣 F5/F10 指名的同步位置 | 反駁 CONFIRMED×3、副作用 CONFIRMED×3 | 成立：改為出貨實測 1.56M/6.4×、2.33M/4.3× | R2 fix |
+| 17 | R2 | fixverify＋sidefx | tasks.md 5.1 驗收條件殘留「≤2M」舊門檻，與已勾選 [x]＋notes 實測 2.33M 自相矛盾 | 反駁 CONFIRMED×2、副作用 CONFIRMED×2 | 成立：改「≤2.5M（上限/4）」 | R2 fix |
+| 18 | R2 | fixverify＋sidefx | spec R3 末句「the table SHALL be built incrementally」與瘦身後 568 reference（排序單趟掃描、無具體表）主詞不相容 | 反駁 DOWNGRADED（nit）×2、副作用 DOWNGRADED | 成立（採副作用鏡頭建議）：改為「incrementally in a single ascending pass (whether or not an explicit table is materialized)」——弱化過度指定 | R2 fix |
+| 19 | R2 | fixverify | spec R4 Scenario 的「the intended solution」缺「出貨 reference 逐字」限定，與 requirement 散文不對齊 | 反駁 DOWNGRADED（nit） | 成立（低成本對齊）：Scenario 改「the shipped reference_solution (the measured intended-solution proxy)」 | R2 fix |
+| 20 | R2 | fixverify | 矩陣 F9 proposal 欄誤標 Impact（應 What Changes）；F14 修一半仍留錯誤 Impact 指向 | 反駁 CONFIRMED、副作用 CONFIRMED | 成立：F9→What Changes、F14→Non-Goals | R2 fix |
+| 21 | R2 | sidefx | 568 reference 瘦身後與 generator 同用淨差簿記，spec R6「different bookkeeping style」宣稱弱化 | 反駁 DOWNGRADED（nit）、副作用 DOWNGRADED | 成立（弱化宣告）：R6 改「a materially different implementation strategy」（table+pow vs 排序掃描+cycle 表、input() vs stdin.read 仍實質不同） | R2 fix |
+| 22 | R2 | sidefx | 矩陣 F8/F13/F15 spec 欄誤指「R3 example」（R3 無 Example 區塊；錨點實在 R1/R2 的 Example 表） | 反駁 DOWNGRADED（nit）、副作用 DOWNGRADED | 成立：F8→R1 example、F13→R3 scenario＋R2 example、F15→R2 example | R2 fix |
+| 23 | R2 | freshcliff | design D4 把 P(25,1)=5 歸入 10212 邊界 literal 組，實際它在第 1 筆範例 literal；邊界組清單不完整（R2-SE-6 nit 同題） | 反駁 CONFIRMED、副作用 DOWNGRADED | 成立：D4 邊界 literal 逐筆列舉並註明 P(25,1) 歸屬範例 literal | R2 fix |
+| 24 | R2 | fixverify | （nit）568 異值角落 1,555,807 不可重現且方向記反（異值最壞應比同值貴 +499） | nit 未進驗證、但採納 | 併修：F5／design／notes 改「同值最貴 1,555,994；異值最壞加成 +499 → ≤1,556,493」 | R2 fix |
+| 25 | R2 | freshcontract | （clean）引擎契約＋題面維度全查零 findings；#8 以新驗證複核後維持駁回不變 | — | 無缺陷 | — |
+
+**R2 小結**：**零 must-fix**（收斂條件本輪達成）；should-fix 成立 8（#16~#23，全屬 R1 修正的同步殘留與措辭對齊）、nit 併修 1（#24）。R3 為終局確認輪：驗證 R2 修正落地＋無新 must-fix 即 CLEAN。

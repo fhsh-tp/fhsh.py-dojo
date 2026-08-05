@@ -38,7 +38,7 @@ The site SHALL provide a challenge `prize-order-code` (category `apcs`, type `co
 
 ### Requirement: answer semantics including factor bookkeeping
 
-The generator and the reference solution SHALL compute the last non-zero digit by tracking the balance of stripped factor-2 counts over factor-5 counts across the multiplied range (either as two separate counts or as a single net difference): with b = c2 − c5 that balance and r the remaining product mod 10, the answer SHALL be r×2^b mod 10 when b > 0, exactly 5 when b < 0, and r when b = 0. For rank-code-backfill (full factorials) c2 ≥ c5 always holds and the table SHALL be built incrementally in one pass.
+The generator and the reference solution SHALL compute the last non-zero digit by tracking the balance of stripped factor-2 counts over factor-5 counts across the multiplied range (either as two separate counts or as a single net difference): with b = c2 − c5 that balance and r the remaining product mod 10, the answer SHALL be r×2^b mod 10 when b > 0, exactly 5 when b < 0, and r when b = 0. For rank-code-backfill (full factorials) the balance never goes negative, and the per-query answers SHALL be produced incrementally in a single ascending pass (whether or not an explicit table is materialized).
 
 #### Scenario: excess fives
 
@@ -53,7 +53,7 @@ Each challenge's testcase plan SHALL include pressure testcases on which the nai
 #### Scenario: intended solution headroom
 
 - **GIVEN** the heaviest generated testcase of either challenge
-- **WHEN** the intended solution runs under the judge's op counter
+- **WHEN** the shipped reference_solution (the measured intended-solution proxy) runs under the judge's op counter
 - **THEN** its op count is at most 2,500,000 (op limit 10,000,000 divided by 4)
 
 ### Requirement: C-builtin bypass lethality
@@ -68,7 +68,7 @@ The testcase plans SHALL contain enough pressure testcases that each bypass enum
 
 ### Requirement: independent reference solutions
 
-Each challenge SHALL declare a `reference_solution` implemented independently from its generator (different bookkeeping style), and `scripts/content-regression.test.ts` SHALL pass for both challenges against the production encrypted pools.
+Each challenge SHALL declare a `reference_solution` implemented independently from its generator (a materially different implementation strategy), and `scripts/content-regression.test.ts` SHALL pass for both challenges against the production encrypted pools.
 
 #### Scenario: regression gate
 

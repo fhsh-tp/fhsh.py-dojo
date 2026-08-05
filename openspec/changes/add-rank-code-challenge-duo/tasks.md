@@ -20,7 +20,7 @@
 
 ## 5. 判題斷崖驗證（design D2／D6）
 
-- [x] 5.1 （spec: TLE cliff via op counter；design「D2 斷崖機制對映」）以 settrace 同款計數器對正式測資輸入實測並記入 `openspec/changes/add-rank-code-challenge-duo/dev-verification-notes.md`：兩題正解 ops ≤ 2M；568 天真解於壓力筆 ≥ 20M ops；10212 天真解（1..N 全乘）於壓力筆 ≥ 20M ops；驗證：門檻全數達標。
+- [x] 5.1 （spec: TLE cliff via op counter；design「D2 斷崖機制對映」）以 settrace 同款計數器對正式測資輸入實測並記入 `openspec/changes/add-rank-code-challenge-duo/dev-verification-notes.md`：兩題正解 ops ≤ 2.5M（上限/4）；568 天真解於壓力筆 ≥ 20M ops；10212 天真解（1..N 全乘）於壓力筆 ≥ 20M ops；驗證：門檻全數達標。
 - [x] 5.2 （spec: C-builtin bypass lethality）實測「D6 繞道獵殺驗收」繞道清單並記入同檔：568 逐查詢 math.factorial 壓力筆總牆鐘 native×2 ≥ 240s；10212 大數連乘＋剝零 native×2 ≥ 240s（跨壓力筆合計）；str() 路線 ValueError；驗證：每條繞道有實測數據與死法結論。
 
 ## 6. 測試守門

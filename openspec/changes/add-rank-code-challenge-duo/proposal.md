@@ -6,8 +6,8 @@
 ## What Changes
 
 - 新增兩道 apcs／competition 題目，同一個「遊戲排行榜」宇宙（F16、F17）：
-  - `rank-code-backfill`「每日榜單驗證碼回填」（medium）：T 筆查詢（T ≤ 500），每筆求 N! 去尾零末位（N ≤ 200000）。正解一次增量建表 O(maxN+T)（1.31M ops，餘裕 7.6×，F5）；逐查詢重算的天真解 20 筆查詢即破 op 上限（F6）；逐查詢 math.factorial 繞道死於總預算硬殺（F7）。
-  - `prize-order-code`「頒獎順位驗證碼」（hard）：T ≤ 3 筆查詢，每筆求 N×(N−1)×…×(N−M+1) 去尾零末位（N ≤ 10⁹、M ≤ 100000）。正解 O(M) 區間模運算（1.67M ops，餘裕 6.0×，F10）；1..N 全乘天真解 op 必破限（F12）；大數連乘繞道死於總預算硬殺、str() 路線踩 4300 位上限 ValueError（F3、F11）。
+  - `rank-code-backfill`「每日榜單驗證碼回填」（medium）：T 筆查詢（T ≤ 500），每筆求 N! 去尾零末位（N ≤ 200000）。正解一次增量建表 O(maxN+T)（出貨 reference 實測 1.56M ops，餘裕 6.4×，F5）；逐查詢重算的天真解 20 筆查詢即破 op 上限（F6）；逐查詢 math.factorial 繞道死於總預算硬殺（F7）。
+  - `prize-order-code`「頒獎順位驗證碼」（hard）：T ≤ 3 筆查詢，每筆求 N×(N−1)×…×(N−M+1) 去尾零末位（N ≤ 10⁹、M ≤ 100000）。正解 O(M) 區間模運算（出貨 reference 實測 2.33M ops，餘裕 4.3×，F10）；1..N 全乘天真解 op 必破限（F12）；大數連乘繞道死於總預算硬殺、str() 路線踩 4300 位上限 ValueError（F3、F11）。
 - 兩題皆用 `testcase_plan`（band＋literal）做 APCS 式配分與斷崖，第一筆 literal＝題面範例；10212 版以 literal 覆蓋 5 因子過剩陷阱（F13）與 M=0 邊界（F15）。
 - 兩題皆宣告獨立實作的 `reference_solution` 接受 content-regression 驗證。
 
