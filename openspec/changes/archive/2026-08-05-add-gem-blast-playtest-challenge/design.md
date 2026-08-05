@@ -44,7 +44,7 @@
 
 **Interface / data shape**（frontmatter 契約）：
 
-- `layout: challenge`、`id`（scaffold 配號，預期 apcs006）、`title: 寶石消除關卡測試`、`difficulty: medium`、`category: apcs`、`type: competition`、`algorithm: gem_blast_playtest`、`input_budget: 42000`（貼緊壓力 band worst-case 40004 bytes——預算閘門即題面公告 40000 上限的數值守衛；日後若恢復大型獵殺筆需連同此值一起調整）、`starter_code: ""`。
+- `layout: challenge`、`id`（scaffold 配號，預期 apcs006）、`title: 寶石消除關卡測試`、`difficulty: medium`、`category: apcs`、`type: competition`、`algorithm: gem_blast_playtest`、`input_budget: 40004`（＝引擎對壓力 band 的 worst-case 估算值，實測 40003 建置失敗並指名條目、40004 通過——任何把 band 或 literal 撐破題面 40000 上限的未來編輯都會在 build 期 loud fail；日後若恢復大型獵殺筆需連同此值一起調整）、`starter_code: ""`。
 - `params` 三層：`t`（int 1..3）→ `rounds`（group，repeat from t）內含 `n`（int 1..5）與 `boards`（alpha_lower，min_len 3、max_len 50，count from n、separator "\n"）。band override 時壓力 band 收斂為 t=1、n=1、min_len 30000、max_len 40000。
 - `testcase_plan` 共 20 條目、順序固定：1 範例 literal（置首）→ 9 暖身 band（base params 值域）→ 5 隨機壓力 band（override 如上）→ 3 筆兩兩異長異殘量巢狀 literal（長度 30000/34001/38002、殘量 0/1/2，字母對 ab/cd/ef＋核心外哨兵字母）→ 2 邊界 literal（單版面單顆→輸出 1；多版面全部全滅→輸出 0）。
 - 輸出格式：T 行，每行一個整數＝該場 N 個版面遺留顆數的最大值。
@@ -64,7 +64,7 @@
 
 ## Risks / Trade-offs
 
-- **literal 進公開 repo**：巢狀 literal 輸入可被學生預計算並 hardcode 該筆輸出；三筆異長（30000/34001/38002）異殘量（0/1/2）設計使單一長度判別或常數輸出捷徑最多覆蓋一筆——長度分支＋print(0) 會在其餘兩筆與隨機壓力筆吃 WA，效能斷崖不因 hardcode 而失守（R2 audit 對抗驗證確認）。殘餘弱點：逐筆長度仍各自可鍵，須三份獨立 hardcode 才能全蓋，且與隨機壓力筆同值域 [30000,40002] 重疊、無法以區間判別分流。接受。
+- **literal 進公開 repo**：巢狀 literal 輸入可被學生預計算並 hardcode 該筆輸出；攻擊「單一長度分支＋print(0)」在異長異殘量設計下被封堵（dev 實測 13/20：隨機壓力筆 WA×5、異殘量筆 WA×2）；攻擊「三份長度鍵 hardcode {30000:0, 34001:1, 38002:2}＋逐趟式天真解」**不被封堵**（R3 實測 20/20 AC，最大單筆 553,532 events）——對讀過公開 plan 的學生，spec 條款 (b) 無執行機制，此與已接受的 replace 繞法、settrace(None) opt-out 同屬平台級姿態，已明文列入 spec 的 outside-the-cliff 清單。接受，理由：成本高於 replace 繞法而效益相同，且 14/20 隨機筆仍需正確程式。
 - **replace 繞法放行**：牆鐘軟旗標對同步碼結構性失效（Decisions 2），繞法將得 20/20 AC。高中生自行想到並驗證 replace 收斂等價的機率低；視為聰明解。
-- **frontmatter 約 +102KB，且 literal 會進 production bundle**：strip-generator plugin 只剝 generator 與 reference_solution（BUILD_STRIPPED_FIELDS），`testcase_plan` 連同全部 literal 原文會隨頁面資料送達瀏覽器（ChallengeView 讀取、prod 僅用於 computePlanTotal 計筆數）。實測 gzip 後三筆巢狀 literal 僅約 0.3KB（高度重複字串），傳輸成本可忽略；學生可讀性與「公開 repo 可見」屬同一風險面，已由隨機筆佔 14/20 的結構抵銷。⚠️ 勿為此把 testcase_plan 加入 strip 名單——prod runner 的 effectiveTestcaseCount 會退回 testcase_count 預設 5，與 20 筆 plan block 直接衝突（對抗驗證確認的修一洞挖一洞陷阱）。接受現狀。
+- **frontmatter 約 +102KB，且 literal 會進 production bundle**：strip-generator plugin 只剝 generator 與 reference_solution（BUILD_STRIPPED_FIELDS），`testcase_plan` 連同全部 literal 原文會隨頁面資料送達瀏覽器（ChallengeView 讀取、prod 僅用於 computePlanTotal 計筆數）。實測 gzip 後三筆巢狀 literal 僅約 0.3KB（高度重複字串），傳輸成本可忽略；學生可讀性與「公開 repo 可見」屬同一風險面，已由隨機筆佔 14/20 的結構抵銷。⚠️ 勿把 testcase_plan **整欄** strip——prod runner 的 effectiveTestcaseCount 會退回 testcase_count 預設 5，與 20 筆 plan block 直接衝突。「只遮 literal 值、保留 key」技術上可行（computePlanTotal 只讀 e.count 與 'literal' in e），但違反 generator-strip-plugin baseline spec 的 testcase_plan remain-intact 條款且波及全部含 literal 題目，屬另案——已登錄 BACKLOG §2.12。接受現狀。
 - **繞法整批時間**：replace 繞法最慢單筆（38KB 巢狀）dev 實測 3.2s、三筆巢狀合計 ~7.2s，整批遠低於 6s×20=120s 總預算，無誤觸硬殺疑慮。

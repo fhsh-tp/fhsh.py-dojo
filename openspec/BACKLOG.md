@@ -188,3 +188,21 @@ change、完整 review 與 staging 驗證後才落地。
   (fail-closed,前端顯示載入失敗訊息)——屬 DX/timing 問題。
 - **建議方向**:`readChallenge` 加 `['hidden','actual','full']` 白名單,
   一行成本,適合夾帶在下一個觸碰該檔的 change。
+
+### 2.12 testcase_plan literal 值於 production bundle 的內容遮蔽(2026-08-05,gem-blast audit R3)
+
+- **問題**:strip-generator plugin 的 `BUILD_STRIPPED_FIELDS` 只涵蓋
+  generator/reference_solution;`testcase_plan` 連同 literal 原文整包進
+  production 頁面 bundle。prod runner 的 `computePlanTotal` 只讀
+  `e.count` 與 `'literal' in e`、從不讀 literal 字串——故「只遮值、保留
+  key」(literal 值 → 1-byte 佔位)可在不破壞筆數推導下移除頁內測資
+  明文。影響題目:gem-blast-playtest(3 筆 30~38KB)、exam-collect-verify
+  (16 筆)、print-farm-schedule/pillbox-reminder/buffer-audit-log(各數筆)。
+- **為何不在 gem-blast change 內修**:值遮蔽違反 generator-strip-plugin
+  baseline spec 的「testcase_plan …… remain intact with unchanged values」
+  條款,需 MODIFIED capability delta,且波及全部含 literal 題目與 plugin
+  斷言——屬獨立 change。公開 repo 本就可見同一批 literal,此項是縱深
+  改善非洩漏修補。
+- **建議方向**:新 change 修改 strip plugin 增加 build 期 literal 值遮蔽
+  模式＋同步 MODIFIED generator-strip-plugin spec;驗收:bundle 無 literal
+  明文、prod 判題筆數不變、dev 模式不受影響。

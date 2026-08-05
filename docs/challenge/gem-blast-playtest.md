@@ -10,7 +10,7 @@ tags:
   - 字串
 description: 二消寶石版面測試：找出每場測試中最難清空版面的剩餘顆數
 algorithm: gem_blast_playtest
-input_budget: 42000
+input_budget: 40004
 params:
   t:
     type: int
@@ -110,7 +110,7 @@ reference_solution: |
   for _ in range(t):
       n = int(input())
       counts = [leftover(input()) for _ in range(n)]
-      print(max(counts))
+      print(max(counts, default=0))
 starter_code: ""
 ---
 

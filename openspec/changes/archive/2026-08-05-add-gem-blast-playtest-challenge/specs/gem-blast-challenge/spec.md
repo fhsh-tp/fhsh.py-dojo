@@ -41,7 +41,7 @@ The student-visible surface of the challenge (body text, title, description, tag
 
 ### Requirement: Frontmatter contract
 
-The challenge file docs/challenge/gem-blast-playtest.md SHALL declare: layout challenge, scaffold-assigned id with prefix apcs, title 寶石消除關卡測試, difficulty medium, category apcs, type competition, algorithm gem_blast_playtest, input_budget 42000 (sized to sit just above the worst-case stress-band entry so the budget gate tracks the advertised 40000 board-length ceiling), an empty-string starter_code, a one-sentence description, and tags free of data-structure terminology. The frontmatter SHALL NOT declare testcase_count. The params SHALL declare, in order: t as int with min 1 and max 3; rounds as group with repeat from t, containing n as int with min 1 and max 5, and boards as alpha_lower with min_len 3, max_len 50, and count from n with separator newline.
+The challenge file docs/challenge/gem-blast-playtest.md SHALL declare: layout challenge, scaffold-assigned id with prefix apcs, title 寶石消除關卡測試, difficulty medium, category apcs, type competition, algorithm gem_blast_playtest, input_budget 40004 (equal to the engine worst-case estimate of the stress-band entry, so any future widening of a band or literal beyond the advertised 40000 board-length ceiling fails the pool build loudly), an empty-string starter_code, a one-sentence description, and tags free of data-structure terminology. The frontmatter SHALL NOT declare testcase_count. The params SHALL declare, in order: t as int with min 1 and max 3; rounds as group with repeat from t, containing n as int with min 1 and max 5, and boards as alpha_lower with min_len 3, max_len 50, and count from n with separator newline.
 
 #### Scenario: Params pass the engine smoke gate
 
@@ -55,7 +55,7 @@ The challenge SHALL declare a testcase_plan with exactly 20 entries in this fixe
 #### Scenario: Pool build produces the planned pool
 
 - **WHEN** pnpm build:pools runs
-- **THEN** the encrypted pool for gem_blast_playtest contains 10 blocks of 20 testcases each, every entry within the 42000-byte input budget, with the example literal as the first testcase of every block
+- **THEN** the encrypted pool for gem_blast_playtest contains 10 blocks of 20 testcases each, every entry within the 40004-byte input budget, with the example literal as the first testcase of every block
 
 ### Requirement: TLE cliff thresholds
 
@@ -73,7 +73,7 @@ The testcase plan SHALL enforce this performance cliff, verified by replaying th
 
 ### Requirement: Bypass acceptance after hunt downgrade
 
-The C-builtin str.replace bypass SHALL be treated as an accepted alternative solution: for as long as the worker wall-clock flag remains inert for synchronous student code, the testcase plan SHALL NOT contain any entry whose purpose is to defeat it, and the repair path is tracked in the platform BACKLOG section 2.8 (post-run elapsed-based TLE adjudication); the change that implements that repair SHALL amend this clause through the normal spec-delta process. This clause records the verified platform constraint that motivated the downgrade: the worker 5-second wall-clock flag is a setTimeout macrotask, and for synchronous student code the await continuation (a microtask) always runs clearTimeout before an expired timer callback can fire, so the flag can never produce a TLE verdict for synchronous code. The performance cliff of this challenge is enforced solely by the default settrace op-counter: solutions that disable the tracer (for example sys.settrace(None), an opt-out the platform BACKLOG records as accepted) or that delegate the quadratic work to C builtins are outside the cliff guarantee. The dev-runner measurement that confirmed this (bypass verdict and wall time on the former 60000-length hunt literal) SHALL be recorded in the change design document.
+The C-builtin str.replace bypass SHALL be treated as an accepted alternative solution: for as long as the worker wall-clock flag remains inert for synchronous student code, the testcase plan SHALL NOT contain any entry whose purpose is to defeat it, and the repair path is tracked in the platform BACKLOG section 2.8 (post-run elapsed-based TLE adjudication); the change that implements that repair SHALL amend this clause through the normal spec-delta process. This clause records the verified platform constraint that motivated the downgrade: the worker 5-second wall-clock flag is a setTimeout macrotask, and for synchronous student code the await continuation (a microtask) always runs clearTimeout before an expired timer callback can fire, so the flag can never produce a TLE verdict for synchronous code. The performance cliff of this challenge is enforced solely by the default settrace op-counter: solutions that disable the tracer (for example sys.settrace(None), an opt-out the platform BACKLOG records as accepted) or that delegate the quadratic work to C builtins, or that hardcode outputs keyed to the published literal entries (the plan ships to the public repo and the client bundle), are outside the cliff guarantee. The dev-runner measurement that confirmed this (bypass verdict and wall time on the former 60000-length hunt literal) SHALL be recorded in the change design document.
 
 #### Scenario: Bypass passes the full plan
 
