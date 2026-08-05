@@ -2,6 +2,7 @@
 
 > 目的：每一條 audit finding 的**終局裁決**記錄。後續輪次的 finder 與統整者必須先對照本表 reconcile——已裁決項目（含「接受殘餘」）不得以相同理由復活；要推翻既有裁決必須引用新 evidence。
 > 標尺（凍結）：must-fix＝會改變判題 verdict／建置測試失敗／違反 spec SHALL／誤導學生；should-fix＝文件不一致不影響上線行為；nit＝風格。收斂條件＝該輪無 must-fix。
+> 合法終局裁決類別（RCA 補充）：成立→修正／駁回／降級 nit／**聰明解（accepted alternative）**——實測存活且經裁決收編的繞道，不構成缺陷，記錄於 design D6.b 與 notes 5.2b。
 
 | # | Round | 維度 | Finding 摘要 | 對抗驗證 | 終局裁決 | 處置（commit） |
 |---|-------|------|--------------|----------|----------|----------------|
@@ -37,3 +38,12 @@
 | 25 | R2 | freshcontract | （clean）引擎契約＋題面維度全查零 findings；#8 以新驗證複核後維持駁回不變 | — | 無缺陷 | — |
 
 **R2 小結**：**零 must-fix**（收斂條件本輪達成）；should-fix 成立 8（#16~#23，全屬 R1 修正的同步殘留與措辭對齊）、nit 併修 1（#24）。R3 為終局確認輪：驗證 R2 修正落地＋無新 must-fix 即 CLEAN。
+
+| # | Round | 維度 | Finding 摘要 | 對抗驗證 | 終局裁決 | 處置（commit） |
+|---|-------|------|--------------|----------|----------|----------------|
+| 26 | R3 | mustfixhunt | R3-MF-1：apcs008 存在存活繞道 math.perm＋Legendre 尾零計數（正式池 20/20 AC、池最貴 ~108k ops、全套 8.8s native）——D6 清單漏列的 C 內建 API 路線 | 主控親手復刻 CONFIRMED（114,386 ops／1.93s）；RCA 三位 opus 分析官獨立覆核一致 | **成立（must-fix）→ 處置 A：收編為聰明解（accepted alternative）**：矩陣 F19/F20 先行、D6 分流 a 必死/b 接受殘餘、spec R5 存活例外句、notes 5.2b、題面提示句改為經實測為真的成本警語（去除不可能性承諾）；帳本 #10 的降級規則（未證實存活→nit）經 RCA 認定為本缺陷遲到的直接誘因，廢止 | R4 fix |
+| 27 | R3/RCA | — | 「調測資獵殺 math.perm」已量化評估並駁回：reference 7.75 ops/元素、門檻 2.5M ⇒ 元素上限 ~322k；math.perm(10⁹,322k)≈3.2s×20 筆×2＝128s 對 120s 僅 6% 餘裕且正解零餘裕 ⇒ 加壓先死正解（F20） | RCA 裁決輪量測 | **駁回獵殺路線**：不得以相同理由復活；推翻須提出新量測 evidence | — |
+| 28 | R3/RCA | — | 「改問末兩位殺繞道」變體無效：繞道持有精確整數，(p//10**k)%100 同樣一步可得；只有非連續／跳項結構才殺得掉，但毀掉素養敘事，屬另開 change 的題型重設計 | RCA 結構論證 | **駁回變體**：本 change 不採 | — |
+| 29 | R3 | r2landed＋xdoc | 四條 should-fix 同步殘留：tasks 2.2/design D5「不同簿記」舊敘述（#21 漏同步）；spec R4 散文 corner 數字未上界化；矩陣 F12 Evidence 欄 5.5 舊值；tasks 2.2/3.2「spec R3 範例」誤引（應 R1/R2 Example） | 反駁 CONFIRMED×2、DOWNGRADED×2（均採副作用鏡頭修法） | 成立：R4 一併修正（含 F10 +63 上界，兩次獨立重測吻合） | R4 fix |
+
+**R3／RCA 小結**：R3 出現 1 條 must-fix（#26）→ 依協定觸發 multi-opus 乾淨上下文 RCA。裁決＝收編（教學價值：寫得出此解需 Legendre＋min(v₂,v₅) 數論理解，嚴格高於正解；且同款路線在 007 必死，雙題並置本身在教「C 內建不是萬靈丹」）。R4 為 doc-diff 落地輪：F19/F20 → 四份文件＋題面＋BACKLOG §2.8 案例回寫，機械驗證（grep＋validate＋測試）後 CLEAN 收案。root causes 與流程建議全文見 session RCA 報告（wuohycagh）。

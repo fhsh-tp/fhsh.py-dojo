@@ -48,7 +48,7 @@ The generator and the reference solution SHALL compute the last non-zero digit b
 
 ### Requirement: TLE cliff via op counter
 
-Each challenge's testcase plan SHALL include pressure testcases on which the naive recomputation strategy exceeds 2× the judge op limit (rank-code-backfill: per-query O(N) recomputation, measured ≥10M ops within the first 20 of 500 queries; prize-order-code: full 1..N product loops at N ≥ 10^8), while the intended solution — measured as the shipped reference_solution verbatim — stays at or below 1/4 of the op limit (measured 1,555,994 and 2,325,034 ops respectively at the heaviest corners).
+Each challenge's testcase plan SHALL include pressure testcases on which the naive recomputation strategy exceeds 2× the judge op limit (rank-code-backfill: per-query O(N) recomputation, measured ≥10M ops within the first 20 of 500 queries; prize-order-code: full 1..N product loops at N ≥ 10^8), while the intended solution — measured as the shipped reference_solution verbatim — stays at or below 1/4 of the op limit (measured at most 1,556,493 and 2,325,097 ops respectively at the heaviest corners).
 
 #### Scenario: intended solution headroom
 
@@ -58,13 +58,19 @@ Each challenge's testcase plan SHALL include pressure testcases on which the nai
 
 ### Requirement: C-builtin bypass lethality
 
-The testcase plans SHALL contain enough pressure testcases that each bypass enumerated in design D6 fails: per-query math.factorial for rank-code-backfill and un-modded big-integer products for prize-order-code SHALL exceed 2× the executor total wall budget (native measurement multiplied by conservative factor 2 for Pyodide), and the str()-based digit extraction path SHALL raise ValueError under int_max_str_digits=4300. Verification SHALL be recorded per-bypass in dev-verification-notes.md; bypasses outside the D6 list are out of scope.
+The testcase plans SHALL contain enough pressure testcases that each bypass enumerated in design D6.a fails: per-query math.factorial (and its math.perm sibling) for rank-code-backfill and un-modded Python-level big-integer products for prize-order-code SHALL exceed 2× the executor total wall budget (native measurement multiplied by conservative factor 2 for Pyodide), and the str()-based digit extraction path SHALL raise ValueError under int_max_str_digits=4300. Verification SHALL be recorded per-bypass in dev-verification-notes.md; bypasses outside the D6.a list are out of scope. The math.perm-with-Legendre trailing-zero route is a documented surviving alternative solution for prize-order-code (matrix F19/F20, design D6.b); it SHALL NOT be treated as a defect, and testcase plans SHALL NOT be tuned against it at the cost of the intended-solution headroom required by the TLE-cliff requirement.
 
 #### Scenario: stringify path dies
 
 - **GIVEN** a student solution that builds the full product and calls str() on it
 - **WHEN** it runs on any pressure testcase of prize-order-code
 - **THEN** the conversion raises ValueError (result exceeds 4300 digits)
+
+#### Scenario: accepted residual bypass
+
+- **GIVEN** the prize-order-code surviving route recorded in design D6.b (math.perm with Legendre trailing-zero counting)
+- **WHEN** it runs on the production pool
+- **THEN** it is accepted (20/20 AC) and reported as an accepted alternative, not as a regression or defect
 
 ### Requirement: independent reference solutions
 
