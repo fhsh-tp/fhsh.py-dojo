@@ -32,9 +32,11 @@
 
 1. **壓力筆雙軌（隨機 band ＋ 巢狀 literal）而非單靠隨機**：探針證明隨機字串的可消配對集中在前端，天真解 B 幾趟即收斂（168k ops），單靠隨機 band 必漏殺。巢狀對消形狀引擎產不出（無 adversarial pattern 型別），故以 literal 條目落地。替代方案「擴充 Rust 引擎新增巢狀字串型別」因成本（Rust＋cargo test＋新 change）被否決。
 2. **獵殺筆已依降級條款移除（2026-08-05 dev 真機實測定案）**：原設計以 60KB 巢狀 literal 搭配 worker 5 秒牆鐘軟旗標獵殺 replace 繞法。實測結果：繞法於該筆牆鐘 **6984ms > 5000ms，verdict 仍為 AC**。根因是平台機制而非數字——軟旗標是 setTimeout macrotask，同步 Python 計算期間 worker event loop 被鎖死，`runPythonAsync` 完成後的 await 接續（microtask）永遠先於過期 timer callback 執行並 `clearTimeout`，**同步學生碼在既有判題引擎下不可能觸發 5 秒軟旗標**（pyodide.worker.ts 內註解亦自述此 fallback 僅防 event loop 曾再進入的情況；唯一真實牆鐘是 useExecutor 的 6s×筆數總預算硬殺）。依 proposal Non-Goals（不為此開引擎工事）執行降級：60KB 筆改為第三筆 20KB 巢狀 literal，replace 繞法視為聰明解放行。此平台限制值得另開 change 評估（例如 run 完成後以 elapsed 補判 TLE），不在本 change 範圍。
-3. **generator 用 stack 掃描、reference_solution 用雙指標陣列**：兩者演算法等價但實作路徑獨立（append/pop vs 預配陣列＋top 索引），可互抓實作錯誤；沿用 buffer-audit-log 的分工前例。reference 不得用 O(n²) 寫法——content-regression 會拿它跑含 20KB 巢狀筆的正式池。
+3. **generator 用 stack 掃描、reference_solution 用雙指標陣列**：兩者演算法等價但實作路徑獨立（append/pop vs 預配陣列＋top 索引），可互抓實作錯誤；沿用 buffer-audit-log 的分工前例。reference 不得用 O(n²) 寫法——content-regression 會拿它跑含 30~38KB 巢狀筆的正式池。
 4. **聚合變數命名 best**：使用者原稿以 max 為變數名遮蔽內建函式，教材示範不宜，generator 與 reference 一律改用 best。
 5. **範例 literal 置首**：執行彈窗預設 stdin＝第一筆測資（ChallengeView defaultStdin 慣例），第一筆固定為題面範例一，且含一個全滅→0 的版面讓學生看見「0 是合法答案」。
+
+6. **巢狀 literal 異長異殘量（R2 audit 定案）**：R2 對抗驗證證實三筆同長（20000）同殘量（0）literal 可被一行 `len(b)==20000` 長度分支＋print(0) 繞過（天真解 B 在全部隨機筆本就不超限）。修法：長度改 30000/34001/38002（落在壓力 band 值域內、無區間可判別）、殘量改 0/1/2（哨兵字母製造非零殘量，常數輸出必 WA）。探針複核：天真解 A/B 於三筆新 literal 全部 ≥2.5×10⁷ ops 觸限、正解 ≤115k ops。
 
 ## Implementation Contract
 
@@ -42,9 +44,9 @@
 
 **Interface / data shape**（frontmatter 契約）：
 
-- `layout: challenge`、`id`（scaffold 配號，預期 apcs006）、`title: 寶石消除關卡測試`、`difficulty: medium`、`category: apcs`、`type: competition`、`algorithm: gem_blast_playtest`、`input_budget: 65000`、`starter_code: ""`。
+- `layout: challenge`、`id`（scaffold 配號，預期 apcs006）、`title: 寶石消除關卡測試`、`difficulty: medium`、`category: apcs`、`type: competition`、`algorithm: gem_blast_playtest`、`input_budget: 42000`（貼緊壓力 band worst-case 40004 bytes——預算閘門即題面公告 40000 上限的數值守衛；日後若恢復大型獵殺筆需連同此值一起調整）、`starter_code: ""`。
 - `params` 三層：`t`（int 1..3）→ `rounds`（group，repeat from t）內含 `n`（int 1..5）與 `boards`（alpha_lower，min_len 3、max_len 50，count from n、separator "\n"）。band override 時壓力 band 收斂為 t=1、n=1、min_len 30000、max_len 40000。
-- `testcase_plan` 共 20 條目、順序固定：1 範例 literal（置首）→ 9 暖身 band（base params 值域）→ 5 隨機壓力 band（override 如上）→ 3 筆 20KB 巢狀 literal → 2 邊界 literal（單版面單顆→輸出 1；多版面全部全滅→輸出 0）。
+- `testcase_plan` 共 20 條目、順序固定：1 範例 literal（置首）→ 9 暖身 band（base params 值域）→ 5 隨機壓力 band（override 如上）→ 3 筆兩兩異長異殘量巢狀 literal（長度 30000/34001/38002、殘量 0/1/2，字母對 ab/cd/ef＋核心外哨兵字母）→ 2 邊界 literal（單版面單顆→輸出 1；多版面全部全滅→輸出 0）。
 - 輸出格式：T 行，每行一個整數＝該場 N 個版面遺留顆數的最大值。
 
 **Failure modes**：build:pools 對超預算 literal 直接失敗並指名條目；params 拼錯欄位由 scripts/challenge-params.test.ts 指名擋下；reference 與 generator 不一致由 content-regression 測試擋下。
@@ -52,7 +54,7 @@
 **Acceptance criteria**：
 
 1. `pnpm build:pools` 成功，池 10 blocks × 20 筆。
-2. `node_modules/.bin/vitest --run scripts/content-regression.test.ts` 過（reference 對正式池全 AC）。
+2. `node_modules/.bin/vitest --run scripts/content-regression.test.ts` 過（確定性 20-of-200 抽樣；未覆蓋的 plan 位置由 wrapper 冒煙 [0,100,199] 與 dev 全 20 筆人工驗證補齊並記錄於 dev-verification-notes）。
 3. `node_modules/.bin/vitest --run scripts/challenge-params.test.ts` 過。
 4. 3000 組隨機字串雙實作互驗（generator 核心 vs reference 核心）零差異。
 5. 探針複核（重現 tracer）：天真解 A/B 於每一壓力條目 op ≥ 2×10M；正解於全部條目 op ≤ 10M/50。
@@ -62,7 +64,7 @@
 
 ## Risks / Trade-offs
 
-- **literal 進公開 repo**：巢狀 literal 輸入可被學生預計算並 hardcode 該筆輸出；但其餘 17 筆隨機／範例筆仍需正確程式，無法整題作弊。接受。
+- **literal 進公開 repo**：巢狀 literal 輸入可被學生預計算並 hardcode 該筆輸出；三筆異長（30000/34001/38002）異殘量（0/1/2）設計使單一長度判別或常數輸出捷徑最多覆蓋一筆——長度分支＋print(0) 會在其餘兩筆與隨機壓力筆吃 WA，效能斷崖不因 hardcode 而失守（R2 audit 對抗驗證確認）。殘餘弱點：逐筆長度仍各自可鍵，須三份獨立 hardcode 才能全蓋，且與隨機壓力筆同值域 [30000,40002] 重疊、無法以區間判別分流。接受。
 - **replace 繞法放行**：牆鐘軟旗標對同步碼結構性失效（Decisions 2），繞法將得 20/20 AC。高中生自行想到並驗證 replace 收斂等價的機率低；視為聰明解。
-- **frontmatter 約 +60KB，且 literal 會進 production bundle**：strip-generator plugin 只剝 generator 與 reference_solution（BUILD_STRIPPED_FIELDS），`testcase_plan` 連同全部 literal 原文會隨頁面資料送達瀏覽器（ChallengeView 讀取、prod 僅用於 computePlanTotal 計筆數）。實測 gzip 後三筆巢狀 literal 僅約 0.3KB（高度重複字串），傳輸成本可忽略；學生可讀性與「公開 repo 可見」屬同一風險面，已由隨機筆佔 14/20 的結構抵銷。⚠️ 勿為此把 testcase_plan 加入 strip 名單——prod runner 的 effectiveTestcaseCount 會退回 testcase_count 預設 5，與 20 筆 plan block 直接衝突（對抗驗證確認的修一洞挖一洞陷阱）。接受現狀。
-- **繞法整批時間**：replace 繞法最慢單筆（20KB 巢狀）實測數百 ms 等級，整批遠低於 6s×20=120s 總預算，無誤觸硬殺疑慮。
+- **frontmatter 約 +102KB，且 literal 會進 production bundle**：strip-generator plugin 只剝 generator 與 reference_solution（BUILD_STRIPPED_FIELDS），`testcase_plan` 連同全部 literal 原文會隨頁面資料送達瀏覽器（ChallengeView 讀取、prod 僅用於 computePlanTotal 計筆數）。實測 gzip 後三筆巢狀 literal 僅約 0.3KB（高度重複字串），傳輸成本可忽略；學生可讀性與「公開 repo 可見」屬同一風險面，已由隨機筆佔 14/20 的結構抵銷。⚠️ 勿為此把 testcase_plan 加入 strip 名單——prod runner 的 effectiveTestcaseCount 會退回 testcase_count 預設 5，與 20 筆 plan block 直接衝突（對抗驗證確認的修一洞挖一洞陷阱）。接受現狀。
+- **繞法整批時間**：replace 繞法最慢單筆（38KB 巢狀）dev 實測 3.2s、三筆巢狀合計 ~7.2s，整批遠低於 6s×20=120s 總預算，無誤觸硬殺疑慮。

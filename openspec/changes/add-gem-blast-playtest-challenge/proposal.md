@@ -7,7 +7,7 @@ APCS 素養題庫（apcs001~005）已涵蓋堆疊回數、緩衝稽核、排程�
 - 新增挑戰題 `docs/challenge/gem-blast-playtest.md`（scaffold 配號 apcs006、medium、competition、algorithm `gem_blast_playtest`）。
 - 題面：消除遊戲測試員素養情境——一列寶石相鄰兩顆同色互消、兩側靠攏可連鎖；每場測試 N 個版面，回報最卡關版面（剩餘顆數最大值）；共 T 場。全文、tags、description 零資料結構術語。
 - 輸入結構：第一行 T；每場第一行 N、接著 N 行小寫字母字串（group + count.from 三層結構）。輸出 T 行整數。
-- `testcase_plan` 20 筆：1 範例 literal 置首（＝題面範例一，含全滅→0 版面）＋9 暖身 band＋5 隨機壓力 band（T=1、N=1、L 30000..40000）＋3 筆 20KB 巢狀對消 literal＋2 邊界 literal（單顆→1、多版面全滅→0）。`input_budget: 65000`。
+- `testcase_plan` 20 筆：1 範例 literal 置首（＝題面範例一，含全滅→0 版面）＋9 暖身 band＋5 隨機壓力 band（T=1、N=1、L 30000..40000）＋3 筆兩兩異長異殘量巢狀對消 literal（30000/34001/38002、殘量 0/1/2）＋2 邊界 literal（單顆→1、多版面全滅→0）。`input_budget: 42000`。
 - generator＝stack 掃描解（暫存末端比對，聚合變數名 best）；`reference_solution`＝雙指標陣列版（預配 buf＋top 索引），實作路徑獨立以互抓錯。starter_code 空字串。
 - 驗證含：3000 組隨機雙實作互驗、TLE 斷崖探針複核（天真解 ≥2× 超限、正解餘裕 ≥50×）、dev 真機實測 replace 繞法（實測已定案：牆鐘軟旗標對同步碼結構性失效，60KB 獵殺筆依降級條款改為第三筆 20KB literal，繞法放行；細節見 design Decisions 2）。
 
@@ -32,5 +32,5 @@ APCS 素養題庫（apcs001~005）已涵蓋堆疊回數、緩衝稽核、排程�
 - Affected specs: 新增 `gem-blast-challenge`
 - Affected code:
   - New: docs/challenge/gem-blast-playtest.md
-  - Modified: (none)
+  - Modified: openspec/BACKLOG.md（§2.8 補 2026-08-05 牆鐘軟旗標失效實測更正，audit R2 要求）
   - Removed: (none)
