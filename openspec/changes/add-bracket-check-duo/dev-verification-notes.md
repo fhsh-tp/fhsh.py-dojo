@@ -27,3 +27,20 @@
 
 - `pnpm build:pools`：64 pools、0 failed；prop-box-packing.bin 1,616,723B、magazine-typeset-check.bin 1,065,334B
 - `challenge-params.test.ts` 69 passed；`content-regression.test.ts` 兩題 passed；`wrapper-content-smoke.test.ts` 15 passed（含兩新題，判題 wrapper 真路徑）
+
+## Round 1 audit 修復後重驗（2026-08-06，兩池重洗）
+
+R1 修復內容：1a stress 裁回深度 31000（62000 字元，ref 恰 217,022 ops 與矩陣一致）；1b 六筆獵殺重設計
+（互異、lean 下限 m×2k≥20M、3 筆殘留分支答案 7/5/9）；starter 改為不輸出；1b 提醒句改窄（B10）；
+C-rfind 收編（B9）；proposal/tasks prose 同步。
+
+| 路線 | 預測 | 實測 | 命中 |
+|------|------|------|------|
+| V1 1a ref | 20/20 | 20/20 AC | ✅ |
+| V2 1a 計數器 | 15/20，WA 恰 4/9/12/15/18 | 15/20，WA 恰同五筆（池重洗後 soup 巧合維持） | ✅ |
+| V3 1a replace | 20/20 | 20/20 AC | ✅ |
+| V4 1b ref | 20/20 | 20/20 AC（獵殺筆 16~20ms） | ✅ |
+| V5 1b 回頭掃描 | 14/20，TLE 恰 14/15/16/18/19/20 | 14/20，TLE 恰同六筆（~1.9s） | ✅ |
+| V6 1b 最精簡回頭掃描（1 op/iter，R1 新增路線） | 14/20，同六筆爆殺 | 14/20，TLE 恰同六筆（~2.8s） | ✅ |
+
+守門：build:pools 0 failed；params 69 passed；content-regression 兩題 passed；wrapper-smoke 15 passed。

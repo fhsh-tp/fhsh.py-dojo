@@ -18,6 +18,7 @@
 | C7 | 輸入格式：第一行 T（1 ≤ T ≤ 5），接著 T 行、每行一個紀錄字串；字串長度 1..62000 | 本設計定義；預算驗算見 C4 | S R1/R4；Ma/Mb 輸入說明 |
 | C8 | 引擎 band 用 `t` 固定 1＋`s` enum（值＝允許字元清單、count＝長度範圍、separator ""）；band override 只補丁 `values`／`count` 值域；literal 筆可用 T>1 | Usage.md 型別一覽＋override 合併規則；parser.rs 多字元 enum values 測試 L1138 | D params 設計；Ma/Mb params＋testcase_plan |
 | C9 | generator 與 reference_solution 語義一致但寫法獨立（stack 掃描 vs 不同資料佈局），由 content-regression 驗證 | challenge-author skill §3 | D 驗證；Ma/Mb generator/reference_solution |
+| C10 | starter_code 讀入後不輸出任何行（原地提交＝0/20 基線）；「刻意常數輸出」的殘餘得分（1a 全 NG≈11/20、1b 全 0≈3~5/20）為 accepted residual——判題逐筆亮 WA、無法通關，與其他二值輸出題同性質 | R1 修訂（原 starter 印 NG/0 白拿 11/20、7/20）；R1 findings 5/8/13/14 | D D5；Ma/Mb starter_code |
 
 ## 1a 道具箱裝箱檢查（A）
 
@@ -25,7 +26,7 @@
 |----|------|----------|----------|
 | A1 | 合法性語義：由左至右掃描，右括號必須與「最近尚未配對的左括號」同種配對；掃描完無殘留＝合法 | UVa 673 語義；探針 sanity（`([)]`→NG） | S R1；Ma 演算法說明 |
 | A2 | 每行輸出恰為 `OK`（合法）或 `NG`（不合法），共 T 行 | 本設計定義 | S R1；Ma 輸出說明 |
-| A3 | 計數器假解（逐種計數＋執行中不可為負）僅在「各種類數量平衡、執行中不為負、但順序交錯」時出錯——隨機 NG soup 上會巧合正確。因此交錯陷阱 literal 布 5 筆（第 4/9/12/15/18 筆，各含一個騙倒計數器的 case：`([)]`／`[(])`／`(([))]`／`{[}]`／`([{)]}` 家族）；預測計數器精確 15/20、第 4 筆首 WA | 探針 sanity＋離線自檢腳本逐 case 斷言 counter_fake≠truth；e2e V1 後修正（原「3/20」預測為誤，2026-08-06 修訂） | S R2 Scenario；D 假解分析；Ma testcase_plan |
+| A3 | 計數器假解（逐種計數＋執行中不可為負）僅在「各種類數量平衡、執行中不為負、但順序交錯」時出錯——隨機 NG soup 上會巧合正確。因此交錯陷阱 literal 布 5 筆（第 4/9/12/15/18 筆，各含一個騙倒計數器的 case：`([)]`／`[(])`／`(([))]`／`{[}]`／`([{)]}` 家族）；預測計數器精確 15/20、第 4 筆首 WA | 探針 sanity＋離線自檢腳本逐 case 斷言 counter_fake≠truth；e2e V1 後修正（原「3/20」預測為誤，2026-08-06 修訂） | P What Changes；S R2 Scenario；D 假解分析；Ma testcase_plan |
 | A4 | C 繞道（replace 迴圈、find+切片刪除）**收編為 accepted alternative**：31k 深巢下 replace 93,017 ops／5.5s native、delfind 434,026 ops／3.6s native——op counter 抓不到（<0.5M ops），牆鐘獵殺需 ≥10 筆 62KB 獵殺筆（不可行）。題面**不得**寫不可能性承諾 | 探針 P2/P3（probe_harness，settrace 同款 tracer）；rank-code-duo RCA D6.b 判例 | D 繞道分析；S R3；Ma 無（題面沉默） |
 | A5 | 正解（stack 掃描）worst-case：62KB 深巢 217,022 ops／0.016s native，≤ 門檻 2.5M（上限 10M÷4） | 探針 P1 | D 效能驗算；S R3 |
 | A6 | 第 20 筆 stress literal：62KB 混種深巢（深度 31000，`([{` 循環）；replace 路線單筆 ~5.5s native、正解毫秒級 | 探針 P1/P2（同構） | S R2；D 測資設計；Ma testcase_plan |
@@ -39,11 +40,13 @@
 | B1 | 首錯位置語義三分支：(i) 掃描遇「右括號且無待配對左括號或種類不符」→輸出該右括號位置；(ii) 掃畢有殘留左括號→輸出**最早**一個未配對左括號位置（殘留堆疊最底）；(iii) 全配對→輸出 0 | 本設計定義；探針 sanity（`x([y)z]`→5、`((a`→1、無括號→0） | S R4；Mb 演算法／輸出說明 |
 | B2 | 位置以**原字串** 1-based 計，雜訊字元一併計位 | 本設計定義 | S R4；Mb 輸出說明 |
 | B3 | 字串混入雜訊字元；雜訊集＝小寫字母＋數字＋`.,;`（**不含空白**——學生慣用 `input().strip()`，前導/尾隨空白會造成非預期位置偏移陷阱）；雜訊掃描時跳過、但一併計位 | grilling Q4 補充；strip 誤傷分析（apply 期發現） | S R4；Mb 輸入說明；D params |
-| B4 | 獵殺筆 ×6（第 14、15、16、18、19、20 筆）：形狀 `(`×1000＋`()`×5000＋`)`×1000（12,000 字元）；回頭掃描天真解每筆 ≥20M 精簡 ops（2 ops/iter 下限估算）→ 逐筆 op 爆殺；預測天真解 14/20 | 探針 P5＋尺寸掃描（m=400..800 全部 10M 爆殺、正解 ≤51k ops）；m=1000,k=5000 下限驗算 1000×10000×2=20M | S R5；D 測資設計；Mb testcase_plan |
-| B5 | 正解 worst-case：50KB 獵殺形 200,823 ops／40KB 混雜訊 151,649 ops，≤ 2.5M | 探針 P4 | D 效能驗算；S R6 |
+| B4 | 獵殺筆 ×6（第 14/15/16/18/19/20 筆）互不相同：形狀家族 `前綴成對×p ＋ 開×m ＋ 成對×k ＋ 閉×(m 或 m−1)`，參數 (kind,m,k,p,殘留)＝K14(`(`,2000,5000,0,無)、K15(`[`,2000,6250,3,有→答案 7)、K16(`{`,2000,5000,0,無)、K18(`(`,2500,4000,2,有→答案 5)、K19(`[`,1600,6250,0,無)、K20(`{`,2000,5000,4,有→答案 9)；長度 13,006~16,508 字元；每筆 lean 下限 m×2k ≥ 20M（1 op/iter 精簡變體實測 K18=26,290,548 ops 仍爆殺，餘裕 ≥2×）；預測天真解 14/20 | R1 修訂：原 6 筆同形重複＋餘裕僅 1.11×（複核實測 1 op/iter 變體）→ 重設計；六筆對最精簡變體逐筆實測全數 10M 爆殺（wall ~1.4s）；正解最大筆 K15=66,043 ops | P What Changes；S R5；D 測資設計；Mb testcase_plan |
+| B5 | 正解 worst-case：50KB 獵殺形 200,823 ops／40KB 混雜訊 151,649 ops／新六筆獵殺最大 K15=66,043 ops，≤ 2.5M | 探針 P4＋R1 重測 | D 效能驗算；S R6 |
 | B6 | replace／刪除類路線**結構性不可用**（消字元後位置資訊消失）——設計層論證，題面不宣稱 | Q3 拍板論證 | D 繞道分析 |
 | B7 | 無任何括號的字串→輸出 0（邊界 literal 釘死） | B1(iii) 特例 | S R4 Scenario；Mb testcase_plan |
-| B8 | 獵殺筆為合法字串（答案 0），逼天真解掃到爆；正解毫秒 | 探針 P4/P5 | D 測資設計 |
+| B8 | 獵殺筆逼天真解全行掃描（無錯配可提早 break）：無殘留筆答案 0、殘留筆走 B1(ii) 分支（答案 7/5/9）——兩型皆須掃完全行；正解毫秒 | 探針 P4/P5＋R1 重測 | D 測資設計 |
+| B9 | C 層回頭掃描（str.rfind 系）收編為 accepted alternative：op 稀疏、op counter 抓不到，與 1a replace 同機制不可獵殺（R1 賞金獵人實測 AC） | R1 bounty-bypass 實測 | D 繞道分析 |
+| B10 | 1b 題面提醒句限定為窄而實測為真的敘述：「每遇到一個右標記，就用迴圈逐字元往回重新掃描」的寫法經實測超出運算次數限制——不含對 C 層路線的不可能性承諾 | R1 修訂（原句為可證偽的不可能性承諾，C-rfind 反例）；rank-code-duo 題面警語守則 | D D6；Mb 提醒句 |
 
 ## 判題預測矩陣（V）— dev e2e 驗證標的
 
