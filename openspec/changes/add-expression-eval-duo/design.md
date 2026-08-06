@@ -32,7 +32,7 @@
 
 ## D4 階梯哲學與收編清單
 
-軸心＝語義鑑別（trace C8）。收編（=接受為聰明解，題面不提、不獵殺）：E1（011 20/20，279,208 ops，trace A3）、R2（011 20/20，trace A11）、E3′（012 20/20，fuzz 1200/1200，trace B4——`**` 是 Python 唯一高優先右結合運算子，右結合性隨選擇免費取得，屬已知教學殘餘，依守則⑤不以測資獵殺）、N1（C 層重寫）。完整判分預測見矩陣 V 表（V1–V12），apply 期對具獨立路線檔的 V1–V5／V7–V12（15 次提交）ship-e2e 重測（I-5）；V6 無獨立路線檔，由 V8/V10 家族夾擊覆蓋，維持 design-probe 並於 spec 明文豁免。
+軸心＝語義鑑別（trace C8）。收編（=接受為聰明解，題面不提、不獵殺）：E1（011 20/20，279,208 ops，trace A3）、R2（011 20/20，trace A11）、E3′（012 20/20，fuzz 1200/1200，trace B4——`**` 是 Python 唯一高優先右結合運算子，右結合性隨選擇免費取得，屬已知教學殘餘，依守則⑤不以測資獵殺）、N1（C 層重寫）。完整判分預測見矩陣 V 表（V1–V12），apply 期對具獨立路線檔的 V 表 cell（V1–V5／V7–V12，14 次提交）ship-e2e 重測（I-5）；無路線檔的 cell——V6（兩題）與 V8 的 011 欄——維持 design-probe 並於 spec 明文豁免（由策展腳本逐 entry predictor assert 覆蓋；012 側另有 V8/V10 實測夾擊）。
 
 ## D5 鑑別職責與斷言牆
 
@@ -93,5 +93,5 @@ plan_b.py `finalize()` 對每個錯誤路線類掛 predictor＋上界 assert（I
 2. **Frontmatter**：`algorithm` 取 scaffold 預設底線版；`input_budget: 63488`；`testcase_plan` 為 20 個 literal 區塊，內容 byte-for-byte 等於 `design_b/literals/{a,b}_NN.txt`（由組裝腳本寫入，不手貼）；`params` 保留 scaffold 合法宣告（literal-only plan 下僅佔位，型別須通過 challenge-params 冒煙）。
 3. **generator**：實作 D2 語義（迭代式段折疊），內建整除 assert；**reference_solution**：shunting-yard→RPN 異構實作（012 支援括弧、右結合加減）。兩者在全 40 筆 literal 上輸出一致（apply 期以腳本先行驗證再進瀏覽器）。
 4. **題面**：依 D6 全部約束撰寫；範例區塊＝entry 1 內容原樣。
-5. **驗證閘（I-5）**：`pnpm build:pools` 後，dev e2e 依 V 表具路線檔之 11 條路線（V1–V5／V7–V12，15 次提交）逐筆重測（agent-browser SOP），矩陣 ship-e2e 欄位補齊（V6 依 spec 豁免、維持 design-probe）；任何 literal／generator 改動先標 STALE 再重測。scoreboard 斷言：`pnpm typecheck`、`pnpm lint`、params 冒煙、content-regression（兩題 reference_solution）全綠。
+5. **驗證閘（I-5）**：`pnpm build:pools` 後，dev e2e 依 V 表具路線檔之 11 條路線（V1–V5／V7–V12，14 次提交；另補測非 V 表之 E3-naive 檔 1 次）逐筆重測（agent-browser SOP），矩陣 ship-e2e 欄位補齊（V6 兩題與 V8 之 011 欄依 spec 豁免、維持 design-probe）；任何 literal／generator 改動先標 STALE 再重測。scoreboard 斷言：`pnpm typecheck`、`pnpm lint`、params 冒煙、content-regression（兩題 reference_solution）全綠。
 6. **修復紀律**：改數值先 `grep -n` 舊值全域列舉、改後歸零（I-7）；audit 輪的 side_effect_risk 機械抽成同步 checklist（I-8）；修復若新增／改動 literal 家族，當輪對新造物件重跑 I-3 表（I-4）。

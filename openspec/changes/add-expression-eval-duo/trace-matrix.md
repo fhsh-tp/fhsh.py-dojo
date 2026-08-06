@@ -11,7 +11,7 @@
 
 | ID | 事實 | 值／狀態 | evidence 出處 | proposal | design | spec |
 |----|------|---------|--------------|----------|--------|------|
-| C1 | 判題 op 上限／總時間預算 | `10_000_000` ops/test；120s 累計 | worker-utils.ts（change A 已錨定） | — | D1 | — |
+| C1 | 判題資源上限（三機制）：op 計數、單筆軟旗標、單筆硬殺；總預算為派生值 | `10_000_000` ops/test（DEFAULT_OP_LIMIT）；軟旗標 `5_000`ms（pyodide.worker.ts WALL_CLOCK_MS）；硬殺 `6_000`ms／筆（useExecutor.ts WALL_CLOCK_KILL_MS）；累計預算＝20×6s＝120s（派生） | pyodide.worker.ts:109-110＋useExecutor.ts:5,56 | — | D1 | — |
 | C2 | 輸入格式：首行 T（`T ≥ 1`）、續 T 行運算式；token 間單一空白；輸出 T 行整數；單一數字行合法 | 固定 | plan_b.py `finalize()`＋literals（a_02 含單數字行） | What | D2 | 輸入輸出 requirement |
 | C3 | 運算元非負整數；實測最大 `3791`（規格保證 `< 10000`）；中間值可為負，實測峰值 `44865`（規格保證 `\|值\| < 100000`）；無一元負號 | measured | design_b 量測（design-probe） | What | D2 | 值域 requirement |
 | C4 | 除法保證整除；除數（除號右運算元求值後）恆為**正整數**，實測最小 `1`；`0 / d = 0` 合法（值域保證非覆蓋承諾：0 被除數實例僅見於 011 entry 7，012 池內無實例） | assert 全 40 筆 | plan_b.py eval assert＋量測 | What | D2 | 整除 requirement |
@@ -77,6 +77,8 @@
 | V10 | 雙路徑複合（hybrid） | — | `8/20` | design-probe ✓，ship-e2e ✓ |
 | V11 | N1 list-rewrite C 路線 | `20/20`（收編） | — | design-probe ✓，ship-e2e ✓（011） |
 | V12 | R2 regex 括弧化＋eval | `20/20`（收編） | — | design-probe ✓，ship-e2e ✓ |
+
+> **ship-e2e 應測 route-run 數（派生錨點）＝14**：V 表具路線檔之 cell 逐一計數（V1=2、V2=1、V3=2、V4=2、V5=1、V7=1、V8=1〔僅 012〕、V9=1、V10=1、V11=1、V12=1）；V6 全列與 V8 之 011 欄無路線檔、依 spec 豁免。另補測非 V 表之 E3-naive 檔（B4）1 次，e2e 實際提交共 15 次。
 
 ## 賞金結果（design bounty wf_b2660959-6d7）
 

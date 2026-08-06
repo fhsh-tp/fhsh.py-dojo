@@ -29,7 +29,7 @@
 | V9 parens-std | 8/20 {1-8} | 8/20 ✓ | AC 恰 {1-8} |
 | V10 hybrid 雙路徑 | 8/20 {1-8} | 8/20 ✓ | AC 恰 {1-8}——PKline 封殺驗證成立 |
 
-**結論：15/15 路線、每一筆 entry 判定與設計期預測零偏差。** V6（uniform mdr）無獨立路線檔，維持 design-probe 狀態（其行為已被 V8/V10 家族夾擊覆蓋）。
+**結論：15 次提交（V 表 14 route-run＋非 V 表 E3-naive 檔 1 次）、每一筆 entry 判定與設計期預測零偏差。** 無路線檔的 V 表 cell——V6（兩題）與 V8 的 011 欄——維持 design-probe 狀態（由策展腳本逐 entry predictor assert 覆蓋；012 側另有 V8/V10 實測夾擊）。
 
 ## 平台觀察（非本 change 缺陷，記錄供平台參考）
 
