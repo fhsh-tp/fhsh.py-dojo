@@ -141,11 +141,7 @@ reference_solution: |
   data = sys.stdin.read().splitlines()
   t = int(data[0])
   print("\n".join(check(data[i]) for i in range(1, t + 1)))
-starter_code: |
-  t = int(input())
-  for _ in range(t):
-      record = input()
-      # 在此判斷這一行紀錄是否合法，印出 OK 或 NG
+starter_code: ""
 ---
 
 ## 道具箱裝箱檢查
