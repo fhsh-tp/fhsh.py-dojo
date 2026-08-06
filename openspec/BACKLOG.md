@@ -163,6 +163,15 @@ change、完整 review 與 staging 驗證後才落地。
 - **延後改善(audit R2 記錄)**:generator 豁免 op-counter 後,dev 模式
   generate 路徑的無限迴圈 generator 會掛住預覽頁——細節與建議修法見
   §2.3(同一根因,已於該條目 2026-07-28 更新段整併,勿重複記錄)。
+- **2026-08-06 推論(rank-code-duo RCA)**:C 內建對 op counter 隱形 ＋
+  單筆牆鐘軟旗標失效 ⇒ 凡「答案可由單一 C 實作 stdlib API 一步得出」的
+  題型,皆存在無法以測資獵殺的存活路徑(加壓必先打死正解)。案例:
+  gem-blast 的 str.replace(2026-08-05,收編為聰明解)、prize-order-code
+  的 math.perm＋Legendre 尾零計數(2026-08-06,收編為聰明解,量化論證見
+  `openspec/changes/add-rank-code-challenge-duo/trace-matrix.md` F19/F20)。
+  在缺口修復前,選題階段須先做 stdlib 封閉形式盤點(math.factorial/perm/
+  comb/prod/isqrt/gcd/lcm、三參數 pow、str 運算等),凡能一步到位者一律
+  實測列入繞道清單,或明確接受為聰明解。
 
 ### 2.9 .env.pool 檔案權限(M-R2-2)
 
