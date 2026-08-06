@@ -11,7 +11,7 @@
 
 | ID | 事實 | 值／狀態 | evidence 出處 | proposal | design | spec |
 |----|------|---------|--------------|----------|--------|------|
-| C1 | 判題資源上限（三機制）：op 計數、單筆軟旗標、單筆硬殺；總預算為派生值 | `10_000_000` ops/test（DEFAULT_OP_LIMIT）；軟旗標 `5_000`ms（pyodide.worker.ts WALL_CLOCK_MS）；硬殺 `6_000`ms／筆（useExecutor.ts WALL_CLOCK_KILL_MS）；累計預算＝20×6s＝120s（派生） | pyodide.worker.ts:109-110＋useExecutor.ts:5,56 | — | D1 | — |
+| C1 | 判題資源上限（三機制）：op 計數、單筆軟旗標、單筆硬殺；總預算為派生值 | `10_000_000` ops/test（DEFAULT_OP_LIMIT）；軟旗標 `5_000`ms（pyodide.worker.ts WALL_CLOCK_MS）；硬殺 `6_000`ms／筆（useExecutor.ts WALL_CLOCK_KILL_MS）；累計預算＝20×6s＝120s（派生） | pyodide.worker.ts（DEFAULT_OP_LIMIT、WALL_CLOCK_MS）＋useExecutor.ts（WALL_CLOCK_KILL_MS、totalBudget） | — | D1 | — |
 | C2 | 輸入格式：首行 T（`T ≥ 1`）、續 T 行運算式；token 間單一空白；輸出 T 行整數；單一數字行合法 | 固定 | plan_b.py `finalize()`＋literals（a_02 含單數字行） | What | D2 | 輸入輸出 requirement |
 | C3 | 運算元非負整數；實測最大 `3791`（規格保證 `< 10000`）；中間值可為負，實測峰值 `44865`（規格保證 `\|值\| < 100000`）；無一元負號 | measured | design_b 量測（design-probe） | What | D2 | 值域 requirement |
 | C4 | 除法保證整除；除數（除號右運算元求值後）恆為**正整數**，實測最小 `1`；`0 / d = 0` 合法（值域保證非覆蓋承諾：0 被除數實例僅見於 011 entry 7，012 池內無實例） | assert 全 40 筆 | plan_b.py eval assert＋量測 | What | D2 | 整除 requirement |
@@ -36,7 +36,7 @@
 | A4 | E2 標準優先序 eval 上界 | ≤`3`；實測 `2/20`（entries 2,3） | plan_b assert＋verify | — | D5 | 判分 requirement |
 | A5 | 加減右結合誤解上界 | ≤`4`；實測 `1/20`（entry 2） | plan_b assert＋verify | — | D5 | 判分 requirement |
 | A6 | 乘除右結合 bug（遞迴下降 `expr:=term op expr`）上界 | ≤`4`；實測 `3/20`（entries 1,2,3） | plan_b assert（design-probe） | — | D5 | 判分 requirement |
-| A7 | 20 筆結構：1 範例(T=5)／2-3 gimme／4-7 手工考點（含 L2R、divtight 鑑別行）／8-12 seeded 中型／13-16 大型／17-20 規模 30-50KB | 固定 | plan_b.build_011 | — | D3 | 測資 requirement |
+| A7 | 20 筆結構：1 範例(T=5)／2-3 gimme／4-7 手工考點（含 L2R、divtight 鑑別行）／8-12 seeded 中型／13-16 大型／17-20 規模（實測 21577–50055 bytes） | 固定 | plan_b.build_011 | — | D3 | 測資 requirement |
 | A8 | 正解 ops 餘裕 | 單筆峰值 `28_864`；全 20 筆累計 `161_108` ops／`0.036`s | HARNESS（design-probe） | — | D4 | — |
 | A9 | L2R（全運算子同優先序左到右）上界 — 賞金 F5 | ≤`3`；實測 `2/20`（entries 2,3） | plan_b `l2r` assert＋b011_l2r 實測 | — | D5 | 判分 requirement |
 | A10 | divtight（`/` 比 `*` 更緊）上界 — 賞金 F1 旁系 | ≤`4`；實測 `4/20`（entries 1,2,3,11） | plan_b `divtight` assert | — | D5 | 判分 requirement |
@@ -55,11 +55,11 @@
 | B7 | 乘除右結合 bug（uniform）上界 | ≤`4`；實測 `3/20`（entries 1,2,3） | plan_b assert＋verify | — | D5 | 判分 requirement |
 | B8 | 20 筆結構：1-8 無括弧（1 範例／2 gimme／3-6 手工／7-8 seeded＋DTkill 行）／9 括弧入門（含 PKline 鑑別行）／10-16 巢狀 2-25 層＋PKline／17-20 規模＋PKline | 固定 | plan_b.build_012 | — | D3 | 測資 requirement |
 | B9 | 正解 ops 餘裕 | 單筆峰值 `72_106`；全 20 筆累計 `308_093` ops／`0.046`s | HARNESS（design-probe） | — | D4 | — |
-| B10 | generator＝段折疊迭代式；reference_solution＝獨立異構實作（shunting-yard／RPN） | 待 apply | 設計決策 | What | D2 | — |
+| B10 | generator＝段折疊迭代式；reference_solution＝獨立異構實作（shunting-yard／RPN） | 已出貨 ✓（兩檔皆宣告 reference_solution；content-regression 17 passed） | 設計決策＋dev-verification-notes | What | D2 | — |
 | B11 | divtight（`/` 比 `*` 更緊）上界 — 賞金 F1 主案 | ≤`4`；實測 `3/20`（entries 1,2,3；修補前 `15/20`） | plan_b assert＋b012_divtight 實測 | — | D5 | 判分 requirement |
 | B12 | parens-std（括弧內改用標準規則）上界 — 賞金 F6 | ≤`8`；實測 `8/20`（entries 1-8＝結構性下限：無括弧段語義全對者應得） | plan_b assert＋b012_parenstd 實測 | — | D5 | 判分 requirement |
 | B13 | 雙路徑複合解（無括弧行正確＋括弧行帶 mdr bug）上界 — 賞金 F3 | ≤`8`；實測 `8/20`（修補前 `20/20`；PKline=括弧行內同層雙乘除鑑別行封殺） | plan_b `hybrid_ok` assert＋sol_hybrid012 實測 | — | D5 | 判分 requirement |
-| B14 | 「往回套用」語感有分岔讀法（逐次套用 vs 巢狀分組）——頁面規則必須以「每張券作用於其右側整段已計算結果」＋範例逐步拆解表述 — 賞金 F11 | 頁面撰寫約束 | page-lang lens | — | D6 | 題面 requirement |
+| B14 | 「往回套用」語感有分岔讀法（逐次套用 vs 巢狀分組）——頁面規則必須以「每張券作用於其右側整段已計算的結果」＋範例逐步拆解表述 — 賞金 F11 | 頁面撰寫約束 | page-lang lens | — | D6 | 題面 requirement |
 
 ## V — 判分預測表（I-6：AC 用上界式；精確值為 measured 紀錄非 AC）
 

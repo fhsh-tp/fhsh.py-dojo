@@ -6,7 +6,7 @@
 ## 2. 題面撰寫
 
 - [x] 2.1 撰寫 apcs011 題面，落實「Challenge-page language constraints」與「Score-ladder disposition and co-opted routes」（不提收編路線、不寫不可能性）：福利社老收銀機情境、值域/整除/除數為正/單數字行/答案可負逐條寫入、範例區塊=entry 1 原樣（含 1 - 7 / 2 = -3）；驗收：對照 trace C2/C3/C4/A1/A2 逐列勾稽、無資料結構術語
-- [x] 2.2 撰寫 apcs012 題面，落實「Challenge-page language constraints」：折價券疊加情境、右結合以「每張券作用於其右側整段已計算結果」表述＋10 - 4 - 3 + 2 * 6 逐步拆解表（trace B14）、括弧覆寫 worked example、與 011 的 30/66 對照（trace B2）；驗收：同上逐列勾稽
+- [x] 2.2 撰寫 apcs012 題面，落實「Challenge-page language constraints」：折價券疊加情境、右結合以「每張券作用於其右側整段已計算的結果」表述＋10 - 4 - 3 + 2 * 6 逐步拆解表（trace B14）、括弧覆寫 worked example、與 011 的 30/66 對照（trace B2）；驗收：同上逐列勾稽
 
 ## 3. 建置與本機驗證
 
