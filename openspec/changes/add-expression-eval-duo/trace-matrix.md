@@ -11,11 +11,11 @@
 
 | ID | 事實 | 值／狀態 | evidence 出處 | proposal | design | spec |
 |----|------|---------|--------------|----------|--------|------|
-| C1 | 判題 op 上限／總時間預算 | `10_000_000` ops/test；120s 累計 | worker-utils.ts（change A 已錨定） | Why | D1 | — |
+| C1 | 判題 op 上限／總時間預算 | `10_000_000` ops/test；120s 累計 | worker-utils.ts（change A 已錨定） | — | D1 | — |
 | C2 | 輸入格式：首行 T（`T ≥ 1`）、續 T 行運算式；token 間單一空白；輸出 T 行整數；單一數字行合法 | 固定 | plan_b.py `finalize()`＋literals（a_02 含單數字行） | What | D2 | 輸入輸出 requirement |
 | C3 | 運算元非負整數；實測最大 `3791`（規格保證 `< 10000`）；中間值可為負，實測峰值 `44865`（規格保證 `\|值\| < 100000`）；無一元負號 | measured | design_b 量測（design-probe） | What | D2 | 值域 requirement |
-| C4 | 除法保證整除；除數（除號右運算元求值後）恆為**正整數**，實測最小 `1`；`0 / d = 0` 合法 | assert 全 40 筆 | plan_b.py eval assert＋量測 | What | D2 | 整除 requirement |
-| C5 | 關聯輸入無法由 8 型別引擎原生生成 → 全 literal 策展 | 40/40 literal | change A 先例 | Why | D3 | — |
+| C4 | 除法保證整除；除數（除號右運算元求值後）恆為**正整數**，實測最小 `1`；`0 / d = 0` 合法（值域保證非覆蓋承諾：0 被除數實例僅見於 011 entry 7，012 池內無實例） | assert 全 40 筆 | plan_b.py eval assert＋量測 | What | D2 | 整除 requirement |
+| C5 | 關聯輸入無法由 8 型別引擎原生生成 → 全 literal 策展 | 40/40 literal | change A 先例 | What | D3 | — |
 | C6 | input_budget | `63488`；最大 entry `50084` bytes（b_20） | plan_b.py 輸出（design-probe） | — | D3 | — |
 | C7 | op 斷崖不可建：重寫類天真解重活皆 C 層 | b011_rewrite `83_398` ops on 35KB → PASS | probe_b.py（design-probe） | Why | D4 | — |
 | C8 | 得分階梯軸心＝語義鑑別（非 TLE）；語義完全正確的繞道一律收編 | 見 V 表 | C7＋Q5/Q6 無 TLE 要求 | Why | D4 | 判分 requirement |
@@ -70,12 +70,12 @@
 | V3 | E1 對調 eval | `20/20`（收編） | `1/20` | design-probe ✓，ship-e2e ✓ |
 | V4 | E2 標準優先序 eval | `2/20` | `1/20` | design-probe ✓，ship-e2e ✓ |
 | V5 | L2R 全左到右 | `2/20` | — | design-probe ✓，ship-e2e ✓ |
-| V6 | 乘除右結合 bug（uniform） | `3/20` | `3/20` | design-probe ✓ |
+| V6 | 乘除右結合 bug（uniform） | `3/20` | `3/20` | design-probe ✓（無獨立路線檔；由 V8/V10 家族夾擊覆蓋；spec 明文豁免 ship-e2e） |
 | V7 | E3′ 冪次編碼（詞法補丁版） | — | `20/20`（收編） | design-probe ✓，ship-e2e ✓ |
-| V8 | divtight（/ 比 * 緊） | `4/20` | `3/20` | design-probe ✓，ship-e2e ✓ |
+| V8 | divtight（/ 比 * 緊） | `4/20` | `3/20` | design-probe ✓；ship-e2e ✓ 僅 012（011 欄無路線檔，維持 design-probe） |
 | V9 | parens-std | — | `8/20` | design-probe ✓，ship-e2e ✓ |
 | V10 | 雙路徑複合（hybrid） | — | `8/20` | design-probe ✓，ship-e2e ✓ |
-| V11 | N1 list-rewrite C 路線 | `20/20`（收編） | — | design-probe ✓ |
+| V11 | N1 list-rewrite C 路線 | `20/20`（收編） | — | design-probe ✓，ship-e2e ✓（011） |
 | V12 | R2 regex 括弧化＋eval | `20/20`（收編） | — | design-probe ✓，ship-e2e ✓ |
 
 ## 賞金結果（design bounty wf_b2660959-6d7）

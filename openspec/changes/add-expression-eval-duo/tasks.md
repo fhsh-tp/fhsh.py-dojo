@@ -15,7 +15,7 @@
 
 ## 4. dev e2e 與量測閘（I-5）
 
-- [x] 4.1 pnpm dev 起站，依 agent-browser SOP 對 V 表 12 路線逐路線提交、逐筆核對（V1-V12 期望值見 trace-matrix V 表；驗證「Snack-bar register testcase plan and discrimination duties」「Coupon-stacking testcase plan and discrimination duties」「Score-ladder disposition and co-opted routes」的實測面）；任何偏差即停
+- [x] 4.1 pnpm dev 起站，依 agent-browser SOP 對 V 表具路線檔之 11 條路線（V1-V5／V7-V12，15 次提交）逐路線提交、逐筆核對（期望值見 trace-matrix V 表；V6 無路線檔，維持 design-probe 並於 spec 明文豁免；驗證「Snack-bar register testcase plan and discrimination duties」「Coupon-stacking testcase plan and discrimination duties」「Score-ladder disposition and co-opted routes」的實測面）；任何偏差即停
 - [x] 4.2 將 ship-e2e 實測回填 trace-matrix.md（V 表狀態欄）並撰寫 dev-verification-notes.md（每路線 per-entry 判定表），完成「Verification and measurement discipline」
 
 ## 5. 收尾
