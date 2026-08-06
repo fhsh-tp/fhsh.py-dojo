@@ -17,8 +17,9 @@
   策展 literal。修法：交錯陷阱從 2 筆增為 5 筆（第 4/9/12/15/18 筆，`([)]`／`[(])`／`(([))]`／
   `{[}]`／`([{)]}` 家族），先改追溯矩陣再同步 spec/design/策展腳本，重建池後 V2 實測精確 15/20。
   教訓：假解得分預測必須以「假解與正解在**每一筆**測資上的一致性」推導，不能只看首個 WA 位置。
-- V3 stress 筆 Pyodide 牆鐘 3522ms（native 探針 5.5s）——WASM 字串 C 路徑不比 native 慢，
-  收編判定（牆鐘獵殺需 ≥10 筆 62KB 獵殺筆，不可行）成立。
+- V3 stress 筆 Pyodide 牆鐘 3522ms；R2 以出貨 literal 重測 native 為 2.1s（原 5.5s 量自單種探針形）——
+  Pyodide ≈1.7× native。收編判定改由 Pyodide 實測直接推導：即使 20 筆全 stress ≈ 70s < 120s 總預算，
+  牆鐘獵殺不可行，判定不變。
 - V5 op 爆殺每筆 ~1.9s 即中斷，與 rank-code 觀察一致（op counter 殺 TLE 筆的牆鐘特徵）。
 - 引擎 band（enum soup）+ literal 策展混排順序正確：判題順序＝testcase_plan 宣告順序，
   literal 位置驗算（策展腳本斷言 4/9/12/15/18 陷阱位、14/15/16/18/19/20 獵殺位）與實測一致。
@@ -44,3 +45,25 @@ C-rfind 收編（B9）；proposal/tasks prose 同步。
 | V6 1b 最精簡回頭掃描（1 op/iter，R1 新增路線） | 14/20，同六筆爆殺 | 14/20，TLE 恰同六筆（~2.8s） | ✅ |
 
 守門：build:pools 0 failed；params 69 passed；content-regression 兩題 passed；wrapper-smoke 15 passed。
+
+## Round 2 audit 修復後重驗（2026-08-06，兩池再重洗）
+
+R2 修復內容：A4/A6/D3/R3 繞道數字改以出貨 literal 直接量測（replace 62,018 ops／2.1s、delfind 310,030／1.4s——
+原數字量自單種探針形，複核人以 git show 證明真因為「探針形狀≠出貨形狀」）；1a 新增兩筆長交錯陷阱（第 17/19 筆，
+28K/35K，counts 平衡但深處交錯）封殺「長行只比數量」混合投機；1b 六筆獵殺重構為不規則混種帶雜訊形
+（殘留答案 29/27/18/23 埋 warmup 後、非公式可猜）封殺形狀偵測投機；B5 歸屬修正（reference K15=100,789、
+generator 67,337）；題面三處 prose 修正（1a 空堆疊情形、1b 主句與三分支對齊、提醒句去長度因果）；
+spec 無括號 literal 措辭修正；V 表補 V6–V8。
+
+| 路線 | 預測 | 實測 | 命中 |
+|------|------|------|------|
+| V1 1a ref | 20/20 | 20/20 AC | ✅ |
+| V2 1a 計數器 | 13/20，WA 恰 4/9/12/15/17/18/19 | 13/20，WA 恰同七筆 | ✅ |
+| V3 1a replace | 20/20 | 20/20 AC | ✅ |
+| V7 1a 混合投機（短行 stack＋長行比數量；R2 bounty 曾 20/20） | 18/20，WA 恰 17/19 | 18/20，WA 恰 17/19 | ✅ |
+| V4 1b ref | 20/20 | 20/20 AC | ✅ |
+| V5 1b 天真回掃 | 14/20，TLE 恰 14/15/16/18/19/20 | 14/20，TLE 恰同六筆 | ✅ |
+| V6 1b 精簡回掃（1 op/iter） | 14/20 | 14/20，TLE 恰同六筆 | ✅ |
+| V8 1b 長行跳過（len>5000 印 0；R2 bounty 形狀投機家族） | ≤16/20，14/15/18/20 必 WA | 16/20，WA 恰 14/15/18/20 | ✅ |
+
+守門：build:pools 0 failed（1a 1,858,805B／1b 1,217,707B）；params 69、content-regression 兩題、wrapper-smoke 15 全綠。
