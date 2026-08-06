@@ -65,7 +65,7 @@ R1 稽核發現原 6 筆獵殺有兩缺陷：18/19/20 與 14/15/16 逐位元組�
 
 1. `pnpm new-challenge prop-box-packing --title "道具箱裝箱檢查" --difficulty medium --category apcs --type competition`；`pnpm new-challenge magazine-typeset-check --title "校刊排版檢查器" --difficulty medium --category apcs --type competition`（id 由 scaffold 配號，C1）。
 2. 兩題 frontmatter 依 D2 骨架完成 params/testcase_plan/generator/reference_solution/starter_code；literal 由離線腳本產生後貼入（腳本存 scratchpad，不入 repo——與 exam-collect 慣例一致）。
-3. 驗收出口：`pnpm build:pools` 零錯誤；`node_modules/.bin/vitest --run scripts/content-regression.test.ts` 兩題通過；`node_modules/.bin/vitest --run scripts/challenge-params.test.ts` 通過；dev e2e 依 V1–V5 預測矩陣逐路線驗證（誤差＝逐筆位置零偏差）。
+3. 驗收出口：`pnpm build:pools` 零錯誤；`node_modules/.bin/vitest --run scripts/content-regression.test.ts` 兩題通過；`node_modules/.bin/vitest --run scripts/challenge-params.test.ts` 通過；dev e2e 依 V1–V9 預測矩陣逐路線驗證（誤差＝逐筆位置零偏差）。
 4. 失敗模式：任一 literal 超預算→建置期指名條目失敗（C4）；generator/reference 語義分歧→content-regression 指名失敗（C9）。
 
 ## Risks / Trade-offs
