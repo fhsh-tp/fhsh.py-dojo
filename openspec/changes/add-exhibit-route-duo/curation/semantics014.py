@@ -161,6 +161,28 @@ def route_E6_firstonly(text):
     return str(bag_parity(D, I)) + "\n"
 
 
+
+def route_Z4_bigmax(text):
+    """零洞察：球號大於門檻就直接輸出最大袋號，否則老實模擬。"""
+    res = []
+    for D, I in _parse(text):
+        res.append(str((1 << (D - 1)) if I > 100_000 else bag_parity(D, I)))
+    return "\n".join(res) + "\n"
+
+
+def fixed_period_route(M):
+    """誤解族：球號大於門檻時用固定模數 M 化約（而非 2^(D−1)）。"""
+    def run(text):
+        res = []
+        for D, I in _parse(text):
+            if I > 100_000:
+                res.append(str(bag_parity(D, (I - 1) % M + 1)))
+            else:
+                res.append(str(bag_parity(D, I)))
+        return "\n".join(res) + "\n"
+    return run
+
+
 ROUTES = {
     "ref": route_ref,
     "reversed": route_reversed,
@@ -175,4 +197,5 @@ ROUTES = {
     "E4_parityflip": route_E4_parityflip,
     "E5_dlevels": route_E5_dlevels,
     "E6_firstonly": route_E6_firstonly,
+    "Z4_bigmax": route_Z4_bigmax,
 }

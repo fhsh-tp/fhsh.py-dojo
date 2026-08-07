@@ -22,14 +22,19 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 LIT_DIR = os.path.join(HERE, "literals")
 
 MAX_I = 10_000_000             # 值域上限（題面同步）
-PASS_STEP_CAP = 1_000_000      # 第 1–14 筆：最貴的逐球寫法（4.158 ops/step）也要能過
-KILL_BALL_MIN = 20_000_000     # 第 15–20 筆：每球 1 op 的攤平寫法也要跳閘（2 倍餘裕）
-KILL_STEP_MAX = 45_000_000     # 殺手筆的總下降步數上限（攤平寫法牆鐘 ≈ 6 秒／筆）
-PERIOD_BALL_CAP = 100_000      # 殺手筆內「取週期後仍需模擬的球數」上限（保護收編路線）
-LEVELWISE_OPS_CAP = 8_000_000  # 收編路線每筆 op 上限，模型取**最貴**寫法 5 ops/內圈
+KILL_FROM = 16                 # 第 16 筆起為殺手帶
+PASS_STEP_CAP = 1_000_000      # 前段：最貴的逐球寫法（4.158 ops/step）也要能過
+KILL_BALL_MIN = 20_000_000     # 殺手帶：每球 1 op 的單球攤平寫法要跳閘（2 倍餘裕）
+KILL_STEP_MIN = 75_000_000     # 殺手帶：K 顆球攤平到同一行的寫法規避了 op 計數，只能靠
+                               # C3 的 5,000 ms 軟旗標攔——實測 7.9M steps/s，76M 步 ≈ 9.7 秒（近 2 倍餘裕）
+KILL_STEP_MAX = 85_000_000    # 殺手帶上限：陣亡提交每筆 ≈ 11 秒、5 筆 ≈ 54 秒 < C4 的 120 秒
+PERIOD_BALL_CAP = 100_000      # 每筆「取週期後仍需模擬的球數」**總和**上限（保護收編路線 P1）
+COOPT_NODES_CAP = 600_000      # 每筆 Σ2^(D−1) 上限：收編路線 L1 最貴寫法（遞迴版）實測約
+                               # 13 ops/節點，13 × 600K = 7.8M < C1，留 22% 餘裕
+BIG_I = 100_000                # 「大球數」門檻：超過此值的測試才承擔逐條退化性斷言
 
 ENTRIES = [
-    # 第 1–14 筆：逐球模擬可過（球數小）
+    # 第 1–15 筆：逐球模擬可過（球數小）
     [(4, 1), (4, 2), (4, 3), (4, 8), (4, 11)],              # 頁面範例（含球數 > 袋數）
     [(2, 1), (2, 2), (3, 1), (3, 4), (5, 16), (4, 2), (2, 7), (3, 10)],  # 邊界
     [(6, 32), (7, 10), (8, 100), (5, 33)],
@@ -37,20 +42,22 @@ ENTRIES = [
     [(14, 1000), (11, 777), (13, 2048), (2, 12345)],
     [(16, 5000), (15, 3000), (6, 40000)],
     [(18, 20000), (17, 15000), (4, 30000)],
-    [(20, 30000), (19, 20000), (7, 10000)],
+    [(20, 30000), (12, 20000), (7, 10000)],
     [(20, 50000), (6, 20), (3, 20000)],
-    [(20, 25000), (18, 25000), (5, 15000)],
+    [(20, 25000), (11, 25000), (5, 15000)],
     [(20, 50000), (3, 2), (8, 3000)],
     [(19, 54000), (2, 1), (9, 1500)],
     [(20, 45000), (16, 6000), (2, 49999)],
     [(20, 35000), (13, 15000), (4, 40000)],
-    # 第 15–20 筆：球數大到任何逐球寫法都跳閘（小 D 控制牆鐘）
-    [(2, 9_900_000), (3, 5_100_000), (4, 5_050_000), (6, 17), (20, 1234)],
-    [(3, 7_300_000), (2, 8_800_000), (4, 4_400_000), (12, 4095), (5, 96)],
-    [(4, 5_100_000), (2, 10_000_000), (3, 5_400_000), (20, 3000), (7, 1000)],
-    [(2, 10_000_000), (4, 5_600_000), (3, 4_800_000), (9, 255), (14, 9000)],
-    [(3, 6_600_000), (4, 6_050_000), (2, 8_100_000), (11, 700), (18, 65535)],
-    [(4, 7_200_000), (3, 5_900_000), (2, 7_400_000), (16, 12345), (6, 31)],
+    [(20, 30000), (10, 5000), (5, 80000)],
+    # 第 16–20 筆：球數大到「每球至少一個 line 事件」的逐球寫法都跳閘
+    #   步數只受上限約束（陣亡提交的牆鐘），不設下限——C3 軟旗標對同步碼無效（見 C3），
+    #   把步數堆高只會拖長陣亡提交的等待，並不會多殺任何路線。
+    [(3, 6_700_002), (3, 6_710_003), (3, 6_720_002), (7, 220_001), (20, 1234)],
+    [(3, 6_730_003), (3, 6_740_002), (3, 6_750_003), (9, 180_001), (12, 4095)],
+    [(3, 6_760_002), (3, 6_770_003), (3, 6_780_002), (8, 200_001), (16, 12345)],
+    [(3, 6_790_003), (3, 6_800_002), (3, 6_810_003), (10, 150_001), (18, 65535)],
+    [(3, 6_820_002), (3, 6_830_003), (3, 6_840_002), (6, 260_002), (14, 9000)],
 ]
 
 CAPS = {
@@ -67,32 +74,39 @@ CAPS = {
     "E4_parityflip": ("eq", 0),
     "E5_dlevels": ("eq", 0),
     "E6_firstonly": ("eq", 0),
+    "Z4_bigmax": ("eq", 15),   # 大球數就丟最大袋：前段可過、殺手帶必錯
 }
 
 
-def levelwise_ops(cases):
-    """收編路線的 op 模型：最貴寫法（顯式 if/else）每次內圈 5 ops、共 2^(D−1) 次。"""
-    return sum(5 * (1 << (D - 1)) for D, _ in cases)
+def coopt_nodes(cases):
+    """收編路線 L1 的工作量：整台機器的翻板數 Σ2^(D−1)（與球數無關）。"""
+    return sum(1 << (D - 1) for D, _ in cases)
+
+
+def period_balls(cases):
+    """收編路線 P1 取週期後仍要模擬的球數總和。"""
+    return sum(min(I, 1 << (D - 1)) for D, I in cases)
 
 
 def main(write=True):
     problems = []
     scores = {k: 0 for k in S.ROUTES}
     per_entry = []
-    KILL_FROM = 15
 
     for i, cases in enumerate(ENTRIES, 1):
         text = S.render_input(cases)
         exp = S.render_expected(cases)
         st = sum(S.steps(D, I) for D, I in cases)
         bl = sum(S.balls(D, I) for D, I in cases)
-        lw = levelwise_ops(cases)
+        nodes = coopt_nodes(cases)
+        pball = period_balls(cases)
         row = {
             "entry": i,
             "tests": [{"D": D, "I": I, "bag": S.bag_parity(D, I), "steps": S.steps(D, I)} for D, I in cases],
             "total_steps": st,
             "total_balls": bl,
-            "levelwise_ops_model": lw,
+            "coopt_nodes": nodes,
+            "period_balls": pball,
             "bytes": len(text.encode()),
         }
         for name, fn in S.ROUTES.items():
@@ -128,15 +142,27 @@ def main(write=True):
                 problems.append("entry %d: steps %d > %d（逐球模擬應可過）" % (i, st, PASS_STEP_CAP))
         else:
             if bl < KILL_BALL_MIN:
-                problems.append("entry %d: 球數 %d < %d（每球 1 op 的攤平寫法可能存活）" % (i, bl, KILL_BALL_MIN))
+                problems.append("entry %d: 球數 %d < %d（每球 1 op 的單球攤平寫法可能存活）" % (i, bl, KILL_BALL_MIN))
             if st > KILL_STEP_MAX:
                 problems.append("entry %d: steps %d > %d（陣亡提交會吃掉累計牆鐘預算）" % (i, st, KILL_STEP_MAX))
-            worst_period = max(min(I, 1 << (D - 1)) for D, I in cases)
-            if worst_period > PERIOD_BALL_CAP:
-                problems.append("entry %d: 週期內球數 %d > %d，收編的『取週期再模擬』路線會被誤殺"
-                                % (i, worst_period, PERIOD_BALL_CAP))
-        if lw > LEVELWISE_OPS_CAP:
-            problems.append("entry %d: 收編路線 op 模型 %d > %d" % (i, lw, LEVELWISE_OPS_CAP))
+            # 承擔成本鑑別責任的每一條大球數測試都必須逐條非退化
+            for D, I in cases:
+                if I <= BIG_I:
+                    continue
+                span = 1 << (D - 1)
+                bag = S.bag_parity(D, I)
+                if I % span == 0:
+                    problems.append("entry %d: 大球數測試 (%d, %d) 落在週期整倍數上，答案恆為最大袋號" % (i, D, I))
+                if bag == span and span > 2:
+                    problems.append("entry %d: 大球數測試 (%d, %d) 的答案就是最大袋號" % (i, D, I))
+                if bag == (I - 1) % span + 1 and span > 2:
+                    problems.append("entry %d: 大球數測試 (%d, %d) 的答案等於化約後球號（不做反向也會對）" % (i, D, I))
+            if not any(I > BIG_I and (1 << (D - 1)) > 8 for D, I in cases):
+                problems.append("entry %d: 沒有任何『大球數且週期 > 8』的測試，寫死模數 8 的誤解無法鑑別" % i)
+        if nodes > COOPT_NODES_CAP:
+            problems.append("entry %d: Σ2^(D−1) = %d > %d，收編路線 L1 的遞迴寫法會被誤殺" % (i, nodes, COOPT_NODES_CAP))
+        if pball > PERIOD_BALL_CAP:
+            problems.append("entry %d: 取週期後球數總和 %d > %d，收編路線 P1 會被誤殺" % (i, pball, PERIOD_BALL_CAP))
 
     # 第 1 筆（＝題面範例）必須讓所有零洞察／誤解路線當場現形
     first = per_entry[0]
@@ -155,6 +181,19 @@ def main(write=True):
     if naive_score != KILL_FROM - 1:
         problems.append("逐球模擬預期得分 %d，契約要求 %d" % (naive_score, KILL_FROM - 1))
 
+    # 寫死模數族：任何固定模數 M 的化約都不得拿滿分
+    period_family = {}
+    for M in [1 << k for k in range(1, 20)]:
+        r = S.fixed_period_route(M)
+        sc = sum(1 for i, cases in enumerate(ENTRIES, 1)
+                 if r(S.render_input(cases)) == S.render_expected(cases))
+        period_family[M] = sc
+        # M 若是所有大球數測試週期的公倍數，這條路線在數學上就是正確的（過度化約無害），
+        # 不算誤解；只有「M 小於某個大球數測試的週期」時才必須被鑑別出來。
+        undersized = any(I > BIG_I and (1 << (D - 1)) > M for cs in ENTRIES for D, I in cs)
+        if undersized and sc >= 20:
+            problems.append("固定模數 M=%d 小於出貨測試的最大週期卻得 %d/20，無法鑑別" % (M, sc))
+
     flat = [(D, I) for cs in ENTRIES for (D, I) in cs]
     if not any(D == 2 for D, _ in flat):
         problems.append("缺 D=2 邊界")
@@ -172,13 +211,16 @@ def main(write=True):
         "pass_step_cap": PASS_STEP_CAP,
         "kill_ball_min": KILL_BALL_MIN,
         "kill_step_max": KILL_STEP_MAX,
-        "levelwise_ops_cap": LEVELWISE_OPS_CAP,
+        "coopt_nodes_cap": COOPT_NODES_CAP,
+        "period_ball_cap": PERIOD_BALL_CAP,
+        "fixed_period_family": period_family,
         "max_entry_bytes": max(r["bytes"] for r in per_entry),
         "naive_expected_score": naive_score,
         "pass_band_max_steps": max(r["total_steps"] for r in per_entry[:KILL_FROM - 1]),
         "kill_band_min_balls": min(r["total_balls"] for r in per_entry[KILL_FROM - 1:]),
         "kill_band_max_steps": max(r["total_steps"] for r in per_entry[KILL_FROM - 1:]),
-        "levelwise_ops_max": max(r["levelwise_ops_model"] for r in per_entry),
+        "coopt_nodes_max": max(r["coopt_nodes"] for r in per_entry),
+        "period_balls_max": max(r["period_balls"] for r in per_entry),
         "scores": scores,
         "caps": {k: list(v) for k, v in CAPS.items()},
         "per_entry": per_entry,
@@ -197,7 +239,7 @@ def main(write=True):
 
     print(json.dumps({k: report[k] for k in
                       ("max_entry_bytes", "naive_expected_score", "pass_band_max_steps",
-                       "kill_band_min_balls", "kill_band_max_steps", "levelwise_ops_max", "scores")},
+                       "kill_band_min_balls", "kill_band_max_steps", "coopt_nodes_max", "period_balls_max", "scores")},
                      ensure_ascii=False, indent=1))
     if problems:
         print("\n斷言牆失敗：")

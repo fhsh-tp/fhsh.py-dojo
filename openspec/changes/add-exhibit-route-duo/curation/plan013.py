@@ -24,7 +24,7 @@ ENTRIES = [
     [(1, 7, "leftheavy", 1301)],
     [(1, 1, "single", 1302), (1, 2, "lchain", 1303), (1, 2, "rchain", 1304), (1, 3, "zigzag", 1305),
      (1, 24, "random", 1398)],
-    [(1, 9, "random", 1306), (1, 12, "balanced", 1307), (1, 22, "leftheavy", 1308)],
+    [(1, 14, "random", 1306), (1, 12, "balanced", 1307), (1, 22, "leftheavy", 1308), (1, 31, "random", 1399)],
     [(1, 25, "random", 1309), (1, 30, "caterpillar", 1310), (1, 18, "rchain", 1311)],
     [(1, 60, "random", 1312), (1, 45, "zigzag", 1313), (1, 50, "leftheavy", 1314)],
     [(1, 120, "spine", 1315), (1, 90, "random", 1316)],
@@ -34,16 +34,26 @@ ENTRIES = [
     [(1, 1200, "spine", 1323), (1, 900, "random", 1324)],
     # 第 11 筆：模式 2 單組（頁面第二個範例）
     [(2, 7, "leftheavy", 1331)],
-    # 第 12–20 筆：同筆混合兩種模式
-    [(2, 4, "lchain", 1332), (1, 5, "leftheavy", 1333), (2, 6, "balanced", 1334), (2, 26, "random", 1396)],
-    [(2, 20, "random", 1335), (1, 24, "caterpillar", 1336), (2, 16, "leftheavy", 1337)],
-    [(2, 55, "leftheavy", 1338), (1, 40, "zigzag", 1339), (2, 70, "random", 1340)],
-    [(2, 130, "spine", 1341), (1, 110, "leftheavy", 1342)],
-    [(2, 240, "random", 1343), (1, 200, "caterpillar", 1344)],
-    [(2, 400, "spine", 1345), (1, 350, "random", 1346)],
-    [(2, 700, "random", 1347), (1, 550, "spine", 1348)],
-    [(2, 1000, "spine", 1349), (1, 300, "zigzag", 1350), (2, 480, "random", 1351)],
-    [(2, 1400, "random", 1352), (1, 1100, "spine", 1353)],
+    # 第 12–20 筆：同筆混合兩種模式，且 9 筆的模式序列兩兩不同
+    #（任何「只讀第一個標記＋位置規則」的實作最多只能命中其中一筆）
+    [(2, 22, "random", 1332), (1, 25, "leftheavy", 1333), (1, 28, "balanced", 1334),
+     (1, 24, "caterpillar", 1396), (2, 26, "random", 1395)],
+    [(2, 40, "random", 1335), (1, 44, "caterpillar", 1336), (1, 36, "leftheavy", 1337),
+     (2, 48, "balanced", 1394), (1, 30, "random", 1393)],
+    [(2, 55, "leftheavy", 1338), (1, 40, "zigzag", 1339), (2, 70, "random", 1340),
+     (1, 60, "spine", 1392), (1, 50, "balanced", 1391)],
+    [(2, 130, "spine", 1341), (2, 110, "leftheavy", 1342), (1, 90, "random", 1390),
+     (1, 75, "caterpillar", 1389), (1, 120, "balanced", 1388)],
+    [(2, 240, "random", 1343), (1, 200, "caterpillar", 1344), (2, 160, "leftheavy", 1387),
+     (2, 180, "spine", 1386), (1, 140, "random", 1385)],
+    [(2, 400, "spine", 1345), (2, 350, "random", 1346), (2, 300, "zigzag", 1384),
+     (1, 260, "leftheavy", 1383), (1, 220, "balanced", 1382)],
+    [(2, 700, "random", 1347), (1, 550, "spine", 1348), (1, 420, "leftheavy", 1381),
+     (2, 380, "random", 1380), (2, 340, "caterpillar", 1379)],
+    [(2, 1000, "spine", 1349), (2, 300, "zigzag", 1350), (1, 480, "random", 1351),
+     (2, 520, "leftheavy", 1378), (1, 260, "balanced", 1377)],
+    [(2, 1400, "random", 1352), (2, 1100, "spine", 1353), (1, 600, "leftheavy", 1376),
+     (1, 480, "caterpillar", 1375), (2, 360, "random", 1374)],
 ]
 
 CAPS = {          # 路線 → (比較子, 上界)  ；'eq' 表示必須精準等於
@@ -57,12 +67,14 @@ CAPS = {          # 路線 → (比較子, 上界)  ；'eq' 表示必須精準�
     "W6_firstonly": ("eq", 2),   # entry 1 與 entry 11 為單組範例筆
     "W9_revfirst": ("eq", 0),
     "W10_echosecond": ("eq", 0),
-    "W11_shapelib": ("eq", 2),    # 只剩 entry 1、11 兩筆單組範例筆（不承擔鑑別責任）
+    "W11_shapelib": ("eq", 2),
+    "W12_dictbrute": ("eq", 2),   # 字典＋小 n 窮舉：同樣只剩兩筆範例筆    # 只剩 entry 1、11 兩筆單組範例筆（不承擔鑑別責任）
     "Z1_echofirst": ("eq", 0),
     "Z2_revsecond": ("eq", 0),
     "Z3_sortdesc": ("eq", 0),
 }
 
+POSITIONAL_RULE_CAP = 12   # 11 筆單一模式筆 + 混合筆中最多命中一筆
 EXAMPLE_ENTRIES = (1, 11)     # 題面兩個範例筆：單組、小 n，不計入鑑別力
 
 
@@ -143,6 +155,18 @@ def main(write=True):
         if op == "le" and s > cap:
             problems.append("route %s: 得分 %d，契約要求 <= %d" % (name, s, cap))
 
+    # 「只讀第一個模式標記＋位置規則」家族：以 (組數, 首個模式, 位置) 為鍵的最佳規則
+    # 只能命中「同鍵之下出現次數最多的那一種模式序列」，逐鍵取最大值即為該家族的上界。
+    from collections import Counter, defaultdict
+    buckets = defaultdict(Counter)
+    for e in entries:
+        seq = tuple(c["mode"] for c in e["cases"])
+        buckets[(len(seq), seq[0])][seq] += 1
+    positional_best = sum(cnt.most_common(1)[0][1] for cnt in buckets.values())
+    if positional_best > POSITIONAL_RULE_CAP:
+        problems.append("只讀首個模式標記＋位置規則的家族上界 %d > %d"
+                        % (positional_best, POSITIONAL_RULE_CAP))
+
     # 邊界覆蓋
     all_n = [c["n"] for e in entries for c in e["cases"]]
     if 1 not in all_n:
@@ -157,6 +181,7 @@ def main(write=True):
         "max_entry_bytes": max(r["bytes"] for r in per_entry),
         "max_n": max(all_n),
         "max_depth_shipped": max(c["depth"] for e in entries for c in e["cases"]),
+        "positional_rule_best": positional_best,
         "scores": scores,
         "caps": {k: list(v) for k, v in CAPS.items()},
         "per_entry": per_entry,

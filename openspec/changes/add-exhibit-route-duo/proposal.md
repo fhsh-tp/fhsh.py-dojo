@@ -6,16 +6,16 @@
 
 ## What Changes
 
-- 新增 `docs/challenge/exhibit-route-rebuild.md`（apcs013，medium，competition）：兩種打卡紀錄還原第三種，模式 1（甲＋乙→丙）佔前 10 筆、模式 2（乙＋丙→甲）佔後 10 筆，每筆測資自帶模式標記。
-- 新增 `docs/challenge/pinball-track-predict.md`（apcs014，hard，competition）：D 層機台（第 1..D−1 層翻板、第 D 層袋子），預測第 I 顆彈珠落入哪個袋子；球數可超過袋數（機台狀態有週期），前 14 筆測資逐球模擬可過，後 6 筆的總球數大到任何逐球寫法都會跳閘。
+- 新增 `docs/challenge/exhibit-route-rebuild.md`（apcs013，medium，competition）：兩種打卡紀錄還原第三種，模式 1（甲＋乙→丙）佔前 10 筆、第 11 筆為模式 2 單組範例、第 12–20 筆每筆五組混合兩種模式且模式序列兩兩相異，每組自帶模式標記。
+- 新增 `docs/challenge/pinball-track-predict.md`（apcs014，hard，competition）：D 層機台（第 1..D−1 層翻板、第 D 層袋子），預測第 I 顆彈珠落入哪個袋子；球數可超過袋數（機台狀態有週期），前 15 筆測資逐球模擬可過，後 5 筆的總球數大到「每球至少一個 line 事件」的逐球寫法都會跳閘。
 - 兩題皆以 20 筆全 literal `testcase_plan` 出貨（走訪紀錄與翻板狀態無法由隨機 band 產生合法輸入），皆宣告 `reference_solution` 並納入 content-regression。
 - 策展證據四件套（規劃腳本、語義正本、組裝腳本、量測報告）隨 change 入庫，可搬移重跑並逐 byte 重現出貨 literal。
 
 ## Non-Goals
 
 - 不建 apcs013 的 TLE 斷崖：C 層繞道實測不可獵殺，依守則⑤收編為聰明解，題面不寫任何「不可能」句。
-- 不獵殺 apcs014 的兩條收編路線（逐層計數 O(2^D)、先取週期再模擬）：兩者語義正確，殺手筆的「小 D 大球數」組成與週期內球數上限即由此推得。
-- 不調整判題引擎、op 上限或牆鐘常數。設計期賞金另外確認兩件平台層事實，皆記錄於矩陣並留待獨立 change：op 計數以 source line 為單位（同行攤平可壓低成本）、`testcase_plan` literal 會進入生產 bundle（且 repo 本身公開）。
+- 不獵殺 apcs014 的兩條收編路線（逐層計數 O(2^D)、先取週期再模擬）：兩者語義正確，殺手筆的「小 D 大球數」組成、翻板數上限與週期內球數上限即由此推得（各取最貴的合理寫法計算預算）。
+- 不調整判題引擎、op 上限或牆鐘常數。設計期賞金與第一輪稽核共確認四件平台層事實，皆記錄於矩陣並留待獨立 change，且**不以測資規避**：op 計數以 source line 為單位（K 球攤平可把成本稀釋到每 K 球 1 op）、`sys.settrace(None)` 可直接凍結計數、每筆 5,000 ms 軟旗標對同步碼不會觸發、`testcase_plan` literal 會進入生產 bundle（且 repo 本身公開）。前三項對全站既有 op 斷崖題一體適用。
 - 不動既有題目與既有 spec。
 
 ## Capabilities

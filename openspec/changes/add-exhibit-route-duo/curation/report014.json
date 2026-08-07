@@ -2,14 +2,37 @@
  "max_I": 10000000,
  "pass_step_cap": 1000000,
  "kill_ball_min": 20000000,
- "kill_step_max": 45000000,
- "levelwise_ops_cap": 8000000,
- "max_entry_bytes": 48,
- "naive_expected_score": 14,
+ "kill_step_max": 85000000,
+ "coopt_nodes_cap": 600000,
+ "period_ball_cap": 100000,
+ "fixed_period_family": {
+  "2": 15,
+  "4": 16,
+  "8": 16,
+  "16": 16,
+  "32": 16,
+  "64": 18,
+  "128": 19,
+  "256": 19,
+  "512": 20,
+  "1024": 20,
+  "2048": 20,
+  "4096": 20,
+  "8192": 20,
+  "16384": 20,
+  "32768": 20,
+  "65536": 20,
+  "131072": 20,
+  "262144": 20,
+  "524288": 20
+ },
+ "max_entry_bytes": 51,
+ "naive_expected_score": 15,
  "pass_band_max_steps": 994999,
- "kill_band_min_balls": 20051251,
- "kill_band_max_steps": 40985330,
- "levelwise_ops_max": 3932480,
+ "kill_band_min_balls": 20351242,
+ "kill_band_max_steps": 43264120,
+ "coopt_nodes_max": 557058,
+ "period_balls_max": 66059,
  "scores": {
   "ref": 20,
   "reversed": 20,
@@ -23,7 +46,8 @@
   "E3_flippernum": 0,
   "E4_parityflip": 0,
   "E5_dlevels": 0,
-  "E6_firstonly": 0
+  "E6_firstonly": 0,
+  "Z4_bigmax": 15
  },
  "caps": {
   "ref": [
@@ -77,6 +101,10 @@
   "E6_firstonly": [
    "eq",
    0
+  ],
+  "Z4_bigmax": [
+   "eq",
+   15
   ]
  },
  "per_entry": [
@@ -116,7 +144,8 @@
    ],
    "total_steps": 75,
    "total_balls": 25,
-   "levelwise_ops_model": 200,
+   "coopt_nodes": 40,
+   "period_balls": 22,
    "bytes": 23,
    "ref_ok": true,
    "reversed_ok": true,
@@ -130,7 +159,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 2,
@@ -186,7 +216,8 @@
    ],
    "total_steps": 110,
    "total_balls": 43,
-   "levelwise_ops_model": 210,
+   "coopt_nodes": 42,
+   "period_balls": 32,
    "bytes": 36,
    "ref_ok": true,
    "reversed_ok": true,
@@ -200,7 +231,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 3,
@@ -232,7 +264,8 @@
    ],
    "total_steps": 1052,
    "total_balls": 175,
-   "levelwise_ops_model": 1200,
+   "coopt_nodes": 240,
+   "period_balls": 158,
    "bytes": 23,
    "ref_ok": true,
    "reversed_ok": true,
@@ -246,7 +279,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 4,
@@ -278,7 +312,8 @@
    ],
    "total_steps": 7296,
    "total_balls": 1605,
-   "levelwise_ops_model": 14100,
+   "coopt_nodes": 2820,
+   "period_balls": 610,
    "bytes": 27,
    "ref_ok": true,
    "reversed_ok": true,
@@ -292,7 +327,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 5,
@@ -324,7 +360,8 @@
    ],
    "total_steps": 57691,
    "total_balls": 16170,
-   "levelwise_ops_model": 66570,
+   "coopt_nodes": 13314,
+   "period_balls": 3827,
    "bytes": 33,
    "ref_ok": true,
    "reversed_ok": true,
@@ -338,7 +375,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 6,
@@ -364,7 +402,8 @@
    ],
    "total_steps": 317000,
    "total_balls": 48000,
-   "levelwise_ops_model": 245920,
+   "coopt_nodes": 49184,
+   "period_balls": 8032,
    "bytes": 26,
    "ref_ok": true,
    "reversed_ok": true,
@@ -378,7 +417,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 7,
@@ -404,7 +444,8 @@
    ],
    "total_steps": 670000,
    "total_balls": 65000,
-   "levelwise_ops_model": 983080,
+   "coopt_nodes": 196616,
+   "period_balls": 35008,
    "bytes": 28,
    "ref_ok": true,
    "reversed_ok": true,
@@ -418,7 +459,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 8,
@@ -430,10 +472,10 @@
      "steps": 570000
     },
     {
-     "D": 19,
+     "D": 12,
      "I": 20000,
-     "bag": 254409,
-     "steps": 360000
+     "bag": 1988,
+     "steps": 220000
     },
     {
      "D": 7,
@@ -442,9 +484,10 @@
      "steps": 60000
     }
    ],
-   "total_steps": 990000,
+   "total_steps": 850000,
    "total_balls": 60000,
-   "levelwise_ops_model": 3932480,
+   "coopt_nodes": 526400,
+   "period_balls": 32112,
    "bytes": 28,
    "ref_ok": true,
    "reversed_ok": true,
@@ -458,7 +501,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 9,
@@ -484,7 +528,8 @@
    ],
    "total_steps": 990100,
    "total_balls": 70020,
-   "levelwise_ops_model": 2621620,
+   "coopt_nodes": 524324,
+   "period_balls": 50024,
    "bytes": 24,
    "ref_ok": true,
    "reversed_ok": true,
@@ -498,7 +543,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 10,
@@ -510,10 +556,10 @@
      "steps": 475000
     },
     {
-     "D": 18,
+     "D": 11,
      "I": 25000,
-     "bag": 117517,
-     "steps": 425000
+     "bag": 919,
+     "steps": 250000
     },
     {
      "D": 5,
@@ -522,9 +568,10 @@
      "steps": 60000
     }
    ],
-   "total_steps": 960000,
+   "total_steps": 785000,
    "total_balls": 65000,
-   "levelwise_ops_model": 3276880,
+   "coopt_nodes": 525328,
+   "period_balls": 26040,
    "bytes": 28,
    "ref_ok": true,
    "reversed_ok": true,
@@ -538,7 +585,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 11,
@@ -564,7 +612,8 @@
    ],
    "total_steps": 971004,
    "total_balls": 53002,
-   "levelwise_ops_model": 2622100,
+   "coopt_nodes": 524420,
+   "period_balls": 50130,
    "bytes": 22,
    "ref_ok": true,
    "reversed_ok": true,
@@ -578,7 +627,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 12,
@@ -604,7 +654,8 @@
    ],
    "total_steps": 984001,
    "total_balls": 55501,
-   "levelwise_ops_model": 1312010,
+   "coopt_nodes": 262402,
+   "period_balls": 54257,
    "bytes": 22,
    "ref_ok": true,
    "reversed_ok": true,
@@ -618,7 +669,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 13,
@@ -644,7 +696,8 @@
    ],
    "total_steps": 994999,
    "total_balls": 100999,
-   "levelwise_ops_model": 2785290,
+   "coopt_nodes": 557058,
+   "period_balls": 51002,
    "bytes": 27,
    "ref_ok": true,
    "reversed_ok": true,
@@ -658,7 +711,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 14,
@@ -684,7 +738,8 @@
    ],
    "total_steps": 965000,
    "total_balls": 90000,
-   "levelwise_ops_model": 2641960,
+   "coopt_nodes": 528392,
+   "period_balls": 39104,
    "bytes": 28,
    "ref_ok": true,
    "reversed_ok": true,
@@ -698,34 +753,77 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
   },
   {
    "entry": 15,
    "tests": [
     {
-     "D": 2,
-     "I": 9900000,
-     "bag": 2,
-     "steps": 9900000
+     "D": 20,
+     "I": 30000,
+     "bag": 501105,
+     "steps": 570000
+    },
+    {
+     "D": 10,
+     "I": 5000,
+     "bag": 452,
+     "steps": 45000
+    },
+    {
+     "D": 5,
+     "I": 80000,
+     "bag": 16,
+     "steps": 320000
+    }
+   ],
+   "total_steps": 935000,
+   "total_balls": 115000,
+   "coopt_nodes": 524816,
+   "period_balls": 30528,
+   "bytes": 27,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": true
+  },
+  {
+   "entry": 16,
+   "tests": [
+    {
+     "D": 3,
+     "I": 6700002,
+     "bag": 3,
+     "steps": 13400004
     },
     {
      "D": 3,
-     "I": 5100000,
-     "bag": 4,
-     "steps": 10200000
-    },
-    {
-     "D": 4,
-     "I": 5050000,
-     "bag": 8,
-     "steps": 15150000
-    },
-    {
-     "D": 6,
-     "I": 17,
+     "I": 6710003,
      "bag": 2,
-     "steps": 85
+     "steps": 13420006
+    },
+    {
+     "D": 3,
+     "I": 6720002,
+     "bag": 3,
+     "steps": 13440004
+    },
+    {
+     "D": 7,
+     "I": 220001,
+     "bag": 2,
+     "steps": 1320006
     },
     {
      "D": 20,
@@ -734,10 +832,11 @@
      "steps": 23446
     }
    ],
-   "total_steps": 35273531,
-   "total_balls": 20051251,
-   "levelwise_ops_model": 2621670,
-   "bytes": 45,
+   "total_steps": 41603466,
+   "total_balls": 20351242,
+   "coopt_nodes": 524364,
+   "period_balls": 1310,
+   "bytes": 49,
    "ref_ok": true,
    "reversed_ok": true,
    "P1_periodic_sim_ok": true,
@@ -750,46 +849,48 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": false
   },
   {
-   "entry": 16,
+   "entry": 17,
    "tests": [
     {
      "D": 3,
-     "I": 7300000,
-     "bag": 4,
-     "steps": 14600000
-    },
-    {
-     "D": 2,
-     "I": 8800000,
+     "I": 6730003,
      "bag": 2,
-     "steps": 8800000
+     "steps": 13460006
     },
     {
-     "D": 4,
-     "I": 4400000,
-     "bag": 8,
-     "steps": 13200000
+     "D": 3,
+     "I": 6740002,
+     "bag": 3,
+     "steps": 13480004
+    },
+    {
+     "D": 3,
+     "I": 6750003,
+     "bag": 2,
+     "steps": 13500006
+    },
+    {
+     "D": 9,
+     "I": 180001,
+     "bag": 5,
+     "steps": 1440008
     },
     {
      "D": 12,
      "I": 4095,
      "bag": 1024,
      "steps": 45045
-    },
-    {
-     "D": 5,
-     "I": 96,
-     "bag": 16,
-     "steps": 384
     }
    ],
-   "total_steps": 36645429,
-   "total_balls": 20504191,
-   "levelwise_ops_model": 10390,
-   "bytes": 45,
+   "total_steps": 41925069,
+   "total_balls": 20404104,
+   "coopt_nodes": 2316,
+   "period_balls": 2316,
+   "bytes": 49,
    "ref_ok": true,
    "reversed_ok": true,
    "P1_periodic_sim_ok": true,
@@ -802,98 +903,48 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
-  },
-  {
-   "entry": 17,
-   "tests": [
-    {
-     "D": 4,
-     "I": 5100000,
-     "bag": 8,
-     "steps": 15300000
-    },
-    {
-     "D": 2,
-     "I": 10000000,
-     "bag": 2,
-     "steps": 10000000
-    },
-    {
-     "D": 3,
-     "I": 5400000,
-     "bag": 4,
-     "steps": 10800000
-    },
-    {
-     "D": 20,
-     "I": 3000,
-     "bag": 487041,
-     "steps": 57000
-    },
-    {
-     "D": 7,
-     "I": 1000,
-     "bag": 58,
-     "steps": 6000
-    }
-   ],
-   "total_steps": 36163000,
-   "total_balls": 20504000,
-   "levelwise_ops_model": 2621830,
-   "bytes": 48,
-   "ref_ok": true,
-   "reversed_ok": true,
-   "P1_periodic_sim_ok": true,
-   "L1_levelwise_ok": true,
-   "Z1_echo_I_ok": false,
-   "Z2_const1_ok": false,
-   "Z3_maxbag_ok": false,
-   "E1_noreverse_ok": false,
-   "E2_zerobased_ok": false,
-   "E3_flippernum_ok": false,
-   "E4_parityflip_ok": false,
-   "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": false
   },
   {
    "entry": 18,
    "tests": [
     {
-     "D": 2,
-     "I": 10000000,
-     "bag": 2,
-     "steps": 10000000
-    },
-    {
-     "D": 4,
-     "I": 5600000,
-     "bag": 8,
-     "steps": 16800000
+     "D": 3,
+     "I": 6760002,
+     "bag": 3,
+     "steps": 13520004
     },
     {
      "D": 3,
-     "I": 4800000,
-     "bag": 4,
-     "steps": 9600000
+     "I": 6770003,
+     "bag": 2,
+     "steps": 13540006
     },
     {
-     "D": 9,
-     "I": 255,
-     "bag": 128,
-     "steps": 2040
+     "D": 3,
+     "I": 6780002,
+     "bag": 3,
+     "steps": 13560004
     },
     {
-     "D": 14,
-     "I": 9000,
-     "bag": 7321,
-     "steps": 117000
+     "D": 8,
+     "I": 200001,
+     "bag": 2,
+     "steps": 1400007
+    },
+    {
+     "D": 16,
+     "I": 12345,
+     "bag": 3591,
+     "steps": 185175
     }
    ],
-   "total_steps": 36519040,
-   "total_balls": 20409255,
-   "levelwise_ops_model": 42310,
-   "bytes": 47,
+   "total_steps": 42205196,
+   "total_balls": 20522353,
+   "coopt_nodes": 32908,
+   "period_balls": 12485,
+   "bytes": 50,
    "ref_ok": true,
    "reversed_ok": true,
    "P1_periodic_sim_ok": true,
@@ -906,34 +957,35 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": false
   },
   {
    "entry": 19,
    "tests": [
     {
      "D": 3,
-     "I": 6600000,
-     "bag": 4,
-     "steps": 13200000
-    },
-    {
-     "D": 4,
-     "I": 6050000,
-     "bag": 8,
-     "steps": 18150000
-    },
-    {
-     "D": 2,
-     "I": 8100000,
+     "I": 6790003,
      "bag": 2,
-     "steps": 8100000
+     "steps": 13580006
     },
     {
-     "D": 11,
-     "I": 700,
-     "bag": 886,
-     "steps": 7000
+     "D": 3,
+     "I": 6800002,
+     "bag": 3,
+     "steps": 13600004
+    },
+    {
+     "D": 3,
+     "I": 6810003,
+     "bag": 2,
+     "steps": 13620006
+    },
+    {
+     "D": 10,
+     "I": 150001,
+     "bag": 32,
+     "steps": 1350009
     },
     {
      "D": 18,
@@ -942,10 +994,11 @@
      "steps": 1114095
     }
    ],
-   "total_steps": 40571095,
-   "total_balls": 20816235,
-   "levelwise_ops_model": 660550,
-   "bytes": 48,
+   "total_steps": 43264120,
+   "total_balls": 20615544,
+   "coopt_nodes": 131596,
+   "period_balls": 66059,
+   "bytes": 51,
    "ref_ok": true,
    "reversed_ok": true,
    "P1_periodic_sim_ok": true,
@@ -958,46 +1011,48 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": false
   },
   {
    "entry": 20,
    "tests": [
     {
-     "D": 4,
-     "I": 7200000,
-     "bag": 8,
-     "steps": 21600000
+     "D": 3,
+     "I": 6820002,
+     "bag": 3,
+     "steps": 13640004
     },
     {
      "D": 3,
-     "I": 5900000,
-     "bag": 4,
-     "steps": 11800000
-    },
-    {
-     "D": 2,
-     "I": 7400000,
+     "I": 6830003,
      "bag": 2,
-     "steps": 7400000
+     "steps": 13660006
     },
     {
-     "D": 16,
-     "I": 12345,
-     "bag": 3591,
-     "steps": 185175
+     "D": 3,
+     "I": 6840002,
+     "bag": 3,
+     "steps": 13680004
     },
     {
      "D": 6,
-     "I": 31,
-     "bag": 16,
-     "steps": 155
+     "I": 260002,
+     "bag": 17,
+     "steps": 1300010
+    },
+    {
+     "D": 14,
+     "I": 9000,
+     "bag": 7321,
+     "steps": 117000
     }
    ],
-   "total_steps": 40985330,
-   "total_balls": 20512376,
-   "levelwise_ops_model": 164070,
-   "bytes": 46,
+   "total_steps": 42397024,
+   "total_balls": 20759009,
+   "coopt_nodes": 8236,
+   "period_balls": 8236,
+   "bytes": 49,
    "ref_ok": true,
    "reversed_ok": true,
    "P1_periodic_sim_ok": true,
@@ -1010,7 +1065,8 @@
    "E3_flippernum_ok": false,
    "E4_parityflip_ok": false,
    "E5_dlevels_ok": false,
-   "E6_firstonly_ok": false
+   "E6_firstonly_ok": false,
+   "Z4_bigmax_ok": false
   }
  ],
  "problems": []

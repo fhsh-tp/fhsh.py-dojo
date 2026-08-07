@@ -37,6 +37,7 @@ SPECS = {
         "generator": "gen013.py",
         "reference": "ref013.py",
         "page": "page013.md",
+        "example_entries": (1, 11),
     },
     "pinball-track-predict": {
         "id": "apcs014",
@@ -50,6 +51,7 @@ SPECS = {
         "generator": "gen014.py",
         "reference": "ref014.py",
         "page": "page014.md",
+        "example_entries": (1,),
     },
 }
 
@@ -101,6 +103,12 @@ def build(slug, spec):
     out = os.path.join(DOCS, slug + ".md")
     with open(out, "w") as fh:
         fh.write(doc)
+
+    # 題面範例必須與 literal 逐 byte 相符（spec 級契約，先前只寫在文件裡沒有程式守門）
+    for idx in spec.get("example_entries", ()):
+        block = literals[idx - 1]
+        if block.rstrip("\n") not in page:
+            raise SystemExit("%s: 題面缺少第 %d 筆 literal 的原樣範例區塊" % (slug, idx))
 
     # 回讀驗證：frontmatter 的 literal 區塊必須與來源逐 byte 相同
     body = open(out).read()
