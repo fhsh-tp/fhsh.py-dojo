@@ -6,8 +6,8 @@
 
 ## What Changes
 
-- 新增 `docs/challenge/exhibit-route-rebuild.md`（apcs013，medium，competition）：兩種打卡紀錄還原第三種，模式 1（甲＋乙→丙）佔前 10 筆、第 11 筆為模式 2 單組範例、第 12–20 筆每筆五組混合兩種模式且模式序列兩兩相異，每組自帶模式標記。
-- 新增 `docs/challenge/pinball-track-predict.md`（apcs014，hard，competition）：D 層機台（第 1..D−1 層翻板、第 D 層袋子），預測第 I 顆彈珠落入哪個袋子；球數可超過袋數（機台狀態有週期），前 15 筆測資逐球模擬可過，後 5 筆的總球數大到「每球至少一個 line 事件」的逐球寫法都會跳閘。
+- 新增 `docs/challenge/exhibit-route-rebuild.md`（apcs013，medium，competition）：兩種打卡紀錄還原第三種，模式 1（甲＋乙→丙）佔前 10 筆、第 11 筆為模式 2 單組範例、第 12–20 筆每筆五組混合兩種模式、組別依大小遞減排列且模式序列兩兩相異，每組自帶模式標記。
+- 新增 `docs/challenge/pinball-track-predict.md`（apcs014，hard，competition）：D 層機台（第 1..D−1 層翻板、第 D 層袋子），預測第 I 顆彈珠落入哪個袋子；球數可超過袋數（機台狀態有週期），層數 2–17、球號可到 10^7；前 15 筆測資逐球模擬可過，後 5 筆的總球數大到「每球至少一個 line 事件」的逐球寫法都會跳閘。
 - 兩題皆以 20 筆全 literal `testcase_plan` 出貨（走訪紀錄與翻板狀態無法由隨機 band 產生合法輸入），皆宣告 `reference_solution` 並納入 content-regression。
 - 策展證據四件套（規劃腳本、語義正本、組裝腳本、量測報告）隨 change 入庫，可搬移重跑並逐 byte 重現出貨 literal。
 

@@ -1,11 +1,4 @@
-"""apcs013 展場動線重建 — 語義正本（SSOT for A1）。
-
-本檔定義：動線形狀產生器、三種打卡序、兩種模式的輸入／期望輸出，
-以及所有錯誤路線（W 系列）與收編路線（R 系列）的參考實作。
-plan013.py 由本檔導出全部 literal 與 predictor 欄位。
-
-用語對照（僅供維護者，題面禁用）：甲＝preorder、乙＝inorder、丙＝postorder。
-"""
+import sys
 import random
 
 
@@ -17,9 +10,6 @@ class Room:
         self.l = None
         self.r = None
 
-
-# ── 形狀產生器 ────────────────────────────────────────────────────────────
-# 每個形狀都必須讓 depth() <= 300（A5）；plan013 的斷言牆會逐筆檢查。
 
 def build(shape, labels, rng):
     n = len(labels)
@@ -124,8 +114,6 @@ def build(shape, labels, rng):
     return rec(labels)
 
 
-# ── 三種打卡序（皆為迭代式，不受遞迴上限影響）─────────────────────────────
-
 def order_a(root):
     out = []
     st = [root]
@@ -182,49 +170,6 @@ def depth(root):
         st.append((nd.r, d + 1))
     return best
 
-
-def make_case(mode, n, shape, seed):
-    """回傳一組測試：輸入片段 + 期望輸出 + 診斷欄位。"""
-    rng = random.Random(seed)
-    labels = list(range(1, n + 1))
-    rng.shuffle(labels)
-    root = build(shape, labels, rng)
-    A, B, C = order_a(root), order_b(root), order_c(root)
-    if mode == 1:
-        s1, s2, exp = A, B, C
-    elif mode == 2:
-        s1, s2, exp = B, C, A
-    else:
-        raise ValueError("mode must be 1 or 2")
-    return {
-        "mode": mode,
-        "n": n,
-        "shape": shape,
-        "seed": seed,
-        "s1": s1,
-        "s2": s2,
-        "exp": exp,
-        "depth": depth(root),
-        "sig": sig(root),
-        "chain": is_chain(root),
-        "mirror_asym": sig(mirror(root)) != sig(root),
-    }
-
-
-def render_input(cases):
-    lines = [str(len(cases))]
-    for c in cases:
-        lines.append("%d %d" % (c["mode"], c["n"]))
-        lines.append(" ".join(map(str, c["s1"])))
-        lines.append(" ".join(map(str, c["s2"])))
-    return "\n".join(lines) + "\n"
-
-
-def render_expected(cases):
-    return "\n".join(" ".join(map(str, c["exp"])) for c in cases) + "\n"
-
-
-# ── 正解與路線實作（全部吃 raw input 文字、吐 output 文字）──────────────────
 
 def _parse(text):
     tok = text.split()
@@ -633,21 +578,5 @@ def _total_depth(s1, s2, mode):
     return total
 
 
-ROUTES = {
-    "ref": route_ref,
-    "R1_mirror": route_R1_mirror,
-    "W1_modeblind": route_W1_modeblind,
-    "W2_postfirst": route_W2_postfirst,
-    "W3_sorted": route_W3_sorted,
-    "W4_swaporder": route_W4_swaporder,
-    "W6_firstonly": route_W6_firstonly,
-    "W5_markeronce": route_W5_modemarker_once,
-    "W11_shapelib": route_W11_shapelib,
-    "W12_dictbrute": route_W12_dictbrute,
-    "W13_depthguess": route_W13_depthguess,
-    "Z1_echofirst": route_Z1_echo_first,
-    "Z2_revsecond": route_Z2_rev_second,
-    "Z3_sortdesc": route_Z3_sort_desc,
-    "W9_revfirst": route_W9_revfirst,
-    "W10_echosecond": route_W10_echosecond,
-}
+
+print(route_W13_depthguess(sys.stdin.read()), end='')

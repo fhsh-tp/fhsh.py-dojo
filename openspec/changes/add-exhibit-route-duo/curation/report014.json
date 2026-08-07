@@ -1,38 +1,38 @@
 {
  "max_I": 10000000,
  "pass_step_cap": 1000000,
- "kill_ball_min": 20000000,
+ "kill_ball_min": 15000000,
  "kill_step_max": 85000000,
  "coopt_nodes_cap": 600000,
- "period_ball_cap": 100000,
+ "p1_ops_cap": 8000000,
  "fixed_period_family": {
   "2": 15,
-  "4": 16,
-  "8": 16,
-  "16": 16,
-  "32": 16,
-  "64": 18,
-  "128": 19,
-  "256": 19,
-  "512": 20,
-  "1024": 20,
-  "2048": 20,
-  "4096": 20,
-  "8192": 20,
-  "16384": 20,
-  "32768": 20,
+  "4": 15,
+  "8": 15,
+  "16": 15,
+  "32": 15,
+  "64": 15,
+  "128": 15,
+  "256": 15,
+  "512": 15,
+  "1024": 15,
+  "2048": 15,
+  "4096": 16,
+  "8192": 16,
+  "16384": 17,
+  "32768": 18,
   "65536": 20,
   "131072": 20,
   "262144": 20,
   "524288": 20
  },
- "max_entry_bytes": 51,
+ "max_entry_bytes": 61,
  "naive_expected_score": 15,
- "pass_band_max_steps": 994999,
- "kill_band_min_balls": 20351242,
- "kill_band_max_steps": 43264120,
- "coopt_nodes_max": 557058,
- "period_balls_max": 66059,
+ "pass_band_max_steps": 860000,
+ "kill_band_min_balls": 15464112,
+ "kill_band_max_steps": 67440568,
+ "coopt_nodes_max": 98368,
+ "p1_ops_max": 6469478,
  "scores": {
   "ref": 20,
   "reversed": 20,
@@ -145,7 +145,7 @@
    "total_steps": 75,
    "total_balls": 25,
    "coopt_nodes": 40,
-   "period_balls": 22,
+   "p1_ops_model": 504,
    "bytes": 23,
    "ref_ok": true,
    "reversed_ok": true,
@@ -217,7 +217,7 @@
    "total_steps": 110,
    "total_balls": 43,
    "coopt_nodes": 42,
-   "period_balls": 32,
+   "p1_ops_model": 495,
    "bytes": 36,
    "ref_ok": true,
    "reversed_ok": true,
@@ -265,7 +265,7 @@
    "total_steps": 1052,
    "total_balls": 175,
    "coopt_nodes": 240,
-   "period_balls": 158,
+   "p1_ops_model": 6316,
    "bytes": 23,
    "ref_ok": true,
    "reversed_ok": true,
@@ -313,7 +313,7 @@
    "total_steps": 7296,
    "total_balls": 1605,
    "coopt_nodes": 2820,
-   "period_balls": 610,
+   "p1_ops_model": 122606,
    "bytes": 27,
    "ref_ok": true,
    "reversed_ok": true,
@@ -361,7 +361,7 @@
    "total_steps": 57691,
    "total_balls": 16170,
    "coopt_nodes": 13314,
-   "period_balls": 3827,
+   "p1_ops_model": 696738,
    "bytes": 33,
    "ref_ok": true,
    "reversed_ok": true,
@@ -403,7 +403,7 @@
    "total_steps": 317000,
    "total_balls": 48000,
    "coopt_nodes": 49184,
-   "period_balls": 8032,
+   "p1_ops_model": 3028435,
    "bytes": 26,
    "ref_ok": true,
    "reversed_ok": true,
@@ -424,16 +424,16 @@
    "entry": 7,
    "tests": [
     {
-     "D": 18,
+     "D": 17,
      "I": 20000,
-     "bag": 127205,
-     "steps": 340000
+     "bag": 63603,
+     "steps": 320000
     },
     {
-     "D": 17,
+     "D": 16,
      "I": 15000,
-     "bag": 59741,
-     "steps": 240000
+     "bag": 29871,
+     "steps": 225000
     },
     {
      "D": 4,
@@ -442,10 +442,10 @@
      "steps": 90000
     }
    ],
-   "total_steps": 670000,
+   "total_steps": 635000,
    "total_balls": 65000,
-   "coopt_nodes": 196616,
-   "period_balls": 35008,
+   "coopt_nodes": 98312,
+   "p1_ops_model": 6468504,
    "bytes": 28,
    "ref_ok": true,
    "reversed_ok": true,
@@ -466,10 +466,10 @@
    "entry": 8,
    "tests": [
     {
-     "D": 20,
+     "D": 17,
      "I": 30000,
-     "bag": 501105,
-     "steps": 570000
+     "bag": 62639,
+     "steps": 480000
     },
     {
      "D": 12,
@@ -484,10 +484,10 @@
      "steps": 60000
     }
    ],
-   "total_steps": 850000,
+   "total_steps": 760000,
    "total_balls": 60000,
-   "coopt_nodes": 526400,
-   "period_balls": 32112,
+   "coopt_nodes": 67648,
+   "p1_ops_model": 4500249,
    "bytes": 28,
    "ref_ok": true,
    "reversed_ok": true,
@@ -508,10 +508,10 @@
    "entry": 9,
    "tests": [
     {
-     "D": 20,
+     "D": 17,
      "I": 50000,
-     "bag": 497177,
-     "steps": 950000
+     "bag": 62148,
+     "steps": 800000
     },
     {
      "D": 6,
@@ -526,10 +526,10 @@
      "steps": 40000
     }
    ],
-   "total_steps": 990100,
+   "total_steps": 840100,
    "total_balls": 70020,
-   "coopt_nodes": 524324,
-   "period_balls": 50024,
+   "coopt_nodes": 65572,
+   "p1_ops_model": 4404724,
    "bytes": 24,
    "ref_ok": true,
    "reversed_ok": true,
@@ -550,10 +550,10 @@
    "entry": 10,
    "tests": [
     {
-     "D": 20,
+     "D": 17,
      "I": 25000,
-     "bag": 470065,
-     "steps": 475000
+     "bag": 58759,
+     "steps": 400000
     },
     {
      "D": 11,
@@ -568,10 +568,10 @@
      "steps": 60000
     }
    ],
-   "total_steps": 785000,
+   "total_steps": 710000,
    "total_balls": 65000,
-   "coopt_nodes": 525328,
-   "period_balls": 26040,
+   "coopt_nodes": 66576,
+   "p1_ops_model": 4447296,
    "bytes": 28,
    "ref_ok": true,
    "reversed_ok": true,
@@ -592,10 +592,10 @@
    "entry": 11,
    "tests": [
     {
-     "D": 20,
+     "D": 17,
      "I": 50000,
-     "bag": 497177,
-     "steps": 950000
+     "bag": 62148,
+     "steps": 800000
     },
     {
      "D": 3,
@@ -610,10 +610,10 @@
      "steps": 21000
     }
    ],
-   "total_steps": 971004,
+   "total_steps": 821004,
    "total_balls": 53002,
-   "coopt_nodes": 524420,
-   "period_balls": 50130,
+   "coopt_nodes": 65668,
+   "p1_ops_model": 4407816,
    "bytes": 22,
    "ref_ok": true,
    "reversed_ok": true,
@@ -634,10 +634,10 @@
    "entry": 12,
    "tests": [
     {
-     "D": 19,
+     "D": 16,
      "I": 54000,
-     "bag": 253229,
-     "steps": 972000
+     "bag": 31654,
+     "steps": 810000
     },
     {
      "D": 2,
@@ -652,10 +652,10 @@
      "steps": 12000
     }
    ],
-   "total_steps": 984001,
+   "total_steps": 822001,
    "total_balls": 55501,
-   "coopt_nodes": 262402,
-   "period_balls": 54257,
+   "coopt_nodes": 33026,
+   "p1_ops_model": 2072994,
    "bytes": 22,
    "ref_ok": true,
    "reversed_ok": true,
@@ -676,10 +676,10 @@
    "entry": 13,
    "tests": [
     {
-     "D": 20,
+     "D": 17,
      "I": 45000,
-     "bag": 466857,
-     "steps": 855000
+     "bag": 58358,
+     "steps": 720000
     },
     {
      "D": 16,
@@ -694,10 +694,10 @@
      "steps": 49999
     }
    ],
-   "total_steps": 994999,
+   "total_steps": 859999,
    "total_balls": 100999,
-   "coopt_nodes": 557058,
-   "period_balls": 51002,
+   "coopt_nodes": 98306,
+   "p1_ops_model": 6468411,
    "bytes": 27,
    "ref_ok": true,
    "reversed_ok": true,
@@ -718,10 +718,10 @@
    "entry": 14,
    "tests": [
     {
-     "D": 20,
+     "D": 17,
      "I": 35000,
-     "bag": 485513,
-     "steps": 665000
+     "bag": 60690,
+     "steps": 560000
     },
     {
      "D": 13,
@@ -736,10 +736,10 @@
      "steps": 120000
     }
    ],
-   "total_steps": 965000,
+   "total_steps": 860000,
    "total_balls": 90000,
-   "coopt_nodes": 528392,
-   "period_balls": 39104,
+   "coopt_nodes": 69640,
+   "p1_ops_model": 4610558,
    "bytes": 28,
    "ref_ok": true,
    "reversed_ok": true,
@@ -760,10 +760,10 @@
    "entry": 15,
    "tests": [
     {
-     "D": 20,
+     "D": 17,
      "I": 30000,
-     "bag": 501105,
-     "steps": 570000
+     "bag": 62639,
+     "steps": 480000
     },
     {
      "D": 10,
@@ -778,10 +778,10 @@
      "steps": 320000
     }
    ],
-   "total_steps": 935000,
+   "total_steps": 845000,
    "total_balls": 115000,
-   "coopt_nodes": 524816,
-   "period_balls": 30528,
+   "coopt_nodes": 66064,
+   "p1_ops_model": 4423641,
    "bytes": 27,
    "ref_ok": true,
    "reversed_ok": true,
@@ -802,41 +802,47 @@
    "entry": 16,
    "tests": [
     {
-     "D": 3,
-     "I": 6700002,
+     "D": 5,
+     "I": 3800002,
+     "bag": 9,
+     "steps": 15200008
+    },
+    {
+     "D": 5,
+     "I": 3810003,
+     "bag": 5,
+     "steps": 15240012
+    },
+    {
+     "D": 5,
+     "I": 3820005,
      "bag": 3,
-     "steps": 13400004
+     "steps": 15280020
     },
     {
-     "D": 3,
-     "I": 6710003,
-     "bag": 2,
-     "steps": 13420006
+     "D": 5,
+     "I": 3830006,
+     "bag": 11,
+     "steps": 15320024
     },
     {
-     "D": 3,
-     "I": 6720002,
-     "bag": 3,
-     "steps": 13440004
+     "D": 17,
+     "I": 200001,
+     "bag": 689,
+     "steps": 3200016
     },
     {
-     "D": 7,
-     "I": 220001,
-     "bag": 2,
-     "steps": 1320006
-    },
-    {
-     "D": 20,
-     "I": 1234,
-     "bag": 284929,
-     "steps": 23446
+     "D": 12,
+     "I": 4095,
+     "bag": 1024,
+     "steps": 45045
     }
    ],
-   "total_steps": 41603466,
-   "total_balls": 20351242,
-   "coopt_nodes": 524364,
-   "period_balls": 1310,
-   "bytes": 49,
+   "total_steps": 64285125,
+   "total_balls": 15464112,
+   "coopt_nodes": 67648,
+   "p1_ops_model": 4499712,
+   "bytes": 60,
    "ref_ok": true,
    "reversed_ok": true,
    "P1_periodic_sim_ok": true,
@@ -856,41 +862,47 @@
    "entry": 17,
    "tests": [
     {
-     "D": 3,
-     "I": 6730003,
-     "bag": 2,
-     "steps": 13460006
+     "D": 5,
+     "I": 3840002,
+     "bag": 9,
+     "steps": 15360008
     },
     {
-     "D": 3,
-     "I": 6740002,
-     "bag": 3,
-     "steps": 13480004
-    },
-    {
-     "D": 3,
-     "I": 6750003,
-     "bag": 2,
-     "steps": 13500006
-    },
-    {
-     "D": 9,
-     "I": 180001,
+     "D": 5,
+     "I": 3850003,
      "bag": 5,
-     "steps": 1440008
+     "steps": 15400012
     },
     {
-     "D": 12,
-     "I": 4095,
-     "bag": 1024,
-     "steps": 45045
+     "D": 5,
+     "I": 3860005,
+     "bag": 3,
+     "steps": 15440020
+    },
+    {
+     "D": 5,
+     "I": 3870006,
+     "bag": 11,
+     "steps": 15480024
+    },
+    {
+     "D": 17,
+     "I": 210003,
+     "bag": 18989,
+     "steps": 3360048
+    },
+    {
+     "D": 14,
+     "I": 9000,
+     "bag": 7321,
+     "steps": 117000
     }
    ],
-   "total_steps": 41925069,
-   "total_balls": 20404104,
-   "coopt_nodes": 2316,
-   "period_balls": 2316,
-   "bytes": 49,
+   "total_steps": 65157112,
+   "total_balls": 15639019,
+   "coopt_nodes": 73792,
+   "p1_ops_model": 4852377,
+   "bytes": 60,
    "ref_ok": true,
    "reversed_ok": true,
    "P1_periodic_sim_ok": true,
@@ -910,28 +922,34 @@
    "entry": 18,
    "tests": [
     {
-     "D": 3,
-     "I": 6760002,
+     "D": 5,
+     "I": 3880002,
+     "bag": 9,
+     "steps": 15520008
+    },
+    {
+     "D": 5,
+     "I": 3890003,
+     "bag": 5,
+     "steps": 15560012
+    },
+    {
+     "D": 5,
+     "I": 3900005,
      "bag": 3,
-     "steps": 13520004
+     "steps": 15600020
     },
     {
-     "D": 3,
-     "I": 6770003,
-     "bag": 2,
-     "steps": 13540006
+     "D": 5,
+     "I": 3910006,
+     "bag": 11,
+     "steps": 15640024
     },
     {
-     "D": 3,
-     "I": 6780002,
-     "bag": 3,
-     "steps": 13560004
-    },
-    {
-     "D": 8,
-     "I": 200001,
-     "bag": 2,
-     "steps": 1400007
+     "D": 17,
+     "I": 220005,
+     "bag": 9947,
+     "steps": 3520080
     },
     {
      "D": 16,
@@ -940,11 +958,11 @@
      "steps": 185175
     }
    ],
-   "total_steps": 42205196,
-   "total_balls": 20522353,
-   "coopt_nodes": 32908,
-   "period_balls": 12485,
-   "bytes": 50,
+   "total_steps": 66025319,
+   "total_balls": 15812366,
+   "coopt_nodes": 98368,
+   "p1_ops_model": 6469478,
+   "bytes": 61,
    "ref_ok": true,
    "reversed_ok": true,
    "P1_periodic_sim_ok": true,
@@ -964,41 +982,47 @@
    "entry": 19,
    "tests": [
     {
-     "D": 3,
-     "I": 6790003,
-     "bag": 2,
-     "steps": 13580006
+     "D": 5,
+     "I": 3920002,
+     "bag": 9,
+     "steps": 15680008
     },
     {
-     "D": 3,
-     "I": 6800002,
+     "D": 5,
+     "I": 3930003,
+     "bag": 5,
+     "steps": 15720012
+    },
+    {
+     "D": 5,
+     "I": 3940005,
      "bag": 3,
-     "steps": 13600004
+     "steps": 15760020
     },
     {
-     "D": 3,
-     "I": 6810003,
-     "bag": 2,
-     "steps": 13620006
+     "D": 5,
+     "I": 3950006,
+     "bag": 11,
+     "steps": 15800024
+    },
+    {
+     "D": 17,
+     "I": 230007,
+     "bag": 28226,
+     "steps": 3680112
     },
     {
      "D": 10,
-     "I": 150001,
-     "bag": 32,
-     "steps": 1350009
-    },
-    {
-     "D": 18,
-     "I": 65535,
-     "bag": 65535,
-     "steps": 1114095
+     "I": 300,
+     "bag": 426,
+     "steps": 2700
     }
    ],
-   "total_steps": 43264120,
-   "total_balls": 20615544,
-   "coopt_nodes": 131596,
-   "period_balls": 66059,
-   "bytes": 51,
+   "total_steps": 66642876,
+   "total_balls": 15970323,
+   "coopt_nodes": 66112,
+   "p1_ops_model": 4424448,
+   "bytes": 59,
    "ref_ok": true,
    "reversed_ok": true,
    "P1_periodic_sim_ok": true,
@@ -1018,41 +1042,47 @@
    "entry": 20,
    "tests": [
     {
-     "D": 3,
-     "I": 6820002,
+     "D": 5,
+     "I": 3960002,
+     "bag": 9,
+     "steps": 15840008
+    },
+    {
+     "D": 5,
+     "I": 3970003,
+     "bag": 5,
+     "steps": 15880012
+    },
+    {
+     "D": 5,
+     "I": 3980005,
      "bag": 3,
-     "steps": 13640004
+     "steps": 15920020
     },
     {
-     "D": 3,
-     "I": 6830003,
-     "bag": 2,
-     "steps": 13660006
+     "D": 5,
+     "I": 3990006,
+     "bag": 11,
+     "steps": 15960024
     },
     {
-     "D": 3,
-     "I": 6840002,
-     "bag": 3,
-     "steps": 13680004
+     "D": 17,
+     "I": 240009,
+     "bag": 4502,
+     "steps": 3840144
     },
     {
-     "D": 6,
-     "I": 260002,
-     "bag": 17,
-     "steps": 1300010
-    },
-    {
-     "D": 14,
-     "I": 9000,
-     "bag": 7321,
-     "steps": 117000
+     "D": 7,
+     "I": 60,
+     "bag": 56,
+     "steps": 360
     }
    ],
-   "total_steps": 42397024,
-   "total_balls": 20759009,
-   "coopt_nodes": 8236,
-   "period_balls": 8236,
-   "bytes": 49,
+   "total_steps": 67440568,
+   "total_balls": 16140085,
+   "coopt_nodes": 65664,
+   "p1_ops_model": 4406707,
+   "bytes": 57,
    "ref_ok": true,
    "reversed_ok": true,
    "P1_periodic_sim_ok": true,

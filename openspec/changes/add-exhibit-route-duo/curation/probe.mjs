@@ -71,6 +71,7 @@ for (const inPath of inPaths) {
       ops,
       ms: Math.round(ms),
       outLen: out.length,
+      out,
       head: head.length > 160 ? head.slice(0, 160) + '…' : head,
       err,
     }),

@@ -1,6 +1,7 @@
 // 成本閘：plan013/plan014 的斷言牆只看得到「輸出對不對」，看不到 op 上限與牆鐘。
-// 本檔把成本軸的契約也機械化——對出貨 literal 逐筆跑 probe，套用判題引擎的三道閘門
-// （C1 op 上限、C3 每筆 5,000 ms 軟旗標、C4 累計預算），再比對契約得分。
+// 本檔把成本軸的契約也機械化——對出貨 literal 逐筆跑 probe，套用判題引擎**真正生效**的
+// 兩道閘門（C1 每筆 op 上限、C4 整場累計硬砍），並逐字比對輸出。
+// C3 的每筆 5,000 ms 軟旗標**不模擬**：實測對同步 Python 不會觸發（見 C3）。
 //
 // 執行：node cost_gate.mjs        （任一條不符即以非零碼結束）
 import { spawn } from 'node:child_process'
@@ -70,11 +71,10 @@ for (const c of CONTRACTS) {
     total += r.ms
     let v
     if (r.err) v = r.ops > OP_LIMIT ? 'TLE-op' : 'RE'
-    else v = r.outLen === expText.length ? 'AC?' : 'WA'
+    else v = (r.out !== undefined ? r.out : '').trimEnd() === expText.trimEnd() ? 'AC' : 'WA'
     verdicts.push(v)
-    if (v === 'AC?') score++
+    if (v === 'AC') score++
   }
-  // 'AC?' 只比長度；正確性由 plan013/plan014 的斷言牆負責，此處只管成本軸
   report.push({ file: c.file, score, expect: c.expect, totalMs: total, verdicts })
   if (score !== c.expect) problems.push(`${c.file}: 成本軸得分 ${score}，契約要求 ${c.expect}`)
   if (!c.slowOk && total > CUMULATIVE_MS * 0.7) {

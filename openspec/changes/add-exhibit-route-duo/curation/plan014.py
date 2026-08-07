@@ -21,14 +21,18 @@ import semantics014 as S  # noqa: E402
 HERE = os.path.dirname(os.path.abspath(__file__))
 LIT_DIR = os.path.join(HERE, "literals")
 
-MAX_I = 10_000_000             # 值域上限（題面同步）
+MAX_I = 10_000_000             # 球號上限（題面同步）
+MAX_D = 17                     # 層數上限（題面同步）：取 17 使全域最大週期 2^16 = 65,536，
+                               # 讓收編路線 P1「取週期再模擬」在最壞情形仍付得起（B8）；
+                               # 若放到 20，要鑑別「寫死模數 2^18」就必須放一條 I > 262,144
+                               # 的 D=20 測試，那條同時會讓 P1 跳閘——兩者互斥（R2-2）
 KILL_FROM = 16                 # 第 16 筆起為殺手帶
 PASS_STEP_CAP = 1_000_000      # 前段：最貴的逐球寫法（4.158 ops/step）也要能過
-KILL_BALL_MIN = 20_000_000     # 殺手帶：每球 1 op 的單球攤平寫法要跳閘（2 倍餘裕）
-KILL_STEP_MIN = 75_000_000     # 殺手帶：K 顆球攤平到同一行的寫法規避了 op 計數，只能靠
-                               # C3 的 5,000 ms 軟旗標攔——實測 7.9M steps/s，76M 步 ≈ 9.7 秒（近 2 倍餘裕）
+KILL_BALL_MIN = 15_000_000     # 殺手帶：每球 1 op 的單球攤平寫法要跳閘（1.5 倍餘裕）
 KILL_STEP_MAX = 85_000_000    # 殺手帶上限：陣亡提交每筆 ≈ 11 秒、5 筆 ≈ 54 秒 < C4 的 120 秒
-PERIOD_BALL_CAP = 100_000      # 每筆「取週期後仍需模擬的球數」**總和**上限（保護收編路線 P1）
+P1_OPS_CAP = 8_000_000         # 收編路線 P1 的 op 模型上限：4.2 ops/step × Σ(D−1)×min(I, 2^(D−1))
+MIN_BIG_SPAN = 16              # 大球數測試的週期下限：span ≤ 8 時，逐條非退化斷言會把可用殘值
+                               # 砍到只剩 2–4 個，答案塌縮成「I mod 2 或 mod 4」的查表（R2-1）
 COOPT_NODES_CAP = 600_000      # 每筆 Σ2^(D−1) 上限：收編路線 L1 最貴寫法（遞迴版）實測約
                                # 13 ops/節點，13 × 600K = 7.8M < C1，留 22% 餘裕
 BIG_I = 100_000                # 「大球數」門檻：超過此值的測試才承擔逐條退化性斷言
@@ -41,23 +45,23 @@ ENTRIES = [
     [(10, 300), (9, 256), (12, 50), (3, 999)],
     [(14, 1000), (11, 777), (13, 2048), (2, 12345)],
     [(16, 5000), (15, 3000), (6, 40000)],
-    [(18, 20000), (17, 15000), (4, 30000)],
-    [(20, 30000), (12, 20000), (7, 10000)],
-    [(20, 50000), (6, 20), (3, 20000)],
-    [(20, 25000), (11, 25000), (5, 15000)],
-    [(20, 50000), (3, 2), (8, 3000)],
-    [(19, 54000), (2, 1), (9, 1500)],
-    [(20, 45000), (16, 6000), (2, 49999)],
-    [(20, 35000), (13, 15000), (4, 40000)],
-    [(20, 30000), (10, 5000), (5, 80000)],
+    [(17, 20000), (16, 15000), (4, 30000)],
+    [(17, 30000), (12, 20000), (7, 10000)],
+    [(17, 50000), (6, 20), (3, 20000)],
+    [(17, 25000), (11, 25000), (5, 15000)],
+    [(17, 50000), (3, 2), (8, 3000)],
+    [(16, 54000), (2, 1), (9, 1500)],
+    [(17, 45000), (16, 6000), (2, 49999)],
+    [(17, 35000), (13, 15000), (4, 40000)],
+    [(17, 30000), (10, 5000), (5, 80000)],
     # 第 16–20 筆：球數大到「每球至少一個 line 事件」的逐球寫法都跳閘
-    #   步數只受上限約束（陣亡提交的牆鐘），不設下限——C3 軟旗標對同步碼無效（見 C3），
-    #   把步數堆高只會拖長陣亡提交的等待，並不會多殺任何路線。
-    [(3, 6_700_002), (3, 6_710_003), (3, 6_720_002), (7, 220_001), (20, 1234)],
-    [(3, 6_730_003), (3, 6_740_002), (3, 6_750_003), (9, 180_001), (12, 4095)],
-    [(3, 6_760_002), (3, 6_770_003), (3, 6_780_002), (8, 200_001), (16, 12345)],
-    [(3, 6_790_003), (3, 6_800_002), (3, 6_810_003), (10, 150_001), (18, 65535)],
-    [(3, 6_820_002), (3, 6_830_003), (3, 6_840_002), (6, 260_002), (14, 9000)],
+    #   bulk 用 D=5（週期 16，非退化殘值仍有 12 個，不會塌縮成小模數查表）
+    #   每筆另含一條 D=17 大球數測試：週期＝全域最大 2^16，逼任何寫死的小模數失效
+    [(5, 3_800_002), (5, 3_810_003), (5, 3_820_005), (5, 3_830_006), (17, 200_001), (12, 4095)],
+    [(5, 3_840_002), (5, 3_850_003), (5, 3_860_005), (5, 3_870_006), (17, 210_003), (14, 9000)],
+    [(5, 3_880_002), (5, 3_890_003), (5, 3_900_005), (5, 3_910_006), (17, 220_005), (16, 12345)],
+    [(5, 3_920_002), (5, 3_930_003), (5, 3_940_005), (5, 3_950_006), (17, 230_007), (10, 300)],
+    [(5, 3_960_002), (5, 3_970_003), (5, 3_980_005), (5, 3_990_006), (17, 240_009), (7, 60)],
 ]
 
 CAPS = {
@@ -83,9 +87,17 @@ def coopt_nodes(cases):
     return sum(1 << (D - 1) for D, _ in cases)
 
 
-def period_balls(cases):
-    """收編路線 P1 取週期後仍要模擬的球數總和。"""
-    return sum(min(I, 1 << (D - 1)) for D, I in cases)
+def p1_ops(cases):
+    """收編路線 P1 的 op 模型，取**最貴**的合理寫法：不是「只模擬 min(I, 週期) 顆球」，
+    而是「把整個週期模擬一遍建表再查」——成本 ∝ (D−1)×2^(D−1)，與 I 無關（R2 的
+    ladder-inversion 發現：帶著週期洞察的建表寫法反而比毫無洞察的逐球模擬更早死）。"""
+    return int(4.2 * sum((D - 1) * (1 << (D - 1)) for D, _ in cases))
+
+
+# 註：不另設「(D, I mod 2^j) 查表」的一般化斷言——任意查表都能擬合少數幾行，
+# 那等同於把公開的出貨答案記下來（C11／F18 已接受的專案層殘餘）。真正要擋的是
+# 「用固定模數化約後跑正確演算法」這一族，由下方 fixed_period_family 逐一驗證，
+# 其豁免門檻取自值域最大週期（R2-2）。
 
 
 def main(write=True):
@@ -99,14 +111,14 @@ def main(write=True):
         st = sum(S.steps(D, I) for D, I in cases)
         bl = sum(S.balls(D, I) for D, I in cases)
         nodes = coopt_nodes(cases)
-        pball = period_balls(cases)
+        p1 = p1_ops(cases)
         row = {
             "entry": i,
             "tests": [{"D": D, "I": I, "bag": S.bag_parity(D, I), "steps": S.steps(D, I)} for D, I in cases],
             "total_steps": st,
             "total_balls": bl,
             "coopt_nodes": nodes,
-            "period_balls": pball,
+            "p1_ops_model": p1,
             "bytes": len(text.encode()),
         }
         for name, fn in S.ROUTES.items():
@@ -118,8 +130,8 @@ def main(write=True):
 
         # ── 結構斷言 ────────────────────────────────────────────────
         for D, I in cases:
-            if not (2 <= D <= 20):
-                problems.append("entry %d: D=%d 超出 2..20" % (i, D))
+            if not (2 <= D <= MAX_D):
+                problems.append("entry %d: D=%d 超出 2..%d" % (i, D, MAX_D))
             if not (1 <= I <= MAX_I):
                 problems.append("entry %d: I=%d 超出 1..%d" % (i, I, MAX_I))
         if len(cases) < 2:
@@ -157,12 +169,15 @@ def main(write=True):
                     problems.append("entry %d: 大球數測試 (%d, %d) 的答案就是最大袋號" % (i, D, I))
                 if bag == (I - 1) % span + 1 and span > 2:
                     problems.append("entry %d: 大球數測試 (%d, %d) 的答案等於化約後球號（不做反向也會對）" % (i, D, I))
-            if not any(I > BIG_I and (1 << (D - 1)) > 8 for D, I in cases):
-                problems.append("entry %d: 沒有任何『大球數且週期 > 8』的測試，寫死模數 8 的誤解無法鑑別" % i)
+                if span < MIN_BIG_SPAN:
+                    problems.append("entry %d: 大球數測試 (%d, %d) 的週期 %d 太小，逐條非退化斷言會讓答案塌縮成小模數查表"
+                                    % (i, D, I, span))
+            if not any(I > BIG_I and (1 << (D - 1)) == (1 << (MAX_D - 1)) for D, I in cases):
+                problems.append("entry %d: 沒有任何『大球數且週期＝全域最大』的測試，寫死小模數的誤解無法鑑別" % i)
         if nodes > COOPT_NODES_CAP:
             problems.append("entry %d: Σ2^(D−1) = %d > %d，收編路線 L1 的遞迴寫法會被誤殺" % (i, nodes, COOPT_NODES_CAP))
-        if pball > PERIOD_BALL_CAP:
-            problems.append("entry %d: 取週期後球數總和 %d > %d，收編路線 P1 會被誤殺" % (i, pball, PERIOD_BALL_CAP))
+        if p1 > P1_OPS_CAP:
+            problems.append("entry %d: 收編路線 P1 的 op 模型 %d > %d，會被誤殺" % (i, p1, P1_OPS_CAP))
 
     # 第 1 筆（＝題面範例）必須讓所有零洞察／誤解路線當場現形
     first = per_entry[0]
@@ -190,9 +205,11 @@ def main(write=True):
         period_family[M] = sc
         # M 若是所有大球數測試週期的公倍數，這條路線在數學上就是正確的（過度化約無害），
         # 不算誤解；只有「M 小於某個大球數測試的週期」時才必須被鑑別出來。
-        undersized = any(I > BIG_I and (1 << (D - 1)) > M for cs in ENTRIES for D, I in cs)
-        if undersized and sc >= 20:
-            problems.append("固定模數 M=%d 小於出貨測試的最大週期卻得 %d/20，無法鑑別" % (M, sc))
+        # 豁免門檻取自**值域**（2^(MAX_D−1)）而非出貨資料：只有大到涵蓋全域週期的 M
+        # 才是數學上正確的過度化約；用出貨資料當門檻會把「剛好夠用」的錯誤模數放行（R2-2）
+        if M < (1 << (MAX_D - 1)) and sc >= 20:
+            problems.append("固定模數 M=%d 小於值域最大週期 %d 卻得 %d/20，無法鑑別"
+                            % (M, 1 << (MAX_D - 1), sc))
 
     flat = [(D, I) for cs in ENTRIES for (D, I) in cs]
     if not any(D == 2 for D, _ in flat):
@@ -203,8 +220,8 @@ def main(write=True):
         problems.append("缺 I=2^(D-1) 邊界")
     if not any(I > (1 << (D - 1)) for D, I in flat):
         problems.append("缺「球數超過袋數」邊界")
-    if not any(D == 20 for D, _ in flat):
-        problems.append("缺 D=20 邊界")
+    if not any(D == MAX_D for D, _ in flat):
+        problems.append("缺 D=%d 邊界" % MAX_D)
 
     report = {
         "max_I": MAX_I,
@@ -212,7 +229,7 @@ def main(write=True):
         "kill_ball_min": KILL_BALL_MIN,
         "kill_step_max": KILL_STEP_MAX,
         "coopt_nodes_cap": COOPT_NODES_CAP,
-        "period_ball_cap": PERIOD_BALL_CAP,
+        "p1_ops_cap": P1_OPS_CAP,
         "fixed_period_family": period_family,
         "max_entry_bytes": max(r["bytes"] for r in per_entry),
         "naive_expected_score": naive_score,
@@ -220,7 +237,7 @@ def main(write=True):
         "kill_band_min_balls": min(r["total_balls"] for r in per_entry[KILL_FROM - 1:]),
         "kill_band_max_steps": max(r["total_steps"] for r in per_entry[KILL_FROM - 1:]),
         "coopt_nodes_max": max(r["coopt_nodes"] for r in per_entry),
-        "period_balls_max": max(r["period_balls"] for r in per_entry),
+        "p1_ops_max": max(r["p1_ops_model"] for r in per_entry),
         "scores": scores,
         "caps": {k: list(v) for k, v in CAPS.items()},
         "per_entry": per_entry,
@@ -239,7 +256,7 @@ def main(write=True):
 
     print(json.dumps({k: report[k] for k in
                       ("max_entry_bytes", "naive_expected_score", "pass_band_max_steps",
-                       "kill_band_min_balls", "kill_band_max_steps", "coopt_nodes_max", "period_balls_max", "scores")},
+                       "kill_band_min_balls", "kill_band_max_steps", "coopt_nodes_max", "p1_ops_max", "scores")},
                      ensure_ascii=False, indent=1))
     if problems:
         print("\n斷言牆失敗：")

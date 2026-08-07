@@ -34,26 +34,18 @@ ENTRIES = [
     [(1, 1200, "spine", 1323), (1, 900, "random", 1324)],
     # 第 11 筆：模式 2 單組（頁面第二個範例）
     [(2, 7, "leftheavy", 1331)],
-    # 第 12–20 筆：同筆混合兩種模式，且 9 筆的模式序列兩兩不同
-    #（任何「只讀第一個標記＋位置規則」的實作最多只能命中其中一筆）
-    [(2, 22, "random", 1332), (1, 25, "leftheavy", 1333), (1, 28, "balanced", 1334),
-     (1, 24, "caterpillar", 1396), (2, 26, "random", 1395)],
-    [(2, 40, "random", 1335), (1, 44, "caterpillar", 1336), (1, 36, "leftheavy", 1337),
-     (2, 48, "balanced", 1394), (1, 30, "random", 1393)],
-    [(2, 55, "leftheavy", 1338), (1, 40, "zigzag", 1339), (2, 70, "random", 1340),
-     (1, 60, "spine", 1392), (1, 50, "balanced", 1391)],
-    [(2, 130, "spine", 1341), (2, 110, "leftheavy", 1342), (1, 90, "random", 1390),
-     (1, 75, "caterpillar", 1389), (1, 120, "balanced", 1388)],
-    [(2, 240, "random", 1343), (1, 200, "caterpillar", 1344), (2, 160, "leftheavy", 1387),
-     (2, 180, "spine", 1386), (1, 140, "random", 1385)],
-    [(2, 400, "spine", 1345), (2, 350, "random", 1346), (2, 300, "zigzag", 1384),
-     (1, 260, "leftheavy", 1383), (1, 220, "balanced", 1382)],
-    [(2, 700, "random", 1347), (1, 550, "spine", 1348), (1, 420, "leftheavy", 1381),
-     (2, 380, "random", 1380), (2, 340, "caterpillar", 1379)],
-    [(2, 1000, "spine", 1349), (2, 300, "zigzag", 1350), (1, 480, "random", 1351),
-     (2, 520, "leftheavy", 1378), (1, 260, "balanced", 1377)],
-    [(2, 1400, "random", 1352), (2, 1100, "spine", 1353), (1, 600, "leftheavy", 1376),
-     (1, 480, "caterpillar", 1375), (2, 360, "random", 1374)],
+    # 第 12–20 筆：同筆五組、混合兩種模式；**組別一律依大小遞減排列**（讓「大小名次」
+    #（與「位置」）兩種鍵指向同一個桶），且 9 筆的模式序列兩兩不同 → 任何不逐組讀
+    # 標記的規則家族最多再多拿一筆（A16）
+    [(2, 28, "balanced", 1334), (1, 26, "zigzag", 1395), (1, 25, "leftheavy", 1333), (1, 24, "caterpillar", 1396), (2, 22, "random", 1332)],
+    [(2, 48, "zigzag", 1394), (1, 44, "caterpillar", 1336), (1, 40, "random", 1335), (2, 36, "leftheavy", 1337), (1, 30, "random", 1393)],
+    [(2, 70, "random", 1340), (1, 60, "spine", 1392), (2, 55, "leftheavy", 1338), (1, 50, "balanced", 1391), (1, 40, "zigzag", 1339)],
+    [(2, 130, "spine", 1341), (2, 120, "balanced", 1388), (1, 110, "zigzag", 1342), (1, 90, "random", 1390), (1, 75, "caterpillar", 1389)],
+    [(2, 240, "random", 1343), (1, 200, "caterpillar", 1344), (2, 180, "spine", 1386), (2, 160, "leftheavy", 1387), (1, 140, "random", 1385)],
+    [(2, 400, "spine", 1345), (2, 350, "random", 1346), (1, 300, "zigzag", 1384), (2, 260, "leftheavy", 1383), (1, 220, "balanced", 1382)],
+    [(2, 700, "random", 1347), (2, 550, "spine", 1348), (2, 420, "leftheavy", 1381), (1, 380, "random", 1380), (1, 340, "caterpillar", 1379)],
+    [(2, 1000, "spine", 1349), (1, 520, "leftheavy", 1378), (1, 480, "random", 1351), (2, 300, "zigzag", 1350), (2, 260, "balanced", 1377)],
+    [(2, 1400, "random", 1352), (2, 1100, "spine", 1353), (1, 600, "leftheavy", 1376), (1, 480, "caterpillar", 1375), (2, 300, "zigzag", 1374)],
 ]
 
 CAPS = {          # 路線 → (比較子, 上界)  ；'eq' 表示必須精準等於
@@ -68,7 +60,8 @@ CAPS = {          # 路線 → (比較子, 上界)  ；'eq' 表示必須精準�
     "W9_revfirst": ("eq", 0),
     "W10_echosecond": ("eq", 0),
     "W11_shapelib": ("eq", 2),
-    "W12_dictbrute": ("eq", 2),   # 字典＋小 n 窮舉：同樣只剩兩筆範例筆    # 只剩 entry 1、11 兩筆單組範例筆（不承擔鑑別責任）
+    "W12_dictbrute": ("eq", 2),   # 字典＋小 n 窮舉：同樣只剩兩筆範例筆
+    "W13_depthguess": ("le", 12), # 完全不讀模式標記、以「總深度較小」猜讀法    # 只剩 entry 1、11 兩筆單組範例筆（不承擔鑑別責任）
     "Z1_echofirst": ("eq", 0),
     "Z2_revsecond": ("eq", 0),
     "Z3_sortdesc": ("eq", 0),
@@ -155,16 +148,33 @@ def main(write=True):
         if op == "le" and s > cap:
             problems.append("route %s: 得分 %d，契約要求 <= %d" % (name, s, cap))
 
-    # 「只讀第一個模式標記＋位置規則」家族：以 (組數, 首個模式, 位置) 為鍵的最佳規則
-    # 只能命中「同鍵之下出現次數最多的那一種模式序列」，逐鍵取最大值即為該家族的上界。
+    # 「不逐組讀模式標記」的規則家族上界：一條規則以某組特徵（組數／首個模式／位置／
+    # 組別大小名次）為鍵決定每組模式，最佳規則只能命中「同鍵之下出現最多次的那一種模式
+    # 序列」，逐鍵取最大值即為上界。R2 指出只算「位置」一種鍵不夠——同族也可用大小名次。
     from collections import Counter, defaultdict
-    buckets = defaultdict(Counter)
-    for e in entries:
-        seq = tuple(c["mode"] for c in e["cases"])
-        buckets[(len(seq), seq[0])][seq] += 1
-    positional_best = sum(cnt.most_common(1)[0][1] for cnt in buckets.values())
+
+    def _seq(e):
+        return tuple(c["mode"] for c in e["cases"])
+
+    def _by_position(e):
+        return (len(e["cases"]), _seq(e)[0])
+
+    def _by_sizerank(e):
+        order = sorted(range(len(e["cases"])), key=lambda k: -e["cases"][k]["n"])
+        return (len(e["cases"]), _seq(e)[0], tuple(order))
+
+    def _by_count_only(e):
+        return (len(e["cases"]),)
+
+    positional_best = 0
+    for keyfn in (_by_position, _by_sizerank, _by_count_only):
+        buckets = defaultdict(Counter)
+        for e in entries:
+            buckets[keyfn(e)][_seq(e)] += 1
+        best = sum(cnt.most_common(1)[0][1] for cnt in buckets.values())
+        positional_best = max(positional_best, best)
     if positional_best > POSITIONAL_RULE_CAP:
-        problems.append("只讀首個模式標記＋位置規則的家族上界 %d > %d"
+        problems.append("不逐組讀模式標記的規則家族上界 %d > %d"
                         % (positional_best, POSITIONAL_RULE_CAP))
 
     # 邊界覆蓋
