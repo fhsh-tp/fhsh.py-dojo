@@ -136,11 +136,7 @@ reference_solution: |
   t = int(data[0])
   out = [str(first_error(data[i])) for i in range(1, t + 1)]
   print("\n".join(out))
-starter_code: |
-  t = int(input())
-  for _ in range(t):
-      line = input()
-      # 在此找出第一個無法配對的字元位置（1-based），全部配對則輸出 0
+starter_code: ""
 ---
 
 ## 校刊排版檢查器

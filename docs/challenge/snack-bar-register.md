@@ -185,12 +185,7 @@ reference_solution: |
   data = sys.stdin.read().split("\n")
   t = int(data[0])
   print("\n".join(str(run_rpn(to_rpn(data[i].split()))) for i in range(1, t + 1)))
-starter_code: |
-  t = int(input())
-  for _ in range(t):
-      toks = input().split()
-      # 在此依照題目規則計算這一行算式的結果
-      print(0)
+starter_code: ""
 ---
 
 ## 福利社老收銀機
