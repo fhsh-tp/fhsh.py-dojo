@@ -1,0 +1,1017 @@
+{
+ "max_I": 10000000,
+ "pass_step_cap": 1000000,
+ "kill_ball_min": 20000000,
+ "kill_step_max": 45000000,
+ "levelwise_ops_cap": 8000000,
+ "max_entry_bytes": 48,
+ "naive_expected_score": 14,
+ "pass_band_max_steps": 994999,
+ "kill_band_min_balls": 20051251,
+ "kill_band_max_steps": 40985330,
+ "levelwise_ops_max": 3932480,
+ "scores": {
+  "ref": 20,
+  "reversed": 20,
+  "P1_periodic_sim": 20,
+  "L1_levelwise": 20,
+  "Z1_echo_I": 0,
+  "Z2_const1": 0,
+  "Z3_maxbag": 0,
+  "E1_noreverse": 0,
+  "E2_zerobased": 0,
+  "E3_flippernum": 0,
+  "E4_parityflip": 0,
+  "E5_dlevels": 0,
+  "E6_firstonly": 0
+ },
+ "caps": {
+  "ref": [
+   "eq",
+   20
+  ],
+  "reversed": [
+   "eq",
+   20
+  ],
+  "P1_periodic_sim": [
+   "eq",
+   20
+  ],
+  "L1_levelwise": [
+   "eq",
+   20
+  ],
+  "Z1_echo_I": [
+   "eq",
+   0
+  ],
+  "Z2_const1": [
+   "eq",
+   0
+  ],
+  "Z3_maxbag": [
+   "eq",
+   0
+  ],
+  "E1_noreverse": [
+   "eq",
+   0
+  ],
+  "E2_zerobased": [
+   "eq",
+   0
+  ],
+  "E3_flippernum": [
+   "eq",
+   0
+  ],
+  "E4_parityflip": [
+   "eq",
+   0
+  ],
+  "E5_dlevels": [
+   "eq",
+   0
+  ],
+  "E6_firstonly": [
+   "eq",
+   0
+  ]
+ },
+ "per_entry": [
+  {
+   "entry": 1,
+   "tests": [
+    {
+     "D": 4,
+     "I": 1,
+     "bag": 1,
+     "steps": 3
+    },
+    {
+     "D": 4,
+     "I": 2,
+     "bag": 5,
+     "steps": 6
+    },
+    {
+     "D": 4,
+     "I": 3,
+     "bag": 3,
+     "steps": 9
+    },
+    {
+     "D": 4,
+     "I": 8,
+     "bag": 8,
+     "steps": 24
+    },
+    {
+     "D": 4,
+     "I": 11,
+     "bag": 3,
+     "steps": 33
+    }
+   ],
+   "total_steps": 75,
+   "total_balls": 25,
+   "levelwise_ops_model": 200,
+   "bytes": 23,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 2,
+   "tests": [
+    {
+     "D": 2,
+     "I": 1,
+     "bag": 1,
+     "steps": 1
+    },
+    {
+     "D": 2,
+     "I": 2,
+     "bag": 2,
+     "steps": 2
+    },
+    {
+     "D": 3,
+     "I": 1,
+     "bag": 1,
+     "steps": 2
+    },
+    {
+     "D": 3,
+     "I": 4,
+     "bag": 4,
+     "steps": 8
+    },
+    {
+     "D": 5,
+     "I": 16,
+     "bag": 16,
+     "steps": 64
+    },
+    {
+     "D": 4,
+     "I": 2,
+     "bag": 5,
+     "steps": 6
+    },
+    {
+     "D": 2,
+     "I": 7,
+     "bag": 1,
+     "steps": 7
+    },
+    {
+     "D": 3,
+     "I": 10,
+     "bag": 3,
+     "steps": 20
+    }
+   ],
+   "total_steps": 110,
+   "total_balls": 43,
+   "levelwise_ops_model": 210,
+   "bytes": 36,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 3,
+   "tests": [
+    {
+     "D": 6,
+     "I": 32,
+     "bag": 32,
+     "steps": 160
+    },
+    {
+     "D": 7,
+     "I": 10,
+     "bag": 37,
+     "steps": 60
+    },
+    {
+     "D": 8,
+     "I": 100,
+     "bag": 100,
+     "steps": 700
+    },
+    {
+     "D": 5,
+     "I": 33,
+     "bag": 1,
+     "steps": 132
+    }
+   ],
+   "total_steps": 1052,
+   "total_balls": 175,
+   "levelwise_ops_model": 1200,
+   "bytes": 23,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 4,
+   "tests": [
+    {
+     "D": 10,
+     "I": 300,
+     "bag": 426,
+     "steps": 2700
+    },
+    {
+     "D": 9,
+     "I": 256,
+     "bag": 256,
+     "steps": 2048
+    },
+    {
+     "D": 12,
+     "I": 50,
+     "bag": 1121,
+     "steps": 550
+    },
+    {
+     "D": 3,
+     "I": 999,
+     "bag": 2,
+     "steps": 1998
+    }
+   ],
+   "total_steps": 7296,
+   "total_balls": 1605,
+   "levelwise_ops_model": 14100,
+   "bytes": 27,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 5,
+   "tests": [
+    {
+     "D": 14,
+     "I": 1000,
+     "bag": 7417,
+     "steps": 13000
+    },
+    {
+     "D": 11,
+     "I": 777,
+     "bag": 68,
+     "steps": 7770
+    },
+    {
+     "D": 13,
+     "I": 2048,
+     "bag": 4095,
+     "steps": 24576
+    },
+    {
+     "D": 2,
+     "I": 12345,
+     "bag": 1,
+     "steps": 12345
+    }
+   ],
+   "total_steps": 57691,
+   "total_balls": 16170,
+   "levelwise_ops_model": 66570,
+   "bytes": 33,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 6,
+   "tests": [
+    {
+     "D": 16,
+     "I": 5000,
+     "bag": 28901,
+     "steps": 75000
+    },
+    {
+     "D": 15,
+     "I": 3000,
+     "bag": 15221,
+     "steps": 42000
+    },
+    {
+     "D": 6,
+     "I": 40000,
+     "bag": 32,
+     "steps": 200000
+    }
+   ],
+   "total_steps": 317000,
+   "total_balls": 48000,
+   "levelwise_ops_model": 245920,
+   "bytes": 26,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 7,
+   "tests": [
+    {
+     "D": 18,
+     "I": 20000,
+     "bag": 127205,
+     "steps": 340000
+    },
+    {
+     "D": 17,
+     "I": 15000,
+     "bag": 59741,
+     "steps": 240000
+    },
+    {
+     "D": 4,
+     "I": 30000,
+     "bag": 8,
+     "steps": 90000
+    }
+   ],
+   "total_steps": 670000,
+   "total_balls": 65000,
+   "levelwise_ops_model": 983080,
+   "bytes": 28,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 8,
+   "tests": [
+    {
+     "D": 20,
+     "I": 30000,
+     "bag": 501105,
+     "steps": 570000
+    },
+    {
+     "D": 19,
+     "I": 20000,
+     "bag": 254409,
+     "steps": 360000
+    },
+    {
+     "D": 7,
+     "I": 10000,
+     "bag": 61,
+     "steps": 60000
+    }
+   ],
+   "total_steps": 990000,
+   "total_balls": 60000,
+   "levelwise_ops_model": 3932480,
+   "bytes": 28,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 9,
+   "tests": [
+    {
+     "D": 20,
+     "I": 50000,
+     "bag": 497177,
+     "steps": 950000
+    },
+    {
+     "D": 6,
+     "I": 20,
+     "bag": 26,
+     "steps": 100
+    },
+    {
+     "D": 3,
+     "I": 20000,
+     "bag": 4,
+     "steps": 40000
+    }
+   ],
+   "total_steps": 990100,
+   "total_balls": 70020,
+   "levelwise_ops_model": 2621620,
+   "bytes": 24,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 10,
+   "tests": [
+    {
+     "D": 20,
+     "I": 25000,
+     "bag": 470065,
+     "steps": 475000
+    },
+    {
+     "D": 18,
+     "I": 25000,
+     "bag": 117517,
+     "steps": 425000
+    },
+    {
+     "D": 5,
+     "I": 15000,
+     "bag": 15,
+     "steps": 60000
+    }
+   ],
+   "total_steps": 960000,
+   "total_balls": 65000,
+   "levelwise_ops_model": 3276880,
+   "bytes": 28,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 11,
+   "tests": [
+    {
+     "D": 20,
+     "I": 50000,
+     "bag": 497177,
+     "steps": 950000
+    },
+    {
+     "D": 3,
+     "I": 2,
+     "bag": 3,
+     "steps": 4
+    },
+    {
+     "D": 8,
+     "I": 3000,
+     "bag": 119,
+     "steps": 21000
+    }
+   ],
+   "total_steps": 971004,
+   "total_balls": 53002,
+   "levelwise_ops_model": 2622100,
+   "bytes": 22,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 12,
+   "tests": [
+    {
+     "D": 19,
+     "I": 54000,
+     "bag": 253229,
+     "steps": 972000
+    },
+    {
+     "D": 2,
+     "I": 1,
+     "bag": 1,
+     "steps": 1
+    },
+    {
+     "D": 9,
+     "I": 1500,
+     "bag": 220,
+     "steps": 12000
+    }
+   ],
+   "total_steps": 984001,
+   "total_balls": 55501,
+   "levelwise_ops_model": 1312010,
+   "bytes": 22,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 13,
+   "tests": [
+    {
+     "D": 20,
+     "I": 45000,
+     "bag": 466857,
+     "steps": 855000
+    },
+    {
+     "D": 16,
+     "I": 6000,
+     "bag": 31605,
+     "steps": 90000
+    },
+    {
+     "D": 2,
+     "I": 49999,
+     "bag": 1,
+     "steps": 49999
+    }
+   ],
+   "total_steps": 994999,
+   "total_balls": 100999,
+   "levelwise_ops_model": 2785290,
+   "bytes": 27,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 14,
+   "tests": [
+    {
+     "D": 20,
+     "I": 35000,
+     "bag": 485513,
+     "steps": 665000
+    },
+    {
+     "D": 13,
+     "I": 15000,
+     "bag": 3734,
+     "steps": 180000
+    },
+    {
+     "D": 4,
+     "I": 40000,
+     "bag": 8,
+     "steps": 120000
+    }
+   ],
+   "total_steps": 965000,
+   "total_balls": 90000,
+   "levelwise_ops_model": 2641960,
+   "bytes": 28,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 15,
+   "tests": [
+    {
+     "D": 2,
+     "I": 9900000,
+     "bag": 2,
+     "steps": 9900000
+    },
+    {
+     "D": 3,
+     "I": 5100000,
+     "bag": 4,
+     "steps": 10200000
+    },
+    {
+     "D": 4,
+     "I": 5050000,
+     "bag": 8,
+     "steps": 15150000
+    },
+    {
+     "D": 6,
+     "I": 17,
+     "bag": 2,
+     "steps": 85
+    },
+    {
+     "D": 20,
+     "I": 1234,
+     "bag": 284929,
+     "steps": 23446
+    }
+   ],
+   "total_steps": 35273531,
+   "total_balls": 20051251,
+   "levelwise_ops_model": 2621670,
+   "bytes": 45,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 16,
+   "tests": [
+    {
+     "D": 3,
+     "I": 7300000,
+     "bag": 4,
+     "steps": 14600000
+    },
+    {
+     "D": 2,
+     "I": 8800000,
+     "bag": 2,
+     "steps": 8800000
+    },
+    {
+     "D": 4,
+     "I": 4400000,
+     "bag": 8,
+     "steps": 13200000
+    },
+    {
+     "D": 12,
+     "I": 4095,
+     "bag": 1024,
+     "steps": 45045
+    },
+    {
+     "D": 5,
+     "I": 96,
+     "bag": 16,
+     "steps": 384
+    }
+   ],
+   "total_steps": 36645429,
+   "total_balls": 20504191,
+   "levelwise_ops_model": 10390,
+   "bytes": 45,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 17,
+   "tests": [
+    {
+     "D": 4,
+     "I": 5100000,
+     "bag": 8,
+     "steps": 15300000
+    },
+    {
+     "D": 2,
+     "I": 10000000,
+     "bag": 2,
+     "steps": 10000000
+    },
+    {
+     "D": 3,
+     "I": 5400000,
+     "bag": 4,
+     "steps": 10800000
+    },
+    {
+     "D": 20,
+     "I": 3000,
+     "bag": 487041,
+     "steps": 57000
+    },
+    {
+     "D": 7,
+     "I": 1000,
+     "bag": 58,
+     "steps": 6000
+    }
+   ],
+   "total_steps": 36163000,
+   "total_balls": 20504000,
+   "levelwise_ops_model": 2621830,
+   "bytes": 48,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 18,
+   "tests": [
+    {
+     "D": 2,
+     "I": 10000000,
+     "bag": 2,
+     "steps": 10000000
+    },
+    {
+     "D": 4,
+     "I": 5600000,
+     "bag": 8,
+     "steps": 16800000
+    },
+    {
+     "D": 3,
+     "I": 4800000,
+     "bag": 4,
+     "steps": 9600000
+    },
+    {
+     "D": 9,
+     "I": 255,
+     "bag": 128,
+     "steps": 2040
+    },
+    {
+     "D": 14,
+     "I": 9000,
+     "bag": 7321,
+     "steps": 117000
+    }
+   ],
+   "total_steps": 36519040,
+   "total_balls": 20409255,
+   "levelwise_ops_model": 42310,
+   "bytes": 47,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 19,
+   "tests": [
+    {
+     "D": 3,
+     "I": 6600000,
+     "bag": 4,
+     "steps": 13200000
+    },
+    {
+     "D": 4,
+     "I": 6050000,
+     "bag": 8,
+     "steps": 18150000
+    },
+    {
+     "D": 2,
+     "I": 8100000,
+     "bag": 2,
+     "steps": 8100000
+    },
+    {
+     "D": 11,
+     "I": 700,
+     "bag": 886,
+     "steps": 7000
+    },
+    {
+     "D": 18,
+     "I": 65535,
+     "bag": 65535,
+     "steps": 1114095
+    }
+   ],
+   "total_steps": 40571095,
+   "total_balls": 20816235,
+   "levelwise_ops_model": 660550,
+   "bytes": 48,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  },
+  {
+   "entry": 20,
+   "tests": [
+    {
+     "D": 4,
+     "I": 7200000,
+     "bag": 8,
+     "steps": 21600000
+    },
+    {
+     "D": 3,
+     "I": 5900000,
+     "bag": 4,
+     "steps": 11800000
+    },
+    {
+     "D": 2,
+     "I": 7400000,
+     "bag": 2,
+     "steps": 7400000
+    },
+    {
+     "D": 16,
+     "I": 12345,
+     "bag": 3591,
+     "steps": 185175
+    },
+    {
+     "D": 6,
+     "I": 31,
+     "bag": 16,
+     "steps": 155
+    }
+   ],
+   "total_steps": 40985330,
+   "total_balls": 20512376,
+   "levelwise_ops_model": 164070,
+   "bytes": 46,
+   "ref_ok": true,
+   "reversed_ok": true,
+   "P1_periodic_sim_ok": true,
+   "L1_levelwise_ok": true,
+   "Z1_echo_I_ok": false,
+   "Z2_const1_ok": false,
+   "Z3_maxbag_ok": false,
+   "E1_noreverse_ok": false,
+   "E2_zerobased_ok": false,
+   "E3_flippernum_ok": false,
+   "E4_parityflip_ok": false,
+   "E5_dlevels_ok": false,
+   "E6_firstonly_ok": false
+  }
+ ],
+ "problems": []
+}
