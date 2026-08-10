@@ -23,7 +23,7 @@
 | C10 | 題目 `id` 由 `pnpm new-challenge` 配號，不得手填；`--category apcs` 決定前綴與上架頁 | `scripts/new-challenge.ts` |
 | C12 | **op 計數可被提交端規避（平台層）**：計數器只在 `sys.settrace` 事件觸發，提交只要在開頭呼叫 `sys.settrace(None)` 就把計數凍結（R1 實測全場 5 ops），op 上限完全失效；此性質對全站所有 op 斷崖題（apcs005／007／008／010、gem-blast 等）一體適用，非本 change 可用測資修補 → 記錄並建議另開 change（例如改用 `sys.monitoring` 或在 wrapper 外層加封鎖） | R1 賞金 `audit_r1/A_untrace.py` 實測 |
 | C13 | **同一行可塞任意多敘述**：tracer 每行只記一個事件，因此把 K 顆球的完整下降串到同一 source line 可讓成本降到「每 K 球 1 op」，任何以 op 數為門檻的斷崖都可被 K 稀釋；而 C3 軟旗標對同步碼無效、C4 只在整場超時才中斷 → 成本軸**沒有任何閘門守得住這條路線**（處置見 B3b） | R1 賞金 `curation/routes/r014_batch32.py` 實測 |
-| C11 | 生產建置只剝除 `generator` 與 `reference_solution`，**`testcase_plan` 的 literal 內容會原樣進入前端 bundle**；本專案的 repo 亦為公開，出貨測資輸入本來就可見 → 全 literal 題目的「離線算好答案再硬編碼」是**專案層既存殘餘**（apcs006、apcs009–012 同此），非本 change 新增；處置見〈賞金結果 F18〉 | `openspec/specs/generator-strip-plugin/spec.md`（明列 `testcase_plan` 保持原樣）、`ChallengeView.vue` 讀取 frontmatter |
+| C11 | 生產建置只剝除 `generator` 與 `reference_solution`，**`testcase_plan` 的 literal 內容會原樣進入前端 bundle**；本專案的 repo 亦為公開，出貨測資輸入本來就可見 → 全 literal 題目的「離線算好答案再硬編碼」是**專案層既存殘餘**，非本 change 新增；處置見〈賞金結果 F18〉。受影響題目以枚舉指令為準（非手列）：`for f in docs/challenge/*.md; do grep -q "^testcase_plan:" $f && [ $(grep -c "^  - count:" $f) -eq 0 ] && grep -m1 "^id:" $f; done` → 2026-08-11 實測為 **apcs011／012／013／014**；採 literal＋band 混合的題目（apcs006／009／010 等）只有 literal 那幾筆可見 | `openspec/specs/generator-strip-plugin/spec.md`（明列 `testcase_plan` 保持原樣）、`ChallengeView.vue` 讀取 frontmatter |
 
 ---
 
@@ -136,7 +136,7 @@
 | F15 | A9（鏡射不對稱）是 SSOT 宣稱但未實作的斷言 | 修：實作 `mirror_asym` 斷言（A9） | `plan013.py` |
 | F16 | 模式 2 的左鏈組別對模式盲免疫，W1＝10/20 的守門機制未記錄 | 修：寫成事實 A14＋結構斷言 | 本檔、`plan013.py` |
 | F17 | C4 累計硬砍在結果表格上可能呈現為全綠 | 記錄為 C4b＋以 B7 的牆鐘餘裕規避；引擎修正屬另案 | 本檔 C4b |
-| F18 | `testcase_plan` literal 進入生產 bundle → 可離線算答案硬編碼 | **接受殘餘**：repo 本身公開，出貨測資輸入原已可見；apcs006／apcs009–012 同此，非本 change 新增。建議另開 change 處理（生產期遮蔽 literal 值＋私有測資），不以測資調整規避 | 本檔 C11 |
+| F18 | `testcase_plan` literal 進入生產 bundle → 可離線算答案硬編碼 | **接受殘餘**：repo 本身公開，出貨測資輸入原已可見；受影響題目清單見 C11 的枚舉指令（2026-08-11 實測 apcs011／012／013／014），非本 change 新增。建議另開 change 處理（生產期遮蔽 literal 值＋私有測資），不以測資調整規避 | 本檔 C11 |
 | F19 | A3 引用的 n=6000 極端輸入不存在於出貨資料且違反 A5／A8 | 修：降級為附註並標明「探針輸入、非出貨形狀」（A3） | 本檔 A3 |
 | F20 | C5「逐字比對」過度描述（實為 trimEnd 容忍） | 修：改寫 C5 | 本檔 C5 |
 | F21 | 小 n 範例筆（1／2／11／12）對窮舉形狀解毫無鑑別力 | 修：非範例筆最大 n 一律 ≥ 20，範例筆明記豁免（A15） | `plan013.py` |
