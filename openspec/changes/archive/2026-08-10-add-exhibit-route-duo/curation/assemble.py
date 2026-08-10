@@ -14,7 +14,22 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LIT = os.path.join(HERE, "literals")
-REPO = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
+
+
+def _find_repo_root(start):
+    """往上找 repo 根（以 package.json 為標記）——固定層數的 ".." 在 change 被
+    archive（多一層日期目錄）或搬移後會算錯，change B 教訓⑨要求本目錄可搬移重跑。"""
+    cur = start
+    while True:
+        if os.path.exists(os.path.join(cur, "package.json")):
+            return cur
+        parent = os.path.dirname(cur)
+        if parent == cur:
+            raise SystemExit("找不到 repo 根（往上都沒有 package.json）：%s" % start)
+        cur = parent
+
+
+REPO = _find_repo_root(HERE)
 DOCS = os.path.join(REPO, "docs", "challenge")
 
 BANNED = [
