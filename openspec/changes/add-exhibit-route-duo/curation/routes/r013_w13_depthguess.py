@@ -44,6 +44,50 @@ def build(shape, labels, rng):
             cur = nd
             left = not left
         return root
+    if shape == "randchain":
+        # 隨機方向的單一路徑：深度＝n（受 A5 上限約束），但方向序列由 seed 決定，
+        # 不屬於任何固定形狀家族——同時對抗「深度啟發式」與「形狀辨識器」（R3）
+        root = Room(labels[0])
+        cur = root
+        for v in labels[1:]:
+            nd = Room(v)
+            if rng.random() < 0.5:
+                cur.l = nd
+            else:
+                cur.r = nd
+            cur = nd
+        return root
+    if shape == "randbush":
+        # 隨機主幹（方向由 seed 決定）＋隨機小叢集：深、非鏈、非固定家族
+        spine_len = min(n, 200)
+        rest = n - spine_len
+        sizes = [0] * spine_len
+        for _ in range(rest):
+            sizes[rng.randrange(spine_len)] += 1
+        it = iter(labels)
+        root = Room(next(it))
+        cur = root
+        for i in range(spine_len - 1):
+            k = sizes[i]
+            sub = [next(it) for _ in range(k)] if k else []
+            nxt = Room(next(it))
+            if rng.random() < 0.5:
+                cur.l = nxt
+                if sub:
+                    cur.r = build("random", sub, rng)
+            else:
+                cur.r = nxt
+                if sub:
+                    cur.l = build("random", sub, rng)
+            cur = nxt
+        k = sizes[-1]
+        if k:
+            sub = [next(it) for _ in range(k)]
+            if rng.random() < 0.5:
+                cur.l = build("random", sub, rng)
+            else:
+                cur.r = build("random", sub, rng)
+        return root
     if shape == "balanced":
         def rec(lo, hi):
             if lo > hi:
@@ -576,6 +620,39 @@ def _total_depth(s1, s2, mode):
             st.append((lo, m - 1, d + 1))
             st.append((m + 1, hi, d + 1))
     return total
+
+
+
+def route_W14_shaperecog(text):
+    """零標記路線：兩種讀法都還原，若某一讀法的結構落在固定形狀家族就採用它，
+    否則退回深度啟發式。攻擊的是策展本身的形狀指紋，而不是題目語義。"""
+    import random as _r
+    res = []
+    for mode, n, s1, s2 in _parse(text):
+        best = None
+        for g in (1, 2):
+            try:
+                out = _mode1(s1, s2) if g == 1 else _mode2(s1, s2)
+            except Exception:
+                continue
+            if len(out) != n:
+                continue
+            hit = False
+            for shape in _SHAPE_LIB:
+                root = build(shape, list(range(n)), _r.Random(0))
+                A, B, C = order_a(root), order_b(root), order_c(root)
+                first, second = (A, B) if g == 1 else (B, C)
+                label = {}
+                for slot, tok in zip(first, s1):
+                    label[slot] = tok
+                if [label[x] for x in second] == list(s2):
+                    hit = True
+                    break
+            key = (1 if hit else 0, -_total_depth(s1, s2, g))
+            if best is None or key > best[0]:
+                best = (key, out)
+        res.append(" ".join(best[1]) if best else "")
+    return "\n".join(res) + "\n"
 
 
 

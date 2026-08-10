@@ -29,7 +29,7 @@ MAX_D = 17                     # 層數上限（題面同步）：取 17 使全�
 KILL_FROM = 16                 # 第 16 筆起為殺手帶
 PASS_STEP_CAP = 1_000_000      # 前段：最貴的逐球寫法（4.158 ops/step）也要能過
 KILL_BALL_MIN = 15_000_000     # 殺手帶：每球 1 op 的單球攤平寫法要跳閘（1.5 倍餘裕）
-KILL_STEP_MAX = 85_000_000    # 殺手帶上限：陣亡提交每筆 ≈ 11 秒、5 筆 ≈ 54 秒 < C4 的 120 秒
+KILL_STEP_MAX = 70_000_000    # 殺手帶上限：陣亡提交每筆 ≈ 11 秒、5 筆 ≈ 54 秒 < C4 的 120 秒
 P1_OPS_CAP = 8_000_000         # 收編路線 P1 的 op 模型上限：4.2 ops/step × Σ(D−1)×min(I, 2^(D−1))
 MIN_BIG_SPAN = 16              # 大球數測試的週期下限：span ≤ 8 時，逐條非退化斷言會把可用殘值
                                # 砍到只剩 2–4 個，答案塌縮成「I mod 2 或 mod 4」的查表（R2-1）
@@ -57,11 +57,11 @@ ENTRIES = [
     # 第 16–20 筆：球數大到「每球至少一個 line 事件」的逐球寫法都跳閘
     #   bulk 用 D=5（週期 16，非退化殘值仍有 12 個，不會塌縮成小模數查表）
     #   每筆另含一條 D=17 大球數測試：週期＝全域最大 2^16，逼任何寫死的小模數失效
-    [(5, 3_800_002), (5, 3_810_003), (5, 3_820_005), (5, 3_830_006), (17, 200_001), (12, 4095)],
-    [(5, 3_840_002), (5, 3_850_003), (5, 3_860_005), (5, 3_870_006), (17, 210_003), (14, 9000)],
-    [(5, 3_880_002), (5, 3_890_003), (5, 3_900_005), (5, 3_910_006), (17, 220_005), (16, 12345)],
-    [(5, 3_920_002), (5, 3_930_003), (5, 3_940_005), (5, 3_950_006), (17, 230_007), (10, 300)],
-    [(5, 3_960_002), (5, 3_970_003), (5, 3_980_005), (5, 3_990_006), (17, 240_009), (7, 60)],
+    [(5, 3800002), (5, 3809013), (5, 3818011), (5, 3827006), (17, 200_001), (12, 4095)],
+    [(5, 3840003), (5, 3849014), (5, 3858012), (5, 3867007), (17, 210_003), (14, 9000)],
+    [(5, 3880004), (5, 3889000), (5, 3898009), (5, 3907005), (17, 220_005), (16, 12345)],
+    [(5, 3920005), (5, 3929010), (5, 3938014), (5, 3947003), (17, 230_007), (10, 300)],
+    [(5, 3960006), (5, 3969011), (5, 3978015), (5, 3987004), (17, 240_009), (7, 60)],
 ]
 
 CAPS = {
@@ -196,20 +196,36 @@ def main(write=True):
     if naive_score != KILL_FROM - 1:
         problems.append("逐球模擬預期得分 %d，契約要求 %d" % (naive_score, KILL_FROM - 1))
 
-    # 寫死模數族：任何固定模數 M 的化約都不得拿滿分
+    # 寫死模數族：對「門檻 × 模數」雙掃描——門檻取出貨資料中每個相異球號的下緣
+    #（涵蓋攻擊者所有可能的切分），模數取所有 2 的冪次。
+    all_I = sorted({I for cs in ENTRIES for _, I in cs})
+    thresholds = sorted({I - 1 for I in all_I} | {0, BIG_I})
     period_family = {}
-    for M in [1 << k for k in range(1, 20)]:
-        r = S.fixed_period_route(M)
-        sc = sum(1 for i, cases in enumerate(ENTRIES, 1)
-                 if r(S.render_input(cases)) == S.render_expected(cases))
-        period_family[M] = sc
+    for M in [1 << k for k in range(1, MAX_D)]:
+        worst = 0
+        for th in thresholds:
+            r = S.fixed_period_route(M, th)
+            sc = sum(1 for cases in ENTRIES
+                     if r(S.render_input(cases)) == S.render_expected(cases))
+            worst = max(worst, sc)
+        period_family[M] = worst
+        sc = worst
         # M 若是所有大球數測試週期的公倍數，這條路線在數學上就是正確的（過度化約無害），
         # 不算誤解；只有「M 小於某個大球數測試的週期」時才必須被鑑別出來。
-        # 豁免門檻取自**值域**（2^(MAX_D−1)）而非出貨資料：只有大到涵蓋全域週期的 M
-        # 才是數學上正確的過度化約；用出貨資料當門檻會把「剛好夠用」的錯誤模數放行（R2-2）
-        if M < (1 << (MAX_D - 1)) and sc >= 20:
-            problems.append("固定模數 M=%d 小於值域最大週期 %d 卻得 %d/20，無法鑑別"
-                            % (M, 1 << (MAX_D - 1), sc))
+        # 只有「M 對它實際套用到的每一行都是該行週期的倍數」時，這條路線在那些行上
+        # 才是數學上正確的過度化約；否則就是誤解，必須被鑑別出來。
+        # 註（R3 殘餘，B9d）：把門檻拉到只涵蓋 bulk 行時，任何 16 的倍數都落在「正確」
+        # 那一側——要鑑別它需要一條「週期＝值域最大且球號大於 bulk」的測試，而那條的
+        # 步數（16 步/球 × ~4M 球）與球數下限、步數上限三者互斥，無法同時滿足。
+        for th in thresholds:
+            r = S.fixed_period_route(M, th)
+            sc_th = sum(1 for cases in ENTRIES
+                        if r(S.render_input(cases)) == S.render_expected(cases))
+            applied_spans = {1 << (D - 1) for cs in ENTRIES for D, I in cs if I > th}
+            sound = all(M % span == 0 for span in applied_spans) if applied_spans else True
+            if not sound and sc_th >= 20:
+                problems.append("固定模數 M=%d、門檻 %d：對週期 %s 的測試是錯的卻仍得 20/20"
+                                % (M, th, sorted(s for s in applied_spans if M % s)))
 
     flat = [(D, I) for cs in ENTRIES for (D, I) in cs]
     if not any(D == 2 for D, _ in flat):

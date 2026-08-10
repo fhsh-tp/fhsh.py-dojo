@@ -4,7 +4,7 @@
    "file": "ref013.py",
    "score": 20,
    "expect": 20,
-   "totalMs": 123,
+   "totalMs": 112,
    "verdicts": [
     "AC",
     "AC",
@@ -32,7 +32,7 @@
    "file": "gen013.py",
    "score": 20,
    "expect": 20,
-   "totalMs": 202,
+   "totalMs": 175,
    "verdicts": [
     "AC",
     "AC",
@@ -60,7 +60,7 @@
    "file": "routes/r013_indexnaive.py",
    "score": 20,
    "expect": 20,
-   "totalMs": 119,
+   "totalMs": 102,
    "verdicts": [
     "AC",
     "AC",
@@ -88,7 +88,7 @@
    "file": "routes/r013_r1_mirror.py",
    "score": 20,
    "expect": 20,
-   "totalMs": 461,
+   "totalMs": 580,
    "verdicts": [
     "AC",
     "AC",
@@ -116,7 +116,7 @@
    "file": "ref014.py",
    "score": 20,
    "expect": 20,
-   "totalMs": 28,
+   "totalMs": 32,
    "verdicts": [
     "AC",
     "AC",
@@ -144,7 +144,7 @@
    "file": "gen014.py",
    "score": 20,
    "expect": 20,
-   "totalMs": 30,
+   "totalMs": 43,
    "verdicts": [
     "AC",
     "AC",
@@ -172,7 +172,7 @@
    "file": "routes/r014_levelwise.py",
    "score": 20,
    "expect": 20,
-   "totalMs": 1268,
+   "totalMs": 1354,
    "verdicts": [
     "AC",
     "AC",
@@ -200,7 +200,7 @@
    "file": "routes/r014_levelwise_rec.py",
    "score": 20,
    "expect": 20,
-   "totalMs": 2868,
+   "totalMs": 2928,
    "verdicts": [
     "AC",
     "AC",
@@ -228,7 +228,7 @@
    "file": "routes/r014_periodic.py",
    "score": 20,
    "expect": 20,
-   "totalMs": 6033,
+   "totalMs": 6005,
    "verdicts": [
     "AC",
     "AC",
@@ -256,7 +256,7 @@
    "file": "routes/r014_periodic_bits.py",
    "score": 20,
    "expect": 20,
-   "totalMs": 18064,
+   "totalMs": 18492,
    "verdicts": [
     "AC",
     "AC",
@@ -284,7 +284,7 @@
    "file": "routes/r014_naive.py",
    "score": 15,
    "expect": 15,
-   "totalMs": 17151,
+   "totalMs": 17356,
    "verdicts": [
     "AC",
     "AC",
@@ -312,7 +312,7 @@
    "file": "routes/r014_lean.py",
    "score": 15,
    "expect": 15,
-   "totalMs": 25262,
+   "totalMs": 26152,
    "verdicts": [
     "AC",
     "AC",
@@ -340,7 +340,7 @@
    "file": "routes/r014_flat.py",
    "score": 15,
    "expect": 15,
-   "totalMs": 29014,
+   "totalMs": 28972,
    "verdicts": [
     "AC",
     "AC",
@@ -368,7 +368,7 @@
    "file": "routes/r014_batch32.py",
    "score": 20,
    "expect": 20,
-   "totalMs": 69120,
+   "totalMs": 69175,
    "verdicts": [
     "AC",
     "AC",

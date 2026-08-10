@@ -170,12 +170,14 @@ def route_Z4_bigmax(text):
     return "\n".join(res) + "\n"
 
 
-def fixed_period_route(M):
-    """誤解族：球號大於門檻時用固定模數 M 化約（而非 2^(D−1)）。"""
+def fixed_period_route(M, threshold=100_000):
+    """誤解族：球號大於**自選門檻**時用固定模數 M 化約（而非 2^(D−1)）。
+    門檻是攻擊者的自由參數——R3 指出只固定一個門檻會漏掉「把門檻拉到守門線之上、
+    只對最大的那幾行抄捷徑」的變體，因此斷言牆必須對門檻與模數雙掃描。"""
     def run(text):
         res = []
         for D, I in _parse(text):
-            if I > 100_000:
+            if I > threshold:
                 res.append(str(bag_parity(D, (I - 1) % M + 1)))
             else:
                 res.append(str(bag_parity(D, I)))

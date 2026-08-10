@@ -5,8 +5,8 @@
   11
  ],
  "max_bytes_allowed": 50000,
- "max_entry_bytes": 30998,
- "max_n": 1400,
+ "max_entry_bytes": 16785,
+ "max_n": 1200,
  "max_depth_shipped": 300,
  "positional_rule_best": 12,
  "scores": {
@@ -20,7 +20,8 @@
   "W5_markeronce": 11,
   "W11_shapelib": 2,
   "W12_dictbrute": 2,
-  "W13_depthguess": 11,
+  "W13_depthguess": 10,
+  "W14_shaperecog": 11,
   "Z1_echofirst": 0,
   "Z2_revsecond": 0,
   "Z3_sortdesc": 0,
@@ -80,6 +81,10 @@
    "le",
    12
   ],
+  "W14_shaperecog": [
+   "le",
+   12
+  ],
   "Z1_echofirst": [
    "eq",
    0
@@ -117,6 +122,7 @@
    "W11_shapelib_ok": true,
    "W12_dictbrute_ok": true,
    "W13_depthguess_ok": true,
+   "W14_shaperecog_ok": true,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -170,6 +176,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": true,
+   "W14_shaperecog_ok": true,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -217,6 +224,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": true,
+   "W14_shaperecog_ok": true,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -258,6 +266,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": true,
+   "W14_shaperecog_ok": true,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -299,6 +308,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": false,
+   "W14_shaperecog_ok": true,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -334,6 +344,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": true,
+   "W14_shaperecog_ok": true,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -375,6 +386,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": true,
+   "W14_shaperecog_ok": true,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -410,6 +422,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": true,
+   "W14_shaperecog_ok": true,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -445,6 +458,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": true,
+   "W14_shaperecog_ok": true,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -480,6 +494,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": true,
+   "W14_shaperecog_ok": true,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -509,6 +524,7 @@
    "W11_shapelib_ok": true,
    "W12_dictbrute_ok": true,
    "W13_depthguess_ok": true,
+   "W14_shaperecog_ok": true,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -521,32 +537,32 @@
     {
      "mode": 2,
      "n": 28,
-     "shape": "balanced",
-     "depth": 5
+     "shape": "randchain",
+     "depth": 28
     },
     {
      "mode": 1,
      "n": 26,
-     "shape": "zigzag",
+     "shape": "randbush",
      "depth": 26
     },
     {
      "mode": 1,
      "n": 25,
-     "shape": "leftheavy",
-     "depth": 7
+     "shape": "randchain",
+     "depth": 25
     },
     {
      "mode": 1,
      "n": 24,
-     "shape": "caterpillar",
-     "depth": 13
+     "shape": "random",
+     "depth": 7
     },
     {
      "mode": 2,
      "n": 22,
      "shape": "random",
-     "depth": 7
+     "depth": 9
     }
    ],
    "bytes": 687,
@@ -562,6 +578,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": false,
+   "W14_shaperecog_ok": false,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -574,32 +591,32 @@
     {
      "mode": 2,
      "n": 48,
-     "shape": "zigzag",
+     "shape": "randchain",
      "depth": 48
     },
     {
      "mode": 1,
      "n": 44,
-     "shape": "caterpillar",
-     "depth": 23
+     "shape": "randbush",
+     "depth": 44
     },
     {
      "mode": 1,
      "n": 40,
-     "shape": "random",
-     "depth": 9
+     "shape": "randchain",
+     "depth": 40
     },
     {
      "mode": 2,
      "n": 36,
-     "shape": "leftheavy",
-     "depth": 8
+     "shape": "random",
+     "depth": 11
     },
     {
      "mode": 1,
      "n": 30,
      "shape": "random",
-     "depth": 9
+     "depth": 10
     }
    ],
    "bytes": 1125,
@@ -615,6 +632,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": false,
+   "W14_shaperecog_ok": false,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -627,32 +645,32 @@
     {
      "mode": 2,
      "n": 70,
-     "shape": "random",
-     "depth": 15
+     "shape": "randchain",
+     "depth": 70
     },
     {
      "mode": 1,
      "n": 60,
-     "shape": "spine",
+     "shape": "randbush",
      "depth": 60
     },
     {
      "mode": 2,
      "n": 55,
-     "shape": "leftheavy",
-     "depth": 9
+     "shape": "random",
+     "depth": 11
     },
     {
      "mode": 1,
      "n": 50,
-     "shape": "balanced",
-     "depth": 6
+     "shape": "random",
+     "depth": 11
     },
     {
      "mode": 1,
      "n": 40,
-     "shape": "zigzag",
-     "depth": 40
+     "shape": "random",
+     "depth": 12
     }
    ],
    "bytes": 1587,
@@ -668,6 +686,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": false,
+   "W14_shaperecog_ok": false,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -680,36 +699,36 @@
     {
      "mode": 2,
      "n": 130,
-     "shape": "spine",
-     "depth": 120
+     "shape": "randchain",
+     "depth": 130
     },
     {
      "mode": 2,
-     "n": 120,
-     "shape": "balanced",
-     "depth": 7
+     "n": 124,
+     "shape": "random",
+     "depth": 15
     },
     {
      "mode": 1,
      "n": 110,
-     "shape": "zigzag",
+     "shape": "randchain",
      "depth": 110
     },
     {
      "mode": 1,
      "n": 90,
      "shape": "random",
-     "depth": 13
+     "depth": 12
     },
     {
      "mode": 1,
      "n": 75,
-     "shape": "caterpillar",
-     "depth": 38
+     "shape": "random",
+     "depth": 11
     }
    ],
-   "bytes": 3216,
-   "out_bytes": 1593,
+   "bytes": 3248,
+   "out_bytes": 1609,
    "ref_ok": true,
    "R1_mirror_ok": true,
    "W1_modeblind_ok": false,
@@ -721,6 +740,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": false,
+   "W14_shaperecog_ok": false,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -733,32 +753,32 @@
     {
      "mode": 2,
      "n": 240,
-     "shape": "random",
-     "depth": 19
+     "shape": "randchain",
+     "depth": 240
     },
     {
      "mode": 1,
      "n": 200,
-     "shape": "caterpillar",
-     "depth": 101
+     "shape": "randbush",
+     "depth": 200
     },
     {
      "mode": 2,
      "n": 180,
-     "shape": "spine",
-     "depth": 121
+     "shape": "randchain",
+     "depth": 180
     },
     {
      "mode": 2,
      "n": 160,
-     "shape": "leftheavy",
+     "shape": "random",
      "depth": 13
     },
     {
      "mode": 1,
      "n": 140,
      "shape": "random",
-     "depth": 12
+     "depth": 13
     }
    ],
    "bytes": 6312,
@@ -774,6 +794,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": false,
+   "W14_shaperecog_ok": false,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -785,37 +806,37 @@
    "tests": [
     {
      "mode": 2,
-     "n": 400,
-     "shape": "spine",
-     "depth": 122
+     "n": 290,
+     "shape": "randchain",
+     "depth": 290
     },
     {
      "mode": 2,
-     "n": 350,
+     "n": 260,
+     "shape": "randbush",
+     "depth": 201
+    },
+    {
+     "mode": 1,
+     "n": 240,
+     "shape": "randchain",
+     "depth": 240
+    },
+    {
+     "mode": 2,
+     "n": 220,
      "shape": "random",
      "depth": 20
     },
     {
      "mode": 1,
-     "n": 300,
-     "shape": "zigzag",
-     "depth": 300
-    },
-    {
-     "mode": 2,
-     "n": 260,
-     "shape": "leftheavy",
-     "depth": 14
-    },
-    {
-     "mode": 1,
-     "n": 220,
-     "shape": "balanced",
-     "depth": 8
+     "n": 200,
+     "shape": "random",
+     "depth": 16
     }
    ],
-   "bytes": 11192,
-   "out_bytes": 5580,
+   "bytes": 8632,
+   "out_bytes": 4300,
    "ref_ok": true,
    "R1_mirror_ok": true,
    "W1_modeblind_ok": false,
@@ -827,6 +848,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": false,
+   "W14_shaperecog_ok": false,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -838,37 +860,37 @@
    "tests": [
     {
      "mode": 2,
-     "n": 700,
+     "n": 300,
+     "shape": "randchain",
+     "depth": 300
+    },
+    {
+     "mode": 2,
+     "n": 280,
+     "shape": "randbush",
+     "depth": 201
+    },
+    {
+     "mode": 2,
+     "n": 260,
      "shape": "random",
-     "depth": 20
-    },
-    {
-     "mode": 2,
-     "n": 550,
-     "shape": "spine",
-     "depth": 123
-    },
-    {
-     "mode": 2,
-     "n": 420,
-     "shape": "leftheavy",
      "depth": 16
     },
     {
      "mode": 1,
-     "n": 380,
+     "n": 240,
      "shape": "random",
-     "depth": 17
+     "depth": 19
     },
     {
      "mode": 1,
-     "n": 340,
-     "shape": "caterpillar",
-     "depth": 171
+     "n": 220,
+     "shape": "random",
+     "depth": 19
     }
    ],
-   "bytes": 18072,
-   "out_bytes": 9020,
+   "bytes": 9352,
+   "out_bytes": 4660,
    "ref_ok": true,
    "R1_mirror_ok": true,
    "W1_modeblind_ok": false,
@@ -879,7 +901,8 @@
    "W5_markeronce_ok": false,
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
-   "W13_depthguess_ok": true,
+   "W13_depthguess_ok": false,
+   "W14_shaperecog_ok": false,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -891,37 +914,37 @@
    "tests": [
     {
      "mode": 2,
-     "n": 1000,
-     "shape": "spine",
-     "depth": 125
-    },
-    {
-     "mode": 1,
-     "n": 520,
-     "shape": "leftheavy",
-     "depth": 17
-    },
-    {
-     "mode": 1,
-     "n": 480,
-     "shape": "random",
-     "depth": 20
-    },
-    {
-     "mode": 2,
      "n": 300,
-     "shape": "zigzag",
+     "shape": "randchain",
      "depth": 300
+    },
+    {
+     "mode": 1,
+     "n": 290,
+     "shape": "randbush",
+     "depth": 202
+    },
+    {
+     "mode": 1,
+     "n": 280,
+     "shape": "randchain",
+     "depth": 280
     },
     {
      "mode": 2,
      "n": 260,
-     "shape": "balanced",
-     "depth": 9
+     "shape": "random",
+     "depth": 16
+    },
+    {
+     "mode": 2,
+     "n": 240,
+     "shape": "random",
+     "depth": 16
     }
    ],
-   "bytes": 19435,
-   "out_bytes": 9701,
+   "bytes": 9912,
+   "out_bytes": 4940,
    "ref_ok": true,
    "R1_mirror_ok": true,
    "W1_modeblind_ok": false,
@@ -933,6 +956,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": false,
+   "W14_shaperecog_ok": false,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
@@ -944,37 +968,37 @@
    "tests": [
     {
      "mode": 2,
-     "n": 1400,
-     "shape": "random",
-     "depth": 23
+     "n": 300,
+     "shape": "randchain",
+     "depth": 300
     },
     {
      "mode": 2,
-     "n": 1100,
-     "shape": "spine",
-     "depth": 126
+     "n": 290,
+     "shape": "randbush",
+     "depth": 200
     },
     {
      "mode": 1,
-     "n": 600,
-     "shape": "leftheavy",
+     "n": 280,
+     "shape": "randchain",
+     "depth": 280
+    },
+    {
+     "mode": 1,
+     "n": 270,
+     "shape": "random",
      "depth": 17
     },
     {
-     "mode": 1,
-     "n": 480,
-     "shape": "caterpillar",
-     "depth": 241
-    },
-    {
      "mode": 2,
-     "n": 300,
-     "shape": "zigzag",
-     "depth": 300
+     "n": 250,
+     "shape": "random",
+     "depth": 15
     }
    ],
-   "bytes": 30998,
-   "out_bytes": 15482,
+   "bytes": 10072,
+   "out_bytes": 5020,
    "ref_ok": true,
    "R1_mirror_ok": true,
    "W1_modeblind_ok": false,
@@ -986,6 +1010,7 @@
    "W11_shapelib_ok": false,
    "W12_dictbrute_ok": false,
    "W13_depthguess_ok": false,
+   "W14_shaperecog_ok": false,
    "Z1_echofirst_ok": false,
    "Z2_revsecond_ok": false,
    "Z3_sortdesc_ok": false,
