@@ -15,37 +15,6 @@ import { buildTutorSidebar } from './sidebar.ts'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-/**
- * Serve the cross-origin isolation headers in dev.
- *
- * These were previously declared through `vite.server.headers`, which
- * VitePress 2 does not forward — verified by requesting the dev server and
- * finding neither header present. The judge's per-testcase deadline needs
- * `SharedArrayBuffer` to interrupt a running testcase; without isolation it
- * silently degrades to adjudicating the deadline only after the testcase has
- * already run to completion, so a dev-only gap would hide the very behaviour
- * being developed. Production gets the same pair from `docs/public/_headers`.
- */
-function crossOriginIsolation() {
-  const headers = {
-    'Cross-Origin-Opener-Policy': 'same-origin',
-    'Cross-Origin-Embedder-Policy': 'require-corp',
-  }
-  const apply = (server: { middlewares: { use: (fn: (req: unknown, res: { setHeader: (k: string, v: string) => void }, next: () => void) => void) => void } }) => {
-    server.middlewares.use((_req, res, next) => {
-      for (const [key, value] of Object.entries(headers)) res.setHeader(key, value)
-      next()
-    })
-  }
-  return {
-    name: 'fhsh-cross-origin-isolation',
-    configureServer: apply,
-    configurePreviewServer: apply,
-  }
-}
-
-
-
 function loadYaml(file: string): unknown {
   try {
     const filePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), file)
@@ -92,12 +61,25 @@ export default defineConfig({
     },
   },
   vite: {
-    plugins: [crossOriginIsolation(), vueJsx(), vueDevTools(), tailwindcss(), wasm(), topLevelAwait(), stripGenerator()],
+    plugins: [vueJsx(), vueDevTools(), tailwindcss(), wasm(), topLevelAwait(), stripGenerator()],
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./.vitepress/theme', import.meta.url)),
       },
     },
-
+    // Cross-origin isolation (COOP/COEP) is NOT configured here.
+    //
+    // A `server.headers` block used to sit at this spot. VitePress 2 does not
+    // forward it — a request to the dev server returns neither header — so it
+    // was dead config that read as a guarantee. It was removed rather than
+    // repaired because Cloudflare owns the headers: `docs/public/_headers` is
+    // the single definition, served in production by Cloudflare Pages and
+    // verifiable locally with `pnpm preview:cf`.
+    //
+    // Consequence for `vitepress dev`: no isolation, so `SharedArrayBuffer` is
+    // absent and the judge's per-testcase deadline falls back to adjudicating
+    // elapsed time after each testcase instead of interrupting it. The
+    // deadline still holds; it is just not prompt. `deadline.ts` logs this
+    // once per page. Verify deadline behaviour under `pnpm preview:cf`.
   },
 })

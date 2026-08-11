@@ -16,7 +16,7 @@
 ## 3. 呈現與部署（D6／D7）
 
 - [x] 3.1 [P] 修正結果表格分母（D7）：改以測資總數為分母，未回報的測資顯示為未執行且與通過列視覺可辨。先寫一個「已回報三筆、總數二十筆」的元件測試斷言列數為二十，再實作。驗收目標：新測試通過，且 `ChallengeView.spec.ts` 維持全綠。 對應 spec 需求：Interrupted batches are displayed honestly。
-- [x] 3.2 [P] 新增 `docs/public/_headers`，送出 `Cross-Origin-Opener-Policy: same-origin` 與 `Cross-Origin-Embedder-Policy: require-corp`（D6）。驗收目標：檔案存在且內容為 Cloudflare Pages 的 `_headers` 格式；於 staging 部署後以瀏覽器開發者工具確認回應標頭含這兩項且 `crossOriginIsolated` 為真。
+- [x] 3.2 [P] 新增 `docs/public/_headers`，送出 `Cross-Origin-Opener-Policy: same-origin` 與 `Cross-Origin-Embedder-Policy: require-corp`；移除 `.vitepress/config.mts` 中已實測不被 VitePress 2 轉發的同名宣告，使標頭只有一份定義並由 Cloudflare 提供；新增 `preview:cf` 腳本以 `wrangler pages dev` 服務建置輸出（D6）。驗收目標：在 `pnpm preview:cf` 之下，回應標頭含這兩項，且瀏覽器中 `crossOriginIsolated` 為真、`SharedArrayBuffer` 存在、console 無 COEP 阻擋訊息、挑戰頁正常渲染。
 
 ## 4. deadline 常數的量測與釘定（D5）
 

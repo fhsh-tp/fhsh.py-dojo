@@ -64,7 +64,8 @@
 |----|------|------|--------------|
 | E1 | `SharedArrayBuffer` 需要 `COOP: same-origin` ＋ `COEP: require-corp` | Web 平台既有規範 | 否 |
 | E2 | ~~dev server 已送出這兩個標頭~~ **此事實為偽，已於 apply 期推翻**。`.vitepress/config.mts` 確實宣告了 `vite.server.headers`，但 VitePress 2.0.0-alpha.16 不轉發該設定 | 實測 `curl -s -D - -o /dev/null http://localhost:5173/` → 兩個標頭皆不存在。宣告自 Pyodide 整合以來一直無效而未被察覺，因為 Pyodide 本身不需要 SharedArrayBuffer | 否（已實測） |
-| E2b | dev 的跨來源隔離改由 `configureServer`／`configurePreviewServer` middleware 外掛提供 | 修正後實測同一指令 → `Cross-Origin-Opener-Policy: same-origin`、`Cross-Origin-Embedder-Policy: require-corp` 皆存在 | 否（已實測） |
+| E2b | 標頭的單一定義為 `docs/public/_headers`，由 Cloudflare 提供；`config.mts` 中已證實無效的宣告移除，不以 Vite middleware 複製一份 | 決策記錄於 design D6；本機驗證管道為 `pnpm preview:cf`（`wrangler pages dev` 服務建置輸出） | **是**（wrangler 下實測標頭與 `crossOriginIsolated`） |
+| E2c | **接受的後果**：`vitepress dev` 無隔離 → 開發期無 `SharedArrayBuffer` → deadline 退化為事後裁決（仍生效、不即時），`deadline.ts` 每頁告警一次 | `deadline.ts` 的 `reportDegradation`；`config.mts` 註解 | 否 |
 | E3 | 生產部署沒有 `_headers` 檔 | `git ls-files` 無任何 `_headers`；`docs/public/_redirects` 為建置產生且被 gitignore | 否 |
 | E4 | Pyodide 與 WASM 皆為同源自架資源（`COEP: require-corp` 的主要風險面） | `pyodide.worker.ts` 的 `PYODIDE_CDN = '/pyodide/'`；`docs/public/pyodide/`、`docs/public/wasm/` | **是**（staging 逐頁確認） |
 | E5 | 生產環境的 `_headers` 可為靜態追蹤檔，不需產生腳本（內容不依賴任何題目資料） | 對照 `scripts/generate-redirects.ts`——別名需由題目檔派生，標頭不需要 | 否 |

@@ -73,13 +73,11 @@ deadline 訂太低會把既有題目的正解與收編路線由 AC 變成 TLE，
 
 `SharedArrayBuffer` 需要 `Cross-Origin-Opener-Policy: same-origin` 與 `Cross-Origin-Embedder-Policy: require-corp`。
 
-原本的設計依據是「dev server 已透過 Vite 設定送出這兩個標頭，只有生產部署未送」。**該依據在 apply 期被實測推翻**：`.vitepress/config.mts` 確實宣告了 `vite.server.headers`，但 VitePress 2.0.0-alpha.16 不轉發它，dev server 實際上兩個標頭都沒有送。這個宣告自 Pyodide 整合以來一直無效而無人察覺，因為 Pyodide 本身並不需要 `SharedArrayBuffer`。若未發現，開發期的中斷路徑會靜默降級成事後裁決，正好隱藏本 change 要開發的行為本身。
+原本的設計依據是「dev server 已透過 Vite 設定送出這兩個標頭，只有生產部署未送」。**該依據在 apply 期被實測推翻**：`.vitepress/config.mts` 確實宣告了 `vite.server.headers`，但 VitePress 2.0.0-alpha.16 不轉發它，dev server 實際上兩個標頭都沒有送。這個宣告自 Pyodide 整合以來一直無效而無人察覺，因為 Pyodide 本身並不需要 `SharedArrayBuffer`。
 
-因此兩端都要處理：dev 改用 `configureServer`／`configurePreviewServer` middleware 外掛設定標頭（已實測生效），生產則以靜態 `_headers` 檔提供。
+**標頭的擁有者是 Cloudflare，不是 Vite。** 唯一的定義寫在 `docs/public/_headers`，生產由 Cloudflare Pages 送出，本機以 `wrangler pages dev` 服務建置輸出來驗證同一份檔案。曾經考慮在 dev server 補一個 middleware 外掛使兩端行為一致，但那會造成兩套機制送同一組值、彼此可能漂移，且真正該被驗證的是會上線的那份 `_headers`，不是它的複製品。`config.mts` 中已證實無效的宣告一併移除——留著它會讓下一個維護者讀到一個不存在的保證。
 
-採用靜態檔而非產生腳本：標頭內容不依賴任何題目資料，沒有需要從資料派生的部分，因此不需要像挑戰別名那樣的產生腳本。
-
-風險是 `require-corp` 會擋掉未帶對應標頭的跨來源子資源。判斷依據：dev server 長期在同一組標頭下運作且站台正常，Pyodide 與 WASM 皆為自架同源資源。驗收時仍須逐頁確認。
+**接受的後果**：`vitepress dev` 沒有跨來源隔離，因此開發期 `SharedArrayBuffer` 不存在，deadline 退化為每筆結束後才裁決。deadline 仍然生效，只是不即時；`deadline.ts` 每頁輸出一次開發者告警說明此狀態。凡是要驗證中斷行為或量測牆鐘的場合，一律在 `pnpm preview:cf` 之下進行。
 
 ### D7：結果表格分母改用測資總數
 
