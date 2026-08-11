@@ -20,17 +20,17 @@
 
 ## 4. deadline 常數的量測與釘定（D5）
 
-- [ ] 4.1 建立瀏覽器量測腳本：對指定題目與指定解法逐筆回報單筆牆鐘與判定。腳本每個外部命令都必須有失敗訊號，不得以重導向吞掉錯誤輸出。驗收目標：對一個已知會逾時的解法執行時，腳本明確回報失敗而非靜默通過。
-- [ ] 4.2 量測兩條已知繞道路線在瀏覽器的單筆牆鐘：提交開頭呼叫 `sys.settrace(None)` 的版本、把迴圈攤平到單行的版本。驗收目標：兩者的單筆牆鐘數字被記錄於 design 的 Open Questions 對應段落。
-- [ ] 4.3 量測全站既有題目的 `reference_solution` 單筆最大牆鐘，先以 node 探針排序候選、再對牆鐘最高的題目在瀏覽器實測。驗收目標：產出一張「題目 × 單筆最大牆鐘」表並寫入 design。
-- [ ] 4.4 量測 gem-blast 的 str.replace 繞道在現行 20 筆計畫下的逐筆牆鐘（`gem-blast-challenge` 修訂條文要求記錄於本 change 的 design）。驗收目標：逐筆數字寫入 design，且不修改該題任何測資。 對應 spec 需求：Bypass acceptance after hunt downgrade。
-- [ ] 4.5 依 D5 的規則選定 deadline 常數並釘進程式碼：須大於 4.3 與 4.4 的最大值乘上明確的安全倍率，且小於 4.2 的繞道牆鐘。若不存在同時滿足兩端的值，改為記錄衝突並保留舊行為。驗收目標：常數與其推導在 design 中有對應數字，且該數字與程式碼常數一致。 對應 spec 需求：The deadline constant is derived from measurement of shipped challenges。
+- [x] 4.1 建立瀏覽器量測腳本：對指定題目與指定解法逐筆回報單筆牆鐘與判定。腳本每個外部命令都必須有失敗訊號，不得以重導向吞掉錯誤輸出。驗收目標：對一個已知會逾時的解法執行時，腳本明確回報失敗而非靜默通過。
+- [x] 4.2 量測兩條已知繞道路線在瀏覽器的單筆牆鐘：提交開頭呼叫 `sys.settrace(None)` 的版本、把迴圈攤平到單行的版本。驗收目標：兩者的單筆牆鐘數字被記錄於 design 的 Open Questions 對應段落。
+- [x] 4.3 量測全站既有題目的 `reference_solution` 單筆最大牆鐘，先以 node 探針排序候選、再對牆鐘最高的題目在瀏覽器實測。驗收目標：產出一張「題目 × 單筆最大牆鐘」表並寫入 design。
+- [x] 4.4 量測 gem-blast 的 str.replace 繞道在現行 20 筆計畫下的逐筆牆鐘（`gem-blast-challenge` 修訂條文要求記錄於本 change 的 design）。驗收目標：逐筆數字寫入 design，且不修改該題任何測資。 對應 spec 需求：Bypass acceptance after hunt downgrade。
+- [x] 4.5 依 D5 的規則選定 deadline 常數並釘進程式碼：須大於 4.3 與 4.4 的最大值乘上明確的安全倍率，且小於 4.2 的繞道牆鐘。若不存在同時滿足兩端的值，改為記錄衝突並保留舊行為。驗收目標：常數與其推導在 design 中有對應數字，且該數字與程式碼常數一致。 對應 spec 需求：The deadline constant is derived from measurement of shipped challenges。
 
 ## 5. 驗收與文件
 
-- [ ] 5.1 瀏覽器端逐條驗收：兩條繞道路線在超時測資上得到 TLE；每個既有題目的 `reference_solution` 得分與本 change 之前相同；一份會被中斷多筆的提交其結果表格列數等於測資總數且與得分一致。驗收目標：三項逐條記錄實測結果，任一項不符即回到 4.5。
-- [ ] 5.2 更新 `openspec/BACKLOG.md` 第 2.8 節：標記牆鐘缺口已修復、更正該節中「`judge.rs` 沒有 TLE 分支」的過期敘述（該分支已存在並由 `timed_out` 驅動）、更正「`sys.settrace(None)` 為接受的繞過」的敘述。驗收目標：該節不再包含與現況矛盾的結論。
-- [ ] 5.3 執行 `pnpm typecheck` 與 `pnpm lint` 與完整測試套件。驗收目標：三者全綠，且輸出貼進本 change 的驗證紀錄。
+- [x] 5.1 瀏覽器端逐條驗收：兩條繞道路線在超時測資上得到 TLE；每個既有題目的 `reference_solution` 得分與本 change 之前相同；一份會被中斷多筆的提交其結果表格列數等於測資總數且與得分一致。驗收目標：三項逐條記錄實測結果，任一項不符即回到 4.5。
+- [x] 5.2 更新 `openspec/BACKLOG.md` 第 2.8 節：標記牆鐘缺口已修復、更正該節中「`judge.rs` 沒有 TLE 分支」的過期敘述（該分支已存在並由 `timed_out` 驅動）、更正「`sys.settrace(None)` 為接受的繞過」的敘述。驗收目標：該節不再包含與現況矛盾的結論。
+- [x] 5.3 執行 `pnpm typecheck` 與 `pnpm lint` 與完整測試套件。驗收目標：三者全綠，且輸出貼進本 change 的驗證紀錄。
 
 ## 6. 需求與設計決策的覆蓋對照
 

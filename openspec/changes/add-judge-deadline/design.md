@@ -130,7 +130,66 @@ deadline 訂太低會把既有題目的正解與收編路線由 AC 變成 TLE，
 
 回滾策略：本 change 獨立成一個 PR。若 staging 出現資源載入問題，單獨回滾即可恢復；elapsed 事後判定的降級路徑使得即使標頭被移除，deadline 仍以較弱的形式生效。
 
+## 量測結果（tasks 4.2–4.5，2026-08-11）
+
+全部在 `pnpm preview:cf`（Cloudflare 本機執行環境，`crossOriginIsolated` 為真）的生產路徑上實測，重跑指令為 `openspec/changes/add-judge-deadline/measure/sweep.sh`，逐筆原始資料在同目錄的 `results.jsonl`。
+
+### 既有題目的 `reference_solution`（O2／O3 上界）
+
+全站 66 題中有 16 題宣告 `reference_solution`，且 11 題宣告 `testcase_plan` 的成本軸題目全數包含在這 16 題之內。**16 題全部維持滿分。**
+
+| 題目／路線 | 得分 | 單筆最大 | 全場 | 判定序列 |
+|---|---|---|---|---|
+| `prize-order-code` | 20/20 | 376 ms | 2421 ms | `AAAAAAAAAAAAAAAAAAAA` |
+| `rank-code-backfill` | 20/20 | 287 ms | 2356 ms | `AAAAAAAAAAAAAAAAAAAA` |
+| `coupon-combo-quote` | 20/20 | 47 ms | 199 ms | `AAAAAAAAAAAAAAAAAAAA` |
+| `prop-box-packing` | 20/20 | 39 ms | 104 ms | `AAAAAAAAAAAAAAAAAAAA` |
+| `snack-bar-register` | 20/20 | 34 ms | 183 ms | `AAAAAAAAAAAAAAAAAAAA` |
+| `gem-blast-playtest` | 20/20 | 28 ms | 218 ms | `AAAAAAAAAAAAAAAAAAAA` |
+| `magazine-typeset-check` | 20/20 | 20 ms | 143 ms | `AAAAAAAAAAAAAAAAAAAA` |
+| `exam-collect-verify` | 20/20 | 19 ms | 86 ms | `AAAAAAAAAAAAAAAAAAAA` |
+| `buffer-audit-log` | 6/6 | 12 ms | 34 ms | `AAAAAA` |
+| `prime-check` | 6/6 | 5 ms | 16 ms | `AAAAAA` |
+| `card-restack-count` | 20/20 | 4 ms | 42 ms | `AAAAAAAAAAAAAAAAAAAA` |
+| `pillbox-reminder` | 20/20 | 4 ms | 44 ms | `AAAAAAAAAAAAAAAAAAAA` |
+| `print-farm-schedule` | 20/20 | 4 ms | 44 ms | `AAAAAAAAAAAAAAAAAAAA` |
+| `hello-world` | 5/5 | 3 ms | 11 ms | `AAAAA` |
+| `multiplication-table` | 5/5 | 3 ms | 11 ms | `AAAAA` |
+| `password-check` | 5/5 | 3 ms | 11 ms | `AAAAA` |
+
+**上界＝376 ms**（`prize-order-code`）。
+
+覆蓋限制（誠實記錄）：其餘 50 題未宣告 `reference_solution`，因此沒有可量測的正解代理。它們是不含 `testcase_plan` 的基礎練習題，測資規模與上表末段同級（單筆 3–5 ms）。
+
+### 計數器看不見的繞道（O1 下界）
+
+| 題目／路線 | 得分 | 單筆最大 | 全場 | 判定序列 |
+|---|---|---|---|---|
+| `gemblast_settrace` | 17/20 | 5009 ms | 31765 ms | `AAAAAAAAAAAAAAATTTAA` |
+| `gemblast_strreplace` | 18/20 | 5005 ms | 14298 ms | `AAAAAAAAAAAAAAAATTAA` |
+| `gemblast_naive` | 12/20 | 1868 ms | 14712 ms | `AAAAAAAAAATTTTTTTTAA` |
+| `gemblast_flat` | 12/20 | 1835 ms | 14582 ms | `AAAAAAAAAATTTTTTTTAA` |
+
+`gemblast_naive` 與 `gemblast_flat` 的 TLE 來自 **op 上限**（單筆最大僅 1.8 秒，遠低於 deadline）——計數器對它們一直有效，與本 change 無關。真正由 deadline 產生的是另外兩條：`gemblast_settrace` 把計數器凍結在 5 ops、`gemblast_strreplace` 把二次方工作交給 C 層，兩者對計數器都是隱形的，單筆最大分別停在 5,009 ms 與 5,005 ms——即 5,000 ms deadline 生效的指紋。它們的真實耗時無從得知，只知道**超過 5 秒**。
+
+四條路線與 `reference_solution` 在 40 組隨機輸入下交叉驗證輸出一致，因此上述差異純粹來自成本。
+
+### 中斷呈現（D7）的驗收狀態
+
+`gemblast_settrace` 是一份被 deadline 中斷三筆的提交，其結果表格回報 20 列、測資總數 20、得分 17，三者一致——D7 要求的「列數等於測資總數」在真實中斷情境下成立。
+
+但要誠實記錄一件事：**觸發 D7 原始缺陷的那個情境（累計硬砍造成截斷）在本次量測中沒有發生，也變得更難發生**。累計預算是「測資數 × 6,000 ms」，而每筆現在最多 5,000 ms，20 筆的最壞總和是 100 秒、低於 120 秒的硬砍線。換句話說 deadline 順帶讓截斷情境退到邊緣。D7 的修正仍然保留為防線（單元測試以「已回報三筆、總數二十筆」直接斷言），但它在瀏覽器端的證據是「中斷提交的列數正確」，不是「硬砍截斷後的列數正確」。
+
+### 釘定（task 4.5）
+
+`DEADLINE_MS = 5,000`：高於上界 376 ms 達 **13.3 倍**，低於兩條繞道的下界。D5 擔心的空集合並未發生，可行域寬鬆。此值亦等於平台原本就打算生效、但因 macrotask 排序而從未觸發的那個 `setTimeout` 常數。
+
+### O4：gem-blast 的 `str.replace` 繞道（結論翻面）
+
+`gem-blast-challenge` 的 spec 原記載此繞道被**接受**為聰明解，理由是「牆鐘旗標對同步碼失效，測資殺不掉它」。實測結果：**18/20**，逐筆判定 `AAAAAAAAAAAAAAAATTAA`，單筆最大 5005 ms。
+
+該繞道**不再通過完整計畫**，而該題測資一個 byte 都沒有更動。本 change 修訂後的條文把接受條件寫成「其單筆牆鐘低於 deadline 時才成立」，量測因此直接決定了結論，無須再改一次條文。
+
 ## Open Questions
 
-- deadline 的具體數值由 D5 的量測決定，於實作期間釘定。
-- 既有題目中是否存在單筆牆鐘已逼近候選 deadline 的路線，須由量測回答；若存在，依 D5 的規則處置。
+無。原本的兩個未決項皆由〈量測結果〉一節回答：deadline 常數已由量測釘定為 5,000 ms；既有題目中不存在單筆牆鐘逼近該值的路線（最大 376 ms，餘裕 13.3 倍）。

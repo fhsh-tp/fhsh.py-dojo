@@ -27,10 +27,20 @@
 /**
  * Wall-clock budget for a single testcase, in milliseconds.
  *
- * Pinned against measurement: it must exceed the slowest single-testcase time
- * of every shipped challenge's reference solution and co-opted routes by a
- * safety factor, while staying below the single-testcase time of the recorded
- * bypass routes.
+ * Pinned by measurement, not chosen. Every shipped challenge's
+ * `reference_solution` was submitted through the production path served by
+ * Cloudflare's local runtime; the slowest single testcase across all sixteen
+ * was 376 ms (prize-order-code). The two routes the operation counter cannot
+ * see — one that freezes the tracer with `sys.settrace(None)`, one that
+ * delegates the quadratic work to `str.replace` — both run past 5 s on
+ * gem-blast's heavy entries. 5,000 ms therefore sits 13.3x above the slowest
+ * honest solution and below both bypasses.
+ *
+ * The value is also the one the platform always intended: the inert
+ * `setTimeout` flag this capability replaces was set to the same 5 s.
+ *
+ * Re-derive with `openspec/changes/add-judge-deadline/measure/sweep.sh` before
+ * changing it, and re-check the two bounds rather than the single number.
  */
 export const DEADLINE_MS = 5_000
 

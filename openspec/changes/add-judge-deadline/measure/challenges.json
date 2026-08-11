@@ -1,0 +1,464 @@
+[
+ {
+  "slug": "arithmetic-sum",
+  "id": "py044",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "beverage-cashier",
+  "id": "py002",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "bmi-classifier",
+  "id": "py013",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ },
+ {
+  "slug": "buffer-audit-log",
+  "id": "apcs002",
+  "has_ref": true,
+  "has_plan": true,
+  "count": 3
+ },
+ {
+  "slug": "card-restack-count",
+  "id": "apcs001",
+  "has_ref": true,
+  "has_plan": false,
+  "count": 20
+ },
+ {
+  "slug": "change-calculator",
+  "id": "py007",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "collatz-steps",
+  "id": "py027",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "countdown",
+  "id": "py024",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "coupon-combo-quote",
+  "id": "apcs012",
+  "has_ref": true,
+  "has_plan": true,
+  "count": 20
+ },
+ {
+  "slug": "date-validator",
+  "id": "py019",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ },
+ {
+  "slug": "digit-counter",
+  "id": "py028",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "digit-sum-skip",
+  "id": "py035",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "digital-root",
+  "id": "py050",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "even-countdown",
+  "id": "py047",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "exam-collect-verify",
+  "id": "apcs005",
+  "has_ref": true,
+  "has_plan": true,
+  "count": 17
+ },
+ {
+  "slug": "factorial",
+  "id": "py023",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "first-divisor",
+  "id": "py030",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "gcd-euclid",
+  "id": "py049",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "gem-blast-playtest",
+  "id": "apcs006",
+  "has_ref": true,
+  "has_plan": true,
+  "count": 8
+ },
+ {
+  "slug": "grade-average",
+  "id": "py006",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "grade-level",
+  "id": "py009",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ },
+ {
+  "slug": "guess-number-simple",
+  "id": "py048",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "hello-world",
+  "id": "py001",
+  "has_ref": true,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "inverted-triangle",
+  "id": "py039",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "isosceles-triangle",
+  "id": "py040",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "leap-year",
+  "id": "py003",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ },
+ {
+  "slug": "magazine-typeset-check",
+  "id": "apcs010",
+  "has_ref": true,
+  "has_plan": true,
+  "count": 15
+ },
+ {
+  "slug": "movie-ticket",
+  "id": "py018",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ },
+ {
+  "slug": "multiplication-table",
+  "id": "py037",
+  "has_ref": true,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "nested-triangle",
+  "id": "py036",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "number-pyramid",
+  "id": "py041",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "number-reverse",
+  "id": "py029",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "number-staircase",
+  "id": "py045",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "number-sum",
+  "id": "py021",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "odd-even",
+  "id": "py011",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ },
+ {
+  "slug": "odd-numbers",
+  "id": "py025",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "pair-count",
+  "id": "py043",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "parrot-echo",
+  "id": "py005",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "password-check",
+  "id": "py031",
+  "has_ref": true,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "perfect-number",
+  "id": "py051",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "perfect-numbers-range",
+  "id": "py053",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "pillbox-reminder",
+  "id": "apcs004",
+  "has_ref": true,
+  "has_plan": true,
+  "count": 5
+ },
+ {
+  "slug": "prime-check",
+  "id": "py052",
+  "has_ref": true,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "print-farm-schedule",
+  "id": "apcs003",
+  "has_ref": true,
+  "has_plan": true,
+  "count": 5
+ },
+ {
+  "slug": "prize-order-code",
+  "id": "apcs008",
+  "has_ref": true,
+  "has_plan": true,
+  "count": 9
+ },
+ {
+  "slug": "prop-box-packing",
+  "id": "apcs009",
+  "has_ref": true,
+  "has_plan": true,
+  "count": 16
+ },
+ {
+  "slug": "quadrant-classifier",
+  "id": "py014",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ },
+ {
+  "slug": "quadratic-discriminant",
+  "id": "py016",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ },
+ {
+  "slug": "range-sum",
+  "id": "py026",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "rank-code-backfill",
+  "id": "apcs007",
+  "has_ref": true,
+  "has_plan": true,
+  "count": 9
+ },
+ {
+  "slug": "repeat-greeting",
+  "id": "py022",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "seconds-converter",
+  "id": "py008",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "self-introduction",
+  "id": "py004",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "sign-check",
+  "id": "py012",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ },
+ {
+  "slug": "skip-multiples",
+  "id": "py033",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "smallest-prime-factor",
+  "id": "py054",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "snack-bar-register",
+  "id": "apcs011",
+  "has_ref": true,
+  "has_plan": true,
+  "count": 20
+ },
+ {
+  "slug": "star-diamond",
+  "id": "py042",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "star-rectangle",
+  "id": "py038",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 6
+ },
+ {
+  "slug": "star-square",
+  "id": "py046",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "sum-skip-fives",
+  "id": "py034",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "target-sum",
+  "id": "py032",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 5
+ },
+ {
+  "slug": "taxi-fare",
+  "id": "py017",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ },
+ {
+  "slug": "triangle-check",
+  "id": "py010",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ },
+ {
+  "slug": "triangle-classify",
+  "id": "py015",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ },
+ {
+  "slug": "vending-change",
+  "id": "py020",
+  "has_ref": false,
+  "has_plan": false,
+  "count": 10
+ }
+]
