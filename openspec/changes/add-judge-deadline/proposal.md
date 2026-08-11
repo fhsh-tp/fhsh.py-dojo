@@ -10,7 +10,7 @@
 - 新增第二層裁決：worker 在每筆結束後以自己量到的 elapsed 時間補判 TLE。這一層同時是無 `SharedArrayBuffer` 環境的 fallback 路徑，讓功能在未跨來源隔離的部署下降級而非失效。
 - 判題執行從 `runPythonAsync` 改為同步 `runPython`。中斷產生的 `KeyboardInterrupt` 在非同步路徑上會從 Immediate 回呼逃出 try/catch 並終結整個 worker。
 - 三個執行 handler（`run`、`run_only`、`execute`）套用同一套 deadline 語義，生產路徑的 `run_only` 因此首次獲得每筆時間上限，並沿用既有的 `timed_out` 結構化欄位讓 WASM judge 產生 TLE 判定。
-- 生產環境送出 `Cross-Origin-Opener-Policy` 與 `Cross-Origin-Embedder-Policy` 標頭，使 `SharedArrayBuffer` 在線上可用（dev server 已透過 Vite 設定送出這兩個標頭）。
+- 生產環境與 dev server 都送出 `Cross-Origin-Opener-Policy` 與 `Cross-Origin-Embedder-Policy` 標頭，使 `SharedArrayBuffer` 可用。dev 原本宣告於 `vite.server.headers` 的設定經實測**從未生效**（VitePress 2 不轉發），改以 middleware 外掛提供。
 - 修正累計硬砍時的結果呈現：結果表格改以測資總數為分母，使被中斷的執行不再看起來全綠。
 - **BREAKING**：既有題目中，任何單筆執行時間超過新 deadline 的正解或收編路線會由 AC 變成 TLE。本 change 必須逐題量測既有題目的正解與收編路線並記錄，deadline 常數依量測結果選定。
 
@@ -38,5 +38,6 @@
     - `.vitepress/theme/composables/useExecutor.ts`
     - `.vitepress/theme/composables/useChallengeRunner.ts`
     - `.vitepress/theme/components/editor/TestResultPanel.vue`
+    - `.vitepress/config.mts`
     - `openspec/BACKLOG.md`
   - Removed: （無）

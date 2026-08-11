@@ -71,7 +71,11 @@ deadline 訂太低會把既有題目的正解與收編路線由 AC 變成 TLE，
 
 ### D6：生產環境以靜態 _headers 檔送出跨來源隔離標頭
 
-`SharedArrayBuffer` 需要 `Cross-Origin-Opener-Policy: same-origin` 與 `Cross-Origin-Embedder-Policy: require-corp`。dev server 已透過 Vite 設定送出這兩個標頭，生產部署則未送。
+`SharedArrayBuffer` 需要 `Cross-Origin-Opener-Policy: same-origin` 與 `Cross-Origin-Embedder-Policy: require-corp`。
+
+原本的設計依據是「dev server 已透過 Vite 設定送出這兩個標頭，只有生產部署未送」。**該依據在 apply 期被實測推翻**：`.vitepress/config.mts` 確實宣告了 `vite.server.headers`，但 VitePress 2.0.0-alpha.16 不轉發它，dev server 實際上兩個標頭都沒有送。這個宣告自 Pyodide 整合以來一直無效而無人察覺，因為 Pyodide 本身並不需要 `SharedArrayBuffer`。若未發現，開發期的中斷路徑會靜默降級成事後裁決，正好隱藏本 change 要開發的行為本身。
+
+因此兩端都要處理：dev 改用 `configureServer`／`configurePreviewServer` middleware 外掛設定標頭（已實測生效），生產則以靜態 `_headers` 檔提供。
 
 採用靜態檔而非產生腳本：標頭內容不依賴任何題目資料，沒有需要從資料派生的部分，因此不需要像挑戰別名那樣的產生腳本。
 
