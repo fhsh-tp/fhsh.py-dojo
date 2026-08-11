@@ -7,9 +7,12 @@
 # has already run to completion.
 #
 # require-corp blocks cross-origin subresources that do not opt in. This site
-# serves Pyodide, the WASM modules and every asset from its own origin, and the
-# dev server has run under the identical pair since the Pyodide integration
-# landed.
+# serves Pyodide, the WASM modules and every asset from its own origin. Verified
+# by serving this file through Cloudflare's local runtime (`pnpm preview:cf`):
+# both headers present, crossOriginIsolated true, SharedArrayBuffer available,
+# no blocked subresource. `vitepress dev` does NOT send these — a declaration in
+# the Vite config was measured to have no effect — so deadline behaviour must be
+# checked under `pnpm preview:cf`, never under the dev server.
 /*
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: require-corp

@@ -25,13 +25,13 @@
 
 ## M 表：機制候選的量測比較（D1／D3 的依據）
 
-計數器路線（**全部否決**，保留於此以免後續 change 重跑同樣的死路）：
+計數器路線（**全部否決**，保留於此以免後續 change 重跑同樣的死路）。稀釋倍率＝同一段迴圈在「一般寫法」與「攤平 ×8 寫法」下的事件數比值，數字直接由 `probes/bench_counting_modes.mjs` 的輸出相除得出；重跑該探針即可核對本表每一格。
 
 | ID | 候選 | 攤平稀釋倍率 | 成本單位膨脹 | 執行時間 | 否決理由 | 證據 |
 |----|------|--------------|--------------|----------|----------|------|
 | M1 | `sys.settrace` line（現況） | 24.0× | 1×（基準） | 126 ms | 就是缺陷本身 | `probes/bench_counting_modes.mjs` |
-| M2 | `sys.monitoring` BRANCH | 24.0×（無改善） | — | 70 ms | 「同行攤平」本質是 loop unrolling，真的消掉迴圈回邊，分支事件同樣被稀釋 | 同上 |
-| M3 | `sys.monitoring` LINE | ~100,000×（更糟） | — | 36 ms | 停留同一行時不重複觸發（攤平版全場僅 6 個事件） | 同上 |
+| M2 | `sys.monitoring` BRANCH | **8.0×**（200,002 ÷ 25,002；比 M1 好但仍被大幅稀釋） | — | 70 ms | 「同行攤平」本質是 loop unrolling，真的消掉迴圈回邊，分支事件同樣被稀釋 | 同上 |
+| M3 | `sys.monitoring` LINE | 100,001×（600,007 ÷ 6；更糟） | — | 36 ms | 停留同一行時不重複觸發（攤平版全場僅 6 個事件） | 同上 |
 | M4 | `sys.monitoring` INSTRUCTION | 1.43× | 5× | 529 ms（**4.2 倍慢**） | 可行但改變成本單位 → 作廢全站 8 道 op 斷崖題的既有校準 | 同上 |
 | M5 | `settrace` ＋ 逐行指令加權 | 1.66× | 6×（**非均勻**：一般迴圈 6×、genexpr 18×） | 400 ms | 同 M4 的校準問題，且對 comprehension／generator 系統性超收 | `probes/bench_weighted_settrace.mjs` |
 
@@ -97,7 +97,7 @@
 |----|------|--------|--------------|
 | O1 | 計數器隱形繞道的單筆牆鐘 | `settrace(None)` 5,009 ms／`str.replace` 5,005 ms（皆被 deadline 截斷，真值 > 5 秒） | 下界 |
 | O2 | 16 支 `reference_solution` 的單筆最大 | **376 ms**（`prize-order-code`），16 題全部維持滿分 | 上界 |
-| O3 | 收編路線的單筆最大 | 併入 O2 量測；本批未出現任何超過 O2 上界的收編路線 | 上界 |
+| O3 | 收編路線的單筆最大 | **原記載「併入 O2 量測」為偽——收編路線當時一條都沒量。** 補量後：`math.perm`（prize-order-code）12/20、最慢完成筆 3,880 ms、七筆停在 deadline；`str.replace`（gem-blast）18/20；對照組 `math.factorial` 0/20（spec 要求它失敗） | **使可行域成為空集合**；處置見 design〈D5 衝突的處置〉 |
 | O4 | gem-blast 的 `str.replace` 繞道逐筆 | 18/20，判定 `AAAAAAAAAAAAAAAATTAA`，單筆最大 5,005 ms | 使該題 spec 條文的接受條件**不再成立** |
 
 **結論**：`DEADLINE_MS = 5,000`，高於上界 13.3 倍、低於下界。D5 所擔心的空集合未發生。

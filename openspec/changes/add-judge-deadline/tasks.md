@@ -23,7 +23,7 @@
 - [x] 4.1 建立瀏覽器量測腳本：對指定題目與指定解法逐筆回報單筆牆鐘與判定。腳本每個外部命令都必須有失敗訊號，不得以重導向吞掉錯誤輸出。驗收目標：對一個已知會逾時的解法執行時，腳本明確回報失敗而非靜默通過。
 - [x] 4.2 量測兩條已知繞道路線在瀏覽器的單筆牆鐘：提交開頭呼叫 `sys.settrace(None)` 的版本、把迴圈攤平到單行的版本。驗收目標：兩者的單筆牆鐘數字被記錄於 design 的 Open Questions 對應段落。
 - [x] 4.3 量測全站既有題目的 `reference_solution` 單筆最大牆鐘，先以 node 探針排序候選、再對牆鐘最高的題目在瀏覽器實測。驗收目標：產出一張「題目 × 單筆最大牆鐘」表並寫入 design。
-- [x] 4.4 量測 gem-blast 的 str.replace 繞道在現行 20 筆計畫下的逐筆牆鐘（`gem-blast-challenge` 修訂條文要求記錄於本 change 的 design）。驗收目標：逐筆數字寫入 design，且不修改該題任何測資。 對應 spec 需求：Bypass acceptance after hunt downgrade。
+- [x] 4.4 量測**所有**已上線題目 spec 中記載為收編的路線在現行計畫下的逐筆牆鐘（gem-blast 的 str.replace、prize-order-code 的 math.perm＋Legendre，以及 rank-code-backfill 的 math.factorial 對照組）。對應 spec 需求：Bypass acceptance after hunt downgrade、C-builtin bypass lethality。在現行 20 筆計畫下的逐筆牆鐘（`gem-blast-challenge` 修訂條文要求記錄於本 change 的 design）。驗收目標：逐筆數字寫入 design，且不修改該題任何測資。 對應 spec 需求：Bypass acceptance after hunt downgrade。
 - [x] 4.5 依 D5 的規則選定 deadline 常數並釘進程式碼：須大於 4.3 與 4.4 的最大值乘上明確的安全倍率，且小於 4.2 的繞道牆鐘。若不存在同時滿足兩端的值，改為記錄衝突並保留舊行為。驗收目標：常數與其推導在 design 中有對應數字，且該數字與程式碼常數一致。 對應 spec 需求：The deadline constant is derived from measurement of shipped challenges。
 
 ## 5. 驗收與文件
@@ -48,6 +48,7 @@
 | Execute Composable Method | 1.5、2.2 |
 | Sandbox guard is injected before user code in every execution | 1.3、1.4、1.5 |
 | Bypass acceptance after hunt downgrade | 4.4 |
+| C-builtin bypass lethality | 4.4 |
 
 | design 決策 | 覆蓋任務 |
 |---|---|

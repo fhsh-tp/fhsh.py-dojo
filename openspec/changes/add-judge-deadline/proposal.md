@@ -24,11 +24,12 @@
 
 - `execute-mode`: `useExecutor` 的牆鐘語義由「整批 N×6 秒一次性 timer」擴充為「每筆 deadline ＋ 整批上限」，`execute` handler 亦套用每筆 deadline。
 - `pyodide-sandbox-guard`: `buildWrappedCode` 產生的包裝碼組成與執行方式改變（同步執行、中斷武裝時機），既有的注入順序條文需對應修訂。
+- `rank-code-challenges`: 該 spec 記載 `math.perm` 路線為「不得視為缺陷、不得以測資調整對付」的收編路線；實測顯示它在每筆 deadline 之下只完成 12/20，條文因此改為「接受狀態以 deadline 為界」，且該題測資不動。
 - `gem-blast-challenge`: 該 spec 中記錄「worker 牆鐘旗標對同步學生碼失效、因此不以測資獵殺 C 內建繞道」的條文，依其自身規定於本修復實作時修訂。
 
 ## Impact
 
-- Affected specs: 新增 `judge-deadline`；修訂 `execute-mode`、`pyodide-sandbox-guard`、`gem-blast-challenge`
+- Affected specs: 新增 `judge-deadline`；修訂 `execute-mode`、`pyodide-sandbox-guard`、`gem-blast-challenge`、`rank-code-challenges`
 - Affected code:
   - New:
     - `docs/public/_headers`

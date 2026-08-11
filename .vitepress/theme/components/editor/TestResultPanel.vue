@@ -46,7 +46,7 @@ const allPassed = computed(() => passedCount.value === totalCount.value)
 
 <template>
   <div
-    v-if="props.results.length > 0 || props.status === 'running'"
+    v-if="props.results.length > 0 || props.status === 'running' || (props.status === 'done' && totalCount > 0)"
     data-testid="result-panel"
     class="border-t border-slate-200 dark:border-gray-800 flex-1 overflow-auto"
   >

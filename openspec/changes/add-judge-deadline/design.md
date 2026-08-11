@@ -116,7 +116,7 @@ deadline 訂太低會把既有題目的正解與收編路線由 AC 變成 TLE，
 ## Risks / Trade-offs
 
 - 既有題目的某個正解或收編路線單筆牆鐘超過選定的 deadline，導致線上題目由 AC 變 TLE → D5 規定常數必須由量測導出，且驗收條件要求逐題以 `reference_solution` 實際提交確認得分不變；衝突無解時保留舊行為。
-- `COEP: require-corp` 擋掉某個未帶對應標頭的跨來源子資源，造成頁面資源載入失敗 → dev server 已長期在同一組標頭下運作，Pyodide 與 WASM 均為同源自架；驗收時逐頁確認，且此變更獨立成一個 PR 以便單獨回滾。
+- `COEP: require-corp` 擋掉某個未帶對應標頭的跨來源子資源，造成頁面資源載入失敗 → 已於 Cloudflare 本機執行環境（`pnpm preview:cf`）實測：兩個標頭皆送出、`crossOriginIsolated` 為真、`SharedArrayBuffer` 可用、console 無任何阻擋訊息、挑戰頁正常渲染。原本寫的理由「dev server 已長期在同一組標頭下運作」**不成立**——該宣告從未生效（E2）。Pyodide 與 WASM 均為同源自架；此變更獨立成一個 PR 以便單獨回滾。
 - 所有機制量測皆來自 node-Pyodide，瀏覽器行為可能不同（特別是中斷是否同樣無法被 `except` 吞掉）→ 瀏覽器覆核列為驗收條件；D2 的第二層在該結論不成立時仍提供防線。
 - 中斷機制在 worker 生命週期中留下不可觀察的狀態，使後續測資行為改變 → 驗收條件包含連續多筆中斷後仍能完成整批的情境。
 - 新增 deadline 後，原本靠整批預算被動終止的無限迴圈提交改由每筆 deadline 終止，整批總時間上升（最壞為測資數 × deadline）→ 主執行緒的整批上限保留，作為總時間的最終保護。
@@ -134,7 +134,7 @@ deadline 訂太低會把既有題目的正解與收編路線由 AC 變成 TLE，
 
 全部在 `pnpm preview:cf`（Cloudflare 本機執行環境，`crossOriginIsolated` 為真）的生產路徑上實測，重跑指令為 `openspec/changes/add-judge-deadline/measure/sweep.sh`，逐筆原始資料在同目錄的 `results.jsonl`。
 
-### 既有題目的 `reference_solution`（O2／O3 上界）
+#### 既有題目的 `reference_solution`（O2／O3 上界）
 
 全站 66 題中有 16 題宣告 `reference_solution`，且 11 題宣告 `testcase_plan` 的成本軸題目全數包含在這 16 題之內。**16 題全部維持滿分。**
 
@@ -161,7 +161,7 @@ deadline 訂太低會把既有題目的正解與收編路線由 AC 變成 TLE，
 
 覆蓋限制（誠實記錄）：其餘 50 題未宣告 `reference_solution`，因此沒有可量測的正解代理。它們是不含 `testcase_plan` 的基礎練習題，測資規模與上表末段同級（單筆 3–5 ms）。
 
-### 計數器看不見的繞道（O1 下界）
+#### 計數器看不見的繞道（O1 下界）
 
 | 題目／路線 | 得分 | 單筆最大 | 全場 | 判定序列 |
 |---|---|---|---|---|
@@ -174,17 +174,43 @@ deadline 訂太低會把既有題目的正解與收編路線由 AC 變成 TLE，
 
 四條路線與 `reference_solution` 在 40 組隨機輸入下交叉驗證輸出一致，因此上述差異純粹來自成本。
 
-### 中斷呈現（D7）的驗收狀態
+#### 中斷呈現（D7）的驗收狀態
 
 `gemblast_settrace` 是一份被 deadline 中斷三筆的提交，其結果表格回報 20 列、測資總數 20、得分 17，三者一致——D7 要求的「列數等於測資總數」在真實中斷情境下成立。
 
 但要誠實記錄一件事：**觸發 D7 原始缺陷的那個情境（累計硬砍造成截斷）在本次量測中沒有發生，也變得更難發生**。累計預算是「測資數 × 6,000 ms」，而每筆現在最多 5,000 ms，20 筆的最壞總和是 100 秒、低於 120 秒的硬砍線。換句話說 deadline 順帶讓截斷情境退到邊緣。D7 的修正仍然保留為防線（單元測試以「已回報三筆、總數二十筆」直接斷言），但它在瀏覽器端的證據是「中斷提交的列數正確」，不是「硬砍截斷後的列數正確」。
 
-### 釘定（task 4.5）
+#### 已收編路線（O3）——量測推翻了原本的釘定依據
 
-`DEADLINE_MS = 5,000`：高於上界 376 ms 達 **13.3 倍**，低於兩條繞道的下界。D5 擔心的空集合並未發生，可行域寬鬆。此值亦等於平台原本就打算生效、但因 macrotask 排序而從未觸發的那個 `setTimeout` 常數。
+第一輪只量了 `reference_solution`，據此得出「上界 376 ms、餘裕 13.3 倍」。但本 change 自己寫進 spec 的條文要求上界涵蓋**每一條在已上線題目的 spec 中被記載為收編的路線**，而那些路線當時一條都沒量。補量後：
 
-### O4：gem-blast 的 `str.replace` 繞道（結論翻面）
+| 路線 | 出處 | 得分 | 逐筆牆鐘 |
+|---|---|---|---|
+| `math.perm` ＋ Legendre 尾零計數（prize-order-code） | `rank-code-challenges/spec.md`「documented surviving alternative solution」 | **12/20** | 最慢完成筆 3,880 ms；七筆停在 deadline |
+| `math.factorial` 逐查詢（rank-code-backfill，對照組） | 同 spec 要求它**必須**失敗 | 0/20 | 符合預期 |
+| `str.replace`（gem-blast） | `gem-blast-challenge/spec.md`「accepted alternative solution」 | 18/20 | 兩筆停在 deadline |
+
+判定序列（`math.perm` 路線）：`AAAAAAAATTTTTTTATAAA`
+
+**這使 D5 的可行域成為空集合。** deadline 必須低於兩條 op 繞道（實測 >5,000 ms），又必須高於這條收編路線（同樣 >5,000 ms）。兩個條件互斥。
+
+#### D5 衝突的處置：維持 5,000 ms，修訂該題 spec
+
+D5 原本規定衝突時保留舊行為。維護者選擇的是另一條：維持常數並顯式修訂 `rank-code-challenges` 的條文。理由如下，一併記錄以便日後複查。
+
+這條路線的成本不是被 deadline 冤枉的。它把最多十萬項的乘積建成精確整數，光是沒被截斷的那一筆就要 3,880 ms；成本全部發生在 C 層，所以 op 計數器看不到、時鐘看得到。**任何具有牆鐘的判題器都會殺掉它**，而「判題器該不該有牆鐘」是比單一題目的既有保證更上位的決定，也正是本 change 的前提。
+
+保留舊行為（D5 原路）的代價是兩條 op 繞道繼續有效——`sys.settrace(None)` 與同行攤平，兩者都不是「解出題目」而是「規避判題器」，且影響全站所有以成本為鑑別軸的題目。提高 deadline 也不可行：要涵蓋這條路線需約 15 秒，20 筆的最壞總和 300 秒遠超累計硬砍的 120 秒，硬砍會先截斷而回到本 change 正在修的那個缺陷。
+
+因此修訂範圍限縮為：該路線的接受狀態改為「在 deadline 之內完成的筆數被接受」，**該題測資一個 byte 都不動**，且結果明確歸因於平台 deadline 而非測資調整。這與 gem-blast 的處置同型，差別只在 gem-blast 的原條文本身是條件句、量測即自動生效，而本條是無條件句、需要顯式修訂。
+
+#### 釘定（task 4.5）
+
+`DEADLINE_MS = 5,000`：高於 16 支 `reference_solution` 的上界 376 ms 達 **13.3 倍**。此值亦等於平台原本就打算生效、但因 macrotask 排序而從未觸發的那個 `setTimeout` 常數。
+
+**但它並未高於所有收編路線**——見上一節。D5 設想的空集合確實發生了，處置為維持常數並修訂該題 spec，而非保留舊行為。
+
+#### O4：gem-blast 的 `str.replace` 繞道（結論翻面）
 
 `gem-blast-challenge` 的 spec 原記載此繞道被**接受**為聰明解，理由是「牆鐘旗標對同步碼失效，測資殺不掉它」。實測結果：**18/20**，逐筆判定 `AAAAAAAAAAAAAAAATTAA`，單筆最大 5005 ms。
 

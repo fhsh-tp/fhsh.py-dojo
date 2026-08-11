@@ -169,3 +169,32 @@ describe('TestResultPanel — interrupted batch honesty', () => {
     expect(wrapper.text()).toContain('3 / 3')
   })
 })
+
+describe('TestResultPanel — truncated run still renders', () => {
+  // The cumulative batch kill terminates the Worker mid-run. On the production
+  // path the store can end up `done` with no results at all, and the panel's
+  // root v-if used to unmount the whole table in exactly that state — so the
+  // honest-denominator fix rendered nothing and the student saw only a score.
+  it('renders the table when the run finished having reported nothing', () => {
+    const wrapper = mount(TestResultPanel, {
+      props: { results: [], status: 'done', total: 20 },
+    })
+    expect(wrapper.find('[data-testid="result-panel"]').exists()).toBe(true)
+    expect(wrapper.findAll('tbody tr')).toHaveLength(20)
+    expect(wrapper.findAll('[data-verdict="none"]')).toHaveLength(20)
+  })
+
+  it('scores a fully truncated run against the real total', () => {
+    const wrapper = mount(TestResultPanel, {
+      props: { results: [], status: 'done', total: 20 },
+    })
+    expect(wrapper.text()).toContain('0 / 20')
+  })
+
+  it('still stays hidden before a run has started', () => {
+    const wrapper = mount(TestResultPanel, {
+      props: { results: [], status: 'idle', total: 20 },
+    })
+    expect(wrapper.find('[data-testid="result-panel"]').exists()).toBe(false)
+  })
+})
