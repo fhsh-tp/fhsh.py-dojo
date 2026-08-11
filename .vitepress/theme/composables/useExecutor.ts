@@ -9,7 +9,7 @@ import type {
   ExecuteResult,
   VerdictDetail,
 } from '../workers/pyodide.worker'
-import { createInterruptChannel, DeadlineWatchdog } from '../workers/deadline'
+import { createInterruptChannel, DeadlineWatchdog, DEADLINE_MS, KILL_MARGIN_MS } from '../workers/deadline'
 
 const WALL_CLOCK_KILL_MS = 6_000
 
@@ -131,7 +131,14 @@ export function useExecutor() {
       const channel = createInterruptChannel()
       const runWatchdog = new DeadlineWatchdog(channel)
 
-      const timer = setTimeout(() => {
+      // The kill timer guards against a Worker that stops responding at all.
+      // It starts here, before Pyodide has loaded, so once user code actually
+      // begins it is re-armed relative to that moment — otherwise Pyodide's
+      // warm-up eats the budget and the kill preempts the deadline, which
+      // terminates the Worker instead of producing a timed-out result.
+      let timer = setTimeout(onKill, WALL_CLOCK_KILL_MS)
+
+      function onKill() {
         runWatchdog.dispose()
         worker.terminate()
         resolve({
@@ -140,11 +147,13 @@ export function useExecutor() {
           elapsed_ms: WALL_CLOCK_KILL_MS,
           error: 'Execution timed out',
         })
-      }, WALL_CLOCK_KILL_MS)
+      }
 
       worker.onmessage = (event: MessageEvent<TestcaseStart | ExecuteResult>) => {
         if (event.data.type === 'testcase_start') {
           runWatchdog.arm(event.data.generation)
+          clearTimeout(timer)
+          timer = setTimeout(onKill, DEADLINE_MS + KILL_MARGIN_MS)
           return
         }
         if (event.data.type === 'execute_result') {

@@ -58,6 +58,44 @@ export const SLOT_SIGNAL = 0
  */
 export const SLOT_GENERATION = 1
 
+/**
+ * Generation value meaning "no testcase is armed".
+ *
+ * The Worker writes this the instant user code stops, which is the only moment
+ * anyone can identify precisely. Waiting for the main thread to disarm leaves a
+ * window: the Worker posts its result and immediately starts the interpreter
+ * cleanup for the next testcase, and an expiry landing in that window raises
+ * inside Pyodide's own asynchronous machinery — measured to leave the runtime
+ * unusable, which stalls the whole batch rather than failing one testcase.
+ *
+ * Live generations therefore run 1..255 and never take this value.
+ */
+export const GENERATION_IDLE = 0
+
+/**
+ * Extra room the Worker-unresponsive kill timer needs once user code is known
+ * to have started.
+ *
+ * The kill timer is armed when the Worker is created, but the Worker then
+ * spends seconds loading Pyodide before any user code runs. Left alone, the
+ * kill fires first and terminates the Worker instead of letting the deadline
+ * produce a verdict — measured on the Run path, where the kill landed around
+ * 1 s of user-code time. Re-arming from the moment user code starts, at the
+ * deadline plus this margin, restores the intended order.
+ */
+export const KILL_MARGIN_MS = 1_000
+
+/**
+ * How far below the deadline an interrupt is still attributable to the judge.
+ *
+ * A KeyboardInterrupt is not proof the deadline fired: student code can raise
+ * one itself, and treating that as a timeout both hides their error and awards
+ * the wrong verdict. Anything arriving this close to the budget is ours;
+ * anything earlier is theirs. The window only has to cover measurement skew
+ * between the main thread's timer and the Worker's own clock.
+ */
+export const INTERRUPT_ATTRIBUTION_MS = 250
+
 export interface InterruptChannel {
   /** False when the environment cannot provide a `SharedArrayBuffer`. */
   supported: boolean
@@ -144,7 +182,8 @@ export class DeadlineWatchdog {
     const view = this.channel.view
     if (view === null) return
 
-    const slot = generation & 0xff
+    // 1..255: GENERATION_IDLE is reserved for "the Worker has disarmed".
+    const slot = (generation % 255) + 1
     view[SLOT_SIGNAL] = 0
     view[SLOT_GENERATION] = slot
 
@@ -157,12 +196,21 @@ export class DeadlineWatchdog {
     }, this.deadlineMs)
   }
 
-  /** Stop the countdown for the current testcase and lower the signal. */
+  /**
+   * Stop the countdown for the current testcase.
+   *
+   * Belt to the Worker's braces: the Worker already parks the generation at
+   * GENERATION_IDLE when user code stops, so a pending expiry is silent by the
+   * time this runs. This still cancels the timer and lowers any signal, which
+   * matters when no Worker-side disarm happened at all — a terminated or
+   * crashed Worker leaves the buffer exactly as it was.
+   */
   disarm(): void {
     this.cancelTimer()
     const view = this.channel.view
     if (view === null) return
     view[SLOT_SIGNAL] = 0
+    view[SLOT_GENERATION] = GENERATION_IDLE
   }
 
   /** Release the watchdog for good; safe to call more than once. */
@@ -187,4 +235,18 @@ export class DeadlineWatchdog {
  */
 export function exceededDeadline(elapsedMs: number, deadlineMs: number = DEADLINE_MS): boolean {
   return elapsedMs > deadlineMs
+}
+
+/**
+ * Was this interrupt ours?
+ *
+ * Called only when the executing code raised KeyboardInterrupt. Student code
+ * can raise that itself, so the exception type alone cannot decide the verdict
+ * — attribute by when it arrived relative to the budget.
+ */
+export function interruptAttributableToDeadline(
+  elapsedMs: number,
+  deadlineMs: number = DEADLINE_MS,
+): boolean {
+  return elapsedMs >= deadlineMs - INTERRUPT_ATTRIBUTION_MS
 }

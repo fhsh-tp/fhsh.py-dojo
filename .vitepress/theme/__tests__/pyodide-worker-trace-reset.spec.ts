@@ -13,14 +13,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // Captured from the worker module at dispatch time — a static import would
 // run the module's `self.onmessage = ...` before the `self` stub exists.
 let traceResetSnippet: string | undefined
+let judgeSnippets: string[] = []
 
 const calls: string[] = []
 const mockRunPythonAsync = vi.fn(async (code: string) => {
+  if (judgeSnippets.includes(code)) return
   // Only the trace reset uses the async entry point; wrapped student code
   // runs synchronously (design D3).
   calls.push(code === traceResetSnippet ? '<reset>' : '<async-exec>')
 })
 const mockRunPython = vi.fn((code: string) => {
+  // The judge's own preamble (capturing and restoring the tracing API) is not
+  // user code and must not appear in the sequence under assertion.
+  if (judgeSnippets.includes(code)) return undefined
   calls.push(code === traceResetSnippet ? '<reset>' : '<exec>')
   return undefined
 })
@@ -48,6 +53,7 @@ vi.stubGlobal('self', {
 async function dispatch(data: unknown): Promise<void> {
   const mod = await import('../workers/pyodide.worker')
   traceResetSnippet = mod.TRACE_RESET_SNIPPET
+  judgeSnippets = [mod.SYS_MODULE_SNIPPET, mod.SYS_SETTRACE_SNIPPET, mod.TRACE_RESTORE_SNIPPET]
   const handler = (self as unknown as { onmessage: (e: { data: unknown }) => Promise<void> })
     .onmessage
   await handler({ data })

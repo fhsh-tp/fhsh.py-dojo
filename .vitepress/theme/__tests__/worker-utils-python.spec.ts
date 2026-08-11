@@ -215,3 +215,50 @@ for off in ${JSON.stringify(offsets)}:
     })
   })
 }
+
+/**
+ * The sandbox guard has to actually block, not merely be present.
+ *
+ * The original guard implemented `find_module`/`load_module` — the import
+ * protocol CPython removed in 3.12. A meta-path finder that only offers those
+ * methods is skipped entirely, so the guard read as protection while blocking
+ * nothing. Every prior test asserted the guard's *shape* (that the wrapper
+ * contains a finder class), which is exactly the assertion that cannot tell a
+ * live guard from a dead one.
+ *
+ * This matters beyond module access: reaching the JS bridge lets student code
+ * disable the judge's own machinery, so a dead guard silently voids the
+ * per-testcase deadline as well.
+ */
+describe.skipIf(!hasPython)('sandbox guard blocks under the current import protocol', () => {
+  it.each(['js', 'pyodide_js', 'pyodide'])('refuses `import %s`', (mod) => {
+    const res = runWrapped(`import ${mod}\nprint("REACHED")`, '', LOW_OP_LIMIT)
+    expect(res.stdout).not.toContain('REACHED')
+    expect(res.stderr).toContain('is not available')
+  })
+
+  it('refuses submodules of a blocked package', () => {
+    const res = runWrapped('import pyodide.ffi\nprint("REACHED")', '', LOW_OP_LIMIT)
+    expect(res.stdout).not.toContain('REACHED')
+    expect(res.stderr).toContain('is not available')
+  })
+
+  it('refuses `from js import ...` as well as plain import', () => {
+    const res = runWrapped('from js import Object\nprint("REACHED")', '', LOW_OP_LIMIT)
+    expect(res.stdout).not.toContain('REACHED')
+    expect(res.stderr).toContain('is not available')
+  })
+
+  it('leaves ordinary standard-library imports working', () => {
+    const res = runWrapped('import json, math\nprint(json.dumps(math.floor(2.7)))', '', LOW_OP_LIMIT)
+    expect(res.status).toBe(0)
+    expect(res.stdout.trim()).toBe('2')
+  })
+
+  it('does not block a module whose name merely starts with a blocked prefix', () => {
+    // `jsonschema`-style names begin with "js" but are not the bridge.
+    const res = runWrapped('import json\nprint("OK")', '', LOW_OP_LIMIT)
+    expect(res.status).toBe(0)
+    expect(res.stdout.trim()).toBe('OK')
+  })
+})

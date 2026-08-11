@@ -4,6 +4,7 @@ import {
   INTERRUPT_SIGNAL,
   SLOT_SIGNAL,
   SLOT_GENERATION,
+  GENERATION_IDLE,
   createInterruptChannel,
   DeadlineWatchdog,
   resetDegradationNotice,
@@ -122,12 +123,25 @@ describe('deadline module', () => {
       expect(channel.view![SLOT_SIGNAL]).toBe(0)
     })
 
-    it('publishes the current generation into the shared buffer on arm', () => {
+    it('publishes a live generation into the shared buffer on arm', () => {
       const channel = createInterruptChannel()
       const wd = new DeadlineWatchdog(channel)
 
       wd.arm(7)
-      expect(channel.view![SLOT_GENERATION]).toBe(7)
+      expect(channel.view![SLOT_GENERATION]).toBe(8)
+    })
+
+    it('never arms with the idle sentinel, whatever the counter value', () => {
+      // GENERATION_IDLE means "the Worker has disarmed"; an armed testcase
+      // taking that value would let a stale expiry match a disarmed slot.
+      const channel = createInterruptChannel()
+      const wd = new DeadlineWatchdog(channel)
+
+      for (const g of [0, 1, 254, 255, 256, 509, 510, 1000]) {
+        wd.arm(g)
+        expect(channel.view![SLOT_GENERATION]).not.toBe(GENERATION_IDLE)
+        expect(channel.view![SLOT_GENERATION]).toBeLessThanOrEqual(255)
+      }
     })
 
     it('wraps the generation so it always fits the shared byte slot', () => {
@@ -135,9 +149,18 @@ describe('deadline module', () => {
       const wd = new DeadlineWatchdog(channel)
 
       wd.arm(256)
-      expect(channel.view![SLOT_GENERATION]).toBe(0)
+      expect(channel.view![SLOT_GENERATION]).toBe(2)
       vi.advanceTimersByTime(DEADLINE_MS)
       expect(channel.view![SLOT_SIGNAL]).toBe(INTERRUPT_SIGNAL)
+    })
+
+    it('disarm parks the slot at the idle sentinel so a stale expiry cannot match', () => {
+      const channel = createInterruptChannel()
+      const wd = new DeadlineWatchdog(channel)
+
+      wd.arm(1)
+      wd.disarm()
+      expect(channel.view![SLOT_GENERATION]).toBe(GENERATION_IDLE)
     })
 
     it('is inert but safe when the channel is unsupported', () => {

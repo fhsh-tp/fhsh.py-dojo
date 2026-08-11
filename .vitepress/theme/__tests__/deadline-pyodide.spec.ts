@@ -52,12 +52,17 @@ parentPort.on('message', (m) => {
 `
 
 /**
- * A loop that comfortably outlasts the budget but still terminates on its own
- * in a few seconds. Sizing matters: an unbounded loop turns "the interrupt
- * regressed" from a fast red into a hung suite, which is the failure mode this
- * project has been bitten by before.
+ * A loop that far outlasts the budget but still terminates on its own.
+ *
+ * Sizing is a two-sided constraint. Too large and "the interrupt regressed"
+ * stops being a fast red and becomes a hung suite. Too small and the test goes
+ * flaky: when the whole suite runs in parallel the watchdog thread can be
+ * starved for seconds, and at 30M iterations the loop was observed finishing
+ * (4,473 ms) before a delayed interrupt landed. This size keeps the loop well
+ * over ten seconds of work so a late interrupt still arrives first, while a
+ * genuine regression fails in seconds rather than minutes.
  */
-const RUNAWAY_ITERATIONS = 30_000_000
+const RUNAWAY_ITERATIONS = 150_000_000
 const RUNAWAY = `i = 0\nwhile i < ${RUNAWAY_ITERATIONS}: i += 1\n"COMPLETED"`
 
 interface Trial {

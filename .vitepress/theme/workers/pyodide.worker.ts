@@ -14,7 +14,13 @@
 
 import { buildWrappedCode, computeVerdict, buildTestcaseResultFields } from './worker-utils'
 import type { VerdictDetail } from './worker-utils'
-import { exceededDeadline } from './deadline'
+import {
+  exceededDeadline,
+  interruptAttributableToDeadline,
+  GENERATION_IDLE,
+  SLOT_SIGNAL,
+  SLOT_GENERATION,
+} from './deadline'
 export type { VerdictDetail }
 
 // ── Message protocol types (task 4.2) ──────────────────────────────────────
@@ -164,6 +170,52 @@ async function ensurePyodide(): Promise<void> {
 export const TRACE_RESET_SNIPPET = 'import sys\nsys.settrace(None)'
 
 /**
+ * The tracing API has to be restored before every testcase.
+ *
+ * `globals.clear()` only empties the execution namespace; it cannot reach
+ * `sys.modules`, which survives every testcase of a submission. Student code
+ * that rebinds `sys.settrace` — two lines at the top of a submission — makes
+ * the wrapper's own `sys.settrace(_tracer)` a no-op for every subsequent
+ * testcase, so the operation counter reads zero and the op limit stops
+ * existing. Measured: a submission whose later testcase should have recorded
+ * two million operations recorded none, which turns a 12/20 route into 20/20.
+ *
+ * The originals are captured once and held on the JavaScript side, out of
+ * reach of the interpreter they are used to repair.
+ */
+
+/** Expression yielding the real `sys` module object. */
+export const SYS_MODULE_SNIPPET = 'import sys; sys'
+
+/** Expression yielding the real `sys.settrace` builtin. */
+export const SYS_SETTRACE_SNIPPET = 'import sys; sys.settrace'
+
+/**
+ * Puts the captured module object and tracing hook back in place. Reaches the
+ * module table through the captured object rather than `import sys`, so a
+ * submission that swapped the `sys` entry cannot hand the restore its decoy.
+ */
+export const TRACE_RESTORE_SNIPPET =
+  "__judge_sys.modules['sys'] = __judge_sys\n__judge_sys.settrace = __judge_settrace\n"
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let pristineSys: any = null
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let pristineSettrace: any = null
+
+/** Capture the originals once, immediately after the runtime is up. */
+function capturePristineTraceApi(): void {
+  if (pristineSettrace !== null) return
+  try {
+    pristineSys = pyodide.runPython(SYS_MODULE_SNIPPET)
+    pristineSettrace = pyodide.runPython(SYS_SETTRACE_SNIPPET)
+  } catch {
+    pristineSys = null
+    pristineSettrace = null
+  }
+}
+
+/**
  * Did the just-failed run exceed its op limit? Probes the wrapper's
  * `_op_count` left in globals (the errored run's namespace is still intact
  * at catch time — cleanup happens before the NEXT run). The guard's
@@ -200,6 +252,21 @@ function opLimitExceeded(opLimit: number): boolean {
  * absorbs the error, so both paths end with clean trace state.
  */
 async function resetTraceState(): Promise<void> {
+  // Undo any tampering with the tracing API before restoring trace state:
+  // a rebound `sys.settrace`, or a `sys` entry swapped out of `sys.modules`,
+  // would otherwise silently disable the operation counter for the rest of
+  // the submission.
+  if (pristineSettrace !== null) {
+    try {
+      pyodide.globals.set('__judge_sys', pristineSys)
+      pyodide.globals.set('__judge_settrace', pristineSettrace)
+      await pyodide.runPythonAsync(TRACE_RESTORE_SNIPPET)
+    } catch {
+      // A runtime that refuses the restore still gets the reset below; the
+      // wall-clock deadline does not depend on the tracer either way.
+    }
+  }
+
   try {
     await pyodide.runPythonAsync(TRACE_RESET_SNIPPET)
   } catch {
@@ -227,12 +294,34 @@ let armGeneration = 0
 function registerInterruptBuffer(buffer: SharedArrayBuffer | undefined): void {
   if (buffer === undefined) return
   try {
-    interruptView = new Uint8Array(buffer)
-    pyodide.setInterruptBuffer(interruptView)
-  } catch {
-    // Older runtimes without setInterruptBuffer must not break judging.
+    const view = new Uint8Array(buffer)
+    pyodide.setInterruptBuffer(view)
+    interruptView = view
+  } catch (err) {
+    // Judging must continue on elapsed adjudication alone, but a runtime that
+    // cannot accept an interrupt buffer is a real capability loss — reporting
+    // it is the difference between a known weaker gate and an absent one.
     interruptView = null
+    console.warn(
+      `[judge-deadline] setInterruptBuffer failed (${String(err)}). Testcases will be ` +
+        `adjudicated from elapsed time after they finish instead of being interrupted.`,
+    )
   }
+}
+
+/**
+ * Park the deadline the instant user code stops.
+ *
+ * Only the Worker knows that moment. If the disarm waited for the main thread
+ * to process the result message, an expiry could land during the interpreter
+ * cleanup that runs immediately afterwards — inside Pyodide's own asynchronous
+ * machinery, where an interrupt was measured to leave the runtime unusable and
+ * stall every remaining testcase.
+ */
+function disarmDeadline(): void {
+  if (interruptView === null) return
+  interruptView[SLOT_SIGNAL] = 0
+  interruptView[SLOT_GENERATION] = GENERATION_IDLE
 }
 
 /**
@@ -285,6 +374,7 @@ self.onmessage = async (
   const { code, testcases, opLimit = DEFAULT_OP_LIMIT, verdictDetail = 'hidden', interruptBuffer } = event.data as RunRequest
 
   await ensurePyodide()
+  capturePristineTraceApi()
   registerInterruptBuffer(interruptBuffer)
 
   let passed = 0
@@ -310,24 +400,32 @@ self.onmessage = async (
     let actual = ''
     let errMsg: string | undefined
 
+    let caught: unknown = null
     try {
       pyodide.runPython(buildWrappedCode(code, input, opLimit))
+    } catch (err: unknown) {
+      caught = err
+    }
+    const elapsed_ms = performance.now() - startTime
+    disarmDeadline()
+
+    if (caught === null) {
       // stdout capture result (task 4.4)
       actual = pyodide.globals.get('_output') ?? ''
       verdict = computeVerdict(actual, expected_output)
-    } catch (err: unknown) {
+    } else if (
       // Probe the op counter instead of matching error text — a student
       // raising their own TimeoutError is an ordinary RE (dev and prod
-      // classify identically). A deadline interrupt is never an RE.
-      if (opLimitExceeded(opLimit) || wasInterrupted(err)) {
-        verdict = 'TLE'
-      } else {
-        verdict = 'RE'
-        errMsg = String(err)
-      }
+      // classify identically). A KeyboardInterrupt is only ours when it
+      // arrived at the budget; students can raise one themselves.
+      opLimitExceeded(opLimit) ||
+      (wasInterrupted(caught) && interruptAttributableToDeadline(elapsed_ms))
+    ) {
+      verdict = 'TLE'
+    } else {
+      verdict = 'RE'
+      errMsg = String(caught)
     }
-
-    const elapsed_ms = performance.now() - startTime
 
     // Authoritative layer: however the code responded to the interrupt — or
     // if no interrupt channel existed at all — outrunning the budget is TLE.
@@ -361,6 +459,7 @@ async function handleRunOnly(req: RunOnlyRequest): Promise<void> {
   const { code, inputs, opLimit = DEFAULT_OP_LIMIT, interruptBuffer } = req
 
   await ensurePyodide()
+  capturePristineTraceApi()
   registerInterruptBuffer(interruptBuffer)
 
   for (let i = 0; i < inputs.length; i++) {
@@ -380,22 +479,29 @@ async function handleRunOnly(req: RunOnlyRequest): Promise<void> {
     let timedOut = false
     let errMsg: string | undefined
 
+    let caught: unknown = null
     try {
       pyodide.runPython(buildWrappedCode(code, input, opLimit))
-      stdout = pyodide.globals.get('_output') ?? ''
     } catch (err: unknown) {
-      // Classify limit-stops HERE by probing the actual op counter and the
-      // interrupt type — downstream the judge only reads the structured flag.
-      // The op-limit message embeds the limit, so a stopped result carries no
-      // error field at all.
-      if (opLimitExceeded(opLimit) || wasInterrupted(err)) {
-        timedOut = true
-      } else {
-        errMsg = String(err)
-      }
+      caught = err
     }
-
     const elapsed_ms = performance.now() - startTime
+    disarmDeadline()
+
+    if (caught === null) {
+      stdout = pyodide.globals.get('_output') ?? ''
+    } else if (
+      // Classify limit-stops HERE by probing the actual op counter and the
+      // interrupt's arrival time — downstream the judge only reads the
+      // structured flag. The op-limit message embeds the limit, so a stopped
+      // result carries no error field at all.
+      opLimitExceeded(opLimit) ||
+      (wasInterrupted(caught) && interruptAttributableToDeadline(elapsed_ms))
+    ) {
+      timedOut = true
+    } else {
+      errMsg = String(caught)
+    }
 
     // Authoritative layer, identical to the dev path: outrunning the budget
     // is a timeout no matter how the code responded to the interrupt.
@@ -423,6 +529,7 @@ async function handleExecute(req: ExecuteRequest): Promise<void> {
   const { code, stdin, opLimit = DEFAULT_OP_LIMIT, interruptBuffer } = req
 
   await ensurePyodide()
+  capturePristineTraceApi()
   registerInterruptBuffer(interruptBuffer)
 
   // Namespace cleanup
@@ -439,14 +546,28 @@ async function handleExecute(req: ExecuteRequest): Promise<void> {
   let stdout = ''
   let errMsg: string | undefined
 
+  let caught: unknown = null
   try {
     pyodide.runPython(buildWrappedCode(code, stdin, opLimit))
-    stdout = pyodide.globals.get('_output') ?? ''
   } catch (err: unknown) {
-    errMsg = wasInterrupted(err) ? TIMED_OUT_MESSAGE : String(err)
+    caught = err
   }
-
   const elapsed_ms = performance.now() - startTime
+  disarmDeadline()
+
+  if (caught === null) {
+    stdout = pyodide.globals.get('_output') ?? ''
+  } else if (
+    // Run mode has no verdict, but it must not leak the op-limit guard's own
+    // message — that text embeds the limit. Both limit stops collapse to the
+    // same neutral string.
+    opLimitExceeded(opLimit) ||
+    (wasInterrupted(caught) && interruptAttributableToDeadline(elapsed_ms))
+  ) {
+    errMsg = TIMED_OUT_MESSAGE
+  } else {
+    errMsg = String(caught)
+  }
 
   // Same authoritative layer as the judged paths. Run mode has no verdict, so
   // the deadline surfaces as an error string the modal can display.

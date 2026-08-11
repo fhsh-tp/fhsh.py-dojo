@@ -98,6 +98,7 @@ const DEFAULT_OP_LIMIT = 10_000_000
 const execOutcomes: Array<'ok' | 'tle' | 'tle-bigint' | 'error' | 'fake-tle'> = []
 let execIndex = 0
 let traceResetSnippet: string | undefined
+let judgeSnippets: string[] = []
 // Classification probes `_op_count` from globals — the mock exposes the
 // count each outcome would leave behind in a real run. Pyodide hands back
 // BigInt for Python ints above 2^53-1, so the mock covers both types.
@@ -105,6 +106,7 @@ let mockOpCount: number | bigint = 0
 
 /** Trace reset still runs through the async entry point. */
 const mockRunPythonAsync = vi.fn(async (code: string) => {
+  if (judgeSnippets.includes(code)) return
   if (code === traceResetSnippet) return
   throw new Error('wrapped user code must run through the synchronous entry point')
 })
@@ -115,6 +117,7 @@ const mockRunPythonAsync = vi.fn(async (code: string) => {
  * Worker instead of producing a verdict.
  */
 const mockRunPython = vi.fn((code: string) => {
+  if (judgeSnippets.includes(code)) return undefined
   if (code === traceResetSnippet) return
   const outcome = execOutcomes[execIndex++] ?? 'ok'
   if (outcome === 'tle') {
@@ -146,6 +149,7 @@ vi.mock('/pyodide/pyodide.mjs', () => ({
     setInterruptBuffer: vi.fn(),
     globals: {
       clear: vi.fn(),
+      set: vi.fn(),
       get: vi.fn((key: string) => (key === '_op_count' ? mockOpCount : 'out\n')),
     },
   })),
@@ -172,6 +176,7 @@ describe('run_only timeout classification (mock-driven)', () => {
     execOutcomes.push(...outcomes)
     const mod = await import('../workers/pyodide.worker')
     traceResetSnippet = mod.TRACE_RESET_SNIPPET
+    judgeSnippets = [mod.SYS_MODULE_SNIPPET, mod.SYS_SETTRACE_SNIPPET, mod.TRACE_RESTORE_SNIPPET]
     const handler = (self as unknown as { onmessage: (e: { data: unknown }) => Promise<void> })
       .onmessage
     await handler({
