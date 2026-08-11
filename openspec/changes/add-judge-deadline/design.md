@@ -109,6 +109,8 @@ deadline 訂太低會把既有題目的正解與收編路線由 AC 變成 TLE，
 
 **範圍外**：op 上限數值與計數機制、既有題目的測資與斷崖重新設計、per-challenge deadline 旋鈕、全 literal 題目的測資公開殘餘、WASM judge 內部的判定邏輯（既有 TLE 分支已存在且沿用）。
 
+`generate` handler **刻意不套用 deadline**：它執行的是題目作者提供的受信任 generator，本來就以 `opLimit: null` 豁免 op 計數。無限迴圈的 generator 會卡住預覽頁，這是 `openspec/BACKLOG.md` §2.3 已記錄並明確延後的獨立問題，不在本 change 併修。因此 `generate` 保留非同步執行入口，而三個判題 handler 改為同步。
+
 ## Risks / Trade-offs
 
 - 既有題目的某個正解或收編路線單筆牆鐘超過選定的 deadline，導致線上題目由 AC 變 TLE → D5 規定常數必須由量測導出，且驗收條件要求逐題以 `reference_solution` 實際提交確認得分不變；衝突無解時保留舊行為。

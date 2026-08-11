@@ -1,0 +1,15 @@
+# Cross-origin isolation.
+#
+# SharedArrayBuffer — which the judge uses to interrupt a testcase that
+# outruns its wall-clock deadline — is only exposed to cross-origin isolated
+# documents. Without these two headers the constructor is simply undefined and
+# judging silently falls back to adjudicating the deadline after each testcase
+# has already run to completion.
+#
+# require-corp blocks cross-origin subresources that do not opt in. This site
+# serves Pyodide, the WASM modules and every asset from its own origin, and the
+# dev server has run under the identical pair since the Pyodide integration
+# landed.
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp

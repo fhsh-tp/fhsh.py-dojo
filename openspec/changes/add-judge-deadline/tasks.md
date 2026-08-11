@@ -1,22 +1,22 @@
 ## 1. 中斷協定與同步執行（D1／D3／D4）
 
-- [ ] 1.1 為中斷緩衝區協定寫失敗測試：測試涵蓋「武裝後寫入中斷值會讓執行中的 Python 拋出可被 handler 捕捉的例外」、「世代編號不同的過期到期不會影響當前執行」、「該筆結束後旗標歸零」。測試檔放在 `.vitepress/theme/__tests__/`，命名與既有 worker 測試一致。驗收目標：新測試在實作前失敗、實作後通過。
-- [ ] 1.2 在 worker 建立中斷緩衝區的註冊與武裝／解除函式：接受緩衝區與世代編號，於使用者程式碼執行前武裝、結束後立即解除並清零。實作 D4 的時機約束——旗標不得跨越 Pyodide 自身的初始化或清理工作。驗收目標：1.1 的三項測試通過。 對應 spec 需求：The deadline is enforced by an interrupt buffer armed per testcase。
-- [ ] 1.3 將 `run` handler 的執行改為同步 Pyodide 執行入口（D3），並把中斷產生的例外分類為逾時而非 RE。驗收目標：`pyodide-worker-verdict-detail.spec.ts` 與 `pyodide-worker-trace-reset.spec.ts` 維持全綠，且逾時分類有新測試覆蓋。 對應 spec 需求：Sandbox guard is injected before user code in every execution。
-- [ ] 1.4 將 `run_only` handler 改為同步執行並在逾時時設定既有的 `timed_out` 結構化欄位，使 WASM judge 既有的 TLE 分支生效。驗收目標：`pyodide-worker-run-only.spec.ts` 擴充一個逾時情境並通過。 對應 spec 需求：Production judging receives the deadline verdict。
-- [ ] 1.5 將 `execute` handler 改為同步執行並套用同一套 deadline 語義，逾時時回傳逾時結果且不終止 Worker。驗收目標：`pyodide-worker-execute.spec.ts` 擴充逾時情境並通過。 對應 spec 需求：Execute Composable Method。
+- [x] 1.1 為中斷緩衝區協定寫失敗測試：測試涵蓋「武裝後寫入中斷值會讓執行中的 Python 拋出可被 handler 捕捉的例外」、「世代編號不同的過期到期不會影響當前執行」、「該筆結束後旗標歸零」。測試檔放在 `.vitepress/theme/__tests__/`，命名與既有 worker 測試一致。驗收目標：新測試在實作前失敗、實作後通過。
+- [x] 1.2 在 worker 建立中斷緩衝區的註冊與武裝／解除函式：接受緩衝區與世代編號，於使用者程式碼執行前武裝、結束後立即解除並清零。實作 D4 的時機約束——旗標不得跨越 Pyodide 自身的初始化或清理工作。驗收目標：1.1 的三項測試通過。 對應 spec 需求：The deadline is enforced by an interrupt buffer armed per testcase。
+- [x] 1.3 將 `run` handler 的執行改為同步 Pyodide 執行入口（D3），並把中斷產生的例外分類為逾時而非 RE。驗收目標：`pyodide-worker-verdict-detail.spec.ts` 與 `pyodide-worker-trace-reset.spec.ts` 維持全綠，且逾時分類有新測試覆蓋。 對應 spec 需求：Sandbox guard is injected before user code in every execution。
+- [x] 1.4 將 `run_only` handler 改為同步執行並在逾時時設定既有的 `timed_out` 結構化欄位，使 WASM judge 既有的 TLE 分支生效。驗收目標：`pyodide-worker-run-only.spec.ts` 擴充一個逾時情境並通過。 對應 spec 需求：Production judging receives the deadline verdict。
+- [x] 1.5 將 `execute` handler 改為同步執行並套用同一套 deadline 語義，逾時時回傳逾時結果且不終止 Worker。驗收目標：`pyodide-worker-execute.spec.ts` 擴充逾時情境並通過。 對應 spec 需求：Execute Composable Method。
 
 ## 2. 主執行緒 watchdog 與第二層裁決（D1／D2）
 
-- [ ] 2.1 為 watchdog 與降級路徑寫失敗測試：涵蓋「每筆測資各自武裝與解除」、「`SharedArrayBuffer` 不可用時不拋錯且改用 elapsed 裁決」、「降級狀態會產生一次性的開發者可見訊息」。驗收目標：新測試在實作前失敗。
-- [ ] 2.2 在 `useExecutor.ts` 與 `useChallengeRunner.ts` 建立每筆測資的 watchdog 武裝與解除，並保留既有的整批上限作為總時間的最終保護。驗收目標：`useExecutor.spec.ts`、`useChallengeRunner-dev.spec.ts`、`useChallengeRunner-prod.spec.ts` 全綠，加上 2.1 的新測試通過。 對應 spec 需求：Every judged testcase has an enforced wall-clock deadline。
-- [ ] 2.3 實作 elapsed 事後裁決（D2）：三個 handler 在每筆結束時，無論正常回傳或拋出，都以 worker 自行量測的 elapsed 與 deadline 比較，超過即判逾時。驗收目標：一份「捕捉中斷例外後繼續執行」的測試提交在該筆得到逾時判定。 對應 spec 需求：Student code cannot suppress the deadline verdict。
-- [ ] 2.4 實作無 `SharedArrayBuffer` 的降級路徑：不拋錯、不阻擋執行、不對學生顯示環境相關錯誤，僅以 elapsed 裁決並輸出一次性開發者訊息。驗收目標：2.1 的降級測試通過。 對應 spec 需求：Judging degrades rather than fails without SharedArrayBuffer。
+- [x] 2.1 為 watchdog 與降級路徑寫失敗測試：涵蓋「每筆測資各自武裝與解除」、「`SharedArrayBuffer` 不可用時不拋錯且改用 elapsed 裁決」、「降級狀態會產生一次性的開發者可見訊息」。驗收目標：新測試在實作前失敗。
+- [x] 2.2 在 `useExecutor.ts` 與 `useChallengeRunner.ts` 建立每筆測資的 watchdog 武裝與解除，並保留既有的整批上限作為總時間的最終保護。驗收目標：`useExecutor.spec.ts`、`useChallengeRunner-dev.spec.ts`、`useChallengeRunner-prod.spec.ts` 全綠，加上 2.1 的新測試通過。 對應 spec 需求：Every judged testcase has an enforced wall-clock deadline。
+- [x] 2.3 實作 elapsed 事後裁決（D2）：三個 handler 在每筆結束時，無論正常回傳或拋出，都以 worker 自行量測的 elapsed 與 deadline 比較，超過即判逾時。驗收目標：一份「捕捉中斷例外後繼續執行」的測試提交在該筆得到逾時判定。 對應 spec 需求：Student code cannot suppress the deadline verdict。
+- [x] 2.4 實作無 `SharedArrayBuffer` 的降級路徑：不拋錯、不阻擋執行、不對學生顯示環境相關錯誤，僅以 elapsed 裁決並輸出一次性開發者訊息。驗收目標：2.1 的降級測試通過。 對應 spec 需求：Judging degrades rather than fails without SharedArrayBuffer。
 
 ## 3. 呈現與部署（D6／D7）
 
-- [ ] 3.1 [P] 修正結果表格分母（D7）：改以測資總數為分母，未回報的測資顯示為未執行且與通過列視覺可辨。先寫一個「已回報三筆、總數二十筆」的元件測試斷言列數為二十，再實作。驗收目標：新測試通過，且 `ChallengeView.spec.ts` 維持全綠。 對應 spec 需求：Interrupted batches are displayed honestly。
-- [ ] 3.2 [P] 新增 `docs/public/_headers`，送出 `Cross-Origin-Opener-Policy: same-origin` 與 `Cross-Origin-Embedder-Policy: require-corp`（D6）。驗收目標：檔案存在且內容為 Cloudflare Pages 的 `_headers` 格式；於 staging 部署後以瀏覽器開發者工具確認回應標頭含這兩項且 `crossOriginIsolated` 為真。
+- [x] 3.1 [P] 修正結果表格分母（D7）：改以測資總數為分母，未回報的測資顯示為未執行且與通過列視覺可辨。先寫一個「已回報三筆、總數二十筆」的元件測試斷言列數為二十，再實作。驗收目標：新測試通過，且 `ChallengeView.spec.ts` 維持全綠。 對應 spec 需求：Interrupted batches are displayed honestly。
+- [x] 3.2 [P] 新增 `docs/public/_headers`，送出 `Cross-Origin-Opener-Policy: same-origin` 與 `Cross-Origin-Embedder-Policy: require-corp`（D6）。驗收目標：檔案存在且內容為 Cloudflare Pages 的 `_headers` 格式；於 staging 部署後以瀏覽器開發者工具確認回應標頭含這兩項且 `crossOriginIsolated` 為真。
 
 ## 4. deadline 常數的量測與釘定（D5）
 

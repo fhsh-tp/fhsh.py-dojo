@@ -103,7 +103,18 @@ let traceResetSnippet: string | undefined
 // BigInt for Python ints above 2^53-1, so the mock covers both types.
 let mockOpCount: number | bigint = 0
 
+/** Trace reset still runs through the async entry point. */
 const mockRunPythonAsync = vi.fn(async (code: string) => {
+  if (code === traceResetSnippet) return
+  throw new Error('wrapped user code must run through the synchronous entry point')
+})
+
+/**
+ * Wrapped student code runs synchronously (design D3): an interrupt raised
+ * during asynchronous execution escapes the handler's try/catch and kills the
+ * Worker instead of producing a verdict.
+ */
+const mockRunPython = vi.fn((code: string) => {
   if (code === traceResetSnippet) return
   const outcome = execOutcomes[execIndex++] ?? 'ok'
   if (outcome === 'tle') {
@@ -125,11 +136,14 @@ const mockRunPythonAsync = vi.fn(async (code: string) => {
     throw new Error('PythonError: TimeoutError: my own timeout')
   }
   mockOpCount = 42
+  return undefined
 })
 
 vi.mock('/pyodide/pyodide.mjs', () => ({
   loadPyodide: vi.fn(async () => ({
     runPythonAsync: mockRunPythonAsync,
+    runPython: mockRunPython,
+    setInterruptBuffer: vi.fn(),
     globals: {
       clear: vi.fn(),
       get: vi.fn((key: string) => (key === '_op_count' ? mockOpCount : 'out\n')),

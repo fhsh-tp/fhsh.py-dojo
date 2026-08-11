@@ -42,15 +42,20 @@ describe('useExecutor', () => {
   })
 
   describe('execute()', () => {
-    it('creates a Worker and sends an ExecuteRequest', () => {
+    it('creates a Worker and sends an ExecuteRequest carrying the interrupt buffer', () => {
       const { execute } = useExecutor()
       execute('print("hi")', 'hello')
 
-      expect(lastWorkerInstance.postMessage).toHaveBeenCalledWith({
-        type: 'execute',
-        code: 'print("hi")',
-        stdin: 'hello',
-      })
+      expect(lastWorkerInstance.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'execute',
+          code: 'print("hi")',
+          stdin: 'hello',
+          // Without this the Worker cannot be interrupted at the deadline and
+          // falls back to elapsed-only adjudication.
+          interruptBuffer: expect.any(SharedArrayBuffer),
+        }),
+      )
     })
 
     it('resolves with ExecuteResult on success', async () => {

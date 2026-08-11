@@ -14,6 +14,7 @@
 
 import { buildWrappedCode, computeVerdict, buildTestcaseResultFields } from './worker-utils'
 import type { VerdictDetail } from './worker-utils'
+import { exceededDeadline } from './deadline'
 export type { VerdictDetail }
 
 // ── Message protocol types (task 4.2) ──────────────────────────────────────
@@ -26,6 +27,28 @@ export interface RunRequest {
   opLimit?: number
   /** Controls which fields are included in TestcaseResult. Default: 'hidden' */
   verdictDetail?: VerdictDetail
+  /**
+   * Shared buffer the main thread raises the interrupt signal in when a
+   * testcase outruns its deadline. Absent when the environment cannot provide
+   * one; judging then falls back to elapsed adjudication alone.
+   */
+  interruptBuffer?: SharedArrayBuffer
+}
+
+/**
+ * Emitted immediately before user code for one testcase begins executing, so
+ * the main thread can arm that testcase's deadline. The Worker blocks inside
+ * synchronous Python right after posting this, which is exactly why the
+ * countdown cannot live in the Worker itself.
+ */
+export interface TestcaseStart {
+  type: 'testcase_start'
+  index: number
+  /**
+   * Identifies this arming. An expiry whose generation no longer matches
+   * belongs to a finished testcase and must stay silent.
+   */
+  generation: number
 }
 
 export interface TestcaseResult {
@@ -71,6 +94,8 @@ export interface RunOnlyRequest {
   inputs: string[]
   /** Maximum Python bytecode operations per testcase. Default: 10_000_000 */
   opLimit?: number
+  /** See RunRequest.interruptBuffer. */
+  interruptBuffer?: SharedArrayBuffer
 }
 
 /** Per-testcase result for run_only — no verdict fields (prod judges in WASM). */
@@ -81,7 +106,11 @@ export interface RunOnlyTestcaseResult {
   elapsed_ms: number
   /** Set for non-timeout failures only. */
   error?: string
-  /** Set (true) only for op-limit timeouts, classified in the Worker. */
+  /**
+   * Set (true) when the testcase was stopped by a limit rather than by a
+   * defect in the code — the op-limit guard or the wall-clock deadline. The
+   * WASM judge maps this flag straight to TLE.
+   */
   timed_out?: boolean
 }
 
@@ -92,6 +121,8 @@ export interface ExecuteRequest {
   stdin: string
   /** Maximum Python bytecode operations. Default: 10_000_000 */
   opLimit?: number
+  /** See RunRequest.interruptBuffer. */
+  interruptBuffer?: SharedArrayBuffer
 }
 
 export interface ExecuteResult {
@@ -102,12 +133,17 @@ export interface ExecuteResult {
   error?: string
 }
 
-type WorkerOutMessage = TestcaseResult | RunComplete | GenerateComplete | ExecuteResult
+type WorkerOutMessage = TestcaseResult | TestcaseStart | RunComplete | GenerateComplete | ExecuteResult
 
 const PYODIDE_CDN = '/pyodide/'
 const DEFAULT_OP_LIMIT = 10_000_000
-/** Wall-clock budget per testcase in milliseconds (task 4.6) */
-const WALL_CLOCK_MS = 5_000
+
+/**
+ * Shown in Run mode when execution is stopped by the deadline. Deliberately
+ * free of any limit value — the op-limit guard's own message embeds the limit
+ * and must not reach a student.
+ */
+export const TIMED_OUT_MESSAGE = 'Execution timed out'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let pyodide: any = null
@@ -172,6 +208,50 @@ async function resetTraceState(): Promise<void> {
   }
 }
 
+
+/**
+ * View over the main thread's interrupt buffer, once supplied. Pyodide polls
+ * this inside its evaluation loop, which is what lets a blocked Worker be
+ * stopped from outside without terminating it.
+ */
+let interruptView: Uint8Array | null = null
+
+/** Monotonic per-testcase arming id, wrapped to the shared byte slot. */
+let armGeneration = 0
+
+/**
+ * Hand the shared buffer to Pyodide. Absent buffer means the environment is
+ * not cross-origin isolated; judging then rests on elapsed adjudication alone,
+ * which is a weaker but still real gate.
+ */
+function registerInterruptBuffer(buffer: SharedArrayBuffer | undefined): void {
+  if (buffer === undefined) return
+  try {
+    interruptView = new Uint8Array(buffer)
+    pyodide.setInterruptBuffer(interruptView)
+  } catch {
+    // Older runtimes without setInterruptBuffer must not break judging.
+    interruptView = null
+  }
+}
+
+/**
+ * Did this failure come from the deadline interrupt? Pyodide tags the thrown
+ * error with the Python exception type, so this does not match on message
+ * text — a student raising their own KeyboardInterrupt is indistinguishable
+ * by text but produces the same verdict either way, since the elapsed check
+ * is what ultimately decides.
+ */
+function wasInterrupted(err: unknown): boolean {
+  return (err as { type?: string } | null | undefined)?.type === 'KeyboardInterrupt'
+}
+
+/** Announce the start of one testcase so the main thread arms its deadline. */
+function armDeadline(index: number): void {
+  armGeneration = (armGeneration + 1) & 0xff
+  self.postMessage({ type: 'testcase_start', index, generation: armGeneration } satisfies TestcaseStart)
+}
+
 // ── Message handler ────────────────────────────────────────────────────────
 
 self.onmessage = async (
@@ -202,24 +282,15 @@ self.onmessage = async (
 
   if (type !== 'run') return
 
-  const { code, testcases, opLimit = DEFAULT_OP_LIMIT, verdictDetail = 'hidden' } = event.data as RunRequest
+  const { code, testcases, opLimit = DEFAULT_OP_LIMIT, verdictDetail = 'hidden', interruptBuffer } = event.data as RunRequest
 
   await ensurePyodide()
+  registerInterruptBuffer(interruptBuffer)
 
   let passed = 0
 
   for (let i = 0; i < testcases.length; i++) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { input, expected_output } = testcases[i]!
-    const startTime = performance.now()
-
-    // Wall-clock fallback (task 4.6): set a flag if JS event loop re-enters
-    // after the timeout. For truly blocked Workers, the main-thread kill
-    // in useExecutor provides the hard wall-clock guarantee.
-    let wallClockTle = false
-    const wallClock = setTimeout(() => {
-      wallClockTle = true
-    }, WALL_CLOCK_MS)
 
     // Namespace cleanup before each testcase (task 4.7)
     await resetTraceState()
@@ -229,55 +300,52 @@ self.onmessage = async (
       // globals.clear() may not exist on all Pyodide versions; ignore
     }
 
+    // Arm strictly around user code. An interrupt landing while the runtime
+    // does its own work was measured to leave that runtime unusable for every
+    // subsequent testcase.
+    armDeadline(i)
+    const startTime = performance.now()
+
+    let verdict: TestcaseResult['verdict']
+    let actual = ''
+    let errMsg: string | undefined
+
     try {
-      const wrapped = buildWrappedCode(code, input, opLimit)
-      await pyodide.runPythonAsync(wrapped)
-
-      clearTimeout(wallClock)
-
-      if (wallClockTle) {
-        self.postMessage({
-          type: 'testcase_result',
-          index: i,
-          verdict: 'TLE',
-          elapsed_ms: performance.now() - startTime,
-          ...buildTestcaseResultFields('', expected_output, verdictDetail),
-        } satisfies TestcaseResult)
-        continue
-      }
-
+      pyodide.runPython(buildWrappedCode(code, input, opLimit))
       // stdout capture result (task 4.4)
-      const actual: string = pyodide.globals.get('_output') ?? ''
-      const elapsed_ms = performance.now() - startTime
-      const verdict = computeVerdict(actual, expected_output)
-
-      if (verdict === 'AC') passed++
-
-      self.postMessage({
-        type: 'testcase_result',
-        index: i,
-        verdict,
-        elapsed_ms,
-        ...buildTestcaseResultFields(actual, expected_output, verdictDetail),
-      } satisfies TestcaseResult)
+      actual = pyodide.globals.get('_output') ?? ''
+      verdict = computeVerdict(actual, expected_output)
     } catch (err: unknown) {
-      clearTimeout(wallClock)
-      const elapsed_ms = performance.now() - startTime
-      const errMsg = String(err)
       // Probe the op counter instead of matching error text — a student
       // raising their own TimeoutError is an ordinary RE (dev and prod
-      // classify identically).
-      const isTle = opLimitExceeded(opLimit)
-
-      self.postMessage({
-        type: 'testcase_result',
-        index: i,
-        verdict: isTle ? 'TLE' : 'RE',
-        elapsed_ms,
-        error: isTle ? undefined : errMsg,
-        ...buildTestcaseResultFields('', expected_output, verdictDetail),
-      } satisfies TestcaseResult)
+      // classify identically). A deadline interrupt is never an RE.
+      if (opLimitExceeded(opLimit) || wasInterrupted(err)) {
+        verdict = 'TLE'
+      } else {
+        verdict = 'RE'
+        errMsg = String(err)
+      }
     }
+
+    const elapsed_ms = performance.now() - startTime
+
+    // Authoritative layer: however the code responded to the interrupt — or
+    // if no interrupt channel existed at all — outrunning the budget is TLE.
+    if (exceededDeadline(elapsed_ms)) {
+      verdict = 'TLE'
+      errMsg = undefined
+    }
+
+    if (verdict === 'AC') passed++
+
+    self.postMessage({
+      type: 'testcase_result',
+      index: i,
+      verdict,
+      elapsed_ms,
+      error: errMsg,
+      ...buildTestcaseResultFields(verdict === 'TLE' || verdict === 'RE' ? '' : actual, expected_output, verdictDetail),
+    } satisfies TestcaseResult)
   }
 
   self.postMessage({
@@ -290,13 +358,13 @@ self.onmessage = async (
 // ── Run-only handler (production mode, no comparison) ─────────────────────
 
 async function handleRunOnly(req: RunOnlyRequest): Promise<void> {
-  const { code, inputs, opLimit = DEFAULT_OP_LIMIT } = req
+  const { code, inputs, opLimit = DEFAULT_OP_LIMIT, interruptBuffer } = req
 
   await ensurePyodide()
+  registerInterruptBuffer(interruptBuffer)
 
   for (let i = 0; i < inputs.length; i++) {
     const input = inputs[i]!
-    const startTime = performance.now()
 
     await resetTraceState()
     try {
@@ -305,34 +373,45 @@ async function handleRunOnly(req: RunOnlyRequest): Promise<void> {
       // ignore
     }
 
+    armDeadline(i)
+    const startTime = performance.now()
+
+    let stdout = ''
+    let timedOut = false
+    let errMsg: string | undefined
+
     try {
-      const wrapped = buildWrappedCode(code, input, opLimit)
-      await pyodide.runPythonAsync(wrapped)
-
-      const stdout: string = pyodide.globals.get('_output') ?? ''
-
-      self.postMessage({
-        type: 'testcase_result',
-        index: i,
-        stdout,
-        elapsed_ms: performance.now() - startTime,
-      } satisfies RunOnlyTestcaseResult)
+      pyodide.runPython(buildWrappedCode(code, input, opLimit))
+      stdout = pyodide.globals.get('_output') ?? ''
     } catch (err: unknown) {
-      const errMsg = String(err)
-      // Classify op-limit timeouts HERE by probing the actual op counter —
-      // downstream the judge only reads the structured flag. The timeout
-      // message embeds the op limit, so a timed-out result carries no
+      // Classify limit-stops HERE by probing the actual op counter and the
+      // interrupt type — downstream the judge only reads the structured flag.
+      // The op-limit message embeds the limit, so a stopped result carries no
       // error field at all.
-      const isTle = opLimitExceeded(opLimit)
-
-      self.postMessage({
-        type: 'testcase_result',
-        index: i,
-        stdout: '',
-        elapsed_ms: performance.now() - startTime,
-        ...(isTle ? { timed_out: true } : { error: errMsg }),
-      } satisfies RunOnlyTestcaseResult)
+      if (opLimitExceeded(opLimit) || wasInterrupted(err)) {
+        timedOut = true
+      } else {
+        errMsg = String(err)
+      }
     }
+
+    const elapsed_ms = performance.now() - startTime
+
+    // Authoritative layer, identical to the dev path: outrunning the budget
+    // is a timeout no matter how the code responded to the interrupt.
+    if (exceededDeadline(elapsed_ms)) {
+      timedOut = true
+      errMsg = undefined
+      stdout = ''
+    }
+
+    self.postMessage({
+      type: 'testcase_result',
+      index: i,
+      stdout: timedOut ? '' : stdout,
+      elapsed_ms,
+      ...(timedOut ? { timed_out: true } : errMsg !== undefined ? { error: errMsg } : {}),
+    } satisfies RunOnlyTestcaseResult)
   }
 
   self.postMessage({ type: 'run_complete' })
@@ -341,11 +420,10 @@ async function handleRunOnly(req: RunOnlyRequest): Promise<void> {
 // ── Execute handler (pure execution, no verdict) ─────────────────────────
 
 async function handleExecute(req: ExecuteRequest): Promise<void> {
-  const { code, stdin, opLimit = DEFAULT_OP_LIMIT } = req
+  const { code, stdin, opLimit = DEFAULT_OP_LIMIT, interruptBuffer } = req
 
   await ensurePyodide()
-
-  const startTime = performance.now()
+  registerInterruptBuffer(interruptBuffer)
 
   // Namespace cleanup
   await resetTraceState()
@@ -355,27 +433,34 @@ async function handleExecute(req: ExecuteRequest): Promise<void> {
     // ignore
   }
 
+  armDeadline(0)
+  const startTime = performance.now()
+
+  let stdout = ''
+  let errMsg: string | undefined
+
   try {
-    const wrapped = buildWrappedCode(code, stdin, opLimit)
-    await pyodide.runPythonAsync(wrapped)
-
-    const stdout: string = pyodide.globals.get('_output') ?? ''
-
-    self.postMessage({
-      type: 'execute_result',
-      stdout,
-      elapsed_ms: performance.now() - startTime,
-    } satisfies ExecuteResult)
+    pyodide.runPython(buildWrappedCode(code, stdin, opLimit))
+    stdout = pyodide.globals.get('_output') ?? ''
   } catch (err: unknown) {
-    const errMsg = String(err)
-
-    self.postMessage({
-      type: 'execute_result',
-      stdout: '',
-      elapsed_ms: performance.now() - startTime,
-      error: errMsg,
-    } satisfies ExecuteResult)
+    errMsg = wasInterrupted(err) ? TIMED_OUT_MESSAGE : String(err)
   }
+
+  const elapsed_ms = performance.now() - startTime
+
+  // Same authoritative layer as the judged paths. Run mode has no verdict, so
+  // the deadline surfaces as an error string the modal can display.
+  if (exceededDeadline(elapsed_ms)) {
+    errMsg = TIMED_OUT_MESSAGE
+    stdout = ''
+  }
+
+  self.postMessage({
+    type: 'execute_result',
+    stdout: errMsg === undefined ? stdout : '',
+    elapsed_ms,
+    ...(errMsg === undefined ? {} : { error: errMsg }),
+  } satisfies ExecuteResult)
 }
 
 // ── Generator handler ──────────────────────────────────────────────────────
