@@ -47,7 +47,7 @@
 | P2 | 獨立執行緒在期限寫入中斷值可準時中斷同步 Python | 預算 3,000 ms → 實測 3,001–3,004 ms（誤差 ≤ 4 ms） | `probes/probe_watchdog_interrupt.mjs` | **是** |
 | P3 | 誠實快解不受影響 | 同一基準解 218–228 ms 正常回傳 | 同上 | 是 |
 | P4 | `sys.settrace(None)` 繞道被中斷 | 3,002 ms 拋出 | 同上 | **是** |
-| P5 | 同行攤平繞道被中斷 | 3,002 ms 拋出 | 同上 | **是** |
+| P5 | 同行攤平繞道被中斷 | 3,002 ms 拋出（node 探針）；**真 Pyodide 測試** `deadline-pyodide.spec.ts` 的「stops code that diluted its operation cost by flattening onto one line」逐次覆核 | 同上 | **未於瀏覽器覆核，且刻意不補**：要在瀏覽器示範需要一份「攤平到足以逃過 op 上限、又仍然慢」且**輸出正確**的解法；實測 gem-blast 的攤平版稀釋幅度不足，仍被 op 上限擋在 12/20，所以瀏覽器上看到的 TLE 來自計數器而非時鐘。與其編造一份不具代表性的解法，本矩陣以真 Pyodide 測試作為該事實的證據並在此標明差異 |
 | P6 | 中斷後 runtime 存活且無效能劣化 | 中斷後立即 1 ms 完成一次 `sum(range(1000))`；再跑基準解 223–225 ms | 同上 | **是** |
 | P7 | 學生層級的例外處理無法吞掉中斷 | `except:`／`except KeyboardInterrupt:`／`except BaseException:`／外層 for 重試四種寫法皆於 3,002–3,004 ms 拋出，例外型別為 `KeyboardInterrupt`，一路穿到 JS | `probes/probe_interrupt_swallow.mjs` | **是**（D2 第二層即為此結論不成立時的防線） |
 | P8 | `runPythonAsync` 路徑的中斷例外會逃出呼叫端 try/catch | 例外自 Pyodide 內部 `Immediate.wrapper` 冒出成為未捕捉例外並終結行程；改同步 `runPython` 後落在 try/catch 內 | `probes/probe_watchdog_interrupt.mjs`（非同步版）與 `probes/probe_interrupt_swallow.mjs`（同步版）對照 | 否（機制性） |
