@@ -220,6 +220,12 @@ deadline 是 5,000 ms 的閘，不是排名。任何在 5 秒內跑完且輸出�
 | `math.perm` ＋ Legendre 尾零計數（prize-order-code） | `rank-code-challenges/spec.md`「documented surviving alternative solution」 | **20/20，單筆最大 2,234 ms** | 12/20、最慢完成筆 3,880 ms——第一版以 `while p % 10 == 0: p //= 10` 逐位除十剝尾零，那是矩陣 F11 早已記錄的死路，不是 spec 指名的 Legendre 公式 |
 | `str.replace`（gem-blast） | `gem-blast-challenge/spec.md`「accepted alternative solution」 | **20/20，單筆最大 3,115 ms** | 18/20、兩筆停在 deadline——第一版掃過全部 26 個字母，而非只掃 `set(s)` 內實際出現的字元 |
 | `math.factorial` 逐查詢（rank-code-backfill，對照組） | 同 spec 要求它**必須**失敗 | 0/20 | 符合預期，無需重量 |
+| E1 對調 eval（snack-bar-register） | `expression-eval-challenges/spec.md`「operator-swap dunder eval」 | **20/20，單筆最大 52 ms** | — |
+| R2 regex 括弧化＋eval（snack-bar-register） | 同 spec「regex-parenthesize-then-eval」 | **20/20，單筆最大 12 ms** | — |
+| N1 C 層重寫迴圈（snack-bar-register） | 同 spec「C-level rewrite loops」 | **20/20，單筆最大 57 ms** | — |
+| E3′ 冪次編碼（coupon-combo-quote） | 同 spec「lexically-patched power-encoding route E3'」 | **20/20，單筆最大 65 ms** | — |
+
+`expression-eval-challenges` 這四條的路線檔已佚失——原檔活在未 commit 的 `design_b/`，與 RCA 根因 2 同型。因此它們是**由 spec 的名稱重新實作**的，也就是量錯兩次的那個動作。防護手段：新增 `measure/verify_routes.py`，把每條路線餵進該題自己 `testcase_plan` 的 20 筆 literal，逐筆比對該題 `reference_solution` 的輸出，四條全部 20/20 相符後才進瀏覽器量時間。四條路線的成本都在 100 ms 量級，與 gem-blast／prize-order-code 的秒級路線不同量級，對上界無影響。
 
 **D5 的可行域不是空集合。** deadline 必須低於兩條 op 繞道（實測 >5,000 ms），又必須高於全部收編路線（最大 3,115 ms）。3,115 < 5,000 < 真實繞道成本，兩個條件同時成立，5,000 ms 是可行解。
 
@@ -240,7 +246,9 @@ deadline 是 5,000 ms 的閘，不是排名。任何在 5 秒內跑完且輸出�
 
 有拘束力的是第二列。`DEADLINE_MS` 必須高於每一條已上線 spec 明文接受的路線，而其中最慢的一條在 3,115 ms——**5,000 ms 只比它高 60%**。先前文件所報的「餘裕 13.3 倍」只涵蓋正解，不是這個常數實際受到的約束。
 
-殘餘風險（誠實記錄）：3,115 ms 是在一台開發機、一次量測下得到的值。比該機器慢 1.61 倍以上的裝置會讓這條 spec 明文接受的路線開始 TLE，而題目資料一個 byte 都沒動。本 change 不擴大範圍處理它，但它是後續調高常數或補上機器係數時的第一順位依據。
+此上界的涵蓋範圍現已完整：三份已上線 spec 明文接受的收編路線全部量畢（gem-blast 一條、rank-code 一條、expression-eval 四條，共六條），最慢者即 3,115 ms。
+
+殘餘風險（誠實記錄）：3,115 ms 是在一台開發機、一次量測下得到的值。比該機器慢 1.61 倍以上的裝置會讓這條 spec 明文接受的路線開始 TLE，而題目資料一個 byte 都沒動。本 change 不擴大範圍處理它，但它是後續調高常數或補上機器係數時的第一順位依據。調高的空間也有限：累計硬砍為「測資數 × 6,000 ms」，20 筆時 `20 × DEADLINE < 120 s` 使常數上限約為 6,000 ms，餘裕頂多 1.93 倍。
 
 #### O4：gem-blast 的 `str.replace` 繞道（結論不翻面）
 
@@ -251,4 +259,4 @@ deadline 是 5,000 ms 的閘，不是排名。任何在 5 秒內跑完且輸出�
 ## Open Questions
 
 1. **1.61 倍的餘裕是否足夠**（見〈釘定〉）。目前的常數只比最慢的合法收編路線高 60%，且該值來自單機單次量測。維持現值不需任何動作；若要提高，須連帶處理「20 筆最壞總和不得超過累計硬砍 120 秒」的上限。
-2. **`expression-eval-challenges` 登記的 4 條收編路線尚未量測**（task 4.4 曾被誤標為完成）。它們同屬「已上線 spec 明文接受」，若其中任何一條慢於 3,115 ms，上表第二列的上界與 1.61 倍的餘裕都要下修。
+2. ~~`expression-eval-challenges` 登記的 4 條收編路線尚未量測~~ → **已於 2026-08-12 量畢，四條皆 20/20、單筆最大 65 ms，上界與 1.61 倍不變**。

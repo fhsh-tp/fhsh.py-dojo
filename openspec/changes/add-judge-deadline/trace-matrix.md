@@ -98,6 +98,7 @@
 | O1 | 計數器隱形繞道的單筆牆鐘 | `settrace(None)` 5,009 ms（被 deadline 截斷，真值 > 5 秒）；同行攤平由 op 上限擋下 | 下界 |
 | O2 | 16 支 `reference_solution` 的單筆最大 | **376 ms**（`prize-order-code`），16 題全部維持滿分 | 上界（非拘束） |
 | O3 | 收編路線的單筆最大 | **原記載「併入 O2 量測」為偽——收編路線當時一條都沒量。** 第一次補量**兩條都實作錯**（取最貴寫法），得到相反結論；以最便宜寫法重量的真值：`math.perm` ＋ Legendre（prize-order-code）**20/20、2,234 ms**；`str.replace`（gem-blast）**20/20、3,115 ms**；對照組 `math.factorial` 0/20（spec 要求它失敗） | **拘束上界 = 3,115 ms**；可行域非空 |
+| O5 | `expression-eval-challenges` 四條收編路線 | 全部 20/20：E1 對調 eval 52 ms、R2 regex 括弧化 12 ms、N1 C 層重寫 57 ms、E3′ 冪次編碼 65 ms。路線檔已佚失、由 spec 名稱重新實作，先經 `measure/verify_routes.py` 對該題 20 筆 literal 驗明輸出等同 `reference_solution` 才量 | 不影響上界（100 ms 量級）；使 O3 的涵蓋範圍完整——六條收編路線全數量畢 |
 | O4 | gem-blast 的 `str.replace` 繞道逐筆 | 最便宜寫法（只掃 `set(s)`）20/20、單筆最大 3,115 ms；最貴寫法（掃 26 字母）18/20、5,005 ms | 該題 spec 的接受條件**仍然成立**，條文改記真值 |
 
 **結論**：`DEADLINE_MS = 5,000`。相對正解上界 376 ms 為 13.3 倍，但**實際受到約束的是收編上界 3,115 ms，餘裕僅 1.61 倍**。D5 所擔心的空集合未發生；兩份針對已上線題目的 spec 修訂中，`rank-code-challenges` 一份已撤銷（其主 spec 原本就正確），`gem-blast-challenge` 一份改記真值後保留（該題主 spec 明文要求本 change 修訂該條文）。

@@ -23,7 +23,7 @@
     "typecheck": "vue-tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit && vue-tsc -p tsconfig.vitest.json --noEmit",
     "gen:keymaterial": "npx tsx scripts/gen-key-material.ts",
     "lint": "eslint .vitepress scripts --max-warnings 28 && prettier --check \"scripts/**/*.ts\" eslint.config.mjs",
-    "preview:cf": "pnpm docs:build && wrangler pages dev .vitepress/dist --port 8788"
+    "preview:cf": "pnpm docs:build && wrangler pages dev .vitepress/dist --port 8788 --compatibility-date=2026-08-11"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.1",
