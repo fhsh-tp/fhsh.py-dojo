@@ -12,7 +12,7 @@
 - 三個執行 handler（`run`、`run_only`、`execute`）套用同一套 deadline 語義，生產路徑的 `run_only` 因此首次獲得每筆時間上限，並沿用既有的 `timed_out` 結構化欄位讓 WASM judge 產生 TLE 判定。
 - 生產環境與 dev server 都送出 `Cross-Origin-Opener-Policy` 與 `Cross-Origin-Embedder-Policy` 標頭，使 `SharedArrayBuffer` 可用。dev 原本宣告於 `vite.server.headers` 的設定經實測**從未生效**（VitePress 2 不轉發），已移除；標頭的單一定義為 `docs/public/_headers`，本機以新增的 `preview:cf` 腳本（`wrangler pages dev`）驗證。
 - 修正累計硬砍時的結果呈現：結果表格改以測資總數為分母，使被中斷的執行不再看起來全綠。
-- **BREAKING**：既有題目中，任何單筆執行時間超過新 deadline 的正解或收編路線會由 AC 變成 TLE。本 change 必須逐題量測既有題目的正解與收編路線並記錄，deadline 常數依量測結果選定。
+- **BREAKING**：既有題目中，任何單筆執行時間超過新 deadline 的正解或收編路線會由 AC 變成 TLE。本 change 必須逐題量測既有題目的正解與收編路線並記錄，deadline 常數依量測結果選定。量測結果：16 支 `reference_solution` 上界 376 ms、兩條已上線 spec 記載的收編路線最便宜寫法皆 20/20（最大 3,115 ms），皆不翻面；翻面的只有 `sys.settrace(None)` 與同行攤平這兩條規避判題器的寫法——那正是本 change 的目的。
 
 ## Capabilities
 
@@ -24,12 +24,13 @@
 
 - `execute-mode`: `useExecutor` 的牆鐘語義由「整批 N×6 秒一次性 timer」擴充為「每筆 deadline ＋ 整批上限」，`execute` handler 亦套用每筆 deadline。
 - `pyodide-sandbox-guard`: `buildWrappedCode` 產生的包裝碼組成與執行方式改變（同步執行、中斷武裝時機），既有的注入順序條文需對應修訂。
-- `rank-code-challenges`: 該 spec 記載 `math.perm` 路線為「不得視為缺陷、不得以測資調整對付」的收編路線；實測顯示它在每筆 deadline 之下只完成 12/20，條文因此改為「接受狀態以 deadline 為界」，且該題測資不動。
-- `gem-blast-challenge`: 該 spec 中記錄「worker 牆鐘旗標對同步學生碼失效、因此不以測資獵殺 C 內建繞道」的條文，依其自身規定於本修復實作時修訂。
+- `gem-blast-challenge`: 該 spec 中記錄「worker 牆鐘旗標對同步學生碼失效、因此不以測資獵殺 C 內建繞道」的條文，依其自身規定於本修復實作時修訂——改以每筆 deadline 為接受邊界。實測該繞道最便宜寫法 20/20、單筆最大 3,115 ms，接受狀態不變、測資不動。
+
+`rank-code-challenges` 一度列為 Modified，理由是「`math.perm` ＋ Legendre 收編路線在 deadline 下只完成 12/20」。該數字源自**量錯的實作**（以逐位除十剝尾零取代 Legendre 公式）；以 spec 記載的正確寫法重量得 20/20、單筆最大 2,234 ms，與該題主 spec 現行條文「it is accepted (20/20 AC)」一致。修訂因此撤銷，該 capability 不在本 change 的影響範圍內。
 
 ## Impact
 
-- Affected specs: 新增 `judge-deadline`；修訂 `execute-mode`、`pyodide-sandbox-guard`、`gem-blast-challenge`、`rank-code-challenges`
+- Affected specs: 新增 `judge-deadline`；修訂 `execute-mode`、`pyodide-sandbox-guard`、`gem-blast-challenge`
 - Affected code:
   - New:
     - `docs/public/_headers`

@@ -95,12 +95,12 @@
 
 | ID | 項目 | 實測值 | 對常數的作用 |
 |----|------|--------|--------------|
-| O1 | 計數器隱形繞道的單筆牆鐘 | `settrace(None)` 5,009 ms／`str.replace` 5,005 ms（皆被 deadline 截斷，真值 > 5 秒） | 下界 |
-| O2 | 16 支 `reference_solution` 的單筆最大 | **376 ms**（`prize-order-code`），16 題全部維持滿分 | 上界 |
-| O3 | 收編路線的單筆最大 | **原記載「併入 O2 量測」為偽——收編路線當時一條都沒量。** 補量後：`math.perm`（prize-order-code）12/20、最慢完成筆 3,880 ms、七筆停在 deadline；`str.replace`（gem-blast）18/20；對照組 `math.factorial` 0/20（spec 要求它失敗） | **使可行域成為空集合**；處置見 design〈D5 衝突的處置〉 |
-| O4 | gem-blast 的 `str.replace` 繞道逐筆 | 18/20，判定 `AAAAAAAAAAAAAAAATTAA`，單筆最大 5,005 ms | 使該題 spec 條文的接受條件**不再成立** |
+| O1 | 計數器隱形繞道的單筆牆鐘 | `settrace(None)` 5,009 ms（被 deadline 截斷，真值 > 5 秒）；同行攤平由 op 上限擋下 | 下界 |
+| O2 | 16 支 `reference_solution` 的單筆最大 | **376 ms**（`prize-order-code`），16 題全部維持滿分 | 上界（非拘束） |
+| O3 | 收編路線的單筆最大 | **原記載「併入 O2 量測」為偽——收編路線當時一條都沒量。** 第一次補量**兩條都實作錯**（取最貴寫法），得到相反結論；以最便宜寫法重量的真值：`math.perm` ＋ Legendre（prize-order-code）**20/20、2,234 ms**；`str.replace`（gem-blast）**20/20、3,115 ms**；對照組 `math.factorial` 0/20（spec 要求它失敗） | **拘束上界 = 3,115 ms**；可行域非空 |
+| O4 | gem-blast 的 `str.replace` 繞道逐筆 | 最便宜寫法（只掃 `set(s)`）20/20、單筆最大 3,115 ms；最貴寫法（掃 26 字母）18/20、5,005 ms | 該題 spec 的接受條件**仍然成立**，條文改記真值 |
 
-**結論**：`DEADLINE_MS = 5,000`，高於上界 13.3 倍、低於下界。D5 所擔心的空集合未發生。
+**結論**：`DEADLINE_MS = 5,000`。相對正解上界 376 ms 為 13.3 倍，但**實際受到約束的是收編上界 3,115 ms，餘裕僅 1.61 倍**。D5 所擔心的空集合未發生；兩份針對已上線題目的 spec 修訂中，`rank-code-challenges` 一份已撤銷（其主 spec 原本就正確），`gem-blast-challenge` 一份改記真值後保留（該題主 spec 明文要求本 change 修訂該條文）。
 
 ### 量測工具本身的缺陷與修正（記錄以免重蹈）
 

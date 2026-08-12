@@ -172,7 +172,7 @@
 
 ## 四、本輪未能完成的驗證
 
-1. **gem-blast 的第二份已上線保證未證實**。`gemblast_strreplace_set.py`（最便宜寫法）存在於工作樹但**從未在 Pyodide 量測**；分析 C 的 native 複驗（703／1,055／1,509 ms vs 3,203／4,116／5,133 ms）只能推估其 Pyodide 值落在 0.7–1.5 s，遠低於 5,000 ms。若成立，該題「繞道不再通過完整計畫、18/20」的結論同樣為偽，而其 spec delta 寫成條件句會自動採納錯誤量測。**需一次 `measure.sh` 呼叫即可定案，本輪未跑（禁止執行 sweep，且不擬新增未經授權的量測）**。
+1. ~~**gem-blast 的第二份已上線保證未證實**~~ → **已於 2026-08-12 定案，本報告的預測成立**。`gemblast_strreplace_set.py`（最便宜寫法）以 `measure.sh` 在同一條 `:8788` 生產路徑實測：**20/20、單筆最大 3,115 ms**（預估 0.7–1.5 s 偏低，但「遠低於 5,000 ms、繞道仍通過」的結論正確）。「繞道不再通過完整計畫、18/20」確為偽。處置：`rank-code-challenges` delta 整份刪除，`gem-blast-challenge` delta 改記真值後保留（該題主 spec 明文要求本 change 修訂該條文，不得刪除）。連帶更新 design〈量測結果〉、trace-matrix O3／O4、proposal 影響範圍。**釘定常數的拘束上界因此由 376 ms 改為 3,115 ms，餘裕由 13.3 倍改為 1.61 倍。**
 2. **`expression-eval-challenges/spec.md:75` 登記的 4 條收編路線至今零量測**，而 tasks 4.4 已打勾。D5 的上界至今不符合它自己 spec 條文要求的涵蓋範圍。
 3. **兩條純程式面缺陷的誕生原因未解釋**：`builtins.__import__` 置換使 op 計數器永久毒化、`_op_limit = 1` 使守衛原文外洩。本清單只解釋了為何測不到（根因 4／5），不解釋為何會被寫成這樣。
 4. **`challenges.json` 的 metadata 與實測列數不一致**（buffer-audit-log 記 count=3 而實測 rows=6、exam-collect-verify 記 count=17 而實測 rows=20）。兩輪稽核與 D7 的「列數等於測資總數」驗收都沒問過；成因未查，是否無害未知。

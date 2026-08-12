@@ -190,11 +190,16 @@ deadline 是 5,000 ms 的閘，不是排名。任何在 5 秒內跑完且輸出�
 | 題目／路線 | 得分 | 單筆最大 | 全場 | 判定序列 |
 |---|---|---|---|---|
 | `gemblast_settrace` | 17/20 | 5009 ms | 31765 ms | `AAAAAAAAAAAAAAATTTAA` |
-| `gemblast_strreplace` | 18/20 | 5005 ms | 14298 ms | `AAAAAAAAAAAAAAAATTAA` |
+| `gemblast_strreplace`（**最貴寫法**，掃 26 字母；非代表值） | 18/20 | 5005 ms | 14298 ms | `AAAAAAAAAAAAAAAATTAA` |
+| `gemblast_strreplace_set`（**最便宜寫法**，只掃 `set(s)`；代表值） | 20/20 | 3115 ms | 7188 ms | `AAAAAAAAAAAAAAAAAAAA` |
 | `gemblast_naive` | 12/20 | 1868 ms | 14712 ms | `AAAAAAAAAATTTTTTTTAA` |
 | `gemblast_flat` | 12/20 | 1835 ms | 14582 ms | `AAAAAAAAAATTTTTTTTAA` |
 
-`gemblast_naive` 與 `gemblast_flat` 的 TLE 來自 **op 上限**（單筆最大僅 1.8 秒，遠低於 deadline）——計數器對它們一直有效，與本 change 無關。真正由 deadline 產生的是另外兩條：`gemblast_settrace` 把計數器凍結在 5 ops、`gemblast_strreplace` 把二次方工作交給 C 層，兩者對計數器都是隱形的，單筆最大分別停在 5,009 ms 與 5,005 ms——即 5,000 ms deadline 生效的指紋。它們的真實耗時無從得知，只知道**超過 5 秒**。
+`gemblast_naive` 與 `gemblast_flat` 的 TLE 來自 **op 上限**（單筆最大僅 1.8 秒，遠低於 deadline）——計數器對它們一直有效，與本 change 無關。
+
+真正由 deadline 產生的只有 `gemblast_settrace`：它把計數器凍結在 5 ops，對計數器完全隱形，三筆停在 5,009 ms——即 5,000 ms deadline 生效的指紋，真實耗時只知道**超過 5 秒**。這正是本 change 要關的洞。
+
+`str.replace` 那兩列必須一起讀，且**只有第二列算數**。第一列掃過全部 26 個字母，是這條路線的最貴寫法；第二列只掃 `set(s)` 裡實際出現的字元，是任何學生都會自然寫出的最便宜寫法。收編路線的成本上界必須取最便宜寫法（本 change 的 RCA 把這條原則列為 I-16），因為只要有一種合理寫法能過，這條路線就沒有被 deadline 擋掉。真值是 **20/20、單筆最大 3,115 ms**：`str.replace` 繞道在 deadline 之下**完整通過**，該題保證不變。第一列保留在此僅作為「量錯寫法會得到相反結論」的留痕。
 
 四條路線與 `reference_solution` 在 40 組隨機輸入下交叉驗證輸出一致，因此上述差異純粹來自成本。
 
@@ -204,42 +209,46 @@ deadline 是 5,000 ms 的閘，不是排名。任何在 5 秒內跑完且輸出�
 
 但要誠實記錄一件事：**觸發 D7 原始缺陷的那個情境（累計硬砍造成截斷）在本次量測中沒有發生，也變得更難發生**。累計預算是「測資數 × 6,000 ms」，而每筆現在最多 5,000 ms，20 筆的最壞總和是 100 秒、低於 120 秒的硬砍線。換句話說 deadline 順帶讓截斷情境退到邊緣。D7 的修正仍然保留為防線（單元測試以「已回報三筆、總數二十筆」直接斷言），但它在瀏覽器端的證據是「中斷提交的列數正確」，不是「硬砍截斷後的列數正確」。
 
-#### 已收編路線（O3）——量測推翻了原本的釘定依據
+#### 已收編路線（O3）——兩次量錯與最終真值
 
-第一輪只量了 `reference_solution`，據此得出「上界 376 ms、餘裕 13.3 倍」。但本 change 自己寫進 spec 的條文要求上界涵蓋**每一條在已上線題目的 spec 中被記載為收編的路線**，而那些路線當時一條都沒量。補量後：
+第一輪只量了 `reference_solution`，據此得出「上界 376 ms、餘裕 13.3 倍」。但本 change 自己寫進 spec 的條文要求上界涵蓋**每一條在已上線題目的 spec 中被記載為收編的路線**，而那些路線當時一條都沒量。
 
-| 路線 | 出處 | 得分 | 逐筆牆鐘 |
+補量的第一版**兩條路線都實作錯了**，兩條都得到「deadline 殺掉了它」的相反結論。錯法同型：都取了該路線的最貴寫法，而收編路線的成本上界必須取**最便宜的合理寫法**（RCA 的 I-16）。留痕如下，第三欄才是有效值：
+
+| 路線 | 出處 | **真值（最便宜寫法）** | 量錯的第一版 |
 |---|---|---|---|
-| `math.perm` ＋ Legendre 尾零計數（prize-order-code） | `rank-code-challenges/spec.md`「documented surviving alternative solution」 | **12/20** | 最慢完成筆 3,880 ms；七筆停在 deadline |
-| `math.factorial` 逐查詢（rank-code-backfill，對照組） | 同 spec 要求它**必須**失敗 | 0/20 | 符合預期 |
-| `str.replace`（gem-blast） | `gem-blast-challenge/spec.md`「accepted alternative solution」 | 18/20 | 兩筆停在 deadline |
+| `math.perm` ＋ Legendre 尾零計數（prize-order-code） | `rank-code-challenges/spec.md`「documented surviving alternative solution」 | **20/20，單筆最大 2,234 ms** | 12/20、最慢完成筆 3,880 ms——第一版以 `while p % 10 == 0: p //= 10` 逐位除十剝尾零，那是矩陣 F11 早已記錄的死路，不是 spec 指名的 Legendre 公式 |
+| `str.replace`（gem-blast） | `gem-blast-challenge/spec.md`「accepted alternative solution」 | **20/20，單筆最大 3,115 ms** | 18/20、兩筆停在 deadline——第一版掃過全部 26 個字母，而非只掃 `set(s)` 內實際出現的字元 |
+| `math.factorial` 逐查詢（rank-code-backfill，對照組） | 同 spec 要求它**必須**失敗 | 0/20 | 符合預期，無需重量 |
 
-判定序列（`math.perm` 路線）：`AAAAAAAATTTTTTTATAAA`
+**D5 的可行域不是空集合。** deadline 必須低於兩條 op 繞道（實測 >5,000 ms），又必須高於全部收編路線（最大 3,115 ms）。3,115 < 5,000 < 真實繞道成本，兩個條件同時成立，5,000 ms 是可行解。
 
-**這使 D5 的可行域成為空集合。** deadline 必須低於兩條 op 繞道（實測 >5,000 ms），又必須高於這條收編路線（同樣 >5,000 ms）。兩個條件互斥。
+#### D5 衝突的處置：衝突不存在，兩份 spec 修訂已撤銷
 
-#### D5 衝突的處置：維持 5,000 ms，修訂該題 spec
+先前記載的「維持 5,000 ms 並修訂 `rank-code-challenges` 條文」是建立在 12/20 這個錯誤量測上的決定。真值 20/20 之下，該題主 spec 現行條文「it is accepted (20/20 AC)」原本就正確，deadline 沒有改變它——**該份 delta 已整份刪除**。
 
-D5 原本規定衝突時保留舊行為。維護者選擇的是另一條：維持常數並顯式修訂 `rank-code-challenges` 的條文。理由如下，一併記錄以便日後複查。
-
-這條路線的成本不是被 deadline 冤枉的。它把最多十萬項的乘積建成精確整數，光是沒被截斷的那一筆就要 3,880 ms；成本全部發生在 C 層，所以 op 計數器看不到、時鐘看得到。**任何具有牆鐘的判題器都會殺掉它**，而「判題器該不該有牆鐘」是比單一題目的既有保證更上位的決定，也正是本 change 的前提。
-
-保留舊行為（D5 原路）的代價是兩條 op 繞道繼續有效——`sys.settrace(None)` 與同行攤平，兩者都不是「解出題目」而是「規避判題器」，且影響全站所有以成本為鑑別軸的題目。提高 deadline 也不可行：要涵蓋這條路線需約 15 秒，20 筆的最壞總和 300 秒遠超累計硬砍的 120 秒，硬砍會先截斷而回到本 change 正在修的那個缺陷。
-
-因此修訂範圍限縮為：該路線的接受狀態改為「在 deadline 之內完成的筆數被接受」，**該題測資一個 byte 都不動**，且結果明確歸因於平台 deadline 而非測資調整。這與 gem-blast 的處置同型，差別只在 gem-blast 的原條文本身是條件句、量測即自動生效，而本條是無條件句、需要顯式修訂。
+`gem-blast-challenge` 的 delta 不能一併刪除：該題主 spec 自己寫著「the change that implements that repair SHALL amend this clause」，是一條指名本 change 的無條件義務。留下的修訂改記真值——繞道 20/20、單筆最大 3,115 ms、**維持被接受**、測資不動——並補上一件與量測無關而確實成立的事：`sys.settrace(None)` 這類凍結計數器的解不再豁免於斷崖保證（實測 17/20，三筆被 deadline 截斷）。
 
 #### 釘定（task 4.5）
 
-`DEADLINE_MS = 5,000`：高於 16 支 `reference_solution` 的上界 376 ms 達 **13.3 倍**。此值亦等於平台原本就打算生效、但因 macrotask 排序而從未觸發的那個 `setTimeout` 常數。
+`DEADLINE_MS = 5,000`。此值亦等於平台原本就打算生效、但因 macrotask 排序而從未觸發的那個 `setTimeout` 常數。兩個上界：
 
-**但它並未高於所有收編路線**——見上一節。D5 設想的空集合確實發生了，處置為維持常數並修訂該題 spec，而非保留舊行為。
+| 上界種類 | 值 | 出處 | 餘裕 |
+|---|---|---|---|
+| 正解（16 支 `reference_solution`） | 376 ms | `prize-order-code` | 13.3 倍 |
+| **收編路線（有拘束力者）** | **3,115 ms** | `str.replace`（gem-blast，最便宜寫法） | **1.61 倍** |
 
-#### O4：gem-blast 的 `str.replace` 繞道（結論翻面）
+有拘束力的是第二列。`DEADLINE_MS` 必須高於每一條已上線 spec 明文接受的路線，而其中最慢的一條在 3,115 ms——**5,000 ms 只比它高 60%**。先前文件所報的「餘裕 13.3 倍」只涵蓋正解，不是這個常數實際受到的約束。
 
-`gem-blast-challenge` 的 spec 原記載此繞道被**接受**為聰明解，理由是「牆鐘旗標對同步碼失效，測資殺不掉它」。實測結果：**18/20**，逐筆判定 `AAAAAAAAAAAAAAAATTAA`，單筆最大 5005 ms。
+殘餘風險（誠實記錄）：3,115 ms 是在一台開發機、一次量測下得到的值。比該機器慢 1.61 倍以上的裝置會讓這條 spec 明文接受的路線開始 TLE，而題目資料一個 byte 都沒動。本 change 不擴大範圍處理它，但它是後續調高常數或補上機器係數時的第一順位依據。
 
-該繞道**不再通過完整計畫**，而該題測資一個 byte 都沒有更動。本 change 修訂後的條文把接受條件寫成「其單筆牆鐘低於 deadline 時才成立」，量測因此直接決定了結論，無須再改一次條文。
+#### O4：gem-blast 的 `str.replace` 繞道（結論不翻面）
+
+`gem-blast-challenge` 的 spec 記載此繞道被**接受**為聰明解，理由是「牆鐘旗標對同步碼失效，測資殺不掉它」。理由消失了（deadline 現在對同步碼有效），但結論不變：最便宜寫法實測 **20/20、單筆最大 3,115 ms**，仍在 deadline 之內。
+
+該繞道**仍然通過完整計畫**，該題測資一個 byte 都沒有更動。修訂後的條文把接受的依據從「旗標失效」改寫為「單筆牆鐘低於 deadline」，並記入實測值。
 
 ## Open Questions
 
-無。原本的兩個未決項皆由〈量測結果〉一節回答：deadline 常數已由量測釘定為 5,000 ms；既有題目中不存在單筆牆鐘逼近該值的路線（最大 376 ms，餘裕 13.3 倍）。
+1. **1.61 倍的餘裕是否足夠**（見〈釘定〉）。目前的常數只比最慢的合法收編路線高 60%，且該值來自單機單次量測。維持現值不需任何動作；若要提高，須連帶處理「20 筆最壞總和不得超過累計硬砍 120 秒」的上限。
+2. **`expression-eval-challenges` 登記的 4 條收編路線尚未量測**（task 4.4 曾被誤標為完成）。它們同屬「已上線 spec 明文接受」，若其中任何一條慢於 3,115 ms，上表第二列的上界與 1.61 倍的餘裕都要下修。
