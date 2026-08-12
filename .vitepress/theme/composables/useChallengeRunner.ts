@@ -8,6 +8,7 @@
  * ChallengeView uses this composable instead of directly touching WASM, Workers, or generators.
  */
 import { ref, type Ref } from 'vue'
+import { createInterruptChannel, DeadlineWatchdog } from '../workers/deadline'
 import { useChallengeStore } from '../stores/challenge'
 import { useExecutorStore } from '../stores/executor'
 import { useWasm, type GeneratedInputs } from '../composables/useWasm'
@@ -18,6 +19,7 @@ import type {
   RunRequest,
   RunComplete,
   VerdictDetail,
+  TestcaseStart,
 } from '../workers/pyodide.worker'
 
 export type { VerdictDetail }
@@ -250,7 +252,16 @@ function useDevRunner(config: ChallengeConfig): ChallengeRunner {
       }
 
       const totalBudget = localTestcases.length * WALL_CLOCK_KILL_MS
+
+      // Per-testcase deadline for the dev submit path. This is where dev-mode
+      // submissions actually run — `useExecutor.run()` looks like the submit
+      // path but has no callers, so wiring the watchdog there alone would have
+      // left every dev submission with elapsed-only adjudication.
+      const channel = createInterruptChannel()
+      const watchdog = new DeadlineWatchdog(channel)
+
       submitKillTimerId = setTimeout(() => {
+        watchdog.dispose()
         worker.terminate()
         executorStore.setDone(executorStore.totalTestcases, executorStore.passedCount)
         isRunning.value = false
@@ -258,12 +269,16 @@ function useDevRunner(config: ChallengeConfig): ChallengeRunner {
         resolve()
       }, totalBudget)
 
-      worker.onmessage = (event: MessageEvent<TestcaseResult | RunComplete>) => {
+      worker.onmessage = (event: MessageEvent<TestcaseStart | TestcaseResult | RunComplete>) => {
         const msg = event.data
-        if (msg.type === 'testcase_result') {
+        if (msg.type === 'testcase_start') {
+          watchdog.arm(msg.generation)
+        } else if (msg.type === 'testcase_result') {
+          watchdog.disarm()
           executorStore.addResult(msg)
         } else if (msg.type === 'run_complete') {
           if (submitKillTimerId !== null) clearTimeout(submitKillTimerId)
+          watchdog.dispose()
           executorStore.setDone(msg.total, msg.passed)
           worker.terminate()
           isRunning.value = false
@@ -274,6 +289,7 @@ function useDevRunner(config: ChallengeConfig): ChallengeRunner {
 
       worker.onerror = () => {
         if (submitKillTimerId !== null) clearTimeout(submitKillTimerId)
+        watchdog.dispose()
         executorStore.setDone(executorStore.totalTestcases, executorStore.passedCount)
         worker.terminate()
         isRunning.value = false
@@ -289,6 +305,7 @@ function useDevRunner(config: ChallengeConfig): ChallengeRunner {
           expected_output: tc.expected_output,
         })),
         verdictDetail: config.verdictDetail,
+        ...(channel.buffer === null ? {} : { interruptBuffer: channel.buffer }),
       }
       worker.postMessage(request)
     })
@@ -459,7 +476,13 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
       }> = []
       const totalBudget = codeInputs.length * WALL_CLOCK_KILL_MS
 
+      // Per-testcase deadline: the Worker blocks inside synchronous Python, so
+      // only this thread can stop a testcase that outruns its budget.
+      const channel = createInterruptChannel()
+      const watchdog = new DeadlineWatchdog(channel)
+
       prodKillTimerId = setTimeout(() => {
+        watchdog.dispose()
         worker.terminate()
         settle()
         resolve(null)
@@ -467,7 +490,12 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
 
       worker.onmessage = (event: MessageEvent) => {
         const msg = event.data
+        if (msg.type === 'testcase_start') {
+          watchdog.arm(msg.generation)
+          return
+        }
         if (msg.type === 'testcase_result') {
+          watchdog.disarm()
           results.push({
             stdout: msg.stdout ?? '',
             error: msg.error,
@@ -480,6 +508,7 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
           })
         } else if (msg.type === 'run_complete') {
           if (prodKillTimerId !== null) clearTimeout(prodKillTimerId)
+          watchdog.dispose()
           worker.terminate()
           settle()
           resolve(results)
@@ -488,6 +517,7 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
 
       worker.onerror = () => {
         if (prodKillTimerId !== null) clearTimeout(prodKillTimerId)
+        watchdog.dispose()
         worker.terminate()
         settle()
         resolve(null)
@@ -497,6 +527,7 @@ function useProdRunner(config: ChallengeConfig): ChallengeRunner {
         type: 'run_only',
         code,
         inputs: [...codeInputs],
+        ...(channel.buffer === null ? {} : { interruptBuffer: channel.buffer }),
       })
     })
   }

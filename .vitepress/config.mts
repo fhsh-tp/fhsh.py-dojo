@@ -67,12 +67,19 @@ export default defineConfig({
         '@': fileURLToPath(new URL('./.vitepress/theme', import.meta.url)),
       },
     },
-    server: {
-      headers: {
-        // Required for SharedArrayBuffer used by Pyodide
-        'Cross-Origin-Opener-Policy': 'same-origin',
-        'Cross-Origin-Embedder-Policy': 'require-corp',
-      },
-    },
+    // Cross-origin isolation (COOP/COEP) is NOT configured here.
+    //
+    // A `server.headers` block used to sit at this spot. VitePress 2 does not
+    // forward it — a request to the dev server returns neither header — so it
+    // was dead config that read as a guarantee. It was removed rather than
+    // repaired because Cloudflare owns the headers: `docs/public/_headers` is
+    // the single definition, served in production by Cloudflare Pages and
+    // verifiable locally with `pnpm preview:cf`.
+    //
+    // Consequence for `vitepress dev`: no isolation, so `SharedArrayBuffer` is
+    // absent and the judge's per-testcase deadline falls back to adjudicating
+    // elapsed time after each testcase instead of interrupting it. The
+    // deadline still holds; it is just not prompt. `deadline.ts` logs this
+    // once per page. Verify deadline behaviour under `pnpm preview:cf`.
   },
 })
