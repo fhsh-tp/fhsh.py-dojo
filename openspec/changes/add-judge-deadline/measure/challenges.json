@@ -25,7 +25,7 @@
   "id": "apcs002",
   "has_ref": true,
   "has_plan": true,
-  "count": 3
+  "count": 6
  },
  {
   "slug": "card-restack-count",
@@ -102,7 +102,7 @@
   "id": "apcs005",
   "has_ref": true,
   "has_plan": true,
-  "count": 17
+  "count": 20
  },
  {
   "slug": "factorial",
@@ -130,7 +130,7 @@
   "id": "apcs006",
   "has_ref": true,
   "has_plan": true,
-  "count": 8
+  "count": 20
  },
  {
   "slug": "grade-average",
@@ -186,7 +186,7 @@
   "id": "apcs010",
   "has_ref": true,
   "has_plan": true,
-  "count": 15
+  "count": 20
  },
  {
   "slug": "movie-ticket",
@@ -291,7 +291,7 @@
   "id": "apcs004",
   "has_ref": true,
   "has_plan": true,
-  "count": 5
+  "count": 20
  },
  {
   "slug": "prime-check",
@@ -305,21 +305,21 @@
   "id": "apcs003",
   "has_ref": true,
   "has_plan": true,
-  "count": 5
+  "count": 20
  },
  {
   "slug": "prize-order-code",
   "id": "apcs008",
   "has_ref": true,
   "has_plan": true,
-  "count": 9
+  "count": 20
  },
  {
   "slug": "prop-box-packing",
   "id": "apcs009",
   "has_ref": true,
   "has_plan": true,
-  "count": 16
+  "count": 20
  },
  {
   "slug": "quadrant-classifier",
@@ -347,7 +347,7 @@
   "id": "apcs007",
   "has_ref": true,
   "has_plan": true,
-  "count": 9
+  "count": 20
  },
  {
   "slug": "repeat-greeting",

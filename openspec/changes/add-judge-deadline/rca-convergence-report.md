@@ -175,7 +175,11 @@
 1. ~~**gem-blast 的第二份已上線保證未證實**~~ → **已於 2026-08-12 定案，本報告的預測成立**。`gemblast_strreplace_set.py`（最便宜寫法）以 `measure.sh` 在同一條 `:8788` 生產路徑實測：**20/20、單筆最大 3,115 ms**（預估 0.7–1.5 s 偏低，但「遠低於 5,000 ms、繞道仍通過」的結論正確）。「繞道不再通過完整計畫、18/20」確為偽。處置：`rank-code-challenges` delta 整份刪除，`gem-blast-challenge` delta 改記真值後保留（該題主 spec 明文要求本 change 修訂該條文，不得刪除）。連帶更新 design〈量測結果〉、trace-matrix O3／O4、proposal 影響範圍。**釘定常數的拘束上界因此由 376 ms 改為 3,115 ms，餘裕由 13.3 倍改為 1.61 倍。**
 2. ~~**`expression-eval-challenges/spec.md:75` 登記的 4 條收編路線至今零量測**~~ → **已於 2026-08-12 量畢**：四條全部 20/20，單筆最大 65 ms（E1 52／R2 12／N1 57／E3′ 65），對上界無影響。路線檔已佚失、由 spec 名稱重新實作（與根因 2 同型），故先以 `measure/verify_routes.py` 對該題自己的 20 筆 literal 驗明輸出等同 `reference_solution` 才量。D5 的上界涵蓋範圍自此完整。
 3. **兩條純程式面缺陷的誕生原因未解釋**：`builtins.__import__` 置換使 op 計數器永久毒化、`_op_limit = 1` 使守衛原文外洩。本清單只解釋了為何測不到（根因 4／5），不解釋為何會被寫成這樣。
-4. **`challenges.json` 的 metadata 與實測列數不一致**（buffer-audit-log 記 count=3 而實測 rows=6、exam-collect-verify 記 count=17 而實測 rows=20）。兩輪稽核與 D7 的「列數等於測資總數」驗收都沒問過；成因未查，是否無害未知。
+4. ~~**`challenges.json` 的 metadata 與實測列數不一致**~~ → **已於 2026-08-13 查明並修正，結論為無害**。成因是單一規則：產生該檔的臨時腳本把 `count` 記成 `testcase_plan` 的**項目數**，沒有把 `count:` band 展開成它所代表的測資數。判準是機械的——**九筆錯的 `count` 全部等於該題的 plan 項目數，無一例外**，且錯的正好是全部九道 band-bearing 題目（另兩道有 plan 的題目為 20 筆全 literal，項目數恰等於測資數而僥倖正確）。實際偏差遠大於原記載的兩筆：gem-blast-playtest 記 8 實為 20、pillbox-reminder 與 print-farm-schedule 記 5 實為 20、prize-order-code 與 rank-code-backfill 記 9 實為 20。
+
+   **無害的三項證據**：(a) 生產路徑的 `planTotal()`（`.vitepress/theme/composables/useChallengeRunner.ts:54-69`）算法為「Σ band counts ＋ 每個 literal 算 1」，**正確**，且其結果與每一次實測列數相符——D7 的「列數等於測資總數」驗收因此驗的是對的分母，結論成立；(b) `challenges.json` 從未被 `measure.sh` 或 `sweep.sh` 讀取（grep 全 change 目錄，唯一提及它的是本報告）；(c) 該檔的 `has_ref` 與 `has_plan` 兩欄 66 題**零錯誤**，O2 據以選出的 16 支 `reference_solution` 集合未受汙染。
+
+   **處置**：新增 `measure/inventory.py` 重新產生該檔，算法明文對齊 `planTotal()`；九筆 `count` 修正，其餘欄位零變動。原檔是臨時產物、產生器未進 repo——與根因 2（證物留在 repo 之外）同型，故這次連產生器一起 commit。
 5. **commit `3e47819` 宣稱的「30 組隨機輸入交叉驗證」在 repo 內查無腳本**。該宣稱是未執行、執行了但用了錯的輸入格式、還是執行了但結果被忽略，三種可能對應不同根因，本輪無法判定。（`rank_mathfactorial.py` 的輸入解析格式與該題 reference_solution 根本不同，若交叉驗證真的跑過，它不可能通過。）
 6. **`spectra analyze` 的能力邊界是推論而非查證**。「它檢查工件結構一致性而非事實蘊涵」是從它在一份含跨檔算術自我否證的文件集上回報零 Warning 反推的，未讀實作。
 7. **R1 為何沒找到 `meta_path` 拆除**，儘管它有明確的殘餘旁路 lens 且確實找到了守衛是死碼。假說是「找到最便宜的逃逸即終止搜尋」，逐字稿裡無直接證據，故列為假說。
