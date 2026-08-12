@@ -151,3 +151,39 @@
 3. **測資一個 byte 都沒有更動**。兩條殘餘的關閉完全來自平台層，符合本 change 當初「不以測資規避」的決定。
 
 `r014_settrace.py` 為本次驗證新增的路線檔（`curation/routes/`），內容與 `r014_naive.py` 逐字相同、僅在開頭多一行 `sys.settrace(None)`——這是該殘餘最便宜的寫法。`cost_gate.mjs` 的契約表未收錄它，因為該閘門明文不模擬牆鐘。
+
+## R4 獨立稽核（2026-08-13）
+
+本 change 的 `rca-convergence-report.md` 第四節第 3 項要求「補一輪 R4（乾淨脈絡、hole-hunt 兩條 lens ＋ 獨立 RCA 覆核），再決定是否發 PR」。R4 已執行，三條 lens 的攻擊物件全部入庫（`curation/routes/`、`measure/`），逐筆量測併入 `measure/deadline-verification.jsonl`。
+
+### Lens 1：apcs013 hole-hunt（不讀模式標記能否超過 12/20 上限）
+
+**結論：上限成立，四種攻擊全部 ≤ 10/20。**
+
+| 攻擊 | 得分 | 判定序列 |
+|---|---|---|
+| 恆定模式 1（W1 基準，用於驗證計分工具） | 10/20 | `AAAAAAAAAAWWWWWWWWWW` |
+| 恆定模式 2 | 1/20 | `WWWWWWWWWWAWWWWWWWWW` |
+| **W15 自我偵測**（試建 preorder+inorder，不成立才改判模式 2） | 10/20 | `AAAAAAAAAAWWWWWWWWWW` |
+| **W16 形狀統計**（兩種讀法各建樹，取深度較小者） | 10/20 | `AAAAWAAAAAAWWWWWWWWW` |
+
+W15 之所以退化成「恆定模式 1」，指出一件本 change 從未寫下、但正是題目成立基礎的事實：**任意兩個相同元素集合的排列，當成 (preorder, inorder) 一定能建出一棵合法的樹**。因此「合法性」不帶任何模式資訊，模式在資料上是資訊理論不可還原的——不讀標記的路線只能猜，而 A16 的「模式序列兩兩相異」使猜測的上界維持在 12。W16 進一步證明形狀統計也不帶信號（生成器的真樹並不系統性地比錯讀的樹淺）。此事實建議補入 trace-matrix 的 A 表。
+
+計分工具 `measure/score_literals.py` 以該題自己的 20 筆 literal 與 `reference_solution` 逐筆比對；基準線復現 W1 的契約值 10/20，工具本身因此受檢。
+
+### Lens 2：apcs014 hole-hunt（能否不靠洞察超過 15/20）
+
+**結論：斷崖成立。** 最強攻擊為兩種規避疊加——`sys.settrace(None)` 完全移除 tracing overhead，再加 K 球批次攤平稀釋 op 成本，即「盡可能快地規避計數器」的最便宜寫法（`routes/r014_settrace_batch32.py`）。實測 **15/20**，第 16–20 筆停在 5,006–5,013 ms。疊加沒有比單用任一種更快穿過殺手帶：計數器繞道換來的是時鐘，而 67M 步的逐球工作在 Pyodide 無法在 5 秒內完成。
+
+### Lens 3：獨立覆核本檔〈B3b 的關閉驗證〉的數字
+
+以機械比對取代人工複讀（本專案歷次 RCA 的共同失效點是散文手抄）：
+
+- `measure/deadline-verification.jsonl` **12 列全部自洽**（`score` 等於判定序列的 A 數、`rows` 等於序列長度等於 `per_ms` 長度、`max_ms`／`sum_ms` 與 `per_ms` 相符）。
+- 〈B3b 的關閉驗證〉一節的 **12 項數字宣稱逐條與 JSONL 相符**，零不符。
+- **發現一處覆蓋缺口並已補**：`curation/cost_gate.mjs` 契約表中 `expect: 20` 的收編路線 `routes/r014_levelwise_rec.py`（L1 的遞迴寫法）在 B3b 驗證中漏量。補量結果 **20/20、單筆最大 348 ms**，無回歸。這正是本專案 RCA 反覆記錄的「只量部分收編路線」型缺口，故列於此而非靜默補上。
+- `gen013.py`／`gen014.py` 雖列於契約表，但它們是建置期的期望輸出產生器、不會作為提交進入瀏覽器判題，故不在瀏覽器量測範圍內。
+
+### R4 的執行限制（誠實記錄）
+
+三個乾淨脈絡的稽核代理在 600 秒無輸出的 watchdog 上全部中斷，未產出報告。上述三條 lens 由主代理接手完成，因此**缺少「不同脈絡的第二意見」**這層保護——與第四節第 1 項所記的 R3 情形同型。可機械化的部分（JSONL 自洽性、散文對帳、收編路線覆蓋率）已全部自動化並留下腳本，不受此限制影響；不可機械化的部分（想得到哪些攻擊）仍只有單一來源。
