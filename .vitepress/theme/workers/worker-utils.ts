@@ -86,14 +86,19 @@ import sys as _sys
 import io
 ${opGuard}
 # ── sandbox guard ─────────────────────────────────────────────────
+# Implements find_spec, the only meta-path protocol CPython still consults.
+# The find_module/load_module pair this guard used to implement was removed in
+# 3.12: a finder offering only those methods is skipped outright, so the guard
+# read as protection while blocking nothing. Raising here rather than returning
+# a loader keeps the refusal at the earliest point in the import.
 class _SandboxFinder:
-    def find_module(self, fullname, path=None):
-        if fullname in ('js', 'pyodide_js', 'pyodide') or \
-           fullname.startswith(('js.', 'pyodide_js.', 'pyodide.')):
-            return self
+    _BLOCKED = ('js', 'pyodide_js', 'pyodide')
+
+    def find_spec(self, fullname, path=None, target=None):
+        root = fullname.partition('.')[0]
+        if root in self._BLOCKED:
+            raise ImportError(f"Module '{fullname}' is not available")
         return None
-    def load_module(self, fullname):
-        raise ImportError(f"Module '{fullname}' is not available")
 
 _sys.meta_path.insert(0, _SandboxFinder())
 for _n in list(_sys.modules):

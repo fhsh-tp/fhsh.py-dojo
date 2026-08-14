@@ -92,3 +92,6 @@ refs/other-docs-dot-vitepress/
 
 # Dev-side analysis artifacts (understand knowledge graph)
 .understand-anything/
+# Python bytecode caches
+__pycache__/
+*.pyc

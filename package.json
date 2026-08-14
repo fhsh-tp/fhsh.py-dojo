@@ -22,7 +22,8 @@
     "new-tutor": "npx tsx scripts/new-tutor.ts",
     "typecheck": "vue-tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit && vue-tsc -p tsconfig.vitest.json --noEmit",
     "gen:keymaterial": "npx tsx scripts/gen-key-material.ts",
-    "lint": "eslint .vitepress scripts --max-warnings 28 && prettier --check \"scripts/**/*.ts\" eslint.config.mjs"
+    "lint": "eslint .vitepress scripts --max-warnings 28 && prettier --check \"scripts/**/*.ts\" eslint.config.mjs",
+    "preview:cf": "pnpm docs:build && wrangler pages dev .vitepress/dist --port 8788 --compatibility-date=2026-08-11"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.1",
@@ -78,7 +79,14 @@
     "vite-plugin-wasm": "^3.5.0",
     "vitest": "^4.0.18",
     "vue-eslint-parser": "^9.4.3",
-    "vue-tsc": "^3.2.5"
+    "vue-tsc": "^3.2.5",
+    "wrangler": "^4.120.1"
   },
-  "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be"
+  "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd"
+    ]
+  }
 }

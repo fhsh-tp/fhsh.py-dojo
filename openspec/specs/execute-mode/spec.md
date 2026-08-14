@@ -152,6 +152,8 @@ This method SHALL create a fresh Worker, send an `ExecuteRequest`, and resolve t
 
 The method SHALL apply a wall-clock kill timer (6 seconds). If the timer fires, the Worker SHALL be terminated and the Promise SHALL resolve with an error result.
 
+The `execute` handler SHALL additionally apply the per-testcase deadline defined by the `judge-deadline` capability to the single execution it performs. When that deadline is reached, the running Python code SHALL be terminated and the Promise SHALL resolve with a timed-out result, without terminating the Worker. The 6-second kill timer SHALL remain as the outer bound covering the case where the Worker itself becomes unresponsive.
+
 #### Scenario: Successful execute call
 
 - **WHEN** `execute(code, stdin)` is called
@@ -162,19 +164,9 @@ The method SHALL apply a wall-clock kill timer (6 seconds). If the timer fires, 
 - **WHEN** the Worker does not respond within 6 seconds
 - **THEN** the Worker SHALL be terminated and the Promise SHALL resolve with `{ stdout: '', error: 'Execution timed out', elapsed_ms: 6000 }`
 
-<!-- @trace
-source: add-execute-mode
-updated: 2026-03-24
-code:
-  - .vitepress/theme/composables/useExecutor.ts
-  - .vitepress/theme/components/editor/RunModal.vue
-  - .vitepress/theme/components/editor/RunButton.vue
-  - .vitepress/theme/views/ChallengeView.vue
-  - .vitepress/theme/workers/pyodide.worker.ts
-tests:
-  - .vitepress/theme/__tests__/ChallengeView.spec.ts
-  - .vitepress/theme/__tests__/pyodide-worker-execute.spec.ts
-  - .vitepress/theme/__tests__/RunModal.spec.ts
-  - .vitepress/theme/__tests__/useExecutor.spec.ts
-  - .vitepress/theme/__tests__/RunButton.spec.ts
--->
+#### Scenario: Deadline reached before the Worker kill timer
+
+- **WHEN** code run through `execute` exceeds the per-testcase deadline but the Worker remains responsive
+- **THEN** the Python execution SHALL be terminated at the deadline
+- **AND** the Promise SHALL resolve with a timed-out result whose `elapsed_ms` reflects the deadline rather than the 6-second kill timer
+- **AND** the Worker SHALL NOT be terminated

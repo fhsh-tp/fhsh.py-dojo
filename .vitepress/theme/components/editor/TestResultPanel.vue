@@ -7,8 +7,17 @@ const props = withDefaults(defineProps<{
   results: TestcaseResult[]
   status: ExecutorStatus
   verdictDetail?: VerdictDetail
+  /**
+   * Testcases the challenge actually has. When the cumulative batch limit
+   * terminates a run, the Worker dies mid-batch and the testcases after it
+   * never report — scoring or rendering against `results.length` then shows a
+   * truncated run as a full pass. Defaults to the reported count so callers
+   * that genuinely have no total keep the old behaviour.
+   */
+  total?: number
 }>(), {
   verdictDetail: 'hidden',
+  total: 0,
 })
 
 const verdictStyle: Record<string, string> = {
@@ -19,23 +28,37 @@ const verdictStyle: Record<string, string> = {
 }
 
 const passedCount = computed(() => props.results.filter((r) => r.verdict === 'AC').length)
+
+/** Denominator for both the score and the row count. */
+const totalCount = computed(() => (props.total > 0 ? props.total : props.results.length))
+
+/**
+ * One entry per testcase of the challenge. Indices the run never reached are
+ * `null`, and render as an explicit not-executed row rather than vanishing.
+ */
+const rows = computed<Array<TestcaseResult | null>>(() => {
+  const byIndex = new Map(props.results.map((r) => [r.index, r]))
+  return Array.from({ length: totalCount.value }, (_, i) => byIndex.get(i) ?? null)
+})
+
+const allPassed = computed(() => passedCount.value === totalCount.value)
 </script>
 
 <template>
   <div
-    v-if="props.results.length > 0 || props.status === 'running'"
+    v-if="props.results.length > 0 || props.status === 'running' || (props.status === 'done' && totalCount > 0)"
     data-testid="result-panel"
     class="border-t border-slate-200 dark:border-gray-800 flex-1 overflow-auto"
   >
     <!-- Score summary when done -->
     <div
       v-if="props.status === 'done'"
+      data-testid="result-summary"
       class="px-4 py-2 bg-slate-50 dark:bg-gray-900 border-b border-slate-200 dark:border-gray-800 text-sm"
+      :class="allPassed ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'"
     >
       <span class="text-slate-500 dark:text-gray-400">結果：</span>
-      <span :class="passedCount === props.results.length ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'">
-        {{ passedCount }} / {{ props.results.length }} 通過
-      </span>
+      <span>{{ passedCount }} / {{ totalCount }} 通過</span>
     </div>
 
     <!-- Per-testcase rows -->
@@ -50,13 +73,18 @@ const passedCount = computed(() => props.results.filter((r) => r.verdict === 'AC
       </thead>
       <tbody>
         <tr
-          v-for="result in props.results"
-          :key="result.index"
+          v-for="(result, rowIndex) in rows"
+          :key="rowIndex"
+          :data-verdict="result?.verdict ?? 'none'"
           class="border-b border-slate-100 dark:border-gray-800/50"
         >
-          <td class="px-4 py-1.5 text-slate-400 dark:text-gray-500">{{ result.index + 1 }}</td>
+          <td class="px-4 py-1.5 text-slate-400 dark:text-gray-500">{{ rowIndex + 1 }}</td>
           <td class="px-2 py-1.5">
-            <span class="flex items-center gap-1">
+            <!-- Never reached: the run was cut short before this testcase. -->
+            <span v-if="result === null" class="flex items-center gap-1 text-slate-400 dark:text-gray-600">
+              <span class="px-1.5 py-0.5 rounded font-bold bg-slate-100 dark:bg-gray-800">未執行</span>
+            </span>
+            <span v-else class="flex items-center gap-1">
               <!-- AC: checkmark -->
               <svg
                 v-if="result.verdict === 'AC'"
@@ -93,9 +121,12 @@ const passedCount = computed(() => props.results.filter((r) => r.verdict === 'AC
               </span>
             </span>
           </td>
-          <td class="px-2 py-1.5 text-slate-400 dark:text-gray-500">{{ result.elapsed_ms.toFixed(0) }} ms</td>
+          <td class="px-2 py-1.5 text-slate-400 dark:text-gray-500">
+            {{ result === null ? '—' : `${result.elapsed_ms.toFixed(0)} ms` }}
+          </td>
           <td class="px-2 py-1.5 text-slate-500 dark:text-gray-400 font-mono truncate max-w-xs">
-            <template v-if="result.verdict === 'WA' && props.verdictDetail === 'full'">
+            <template v-if="result === null" />
+            <template v-else-if="result.verdict === 'WA' && props.verdictDetail === 'full'">
               預期 <span class="text-green-600 dark:text-green-400">{{ result.expected }}</span>，
               實際 <span class="text-red-500 dark:text-red-400">{{ result.actual }}</span>
             </template>

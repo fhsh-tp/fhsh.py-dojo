@@ -13,10 +13,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // Captured from the worker module at dispatch time — a static import would
 // run the module's `self.onmessage = ...` before the `self` stub exists.
 let traceResetSnippet: string | undefined
+let judgeSnippets: string[] = []
 
 const calls: string[] = []
 const mockRunPythonAsync = vi.fn(async (code: string) => {
+  if (judgeSnippets.includes(code)) return
+  // Only the trace reset uses the async entry point; wrapped student code
+  // runs synchronously (design D3).
+  calls.push(code === traceResetSnippet ? '<reset>' : '<async-exec>')
+})
+const mockRunPython = vi.fn((code: string) => {
+  // The judge's own preamble (capturing and restoring the tracing API) is not
+  // user code and must not appear in the sequence under assertion.
+  if (judgeSnippets.includes(code)) return undefined
   calls.push(code === traceResetSnippet ? '<reset>' : '<exec>')
+  return undefined
 })
 const mockClear = vi.fn(() => {
   calls.push('<clear>')
@@ -25,6 +36,8 @@ const mockClear = vi.fn(() => {
 vi.mock('/pyodide/pyodide.mjs', () => ({
   loadPyodide: vi.fn(async () => ({
     runPythonAsync: mockRunPythonAsync,
+    runPython: mockRunPython,
+    setInterruptBuffer: vi.fn(),
     globals: { clear: mockClear, get: vi.fn(() => '') },
   })),
 }))
@@ -40,14 +53,22 @@ vi.stubGlobal('self', {
 async function dispatch(data: unknown): Promise<void> {
   const mod = await import('../workers/pyodide.worker')
   traceResetSnippet = mod.TRACE_RESET_SNIPPET
+  judgeSnippets = [mod.SYS_MODULE_SNIPPET, mod.SYS_SETTRACE_SNIPPET, mod.TRACE_RESTORE_SNIPPET]
   const handler = (self as unknown as { onmessage: (e: { data: unknown }) => Promise<void> })
     .onmessage
   await handler({ data })
 }
 
-/** Per-input handler sequence must be: reset → clear → exec. */
-function expectResetBeforeEachExec(inputCount: number): void {
-  expect(calls).toEqual(Array.from({ length: inputCount }, () => ['<reset>', '<clear>', '<exec>']).flat())
+/**
+ * Per-input handler sequence must be: reset → clear → exec.
+ *
+ * `execLabel` distinguishes the two entry points. Judged handlers run wrapped
+ * student code synchronously so a deadline interrupt stays catchable (design
+ * D3); the generate handler runs trusted generator code with the op guard
+ * exempted and no deadline, so it keeps the async entry point.
+ */
+function expectResetBeforeEachExec(inputCount: number, execLabel: '<exec>' | '<async-exec>' = '<exec>'): void {
+  expect(calls).toEqual(Array.from({ length: inputCount }, () => ['<reset>', '<clear>', execLabel]).flat())
 }
 
 beforeEach(() => {
@@ -80,6 +101,6 @@ describe('trace-state reset wiring', () => {
 
   it('generate resets trace state before every generator run', async () => {
     await dispatch({ type: 'generate', generatorCode: 'print(1)', inputs: ['a\n', 'b\n'] })
-    expectResetBeforeEachExec(2)
+    expectResetBeforeEachExec(2, '<async-exec>')
   })
 })
