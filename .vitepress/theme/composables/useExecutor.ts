@@ -1,6 +1,15 @@
 import { computed, ref } from 'vue'
 import { useExecutorStore } from '../stores/executor'
-import type { RunRequest, TestcaseResult, RunComplete, ExecuteRequest, ExecuteResult, VerdictDetail } from '../workers/pyodide.worker'
+import type {
+  RunRequest,
+  TestcaseResult,
+  TestcaseStart,
+  RunComplete,
+  ExecuteRequest,
+  ExecuteResult,
+  VerdictDetail,
+} from '../workers/pyodide.worker'
+import { createInterruptChannel, DeadlineWatchdog, DEADLINE_MS, KILL_MARGIN_MS } from '../workers/deadline'
 
 const WALL_CLOCK_KILL_MS = 6_000
 
@@ -15,6 +24,9 @@ export function useExecutor() {
   const store = useExecutorStore()
   const workerRef = ref<Worker | null>(null)
   const killTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+  // Per-testcase deadline. The Worker blocks inside synchronous Python, so
+  // the countdown has to live here on the main thread.
+  let watchdog: DeadlineWatchdog | null = null
 
   const isRunning = computed(() => store.status === 'running')
 
@@ -30,8 +42,14 @@ export function useExecutor() {
     workerRef.value = null
   }
 
+  function _disposeWatchdog() {
+    watchdog?.dispose()
+    watchdog = null
+  }
+
   function stop() {
     _clearKillTimer()
+    _disposeWatchdog()
     _terminateWorker()
     if (store.status === 'running') {
       store.setDone(store.totalTestcases, store.passedCount)
@@ -52,18 +70,29 @@ export function useExecutor() {
     })
     workerRef.value = worker
 
-    // Wall-clock hard kill (main-thread side)
+    const channel = createInterruptChannel()
+    watchdog = new DeadlineWatchdog(channel)
+
+    // Wall-clock hard kill (main-thread side). Retained as the total-time
+    // backstop: the per-testcase deadline bounds each case, this bounds the
+    // batch and covers a Worker that stops responding altogether.
     const totalBudget = testcases.length * WALL_CLOCK_KILL_MS
     killTimer.value = setTimeout(() => {
       stop()
     }, totalBudget)
 
-    worker.onmessage = (event: MessageEvent<TestcaseResult | RunComplete>) => {
+    worker.onmessage = (event: MessageEvent<TestcaseStart | TestcaseResult | RunComplete>) => {
       const msg = event.data
-      if (msg.type === 'testcase_result') {
+      if (msg.type === 'testcase_start') {
+        watchdog?.arm(msg.generation)
+      } else if (msg.type === 'testcase_result') {
+        // The testcase is over the moment its result arrives; leaving the
+        // signal raised would interrupt the next one.
+        watchdog?.disarm()
         store.addResult(msg)
       } else if (msg.type === 'run_complete') {
         _clearKillTimer()
+        _disposeWatchdog()
         store.setDone(msg.total, msg.passed)
         _terminateWorker()
       }
@@ -71,6 +100,7 @@ export function useExecutor() {
 
     worker.onerror = () => {
       _clearKillTimer()
+      _disposeWatchdog()
       store.setDone(store.totalTestcases, store.passedCount)
       _terminateWorker()
     }
@@ -82,6 +112,7 @@ export function useExecutor() {
       code,
       testcases: testcases.map((tc) => ({ input: tc.input, expected_output: tc.expected_output })),
       verdictDetail,
+      ...(channel.buffer === null ? {} : { interruptBuffer: channel.buffer }),
     }
     worker.postMessage(request)
   }
@@ -97,7 +128,18 @@ export function useExecutor() {
         type: 'module',
       })
 
-      const timer = setTimeout(() => {
+      const channel = createInterruptChannel()
+      const runWatchdog = new DeadlineWatchdog(channel)
+
+      // The kill timer guards against a Worker that stops responding at all.
+      // It starts here, before Pyodide has loaded, so once user code actually
+      // begins it is re-armed relative to that moment — otherwise Pyodide's
+      // warm-up eats the budget and the kill preempts the deadline, which
+      // terminates the Worker instead of producing a timed-out result.
+      let timer = setTimeout(onKill, WALL_CLOCK_KILL_MS)
+
+      function onKill() {
+        runWatchdog.dispose()
         worker.terminate()
         resolve({
           type: 'execute_result',
@@ -105,11 +147,18 @@ export function useExecutor() {
           elapsed_ms: WALL_CLOCK_KILL_MS,
           error: 'Execution timed out',
         })
-      }, WALL_CLOCK_KILL_MS)
+      }
 
-      worker.onmessage = (event: MessageEvent<ExecuteResult>) => {
+      worker.onmessage = (event: MessageEvent<TestcaseStart | ExecuteResult>) => {
+        if (event.data.type === 'testcase_start') {
+          runWatchdog.arm(event.data.generation)
+          clearTimeout(timer)
+          timer = setTimeout(onKill, DEADLINE_MS + KILL_MARGIN_MS)
+          return
+        }
         if (event.data.type === 'execute_result') {
           clearTimeout(timer)
+          runWatchdog.dispose()
           worker.terminate()
           resolve(event.data)
         }
@@ -117,6 +166,7 @@ export function useExecutor() {
 
       worker.onerror = () => {
         clearTimeout(timer)
+        runWatchdog.dispose()
         worker.terminate()
         resolve({
           type: 'execute_result',
@@ -126,7 +176,12 @@ export function useExecutor() {
         })
       }
 
-      const request: ExecuteRequest = { type: 'execute', code, stdin }
+      const request: ExecuteRequest = {
+        type: 'execute',
+        code,
+        stdin,
+        ...(channel.buffer === null ? {} : { interruptBuffer: channel.buffer }),
+      }
       worker.postMessage(request)
     })
   }

@@ -111,7 +111,7 @@ change、完整 review 與 staging 驗證後才落地。
 - **評估**:與 2.6 的 `select_testcases(slug, 200)` 能力完全重疊,邊際風險
   為零;feature-gated 雙 wasm target 的維運成本不值得。記錄備查。
 
-### 2.8 TLE 常數與大輸入(⚠️ 2026-07-28 更正:存在兩個未修復的判題缺口,下方結論在修復前不成立)
+### 2.8 TLE 常數與大輸入(✅ 2026-08-11 已修復:見本節末〈2026-08-11 結案〉)
 
 - **背景**:`DEFAULT_OP_LIMIT = 10_000_000`、`WALL_CLOCK_MS = 5000`、
   `WALL_CLOCK_KILL_MS = 6000` 皆寫死且無 frontmatter 旋鈕
@@ -172,6 +172,23 @@ change、完整 review 與 staging 驗證後才落地。
   在缺口修復前,選題階段須先做 stdlib 封閉形式盤點(math.factorial/perm/
   comb/prod/isqrt/gcd/lcm、三參數 pow、str 運算等),凡能一步到位者一律
   實測列入繞道清單,或明確接受為聰明解。
+
+- **2026-08-11 結案(change `add-judge-deadline`)**:本節記錄的兩個判題缺口皆已處置。
+  1. **每筆牆鐘失效**已修復。worker 內失效的 `setTimeout` 軟旗標由「主執行緒 watchdog
+     ＋ `SharedArrayBuffer` 中斷緩衝區」取代,並在每筆結束後以 elapsed 補判作為第二層。
+     三個判題 handler(`run`／`run_only`／`execute`)語義一致,生產路徑首次獲得每筆時間
+     上限。實測:`sys.settrace(None)` 繞道由 20/20 降為 17/20、C 內建 `str.replace`
+     繞道由 20/20 降為 18/20,兩者測資皆未更動。
+  2. **上文「`judge.rs` 沒有 TLE 分支」的敘述已過期**:`judge()` 早已有由 worker 傳入的
+     `timed_out` 驅動的 TLE 分支(change《add-tle-verdict》),正式站會顯示 TLE。
+  3. **上文「`sys.settrace(None)` 為接受的繞過」不再成立**:deadline 不經過 op 計數器,
+     對停用 tracer 的提交一樣生效。
+  4. **仍然成立的限制**:op 計數器看不見 C 層複雜度。凡「答案可由單一 C 實作 stdlib API
+     一步得出」的題型,若其執行時間低於 deadline 仍會通過——成本軸現在有兩道閘(op 上限
+     與牆鐘),但兩道都以「實際成本」為判準,便宜的 C 層解法依然是合法的聰明解。選題階段的
+     stdlib 封閉形式盤點(見本節 2026-08-06 推論)因此**繼續適用**。
+  5. deadline 常數由量測釘定為 5,000 ms(既有 16 支 `reference_solution` 單筆最大 376 ms,
+     餘裕 13.3 倍);重跑指令與逐筆資料見該 change 的 `measure/` 目錄。
 
 ### 2.9 .env.pool 檔案權限(M-R2-2)
 

@@ -264,7 +264,7 @@ function onRun(payload: { stdin: string; stdout: string; error?: string }) {
                   <!-- Gear ⚙ opens the editor-settings popover (opens upward from the action bar) -->
                   <EditorSettingsPopover />
                 </div>
-                <TestResultPanel :results="executorStore.results" :status="executorStore.status" :verdict-detail="runner.verdictDetail.value" />
+                <TestResultPanel :results="executorStore.results" :status="executorStore.status" :total="executorStore.totalTestcases" :verdict-detail="runner.verdictDetail.value" />
               </div>
             </div>
           </template>

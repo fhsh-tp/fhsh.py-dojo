@@ -123,3 +123,78 @@ describe('TestResultPanel verdictDetail display modes', () => {
     expect(detailCell.text()).toContain('NameError: x')
   })
 })
+
+describe('TestResultPanel — interrupted batch honesty', () => {
+  // A cumulative-kill truncation used to render as "3 / 3 通過" with three
+  // green rows, because the denominator was the number of REPORTED results.
+  // The run had 20 testcases; 17 never reported.
+  const reported = [makeResult('AC', { index: 0 }), makeResult('AC', { index: 1 }), makeResult('AC', { index: 2 })]
+
+  it('renders one row per testcase of the challenge, not per reported result', () => {
+    const wrapper = mount(TestResultPanel, {
+      props: { results: reported, status: 'done', total: 20 },
+    })
+    expect(wrapper.findAll('tbody tr')).toHaveLength(20)
+  })
+
+  it('scores against the total testcase count', () => {
+    const wrapper = mount(TestResultPanel, {
+      props: { results: reported, status: 'done', total: 20 },
+    })
+    expect(wrapper.text()).toContain('3 / 20')
+  })
+
+  it('does not colour a truncated run as a full pass', () => {
+    const wrapper = mount(TestResultPanel, {
+      props: { results: reported, status: 'done', total: 20 },
+    })
+    const summary = wrapper.find('[data-testid="result-summary"]')
+    expect(summary.classes().join(' ')).not.toContain('text-green')
+  })
+
+  it('marks never-reported testcases as not executed, visually distinct from a pass', () => {
+    const wrapper = mount(TestResultPanel, {
+      props: { results: reported, status: 'done', total: 20 },
+    })
+    const rows = wrapper.findAll('tbody tr')
+    expect(rows[19]!.attributes('data-verdict')).toBe('none')
+    expect(rows[0]!.attributes('data-verdict')).toBe('AC')
+  })
+
+  it('falls back to the reported count when total is not supplied', () => {
+    const wrapper = mount(TestResultPanel, {
+      props: { results: reported, status: 'done' },
+    })
+    expect(wrapper.findAll('tbody tr')).toHaveLength(3)
+    expect(wrapper.text()).toContain('3 / 3')
+  })
+})
+
+describe('TestResultPanel — truncated run still renders', () => {
+  // The cumulative batch kill terminates the Worker mid-run. On the production
+  // path the store can end up `done` with no results at all, and the panel's
+  // root v-if used to unmount the whole table in exactly that state — so the
+  // honest-denominator fix rendered nothing and the student saw only a score.
+  it('renders the table when the run finished having reported nothing', () => {
+    const wrapper = mount(TestResultPanel, {
+      props: { results: [], status: 'done', total: 20 },
+    })
+    expect(wrapper.find('[data-testid="result-panel"]').exists()).toBe(true)
+    expect(wrapper.findAll('tbody tr')).toHaveLength(20)
+    expect(wrapper.findAll('[data-verdict="none"]')).toHaveLength(20)
+  })
+
+  it('scores a fully truncated run against the real total', () => {
+    const wrapper = mount(TestResultPanel, {
+      props: { results: [], status: 'done', total: 20 },
+    })
+    expect(wrapper.text()).toContain('0 / 20')
+  })
+
+  it('still stays hidden before a run has started', () => {
+    const wrapper = mount(TestResultPanel, {
+      props: { results: [], status: 'idle', total: 20 },
+    })
+    expect(wrapper.find('[data-testid="result-panel"]').exists()).toBe(false)
+  })
+})
