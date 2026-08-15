@@ -1,0 +1,48 @@
+algorithm: fair_token_exchange
+params:
+  n:
+    type: int
+    min: 1
+    max: 1000000000
+input_budget: 4096
+testcase_plan:
+  - literal: |
+      9
+  - literal: |
+      1
+  - literal: |
+      3
+  - literal: |
+      8
+  - literal: |
+      11
+  - literal: |
+      15
+  - literal: |
+      32
+  - literal: |
+      39
+  - literal: |
+      116
+  - literal: |
+      243
+  - literal: |
+      1024
+  - literal: |
+      4374
+  - literal: |
+      20276
+  - literal: |
+      65610
+  - literal: |
+      987654
+  - literal: |
+      100000089
+  - literal: |
+      123456789
+  - literal: |
+      777777777
+  - literal: |
+      999999968
+  - literal: |
+      1000000000

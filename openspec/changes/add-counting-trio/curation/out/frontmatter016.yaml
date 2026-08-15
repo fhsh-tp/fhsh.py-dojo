@@ -1,0 +1,52 @@
+algorithm: marquee_display_count
+params:
+  nk:
+    type: int
+    min: 0
+    max: 1000000
+    count:
+      min: 2
+      max: 2
+      separator: " "
+input_budget: 4096
+testcase_plan:
+  - literal: |
+      5 2
+  - literal: |
+      1 1
+  - literal: |
+      1000000 1000000
+  - literal: |
+      10 0
+  - literal: |
+      1000000 0
+  - literal: |
+      3 1
+  - literal: |
+      40 7
+  - literal: |
+      60 13
+  - literal: |
+      100 37
+  - literal: |
+      1000 970
+  - literal: |
+      12345 6789
+  - literal: |
+      99991 1234
+  - literal: |
+      500000 1
+  - literal: |
+      500000 499999
+  - literal: |
+      777777 123456
+  - literal: |
+      999999 499999
+  - literal: |
+      654321 54321
+  - literal: |
+      999983 3
+  - literal: |
+      250000 99999
+  - literal: |
+      65537 32768
