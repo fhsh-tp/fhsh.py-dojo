@@ -17,9 +17,15 @@
   E. **數字追溯**：把題面內文出現的每一個數字抓出來，逐一對回 trace-matrix 的
      fact id。允許集合一律**由 semantics 模組與 testcase_plan 機械導出**，不手抄。
 
+  F. **frontmatter 欄位集合一致**：三題鍵集合必須相同且 ``tags`` 非空。
+
 用法：
     python3 openspec/changes/add-counting-trio/verify/check_frontmatter_pair.py
-    python3 .../check_frontmatter_pair.py --json   # 附機器可讀摘要
+    python3 .../check_frontmatter_pair.py --json       # 附機器可讀摘要（stdout）
+    python3 .../check_frontmatter_pair.py --json-out   # 另落成 verify/frontmatter-pair.json
+
+``--json-out`` 是追溯矩陣的位址來源：S 段（S1／S4／S5／S6／S9）引用的數字
+一律指向該檔的鍵，而不是本檔的 stdout。只印 stdout 等於沒有出處。
 """
 
 from __future__ import annotations
@@ -371,6 +377,8 @@ def check_frontmatter_fields(challenges):
     這裡守的是**欄位完整性**這一整類，不是那一格。
     """
     problems = []
+    detail = {"required_key_count": len(REQUIRED_KEYS), "required_keys": REQUIRED_KEYS,
+              "per_challenge": {}}
     for ch in challenges:
         path = CHANGE.parent.parent.parent / "docs" / "challenge" / (ch["slug"] + ".md")
         text = path.read_text(encoding="utf-8")
@@ -378,6 +386,18 @@ def check_frontmatter_fields(challenges):
         keys = re.findall(r"^([a-z_]+):", fm, re.M)
         missing = [k for k in REQUIRED_KEYS if k not in keys]
         extra = [k for k in keys if k not in REQUIRED_KEYS]
+        mtags = re.search(r"^tags:[ \t]*(.*)$", fm, re.M)
+        tags_inline = mtags.group(1).strip() if mtags else None
+        detail["per_challenge"][ch["id"]] = {
+            "key_count": len(keys),
+            "keys": keys,
+            "missing": missing,
+            "extra": extra,
+            "tags_nonempty": bool(mtags) and (
+                tags_inline not in ("", "[]")
+                or fm[mtags.end():].lstrip("\n").startswith("  - ")
+            ),
+        }
         if missing:
             problems.append("%s：缺少 frontmatter 鍵 %s" % (ch["id"], missing))
         if extra:
@@ -388,10 +408,14 @@ def check_frontmatter_fields(challenges):
             rest = fm[m.end():].lstrip("\n")
             if inline in ("", "[]") and not rest.startswith("  - "):
                 problems.append("%s：tags 為空——三題應一致標記" % ch["id"])
-    return problems
+    key_sets = {tuple(v["keys"]) for v in detail["per_challenge"].values()}
+    detail["key_sets_identical"] = len(key_sets) == 1
+    detail["problems"] = problems
+    return problems, detail
 
 def main() -> int:
     want_json = "--json" in sys.argv
+    want_json_out = "--json-out" in sys.argv
     assemble = load_module(CURATION / "assemble.py", "cnt_assemble")
     assemble.scanner_self_test()
     print("[掃描器 self-test] assemble.scan_banned 對 %d 個 probe 全部命中，"
@@ -433,6 +457,8 @@ def main() -> int:
             print("  [B] 四鍵逐位元組相同：PASS（%d bytes，對照 %s）"
                   % (len(frag), frag_path.name))
             rec["four_key_bytes"] = "identical(%d)" % len(frag)
+            rec["four_key_bytes_n"] = len(frag)
+            rec["four_key_identical"] = True
         else:
             import difflib
             d = "\n".join(list(difflib.unified_diff(
@@ -441,6 +467,8 @@ def main() -> int:
             fail("%s：四鍵區段與 %s 位元組不同（片段 %d bytes vs 題目頁 %d bytes）\n%s"
                  % (name, frag_path.name, len(frag), len(sliced), d))
             rec["four_key_bytes"] = "DIFFER"
+            rec["four_key_bytes_n"] = len(frag)
+            rec["four_key_identical"] = False
             print("  [B] 四鍵逐位元組相同：FAIL")
         # 逐鍵確認四鍵都真的在該切片內、且未被拆散
         missing = [k for k in FOUR_KEYS if not re.search(r"^%s:" % k, fm, re.M)]
@@ -492,7 +520,9 @@ def main() -> int:
         unmatched = [(v, ctx) for v, ctx in nums if v not in allowed]
         distinct = sorted({v for v, _ in nums})
         rec["numbers"] = {"total": len(nums), "distinct": distinct,
-                          "unmatched": sorted({v for v, _ in unmatched})}
+                          "distinct_count": len(distinct),
+                          "unmatched": sorted({v for v, _ in unmatched}),
+                          "unmatched_count": len({v for v, _ in unmatched})}
         print("  [E] 內文數字：共 %d 個、相異 %d 種" % (len(nums), len(distinct)))
         for v in distinct:
             if v in allowed:
@@ -519,10 +549,16 @@ def main() -> int:
         print("\n待維護者判斷的補掃命中（本檔不預判是否誤報）：")
         for n in NOTES:
             print("  - %s" % n)
+    fprob, fdetail = check_frontmatter_fields(CHALLENGES)
+    summary["frontmatter_fields"] = fdetail
     if want_json:
         print("\nJSON:")
         print(json.dumps(summary, ensure_ascii=False, indent=2))
-    fprob = check_frontmatter_fields(CHALLENGES)
+    if want_json_out:
+        out = HERE / "frontmatter-pair.json"
+        out.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+                       encoding="utf-8")
+        print("\n已寫出 %s" % out)
     if fprob:
         for x in fprob:
             fail(x)

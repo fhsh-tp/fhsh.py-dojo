@@ -1,0 +1,30 @@
+{
+ "purpose": "r015_cellscan.py 在死亡邊界兩筆的 op 數（冷行程），作為 E8 的規範層依據",
+ "route": "curation/routes/r015_cellscan.py",
+ "op_limit": 10000000,
+ "ops_source": "verify/judge_ops.py::count_ops_source_fresh",
+ "why_not_in_routes015_json": "主 harness 對這條路線的 op 量測會先撞上自己的硬逾時，因此 routes015.json 的 per_entry_ops 在第 9 筆之後為 null。本檔補上邊界兩筆，讓 spec 引用的數字有出處。",
+ "rows": [
+  {
+   "entry": 8,
+   "n": 72,
+   "ops": 5278547,
+   "over_op_limit": false,
+   "times_over_limit": 0.53,
+   "measurement_seconds": 0.5,
+   "expect": "survives",
+   "matches_expectation": true
+  },
+  {
+   "entry": 9,
+   "n": 249,
+   "ops": 216759740,
+   "over_op_limit": true,
+   "times_over_limit": 21.68,
+   "measurement_seconds": 18.0,
+   "expect": "dies",
+   "matches_expectation": true
+  }
+ ],
+ "problems": []
+}

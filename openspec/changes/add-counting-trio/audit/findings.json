@@ -1,0 +1,558 @@
+{
+ "rounds": [
+  {
+   "round": "R1",
+   "lensSummary": [
+    {
+     "lens": "Lens 1：矩陣證據的可復現性（add-counting-trio）",
+     "checksDerived": 31,
+     "findingCount": 4,
+     "verifiedClean": [
+      "C1",
+      "C2",
+      "E1",
+      "E2",
+      "E4",
+      "E5",
+      "E6",
+      "E9",
+      "F3",
+      "F4",
+      "G1",
+      "G5",
+      "S1",
+      "S2",
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+     ]
+    },
+    {
+     "lens": "Lens 2：三份文件（題目頁／spec delta／design）與追溯矩陣的同步性，聚焦 2026-08-15 三條瀏覽器實測修正（E8 死因、E10、G7 得分）",
+     "checksDerived": 14,
+     "findingCount": 3,
+     "verifiedClean": [
+      "E8（cellscan 死因＝op 上限非 deadline）：spec.md L41、design.md L44/L96 皆正確標註 op 上限，且 measure/browser-verification.jsonl 的 cellscan 記錄 verdicts=AAAAAAAATTTTTTTTTTTT（8 個 A + 12 個 T，第 9 筆起死）與 max_ms 皆與 n 無關（1950~2139ms 區間）——實跑 python3 讀 jsonl 確認與 spec/design 文字一致，無殘留『deadline/爆逾時』舊說法",
+      "E10（factorial015 得分 0/20）：spec.md L43、design.md L72 皆正確寫 0/20、全部『未執行』，與 measure/browser-verification.jsonl 的 factorial015 記錄（score:0, verdicts 全為 '-'）一致，未見殘留『8/20』",
+      "G7（factorial017 得分 0/20）：spec.md L88、design.md L96 皆正確寫 0/20，並明文標註本機投影法 13/20『是錯的／不得引用』，與 measure/browser-verification.jsonl 的 factorial017 記錄（score:0）一致，未見殘留『13/20』當作結論引用",
+      "三份題目頁皆未洩漏路線層級得分、op 數、factorial 相關細節——grep 全文確認僅 ap-layout-plan 有一句不指名路線的效能提醒，措辭『執行量上限』而非『時間限制』，符合矩陣 S7",
+      "D1/D4/D7/E7 的 n 上界（apcs015 為 1000，非 3000）：frontmatter max:1000、題面 1<=n<=1000、spec.md L4、design.md 決策表與專節皆一致",
+      "E1（k 值公式與前 8 項 0,6,28,96,252,550,1056,1848）：題面範例輸出、下表前 5 項、spec.md L9 worked example 三處數字互相一致",
+      "E2/E3、F2/G2（三題首筆 literal 與答案）：frontmatter testcase_plan 與題面範例逐一核對相符",
+      "E9/F4/G4/G5 各錯誤路線得分：spec.md 對應段落數字與矩陣一致；G5 另以 measure/report017.json 的 guess_route_bound 實跑驗證（achieved_max_score=12, identity_pair_sum=23=20+3, bound_without_n11=11）",
+      "D1（三題 category/type/difficulty）：三份 frontmatter 與 spec.md L105 一致",
+      "S8（016 的 min:0 與題面 1<=n 不一致的已裁決殘留）：frontmatter 與題面文字皆保留該殘留，未被誤『修好』造成新的不同步"
+     ]
+    },
+    {
+     "lens": "Lens 3：題面品質與洩題風險",
+     "checksDerived": 16,
+     "findingCount": 2,
+     "verifiedClean": [
+      "apcs015：n=8 範例輸出 0,6,28,96,252,550,1056,1848 逐項以公式 k²(k²−1)/2−4(k−1)(k−2) 手算驗證全部正確（E1/E3）",
+      "apcs015：先手算幾個小的 k=1..5 表格與 E1 一致，未洩露 2×3 區塊洞見（D4）",
+      "apcs015：『兩台基地台沒有編號、也不分主次…只能算一次』對『無序配對』表述明確無歧義",
+      "apcs015：k=2『任兩格都能裝』的提示以偏移量最小為 2 而教室邊長僅 2 驗證屬實，無誤導",
+      "apcs015：效能提醒措辭『超出單筆測資的執行量上限』未指名時間或 op 上限，符合 S7 的刻意模糊要求",
+      "apcs016：n=5 k=2 範例輸出 8（=2^3）驗證正確；k=0／k=n 邊界說明（答案為 2^n／1）正確",
+      "apcs016：未建成本斷崖、未暗示折價點在何處，符合 D2；未使用模數/位元等禁用術語",
+      "apcs017：規則 1-3（逐級、剛好用完、零頭即終止不得丟棄或延續）對『剛好整批』表述明確無歧義",
+      "apcs017：n=9 walkthrough 表格 362880→30240→2520→210→餘6 逐步手算驗證全部正確，且與 G1 公式結果 min(v2//2,v3)=3 相符",
+      "apcs017：兌換率 12 表述為固定常數，未暗示可由輸入給定，符合 D5",
+      "三題禁用術語掃描（assemble.scan_banned + HARD/SOFT 棋類補掃，中英文皆掃）：實際執行 verify/check_frontmatter_pair.py 確認零硬命中，唯一軟命中為 apcs016『跑馬燈』內的『馬』×2，判定為誤報，符合 S6",
+      "三題內文每個數字皆可回溯 fact id：自動腳本 E 檢查 015 共 81 個(17 種)、016 共 53 個(8 種)、017 共 97 個(13 種)，對不回者為零，符合 S5",
+      "apcs015/apcs016 的 description 與 tags 欄位內容與實際題意一致",
+      "三題皆未使用資料結構／演算法／棋類詞彙描述解法（如「陣列」「遞迴」「騎士」等）"
+     ]
+    },
+    {
+     "lens": "Lens 4：spec 條文的可驗證性（openspec/changes/add-counting-trio/specs/counting-trio-challenges/spec.md 逐條 SHALL 對照 curation/plan01*.py 斷言牆 與 verify/*.py）",
+     "checksDerived": 24,
+     "findingCount": 1,
+     "verifiedClean": [
+      "apcs015 formula E1: k=1..8 手算 0,6,28,96,252,550,1056,1848 與 spec.md Worked example scenario 完全相符；k=3 分支 28（非 36）驗證 Branch boundary scenario",
+      "curation/plan015.py --check 斷言牆全數通過（含 E1/E2/E3/E6/E8/E9/E11 對應斷言）",
+      "measure/routes015.json：REFERENCE 3010 op、rowscan/rowscan_sum/rowscan_helper 分別 1008010/1510510/2509511 op、cellscan 8/20（entry 9 起死亡）— 與 spec.md 逐字相符",
+      "curation/plan016.py --check 斷言牆全數通過；scores REF/A1/A2=20, W1=2, W2=0, W3=0, W4=6 與 spec.md F3/F4 逐字相符",
+      "measure/routes016.json worst_traced_ops: REF_pow3=7, A1_loop=2000009(entry 5), A2_bigint=7；entry5=frontmatter016.yaml 第 5 筆 '1000000 0' 與 spec.md 逐字相符",
+      "curation/plan017.py --check 斷言牆全數通過；scores R=20, W1=2, W2=11, W3=11, W4=12，guess_route_bound.provable_best_max_score=12=achieved 與 spec.md G3/G4/G5 逐字相符",
+      "measure/routes017.json max_ops: REFERENCE 155, 兩條 ACCEPTED 156/166 與 spec.md G3 逐字相符",
+      "python3 verify/judge_ops.py self_test：inline=4008、helper=10009、比值 2.50 與 trace-matrix C2 逐字相符",
+      "python3 verify/check_frontmatter_pair.py：三題 [A]20/20 [B]bytes相符 [C]starter_code空字串 [D]零硬命中 [E]數字全部對回 fact id，逐字對照 trace-matrix S1-S6",
+      "apcs017 formula G1：answer(9)=3、answer(1)=0，與 spec.md Worked example / No exchange possible scenario 相符",
+      "三題 params 上下界（015 n:1..1000、016 nk:0..1000000、017 n:1..1000000000）與 spec.md I/O contract 逐條相符",
+      "G5 結構性下界證明（v2//2 與 v3 在 n=1,11,1e9 恆為平手）與具體 entry 選擇無關，屬可泛化的數學證明，非僅對本組測資成立——確認 design.md 已裁決事項 4 站得住腳",
+      "spec.md 『in every reasonable spelling, verified in three』屬已收斂的有界全稱句（明確列出三種寫法），非不可窮舉驗證的裝飾性全稱句"
+     ]
+    },
+    {
+     "lens": "Lens 5：鑑別力是否真的成立（出題人視角，攻擊 apcs015/016/017）",
+     "checksDerived": 15,
+     "findingCount": 1,
+     "verifiedClean": [
+      "apcs015：半數干擾偏移（只算 4 種而非 8 種偏移）、k<3 守門 off-by-one（k<=3 誤判邊界）、干擾公式打錯次方（4(k-1)(k-1) 而非 4(k-1)(k-2)）三種攻擊，對 20 筆 literal 逐字元比對輸出，皆僅 2/20——與 E9 文件已記載的誤解路線上限（2/20）持平，未突破。結構性原因：n=1000 這一筆的輸出涵蓋 k=1..1000 全區間，任何一個 k 值算錯就會讓涵蓋該 k 的所有較大 n 測資整筆失敗，天然抵抗『部分正確』攻擊。",
+      "apcs015：既然 20 筆 literal 的『輸入』公開於 repo/bundle，硬編碼 n→答案 對照表可讓完全不懂演算法的學生拿到 20/20——但這正是決策表已裁決事項 5（=矩陣 C6）明文承認的專案層級既有殘留，與 apcs009–014 共用，本 change 明確不處理，故不構成新 finding。",
+      "apcs016：指數 off-by-one（n-k±1）、換錯模數（998244353、1000000009）、換底（3^(n-k)）、把迴圈上限截斷在 30 次等 6 種攻擊，對 20 筆 literal 得分介於 0～7/20，皆未超過稽核門檻（>12/20 才算 finding），也未超過文件已記載的『忘記取餘數』上限（6/20）太多。",
+      "apcs017：把該減半的質數搞反（min(v2, v3//2)）、誤把 4 當成質數基底處理 v2 的部分（min(legendre(n,4), v3)、min(v2//4, v3)）三種攻擊，得分均 ≤3/20，遠低於門檻。",
+      "apcs017：Legendre 迴圈邊界 off-by-one（`while q < n` 誤植取代 `while q <= n`，理論上會在 n 恰為 2 或 3 的整數次方時漏算一項）——經數學驗證：v2(n!) 在 n=2^i 時必為奇數（Legendre 公式 v2(n!)=n−popcount(n)，此時 popcount=1），使 //2 的誤差被地板除法吸收；對 n=1..2^29 全部 2 的冪、n=1..3^18 全部 3 的冪、以及 [1,10^9] 隨機 20000 筆抽樣，mismatch 率均為 0/22000。此變體在本題定義域內與正解永遠等價，不是真正的鑑別力破口，僅是內部實作差異，故未列為 finding。"
+     ]
+    }
+   ],
+   "findings": [
+    {
+     "id": "L1-1",
+     "severity": "blocking",
+     "factIds": [
+      "W3",
+      "W5",
+      "W6",
+      "E10"
+     ],
+     "where": "openspec/changes/add-counting-trio/measure/browser-verification.jsonl（全檔僅 10 行）；被引用於 trace-matrix.md 第61、132、134、135行；design.md 第72行「刻意偏離 3」直接引用 W3、W5",
+     "claim": "矩陣的 W3、W5、W6 三條 fact，以及 E10 的『兩次皆 0/20』半段，都引用 measure/browser-verification.jsonl 裡具名的紀錄（probe_factorial_small、ref017_after_unclean、probe_import_math、factorial015_rerun），但這四筆紀錄在該檔案裡完全不存在。",
+     "evidence": "python3 逐行 json.loads(open('measure/browser-verification.jsonl')) 印出全部 label，結果恰好 10 筆：['ref015','ref016','ref017','rowscan_plain','rowscan_sum','rowscan_helper','cellscan','factorial015','factorial017','ref015_after_unclean']。grep -n 'probe_factorial_small\\|ref017_after_unclean\\|probe_import_math\\|factorial015_rerun' measure/browser-verification.jsonl 零命中。改在 change 根目錄找到另一份同名檔 browser-verification.jsonl，wc -l 顯示 0 行，排除『我讀錯檔案路徑』的可能。",
+     "consequence": "design.md 的『刻意偏離 3』（math.factorial 死法已裁決不修、屬於本次不得重提事項）直接把 W3（有界變體乾淨 TLE 於 5,041ms、19/20）與 W5（分頁/worker 會復原）當成判斷依據寫死；但 W3 全無實測紀錄佐證、W6（import math 不被沙箱擋下，用來排除『0/20 另有他因』的對照組）也全無佐證、W5 的 ref017 半邊同樣缺失。任何人想覆核『math.factorial 到底能不能乾淨中斷』『分頁真的會復原』這兩個已裁決結論時，會發現矩陣宣稱做過的瀏覽器實測其實找不到證物——這正是 W 段自陳『本 change 唯一無法在本機證明、因為它推翻了三條先前結論』的最脆弱環節，證物缺失使推翻先前結論這件事本身失去佐證。",
+     "suggestedFix": "補跑 probe_factorial_small／probe_import_math／ref017_after_unclean／factorial015_rerun 四筆瀏覽器實測並實際寫入 measure/browser-verification.jsonl；若這些筆過去真的跑過但漏寫檔，需從瀏覽器 console 記錄或其他旁證補回並在矩陣註明真實出處，不能讓 design.md 的裁決繼續掛在查無實據的 fact 上。",
+     "fixRisk": "補測須重跑 pnpm preview:cf + COOP/COEP 瀏覽器流程，新測到的數字（尤其 cellscan 那類牆鐘受排程尖峰影響的筆）可能與既有 10 筆記錄的時間點不同步，需一併確認既有 8/20、0/20 等既有分數不會被新一輪量測推翻——若真的推翻，等於又要重開一次 W 段的『推翻先前結論』流程。",
+     "lens": "Lens 1：矩陣證據的可復現性（add-counting-trio）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "L1-2",
+     "severity": "high",
+     "factIds": [
+      "E8"
+     ],
+     "where": "trace-matrix.md 第61行；specs/counting-trio-challenges/spec.md 第41行；curation/plan015.py 第260行註解",
+     "claim": "三處文件（含規範層的 spec.md）皆宣稱 cellscan 路線在 n=249（第9筆）耗費 175,342,739 op（17.5倍超標），n=72（第8筆）耗費 4,262,386 op；用矩陣自己指定的量測法重跑，兩個數字都對不上。",
+     "evidence": "python3 -c 用 verify/judge_ops.count_ops_source_fresh 對 curation/routes/r015_cellscan.py 餵 '249\\n'，重跑兩次皆得 216,759,740（21.7倍超標，非 17.5倍），與 175,342,739 差約 24%。n=72 重跑得 5,278,547，與 repo 內既有 measure/routes015.json 的 per_entry_ops[7]（index 7 對應 entry 8, n=72）＝5278547 完全吻合，但都不等於矩陣宣稱的 4,262,386。route 檔 r015_cellscan.py 的 mtime（12:02）早於 trace-matrix.md／spec.md／design.md（15:16+），排除『量測之後才改路線檔』這個可以解釋落差的理由。",
+     "consequence": "spec.md 是三份受審文件之一、屬於規範層文字，AC 文字裡直接寫死 175,342,739 這個數字。任何依本次稽核鐵律『自己重跑指令驗證』的維護者，會用矩陣寫明的方法論重跑出不同數字，進而要花一輪去釐清『是環境問題還是文件錯』——正是本專案反覆記錄的頭號返工來源。",
+     "suggestedFix": "用 verify/judge_ops.count_ops_source_fresh 對 r015_cellscan.py 在 n=72、n=249 重新量測，把 trace-matrix.md E8、spec.md 第41行、plan015.py 第260行註解三處同步改成可重現的數字與正確倍率（216,759,740／10,000,000 ≈ 21.7倍）。",
+     "fixRisk": "spec.md AC 文字数字变动属规范表面改动，依专案守则要重新走一次『新增规范内容自审』checklist；同时要检查 design.md 是否也间接引用了 17.5× 这个倍率说法。",
+     "lens": "Lens 1：矩陣證據的可復現性（add-counting-trio）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "L1-3",
+     "severity": "medium",
+     "factIds": [
+      "W1"
+     ],
+     "where": "trace-matrix.md 第130行",
+     "claim": "W1 自己列出的三題 reference_solution 最大單筆牆鐘為 375／441／8 ms（deadline=5000ms），卻把『最緊倍率』寫成 13.3倍；13.3倍其實是 apcs015（375ms）的邊際，真正最緊的是 apcs016（441ms）的 11.3倍。",
+     "evidence": "python3 -c \"print(5000/375, 5000/441, 5000/8)\" → 13.333333333333334 11.337868480725623 625.0。三個 ms 值本身經比對 measure/browser-verification.jsonl 的 ref015/ref016/ref017 max_ms 完全吻合，問題只在『最緊』摘要值選錯了要比較的那一個。",
+     "consequence": "若有人依『最緊 13.3倍』評估 apcs016 的 deadline 安全邊際，會低估真實風險（真實最緊只有 11.3倍非 13.3倍，雖然仍遠大於 1 倍、無立即功能風險），但屬於矩陣自我一致性缺陷：三個並列數字與其摘要結論互相矛盾。",
+     "suggestedFix": "把『最緊 13.3倍』改成『最緊 11.3倍（apcs016，entry 5，n=1000000 k=0，441ms）』，或乾脆列出三個倍率分別對應三題，不要只放一個容易對錯的單一摘要數。",
+     "fixRisk": "低，純文字修正；但要順手確認 design.md 或 spec.md 是否也複製了『13.3倍』這個錯誤摘要。",
+     "lens": "Lens 1：矩陣證據的可復現性（add-counting-trio）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "L1-4",
+     "severity": "low",
+     "factIds": [
+      "C4"
+     ],
+     "where": "trace-matrix.md 第42行 vs design.md 第64行",
+     "claim": "trace-matrix C4 的證據欄寫『行內第一次 299、行內第二次 21、新行程 299』；design.md 對同一 fact C4 的重述卻寫『278 events cold and zero warm』（暖行程＝0，非 21）。同一 fact 在兩份文件互相矛盾，且 299/21 這組具體數字在 repo 全文搜尋不到出處，也無法用 judge_ops.py 對任何我能構造的 'import math' 類腳本重現。",
+     "evidence": "python3 用 judge_ops.count_ops_source('import math\\n','') 連跑兩次得 284（第一次）、6（第二次）；count_ops_source_fresh 得 284。改成 'import math\\nimport sys\\n' 得 285／7。278 事件差距本身穩定重現（284-6=278，285-7=278），但『299』『21』兩個具體值在整個 repo grep -rn '299' 都對不上（唯一命中是 self_test 裡與此無關的 N=2000 迴圈）。",
+     "consequence": "此為量測方法論段落的輔助說明，未直接餵給任何裁決或 AC，衝擊面小；但它示範了矩陣與 design.md 對同一 fact 就已經自相矛盾（0 vs 21），若日後有人把其中一個未經驗證的數字抄進更顯眼的位置（例如某題效能提醒），會把一個從未真正核對過的數字散布出去。",
+     "suggestedFix": "重新用一支固定腳本量出 C4 的 cold/warm op 數（可以是現有 judge_ops.py 里新增一個具名 probe），讓 trace-matrix 與 design.md 引用同一份腳本輸出，不要各自手打數字；並修正 design.md『zero warm』與矩陣『21』的矛盾。",
+     "fixRisk": "低。重新量測後若得到的 warm 數字不是 0 也不是 21（例如我量到的 6 或 7），需同時確認不影响 278 這個反复被其他量測腳本引用的核心事实（本次重現顯示 278 本身很穩定，風險小）。",
+     "lens": "Lens 1：矩陣證據的可復現性（add-counting-trio）",
+     "survivedAdversarialReview": false
+    },
+    {
+     "id": "W3-1",
+     "severity": "high",
+     "factIds": [
+      "W3",
+      "E10",
+      "W4"
+     ],
+     "where": "openspec/changes/add-counting-trio/trace-matrix.md:132（W3 列）；被引用進 specs/counting-trio-challenges/spec.md:43 與 design.md:72",
+     "claim": "矩陣 W3 列聲稱『有界版 math.factorial 在瀏覽器可被乾淨中斷，於第 14 筆得到 5,041ms 的乾淨逾時、19/20』，證據欄指向 measure/browser-verification.jsonl 的 probe_factorial_small；但該檔案裡根本沒有這筆記錄。這組具體數字（5,041ms／19/20／逐字判決字串 AAAAAAAAAAAAATAAAAAA）被原封不動抄進 spec.md 第 43 行的規範性文字與 design.md 第 72 行『Deliberate deviations』第 3 點，作為『math.factorial 並非完全不可中斷，只是無界呼叫才會整份結果被丟棄』這個關鍵論證的唯一依據。",
+     "evidence": "python3 逐行解析 measure/browser-verification.jsonl，只印出 10 筆記錄的 label：ref015, ref016, ref017, rowscan_plain, rowscan_sum, rowscan_helper, cellscan, factorial015, factorial017, ref015_after_unclean——沒有 probe_factorial_small。另以 grep -rln \"probe_factorial_small\" 掃全 repo，唯一命中處是 trace-matrix.md 本身；沒有任何腳本（curation/*.py, measure/*.py, verify/*.py）會產生這個 label，代表這是一次應由人工瀏覽器操作留下記錄、但記錄從未寫回檔案的測量。",
+     "consequence": "任何要覆核『KNOWN RESIDUE 的死因是否真的比原先講的更精確』這個論點的人（下一輪 adversarial review、或未來要修引擎的工程師），照矩陣指示去讀 measure/browser-verification.jsonl 時，找不到任何東西能證實 5,041ms／19/20 這組數字，也就無法覆核 spec.md／design.md 裡『math.factorial 有界時能被乾淨中斷』這句已經寫成規範文字的結論是否為真。若這組數字其實是記錯、或瀏覽器那次操作其實沒有真的量到，之後任何依賴『factorial 有界可乾淨中斷』這個前提去設計引擎修復的人會繼承一個沒有實測背書的假設。",
+     "suggestedFix": "要嘛補測：實際在瀏覽器重跑一次有界版 math.factorial 探針，把結果以 label=probe_factorial_small 寫回 measure/browser-verification.jsonl；要嘛降級敘述：在拿到證據前，把 spec.md/design.md 裡『5,041 ms、19/20、乾淨可中斷』這段改寫為未驗證的推測，或直接刪除該具體數字、只保留『無界 C 呼叫是死因、有界呼叫可能不受影響』這個較弱的定性敘述，直到證據補齊。",
+     "fixRisk": "若選擇補測，要注意 C4/C5 的量測方法論（冷行程、牆鐘取 7 次最小值）在瀏覽器手動操作下不易重現；若選擇降級敘述，需同步修改 spec.md 與 design.md 兩處引用，避免降級後又出現新的兩份文件不同步。",
+     "lens": "Lens 2：三份文件（題目頁／spec delta／design）與追溯矩陣的同步性，聚焦 2026-08-15 三條瀏覽器實測修正（E8 死因、E10、G7 得分）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "W5W6-1",
+     "severity": "medium",
+     "factIds": [
+      "E10",
+      "W5",
+      "W6"
+     ],
+     "where": "openspec/changes/add-counting-trio/trace-matrix.md:63（E10 列，「factorial015_rerun」）、134（W5 列，「ref017_after_unclean」）、135（W6 列，「probe_import_math」）",
+     "claim": "矩陣三處聲稱有額外的瀏覽器記錄佐證：(a) E10 說 factorial015『兩次』實測皆 0/20，指名 factorial015 與 factorial015_rerun；(b) W5 說『不乾淨死亡後緊接著提交正解，兩題皆立刻回到 20/20』，指名 ref015_after_unclean 與 ref017_after_unclean；(c) W6 說 import math 不被沙箱擋，指名 probe_import_math。但 measure/browser-verification.jsonl 只有 factorial015（1 次，非 2 次）與 ref015_after_unclean，完全沒有 factorial015_rerun、ref017_after_unclean、probe_import_math 三筆記錄。",
+     "evidence": "python3 用 collections.Counter 統計該 jsonl 的 label 欄位，factorial015 恰好出現 1 次（非矩陣聲稱的 2 次）；grep -rln 三個 label 字串於全 repo，三者都只出現在 trace-matrix.md 本身，任何量測腳本或其他資料檔都不含這些 label。矩陣第 141 行『尚未取得證據的事實』區塊明文宣稱『目前為空』『B3／B4 由瀏覽器實測關閉』，與這三筆缺失的記錄互相矛盾。",
+     "consequence": "design.md 第 72 行把 W5 的『兩題皆會復原』寫成一句涵蓋 015 與 017 兩題的通用敘述，但 017 那一半沒有實測背書；下一位想驗證『apcs017 在 worker 不乾淨死亡後是否真的能復原』的人，只能驗到 015、驗不到 017，卻會被矩陣『目前為空』的收尾誤導成兩者都已閉環。W6 的 import-math 對照組同樣缺失，代表『0/20 的死因確定是大整數 C 呼叫、不是 import 被擋』這個排除法目前少了一個腳。",
+     "suggestedFix": "同 W3：補測並寫回 factorial015_rerun、ref017_after_unclean、probe_import_math 三筆記錄，或在證據補齊前把矩陣『尚未取得證據的事實』區塊改為非空，明列這三項待補，並把 W5/E10 的敘述改成『僅 015 一側已驗證』『僅單次量測』的較弱說法，避免『目前為空』這句話造成假的完備感。",
+     "fixRisk": "若只改矩陣措辭而不補測，design.md 第 72/96 行『兩題皆…』『both actually score 0/20』等跨兩題的合併敘述也要一併拆開重寫，否則會製造出矩陣改了、design 沒同步改的新缺陷。",
+     "lens": "Lens 2：三份文件（題目頁／spec delta／design）與追溯矩陣的同步性，聚焦 2026-08-15 三條瀏覽器實測修正（E8 死因、E10、G7 得分）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "G8-1",
+     "severity": "low",
+     "factIds": [
+      "G8"
+     ],
+     "where": "openspec/changes/add-counting-trio/trace-matrix.md:92（G8 列）",
+     "claim": "矩陣 G8 列的證據欄寫『measure/report017.json 的 bigint_footprint』，但該檔案裡沒有這個鍵；真正的資料（bytes_of_bigint: n=1e8 為 314,159,123、n=1e9 為 3,556,832,228）其實在 measure/routes017.json 裡，由 measure/routes017_measure.py 裡一個確實叫作 bigint_footprint 的函式產生。另外 G8 列附帶的『斜率 1.769 vs 重跑 1.741,差 21%』這組數字，在 routes017.json 與 routes017_measure.py 裡都找不到對應值（實際存的是 central=1.74、envelope=[1.72, 1.747]）。",
+     "evidence": "python3 讀 measure/report017.json 並印出 list(d.keys())，確認沒有 bigint_footprint 這個鍵，problems 欄位也是空陣列；grep -n bigint_footprint 於全 repo，命中 routes017_measure.py（函式定義）與 routes017.json（欄位 bytes_of_bigint 的產生來源）；grep -rn \"1.769\" 全 repo，唯一命中處是 trace-matrix.md 本身。314MB／3,556,832,228 bytes 兩個數字本身在 routes017.json 裡驗證正確。",
+     "consequence": "數字本身沒錯，但矩陣指的檔名／鍵名是錯的，且『1.769』這個具體數字查無實據。下一位想覆核 G8 的人若照矩陣指示去開 report017.json 找 bigint_footprint，會找不到而誤判『這條證據是編造的』，浪費覆核預算去追一個其實只是檔名寫錯的假警報；反之，若直接接受矩陣裡『1.769 vs 1.741』這組沒有出處的數字，則是在沒有實據下多相信了一個結論。",
+     "suggestedFix": "把矩陣 G8 證據欄的檔名從 measure/report017.json 改成 measure/routes017.json，鍵名從 bigint_footprint 改成 bytes_of_bigint；『1.769 vs 1.741,差 21%』若查無出處，改引用 routes017.json 裡實際存在的 loglog_slope_central_from_minima=1.74 與 loglog_slope_envelope=[1.72, 1.747]，或註明這組數字來自一次未存檔的重跑、屬非結論性佐證。",
+     "fixRisk": "此列的兩個結論性數字（314MB、3,556,832,228 bytes）未受影響，也未進入 spec.md／design.md 之外的其他地方，因此改證據欄不會牽動 spec.md／design.md 正文，風險低；只需確認改完後矩陣使用規約第 4 條『修改任一列須檢查位置欄列出每一處』仍然成立。",
+     "lens": "Lens 2：三份文件（題目頁／spec delta／design）與追溯矩陣的同步性，聚焦 2026-08-15 三條瀏覽器實測修正（E8 死因、E10、G7 得分）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "L3-1",
+     "severity": "medium",
+     "factIds": [
+      "G1"
+     ],
+     "where": "openspec/changes/add-counting-trio/specs/counting-trio-challenges/spec.md:80；docs/challenge/fair-token-exchange.md:9",
+     "claim": "apcs017 的輸出語意在兩處被誤述為「最高可達到的階級」，與矩陣 G1／spec.md 自身的 Worked example／題面本文所定義的「成功兌換的次數」不一致，兩者對同一輸入相差 1。",
+     "evidence": "手動驗證 n=9：9! 的 v2(9!)=floor(9/2)+floor(9/4)+floor(9/8)=4+2+1=7，v3(9!)=floor(9/3)+floor(9/9)=3+1=4，答案=min(floor(7/2),4)=min(3,4)=3（與 G1、頁面範例、頁面內文表格一致）。但「成功兌換 3 次」代表代幣最終停在第 4 級，所以「最高可達到的階級」應為 4，不是 3。spec.md 第 80 行寫「SHALL emit one line holding the highest rank reachable」，但同一段落緊接著就寫「the answer counts how many such rank promotions can be completed」——同一段自相矛盾；且第 90-92 行的 Worked example 場景（input 9 → output 3）證實正確語意是「次數」而非「級數」。fair-token-exchange.md 第 9 行 description「代幣每 12 枚整批換上一級，求最多能換到第幾級」沿用了與 spec 第 80 行相同的錯誤框架，題面本文（第 96-144 行）反而是正確的。",
+     "consequence": "VitePress 預設把 frontmatter 的 description 渲染成該頁 <meta name=\"description\">（用於瀏覽器分頁/搜尋引擎摘要），且 ChallengeListView.vue 的模糊搜尋直接比對 description 文字，所以只看列表摘要、分頁標題或搜尋結果、還沒點進去讀完整題目的學生，會被引導成「要輸出的是換到第幾級」而非「換了幾次」，可能因此想錯輸出定義；日後只讀 spec.md 摘要句、不比對 Worked example 就動手驗收或改寫 generator 的維護者，也可能被第一句的錯誤框架誤導，寫出多算 1 的回歸測試或錯誤修改。",
+     "suggestedFix": "把 spec.md 第 80 行改成與同段其餘文字一致的措辭，例如「SHALL emit one line holding the count of rank promotions completed」；把 fair-token-exchange.md 的 description 改寫成不涉及「第幾級」的用詞，例如「代幣每 12 枚整批換上一級，求最多能連續換成功幾次」。",
+     "fixRisk": "純文字措辭修改，低風險；但必須同步修 spec.md 與頁面 description 兩處（本 finding 本身就是「改 A 忘記同步 B」的一個實例），改完後應重跑 verify/check_frontmatter_pair.py 的 D（禁用詞）與 E（數字追溯）確認未誤觸禁用詞、且未引入無出處數字。",
+     "lens": "Lens 3：題面品質與洩題風險",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "L3-2",
+     "severity": "low",
+     "factIds": [],
+     "where": "docs/challenge/fair-token-exchange.md:8",
+     "claim": "apcs017 的 tags 欄位為空陣列，與同批另外兩題（apcs015/016 皆為 [數學]）及站上其他同屬 category: apcs 的數學題慣例不一致；矩陣本身完全沒有追蹤 tags 這個欄位，是矩陣覆蓋範圍的缺口。",
+     "evidence": "直接讀檔：fair-token-exchange.md 第 8 行為 `tags: []`；對照 ap-layout-plan.md 第 9 行、marquee-display-count.md 第 9 行皆為 `tags:\\n  - 數學`。另 grep `category: apcs` 的既有題目（rank-code-backfill.md、prize-order-code.md、snack-bar-register.md 等）在數學色彩相近時也都掛「數學」標籤。trace-matrix.md 全文搜尋不到任何以 tags 為主張的 fact id（D1 只涵蓋 category/type/id 由 scaffold 配發）。",
+     "consequence": "學生在題庫頁用「數學」標籤篩選，或在搜尋框輸入「數學」時（ChallengeListView.vue 的 `c.tags.some(t => t.toLowerCase().includes(q))` 邏輯），會漏掉 apcs017，降低這題被找到的機率，對想按主題複習排列組合／數論類題目的學生影響最直接。",
+     "suggestedFix": "補上 `tags: [數學]`（或維護者認可的等效標籤），並考慮在矩陣新增一列明確追蹤 tags 欄位的規則，避免下次批次新增題目時再度漏標而無從察覺。",
+     "fixRisk": "純 frontmatter 補值，低風險，不影響判題邏輯；若矩陣要求「每個欄位都要有 fact id」，需一併決定 tags 是否正式納入矩陣覆蓋範圍。",
+     "lens": "Lens 3：題面品質與洩題風險",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "L4-1",
+     "severity": "medium",
+     "factIds": [
+      "D5",
+      "D6",
+      "C7",
+      "S6",
+      "B5"
+     ],
+     "where": "specs/counting-trio-challenges/spec.md:45 (apcs015 \"SHALL NOT claim any route impossible\"), :59-60 (apcs016 \"SHALL NOT use modular or binary terminology\"), :80 (apcs017 \"SHALL NOT use factorial, base, prime-factor or modular vocabulary\") 對照 curation/assemble.py:87-109 (BANNED_EN/BANNED_ZH)",
+     "claim": "spec.md 有三條「頁面文字 SHALL NOT 出現特定措辭／論斷」的規範句，但本 change 唯一的自動文字掃描機制（curation/assemble.py 的 scan_banned，由 verify/check_frontmatter_pair.py 的 [D] 檢查與 assemble.py 本身的建置期掃描共用）只涵蓋『資料結構／演算法術語』詞表，完全不包含『不可能』『取模』『二進位』『底數』『質因數』這類措辭。也就是說這三條 SHALL 目前只靠人工審稿把關，沒有任何斷言牆或 CI 檢查支撐。",
+     "evidence": "跑 `python3 -c \"import sys; sys.path.insert(0,'curation'); import assemble; print(assemble.scan_banned('這條路線不可能拿到滿分')); print(assemble.scan_banned('請取模計算')); print(assemble.scan_banned('轉成二進位表示')); print(assemble.scan_banned('找出質因數')); print(assemble.scan_banned('改成底數為 12'))\"` 五個探針全部回傳 `[]`（零命中）。逐一核對 curation/assemble.py:87-109 的 BANNED_EN／BANNED_ZH 兩張詞表，確認其中沒有『不可能』『模』『二進位』『底』『質因數』（僅有『質數』『因數分解』『模冪』等窄詞，不涵蓋這些措辭）。另跑 `python3 verify/check_frontmatter_pair.py` 確認目前三題題面**現況**乾淨（[D] 全零命中），且以 grep 確認三份題目頁目前都沒有這些字樣——說明現在合規純粹是作者自律，不是機制保證。",
+     "consequence": "本 change 的核心鑑別設計（D5/D6：017 避免洩漏『取模冪』『質因數』等技術詞彙、015 不可把 op 上限死亡講成『不可能』以免洩漏刀鋒／死亡路線的存在）完全建立在人工審稿上。日後任何一次題面文字修訂（例如依 Phoenix 一貫偏好把說明寫得『極度詳細、逐步』），若不小心加入『這個答案要對 1000000007 取模』或『暴力解法一定不可能通過大測資』之類的句子，check_frontmatter_pair.py 與 assemble.py 的建置期掃描都不會擋下來、CI 會綠燈通過，直接洩漏本 change 刻意隱藏的鑑別點與死亡路線資訊，而且要等到下一輪人工稽核才會被發現。",
+     "suggestedFix": "把 BANNED_ZH/BANNED_EN 拆成兩層：既有的『資料結構／演算法術語』詞表維持不變，另外新增一張『本 change 特定禁詞』詞表（不可能／取模／二進位／底數／質因數 等），由 scan_banned 或新函式一併掃描，並在 SCANNER_PROBES 補上對應探針做 self-test，確保『掃描器真的會叫』。",
+     "fixRisk": "詞表若訂太寬（例如禁掉單字『底』或『模』）容易誤傷合法內文（如『基地台』含『台』無妨，但『底』可能出現在其他敘述中），需要像現有英文邊界處理一樣做子字串誤判測試；建置期掃描全站或全頁 vs 僅內文的既有兩段式設計（S6 的『馬』誤報前例）也要沿用，避免新詞表引入新的誤報雜訊。",
+     "lens": "Lens 4：spec 條文的可驗證性（openspec/changes/add-counting-trio/specs/counting-trio-challenges/spec.md 逐條 SHALL 對照 curation/plan01*.py 斷言牆 與 verify/*.py）",
+     "survivedAdversarialReview": false
+    },
+    {
+     "id": "L5-1",
+     "severity": "low",
+     "factIds": [
+      "G5",
+      "G6"
+     ],
+     "where": "openspec/changes/add-counting-trio/specs/counting-trio-challenges/spec.md（apcs017「誤解路線鑑別」段）；design.md（量測表、殘餘風險）",
+     "claim": "G5 只證明「取單邊」家族（只取 v3、只取 v2//2、忘記減半）的最高分下界是 12/20 且無法再壓低。但另一種同樣不理解 min 語意的『組合式』誤解——把 v2//2 與 v3 取平均而非取最小——在同一份 20 筆 literal 上可拿到 15/20，超過文件中作為既有基準引用的 12/20，且在更大範圍的 n 抽樣下錯誤率高達 43%，證明它本質上是不合理的公式，只是恰好被這 20 筆蓋到的邊界『放過』。",
+     "evidence": "以 curation/semantics017.py 的 exchanges_formula 為正解，對 curation/out/frontmatter017.yaml 的 20 筆 literal（9,1,3,8,11,15,32,39,116,243,1024,4374,20276,65610,987654,100000089,123456789,777777777,999999968,1000000000）跑 `avg = (legendre(n,2)//2 + legendre(n,3)) // 2`：得分 15/20（相符：9,1,3,11,15,32,39,116,1024,20276,987654,100000089,123456789,777777777,999999968；不符：8,243,4374,65610,999999968→實際核對後不符的 5 筆為 8,243,4374,65610,1000000000）。額外對 n=1..5000 及 [1,10^9] 隨機 5000 筆抽樣，錯誤率 4266/9999 ≈ 42.66%（腳本輸出見上）。對照：只取 v3（=忘記減半，兩者輸出恆等）得 11/20，只取 v2//2 得 12/20，兩者才是文件引用的『家族最高分』基準。",
+     "consequence": "若學生把『答案受限於較稀缺資源』誤解成『答案是兩個候選值的折衷』（用平均取代 min），在判題上仍可拿到 15/20（75%），高於文件現有引用的 12/20 基準、也高於三條已編目的取單邊路線，卻同樣沒有掌握本題核心洞見（12=2²×3，答案取決於較吃緊的那一邊，不是兩邊的折衷）。對學生本人的直接後果不大（他仍看得到扣分），但對出題／複核團隊而言，若日後把『12/20 是本題可達到的最高誤解分數』當成既定事實引用（例如用於下一輪 reviewer 標尺凍結），會低估真實的鑑別力缺口。",
+     "suggestedFix": "在 20 筆 literal 中額外納入 1-2 筆刻意讓 |v2//2 − v3| ≥ 2 的邊界值（例如微調 curation/plan017.py 既有的 n=8、n=32、n=1024 附近取值間距），把『平均型』誤解路線壓回與取單邊家族相近的分數；並在 measure/report017.json 的 guess_route_bound 旁補一個組合式變體的佐證，避免未來只依賴『取單邊』家族的證明就宣稱鑑別力封頂。",
+     "fixRisk": "調整 literal 會牽動 G2（20 筆組成規則）、S4（四鍵與 curation/out 逐位元組相同）、S5（每個數字都要對回 fact id）等既有斷言，需同步改 curation/plan017.py、measure/report017.json，且新邊界值須重跑 B1（正式池 regression）與 W1（瀏覽器 20/20）才能收斂，不能只手改 yaml——這正是 CLAUDE.md 提醒的『新增保證要做副作用檢查』的典型場景。",
+     "lens": "Lens 5：鑑別力是否真的成立（出題人視角，攻擊 apcs015/016/017）",
+     "survivedAdversarialReview": false
+    }
+   ],
+   "survivorCount": 8,
+   "totalCount": 11
+  },
+  {
+   "round": "R2",
+   "lensSummary": [
+    {
+     "lens": "A：第一輪修復（R1-A～R1-F）回歸檢查",
+     "checksDerived": 17,
+     "findingCount": 3,
+     "verifiedCleanCount": 10
+    },
+    {
+     "lens": "Lens B：矩陣證據可復現性（全面重驗）",
+     "checksDerived": 49,
+     "findingCount": 5,
+     "verifiedCleanCount": 44
+    },
+    {
+     "lens": "C：三份文件與矩陣的同步性（第二輪，聚焦 E8/G8/W1/W5/S9 五列）",
+     "checksDerived": 5,
+     "findingCount": 3,
+     "verifiedCleanCount": 6
+    },
+    {
+     "lens": "D：題面品質與洩題風險（第二輪，逐字重讀 ap-layout-plan.md／marquee-display-count.md／fair-token-exchange.md，並以維護者身分驗證第一輪對 apcs017 description／tags 的修復）",
+     "checksDerived": 11,
+     "findingCount": 0,
+     "verifiedCleanCount": 11
+    },
+    {
+     "lens": "E：spec 條文可驗證性（逐條 SHALL 檢查能否被驗證，並與 curation/plan01*.py 斷言牆逐條對照）",
+     "checksDerived": 21,
+     "findingCount": 2,
+     "verifiedCleanCount": 9
+    },
+    {
+     "lens": "F：鑑別力（出題人視角，攻擊 apcs015/016/017）",
+     "checksDerived": 13,
+     "findingCount": 2,
+     "verifiedCleanCount": 11
+    }
+   ],
+   "findings": [
+    {
+     "id": "L1",
+     "severity": "high",
+     "factIds": [
+      "W6"
+     ],
+     "where": "openspec/changes/add-counting-trio/trace-matrix.md:136",
+     "claim": "矩陣 W6 宣稱 `probe_import_math` 的 max 為 2 ms，但 measure/browser-verification.jsonl 實際記錄的 max_ms 是 4.0",
+     "evidence": "python3 -c 讀 measure/browser-verification.jsonl 逐行 json.loads，label==probe_import_math 的紀錄為 {'score': 20, 'max_ms': 4.0, 'per_ms': [3,2,3,4,3,2,3,4,2,3,2,3,3,2,2,2,2,3,2,4]}（第 4/8/20 筆皆為 4.0ms）。矩陣文字寫「20/20、max 2 ms」，與實測值不符。",
+     "consequence": "W6 是 R1-A 這輪新補進 repo 的四筆量測之一，其存在目的是作為『排除 E10／G7 之 0/20 另有他因』的對照實驗證據。矩陣第 3 條使用規約要求證據欄寫到『跑什麼指令、看到什麼值』的程度——這裡寫的值是錯的，任何依矩陣覆核的人若不重新讀 jsonl 就會沿用錯誤數字。",
+     "suggestedFix": "把 trace-matrix.md 第 136 行的「max 2 ms」改成「max 4 ms」，與 browser-verification.jsonl 的 probe_import_math.max_ms 對齊。",
+     "fixRisk": "低——純文字修正，不涉及任何程式碼或判題邏輯。",
+     "lens": "A：第一輪修復（R1-A～R1-F）回歸檢查",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "L2",
+     "severity": "high",
+     "factIds": [
+      "W5",
+      "G7"
+     ],
+     "where": "openspec/changes/add-counting-trio/trace-matrix.md:135",
+     "claim": "矩陣 W5 宣稱 ref017_after_unclean（20/20）『其前一筆 factorial017_pre_recovery 為 0/20，確保復原測試確實接在不乾淨死亡之後』；但 browser-verification.jsonl 裡根本沒有 `factorial017_pre_recovery` 這個 label，且 ref017_after_unclean 在檔案裡的實際前一筆是 `factorial015_rerun`（apcs015 的量測，不是 apcs017）",
+     "evidence": "`grep -rn \"pre_recovery\" openspec/changes/add-counting-trio/` 全域搜尋零命中，確認此 label 未出現在任何檔案（包含它自稱的出處 browser-verification.jsonl）。逐行列出 jsonl 的 14 個 label 順序：...cellscan, factorial015, factorial017, ref015_after_unclean, probe_import_math, probe_factorial_small, factorial015_rerun, ref017_after_unclean——ref017_after_unclean 前一筆是 factorial015_rerun（apcs015、score 0），而真正的 apcs017 不乾淨死亡紀錄 `factorial017` 出現在檔案中段、中間隔了 4 筆其他量測（ref015_after_unclean/probe_import_math/probe_factorial_small/factorial015_rerun）。",
+     "consequence": "W5 的論證邏輯是『緊接在不乾淨死亡之後重新提交正解、立刻回到 20/20』才能證明『分頁與 worker 會復原』且不是巧合。但實際資料顯示 ref017_after_unclean 之前緊接著的是另一題（apcs015）的死亡紀錄，不是 apcs017 自己的不乾淨死亡——矩陣所引用的證據鏈與其自稱的量測情境不符，這條『確保復原測試確實接在不乾淨死亡之後』的保證實際上沒有被資料驗證到。這正是 R1-A 補測（新增 ref017_after_unclean／factorial015_rerun 等四筆）之後才浮現的新洞，並非第一輪要修的原始問題。",
+     "suggestedFix": "若量測順序原本就是有意如此（例如先驗證 015 的復原，再驗證 017 的復原），應把矩陣文字改為誠實描述實際順序，刪除『factorial017_pre_recovery』這個不存在的 label 引用；若原意確實是要在 factorial017 死亡後立刻測 ref017_after_unclean，則需要重新在瀏覽器補測一筆緊接在 factorial017 之後的 ref017 提交，並把新紀錄寫回 jsonl。",
+     "fixRisk": "中——若選擇重新量測，需要重跑瀏覽器 wrangler preview 流程；若只是改矩陣措辭以符合實際資料，風險低但會削弱 W5 原本想主張的『順序保證』強度，需要維護者確認是否可接受。",
+     "lens": "A：第一輪修復（R1-A～R1-F）回歸檢查",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "L3",
+     "severity": "high",
+     "factIds": [
+      "S9"
+     ],
+     "where": "openspec/changes/add-counting-trio/specs/counting-trio-challenges/spec.md:104-113（Shared authoring constraints 段）",
+     "claim": "矩陣 S9（R1-F 新增列）的『位置』欄宣稱此事實（三題 frontmatter 欄位集合一致、tags 皆非空）應出現在 spec 的『共用授權約束』段，但實際上 spec.md 全文對 `tags` 隻字未提",
+     "evidence": "`grep -ni tag openspec/changes/add-counting-trio/specs/counting-trio-challenges/spec.md` 零命中。讀完 spec.md 104-113 行的『Shared authoring constraints』整段（category/type/difficulty、禁用術語掃描、reference_solution、starter_code、數字可追溯性），完全沒有任何一句涉及 frontmatter 鍵集合完整性或 tags 非空的規範。",
+     "consequence": "違反矩陣自身使用規約第 4 條：『修改任何一列，必須同時檢查「位置」欄列出的每一處，缺一即為不同步。』S9 是這一輪（2026-08-15）稽核新增的列，其『位置』欄本身就沒有被檢查過——目前只有可執行的 verify/check_frontmatter_pair.py 的 [F] 檢查在守這件事，spec 本身作為 SHALL 規範文件並未記載這條約束，之後若有人只讀 spec.md 判斷驗收條件，會完全看不到 tags 非空 / 欄位集合一致的要求。",
+     "suggestedFix": "在 spec.md 的『Shared authoring constraints for the counting trio』段落補一句 SHALL 陳述，例如：『All three pages SHALL declare the same frontmatter key set and a non-empty `tags` array (trace S9).』",
+     "fixRisk": "低——純文件補寫一句話，不影響任何程式碼或已通過的自動化檢查（check_frontmatter_pair.py 的 F 檢查本來就獨立於 spec.md 運作）。",
+     "lens": "A：第一輪修復（R1-A～R1-F）回歸檢查",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "LB-1-E11",
+     "severity": "high",
+     "factIds": [
+      "E11"
+     ],
+     "where": "openspec/changes/add-counting-trio/trace-matrix.md:64 ＋ openspec/changes/add-counting-trio/specs/counting-trio-challenges/spec.md:37",
+     "claim": "E11 主張「process 啟動地板 14.53 ms、REFERENCE 演算法增量 0.86 ms、三種 O(n²) 寫法佔 deadline 4.62%／3.18%／5.01%」，但這組數字與其自己引用的 measure/routes015.json 實際內容完全對不上，且此組錯誤數字已同步寫進出貨的 spec.md 第 37 行（The wall clock is not discriminating here: the process start floor measures 14.53 ms...）。",
+     "evidence": "python3 -c 讀取 measure/routes015.json（git status 確認乾淨、與 HEAD 一致）：process_start_floor_cpython_ms = 14.84（非 14.53）；r015_ref_formula.py 的 max_entry_algorithm_increment_cpython_ms = 2.04（非 0.86）；三路線 spelling_wall_pct_of_deadline 為 r015_rowscan.py=16.43、r015_rowscan_sum.py=4.29、r015_rowscan_helper.py=6.07（非 4.62／3.18／5.01，且 rowscan 的真實佔比 16.43% 是矩陣宣稱值 4.62% 的 3.5 倍）。另用 grep -rn '14.53\\|0.86\\|4.62\\|3.18\\|5.01' 掃全 change 目錄，這五個數字只出現在 trace-matrix.md 與 spec.md，routes015.json、plan015.py 等任何資料來源皆查無出處。經確認 plan015.py 的斷言 E-3 只檢查『牆鐘歸因自洽』這個性質，不比對具體數字，故此類數字錯置不會被斷言牆攔下。",
+     "consequence": "spec.md 是本 change 出貨的規範文件，其『牆鐘不具鑑別力』的結論目前建立在編造/對不上來源的具體數字上；雖然把數字換成正確值（16.43%／4.29%／6.07%）後質性結論（皆遠低於 100%、不構成鑑別軸）仍成立，但目前寫入 spec 的精確百分比是假的，任何依此數字做進一步推論（例如比較哪條寫法的牆鐘餘裕最緊）會得到錯誤排序——真實最緊的是 rowscan（16.43%），矩陣卻宣稱是 rowscan_helper（5.01%）。",
+     "suggestedFix": "把 trace-matrix.md E11 列與 spec.md 第 37 行的五個數字，依 measure/routes015.json 的實測值改為：process 啟動地板 14.84 ms、REFERENCE 演算法增量 2.04 ms、三種寫法佔 deadline 16.43%／4.29%／6.07%；並把證據欄的鍵名 `process_start_floor` 改為實際鍵名 `process_start_floor_cpython_ms`。",
+     "fixRisk": "low — 純粹把散文數字改成已存在、已委交的量測檔內數值，不需要重新量測或碰觸程式碼。",
+     "lens": "Lens B：矩陣證據可復現性（全面重驗）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "LB-2-W5",
+     "severity": "medium",
+     "factIds": [
+      "W5"
+     ],
+     "where": "openspec/changes/add-counting-trio/trace-matrix.md:135",
+     "claim": "W5 主張 ref017_after_unclean「其前一筆 factorial017_pre_recovery 為 0/20，確保復原測試確實接在不乾淨死亡之後」，但 measure/browser-verification.jsonl 全檔 14 筆紀錄中根本不存在名為 factorial017_pre_recovery 的項目；ref017_after_unclean 實際的前一筆是 factorial015_rerun（apcs015 的路線，非 apcs017）。",
+     "evidence": "python3 逐行列出 measure/browser-verification.jsonl（git status 確認乾淨）的 label 順序：...(6)cellscan (7)factorial015 (8)factorial017 (9)ref015_after_unclean (10)probe_import_math (11)probe_factorial_small (12)factorial015_rerun (13)ref017_after_unclean。緊接在 ref017_after_unclean 前面的是 factorial015_rerun（score 0），全檔搜尋 'factorial017_pre_recovery' 零命中。",
+     "consequence": "這正是本輪被要求嚴查的失效模式——證據欄指向不存在的鍵。任何想覆核 W5 的人會找不到 factorial017_pre_recovery 這個項目；且矩陣暗示『apcs017 的不乾淨死亡緊接著 apcs017 的復原測試』，但實際緊接在 ref017_after_unclean 前的是 apcs015 的死亡（factorial015_rerun），真正 apcs017 自己的不乾淨死亡（factorial017，index 8）後面接的其實是 ref015_after_unclean（apcs015 復原）——兩題的死亡/復原配對是交錯的，不是矩陣暗示的『各自接自己』。",
+     "suggestedFix": "把引用的標籤改為實際存在的 factorial015_rerun，並把敘述改為『worker 層級的復原不分題目——任一題不乾淨死亡後，緊接著提交任一題正解都會回到 20/20』，不要暗示是 apcs017 專屬的死亡接 apcs017 專屬的復原。若要保留『apcs017 專屬』的敘事，需另外在 browser-verification.jsonl 新增一筆真正緊接在 ref017_after_unclean 之前的 apcs017 不乾淨死亡探針。",
+     "fixRisk": "low — 只是修正引用標籤與敘述用詞，不涉及重新量測。",
+     "lens": "Lens B：矩陣證據可復現性（全面重驗）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "LB-3-G1",
+     "severity": "low",
+     "factIds": [
+      "G1"
+     ],
+     "where": "openspec/changes/add-counting-trio/trace-matrix.md:85",
+     "claim": "G1 主張暴力參照與公式版「在 n ≤ 400 相符」，但 curation/semantics017.py 本身的註解與程式碼都明白寫著只逐一比對到 n=299，400 只是暴力函式的效能硬上限（BRUTE_MAX_N），不是實際跑過的比對範圍。",
+     "evidence": "python3 curation/semantics017.py 印出「n=1..299 公式 vs 暴力 不一致筆數 = 0」；semantics017.py 原始碼第 17 行明寫「兩者在 n = 1..299（含）逐一比對必須零誤差，這是 G1 的機械證據」，第 99 行函式 docstring 也寫「n = 1..299 零誤差」，第 101 行迴圈為 range(1, 300)；BRUTE_MAX_N=400（第 23 行）只是暴力函式『再大就開始以秒計』的硬性使用上限，程式從未真的跑到 n=400 去比對。",
+     "consequence": "矩陣把『理論上暴力函式撐得住的上限』（400）誤植為『實際驗證過的範圍』，誇大了驗證覆蓋度約 34%。不影響最終答案正確性（公式本身在其他地方另有 n≤5000 的獨立復現代理驗證覆蓋這段落），但這條 fact 本身的證據描述與其引用的原始碼不符。",
+     "suggestedFix": "把 G1 證據欄的「在 n ≤ 400 相符」改為「在 n ≤ 299 相符」，與 semantics017.py 的實際比對迴圈一致；若真想驗到 400，需把 range(1, 300) 改成 range(1, 401) 並重新確認暴力函式在 n=400 仍能在合理時間內跑完。",
+     "fixRisk": "low",
+     "lens": "Lens B：矩陣證據可復現性（全面重驗）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "LB-4-C3",
+     "severity": "low",
+     "factIds": [
+      "C3"
+     ],
+     "where": "openspec/changes/add-counting-trio/trace-matrix.md:41",
+     "claim": "C3 主張「三支獨立工具（plan015.py、crosscheck_trio.py、opprobe_015_nbound.py）在 n=1000 對同一路線量到同一個 1,008,010」，但 opprobe_015_nbound.py 直接執行時印出的是 1,008,011，與另外兩支工具的 1,008,010 差 1。",
+     "evidence": "兩次重跑 `python3 measure/opprobe_015_nbound.py`，皆在「決議上界 n=1000 的直接實測」段落穩定印出「O(n^2) 明寫迴圈 1,008,011 op 活」；而 measure/routes015.json 的 spelling_ops_at_max_entry.r015_rowscan.py = 1008010、verify/crosscheck.json 第 197 行的 per_entry_ops 最後一筆同為 1008010。差異來源：opprobe 用 judge_ops.count_ops() 包一層 lambda 直接呼叫函式（多一個框架的 call 事件），另兩支工具用 judge_ops.count_ops_source() 對實際路線檔（含 stdin 讀取）以子行程執行，兩種量測路徑天生會差 1 個 op。",
+     "consequence": "『三支工具量到完全相同的值』這句話字面上不成立；不影響 C3 想論證的核心結論（op 數量級穩定、可原封搬到瀏覽器），但作為『可復現性』證據，任何人照著跑 opprobe_015_nbound.py 都會看到與矩陣宣稱值不同的數字，形成一次可觀察的『對不上』。",
+     "suggestedFix": "在 C3 證據欄註明『1,008,010（plan015.py／crosscheck_trio.py，走 count_ops_source 對實際檔案）vs 1,008,011（opprobe_015_nbound.py，走 count_ops 包 lambda 直接呼叫函式，多一個外殼呼叫的 op），差 1 op 屬量測路徑框架開銷，非路線本身差異』；或修改 opprobe_015_nbound.py 改用 count_ops_source 對實際路線檔案量測，讓三者真正一致。",
+     "fixRisk": "low",
+     "lens": "Lens B：矩陣證據可復現性（全面重驗）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "LB-5-W6",
+     "severity": "low",
+     "factIds": [
+      "W6"
+     ],
+     "where": "openspec/changes/add-counting-trio/trace-matrix.md:136",
+     "claim": "W6 主張 probe_import_math「20/20、max 2 ms」，但 measure/browser-verification.jsonl 中該筆記錄的 max_ms 實際是 4.0，不是 2。",
+     "evidence": "python3 讀取 measure/browser-verification.jsonl（git status 確認乾淨）中 label=='probe_import_math' 的整筆記錄：score=20, max_ms=4.0, per_ms 陣列最大值為 4.0（第 4、8、20 筆）。",
+     "consequence": "輕微——『import math 不被沙箱守衛阻擋、執行極快』的質性結論不受影響（2 ms 或 4 ms 都遠低於 deadline），但引用的具體數字是錯的。",
+     "suggestedFix": "把 W6 證據欄的「max 2 ms」改為「max 4 ms」。",
+     "fixRisk": "low",
+     "lens": "Lens B：矩陣證據可復現性（全面重驗）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "C-1",
+     "severity": "medium",
+     "factIds": [
+      "W1"
+     ],
+     "where": "openspec/changes/add-counting-trio/design.md（應在「Implementation Contract」的 Acceptance criteria 或等效驗收條件段落）",
+     "claim": "矩陣 W1 列規定該事實只需出現在 design（驗收條件），但 design.md 全文完全沒有出現 W1 的任何內容——三題 reference_solution 在真實 Pyodide 各 20/20、且各自的牆鐘餘裕數字（apcs015 13.3 倍／apcs016 11.3 倍「三題最緊」／apcs017 625 倍）一個都沒有寫進去。spec.md 也沒有（其位置欄本就是 —，正確）。",
+     "evidence": "grep -n \"11.3|441 ms|375 ms|13.3|625 倍|最緊\" 對 spec.md 與 design.md 皆零命中；design.md 第 74-93 行的 Acceptance criteria 只泛泛寫「A submission implementing any route marked ACCEPTED or REFERENCE in the trace matrix scores 20/20」，沒有指名任何一題、也沒有牆鐘數字。獨立跑 measure/browser-verification.jsonl 驗證 W1 本身的數字正確（ref015 max_ms=375、ref016 max_ms=441、ref017 max_ms=8，5000/441≈11.34× 符合「apcs016 最緊」），問題純粹是矩陣要求出現在 design 的事實，design 裡完全查無。",
+     "consequence": "第一輪聲稱修正的 R1-C（W1 最緊餘裕選錯比較對象）只改對了 trace-matrix.md 本身，但矩陣是「單一真相來源」，散文本應由矩陣派生；design.md 從未真正記載過這個結論，讀 design.md 的人（例如下一輪維護者或稽核者）完全看不到瀏覽器驗收有牆鐘餘裕這件事，也看不到「apcs016 最緊」這個決策依據，等於這條事實只活在矩陣裡、沒有真正落地到規格文件。",
+     "suggestedFix": "在 design.md 的 Implementation Contract／Acceptance criteria 補一行，明確引用 fact W1：三題 reference_solution 在真實 Pyodide 各 20/20，並列出三題的牆鐘餘裕與「apcs016 最緊（11.3 倍）」的結論。",
+     "fixRisk": "low",
+     "lens": "C：三份文件與矩陣的同步性（第二輪，聚焦 E8/G8/W1/W5/S9 五列）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "C-2",
+     "severity": "medium",
+     "factIds": [
+      "G8"
+     ],
+     "where": "openspec/changes/add-counting-trio/design.md（Risks / Trade-offs 段，矩陣要求「量測表、殘餘風險」）",
+     "claim": "矩陣 G8 列要求該事實同時出現在 spec 與 design。spec.md 第 88 行確實有（且第一輪 R1-D 已修正指向 bytes_of_bigint 與 loglog_slope，內容正確），但 design.md 全文完全沒有 G8 的任何內容——沒有 memory/記憶體、314 MB、bytes_of_bigint、loglog_slope 等字樣，也沒有「apcs017 的 math.factorial 路線在 n≥10⁸ 必定不可行、支柱是記憶體而非時間」這個結論。",
+     "evidence": "grep -n \"bytes_of_bigint|loglog_slope|314,159,123|3,556,832,228|memory|記憶體|megabyte\" 對 design.md 零命中；design.md 唯一提到 apcs017 math.factorial 殘留的段落（第 72、96 行）只講 0/20 得分與 op 數（577／98,699），完全沒提大整數記憶體佔用或不可行性這個獨立結論。",
+     "consequence": "同 W1，這是「單一真相來源」矩陣有記載、但派生出的規格文件缺一處的典型失效模式——design.md 讀者看不到 apcs017 的 math.factorial 殘留為何在大 n 下「必定」不可行，只看到它得 0 分，缺少完整的因果鏈（記憶體 vs 時間）。",
+     "suggestedFix": "在 design.md 的 Risks / Trade-offs（第 94-104 行附近）新增一句引用 fact G8：apcs017 的 math.factorial 路線在 n≥10⁸ 於瀏覽器必定不可行，支柱是記憶體（n=10⁸ 約 300 MiB、n=10⁹ 約 3.56 GB），時間外推僅供量級佐證、不作結論支柱。",
+     "fixRisk": "low",
+     "lens": "C：三份文件與矩陣的同步性（第二輪，聚焦 E8/G8/W1/W5/S9 五列）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "C-3",
+     "severity": "medium",
+     "factIds": [
+      "S9"
+     ],
+     "where": "openspec/changes/add-counting-trio/specs/counting-trio-challenges/spec.md（「Requirement: Shared authoring constraints for the counting trio」段，104-113 行）",
+     "claim": "矩陣 S9 列要求該事實出現在 spec（共用授權約束），但 spec.md 的「Shared authoring constraints」整段完全沒有提到 frontmatter 十五個鍵欄位集合一致、也沒有要求 tags 非空。頁面本身已正確（三題 tags 皆為「數學」，非空，對應 R1-F 修正），但 spec 這一側沒有把驗收要求寫下來。",
+     "evidence": "grep -in \"tags|field|frontmatter|non-empty|key set\" 對 spec.md 只命中 starter_code 空字串那句與 assemble.py 的禁用詞句，完全沒有任何 tags 或欄位集合的 SHALL 敘述；spec.md 第 104-113 行逐句讀過，找不到 S9 對應內容。",
+     "consequence": "S9 是第一輪為了修 apcs017 tags 為空這個根因才新增的矩陣列（矩陣自己註明「此列因 2026-08-15 稽核發現…而新增」），但這條新增的規範表面沒有回頭寫進 spec delta，等於「新內容自審」這一步只做了一半——矩陣有列、頁面有修，但 spec 沒有對應的 SHALL 敘述可供未來的內容回歸測試或稽核引用，往後若有人不小心又把某一題的 tags 清空，spec 文字層面抓不到這個違規。",
+     "suggestedFix": "在 spec.md 的 Shared authoring constraints 段落補一句 SHALL 敘述，對應 fact S9：三題 frontmatter 皆須具備固定的十五個鍵（含非空 tags），欄位集合須逐題一致。",
+     "fixRisk": "low",
+     "lens": "C：三份文件與矩陣的同步性（第二輪，聚焦 E8/G8/W1/W5/S9 五列）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "E-F1",
+     "severity": "high",
+     "factIds": [
+      "G3"
+     ],
+     "where": "openspec/changes/add-counting-trio/spec.md:84（trace G3）vs openspec/changes/add-counting-trio/measure/routes017_measure.py:285-345",
+     "claim": "spec.md 對 apcs017 的 SHALL 條文『The reference route and two accepted spellings SHALL score 20/20 at 155, 156 and 166 operations (trace G3)』完全沒有對應的斷言牆保護——負責產生這三個數字的 measure/routes017_measure.py 的 main() 從頭到尾沒有任何 assert/problems/raise/sys.exit(1)，無論 REFERENCE 或 ACCEPTED 路線得幾分、耗多少 op，程式一律印出 JSON 並 return 0。",
+     "evidence": "grep -n \"problems\\|append(\\\"\" measure/routes017_measure.py 完全無命中；讀 main()（285-345 行）確認全程沒有 if/raise 判斷式，函式尾端固定 return 0。實際跑一次 `python3 routes017_measure.py`（背景工作 byf3xr8ej，exit code 0）重現出與目前 repo 一致的 155/156/166、20/20/20，證明目前數字正確但只是巧合正確，不是被守門守住的。對照組：apcs015 的 curation/plan015.py 對 REFERENCE/ACCEPTED 有『if score != 20: problems.append(...)』與『if max_ops > OP_LIMIT: problems.append(...)』並在失敗時非零結束；apcs016 的 measure/measure016.py 同樣有『if r[\"score\"] != \"20/20\": problems.append(...)』與 op 上限檢查、且 sys.exit(main()) 在 problems 非空時回傳 1。apcs017 是三題中唯一沒有比照辦理的一個。",
+     "consequence": "未來只要有人動了 curation/routes/r017_divmod.py、r017_helper.py、r017_ref.py 任一行（改寫法、修 bug、甚至只是清註解卻不小心動到邏輯），或未來引擎層 op 計數規則變動，routes017_measure.py 都會靜靜地把錯的分數或錯的 op 數字寫進 measure/routes017.json 並以 exit 0 收尾——不會有任何斷言失敗提醒維護者，spec.md 裡『20/20 at 155, 156, 166 operations』的字面主張會在下一輪稽核前悄悄失真，而稽核者若只看『腳本有跑過、exit 0』會誤以為已受保護。",
+     "suggestedFix": "仿照 measure/measure016.py 既有寫法，在 routes017_measure.py 的 main() 尾端加入 problems 收集：對 disposition==REFERENCE/ACCEPTED 的三條路線分別檢查 score==\"20/20\" 與 max_ops<=OP_LIMIT，有問題時印出並讓 main() 回傳非零（if __name__ 區塊已是 raise SystemExit(main())）。",
+     "fixRisk": "低——純新增檢查邏輯，可直接複製 measure016.py 154-167 行的既有樣式，不影響現有測量與輸出格式。",
+     "lens": "E：spec 條文可驗證性（逐條 SHALL 檢查能否被驗證，並與 curation/plan01*.py 斷言牆逐條對照）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "E-F2",
+     "severity": "medium",
+     "factIds": [
+      "G4"
+     ],
+     "where": "openspec/changes/add-counting-trio/spec.md:84,98-101（trace G4）vs openspec/changes/add-counting-trio/curation/plan017.py:118-124",
+     "claim": "spec.md 明確用『SHALL score exactly 2/20』（且 Scenario『The base-ten rule fails』的 THEN 也寫死『it scores 2/20』）描述十進位尾零誤解路線，但 curation/plan017.py 的 CAPS 只用 (\"<=\", DECIMAL_CAP) 上界檢查，沒有機制把它釘死在剛好 2——只要日後 20 筆 literal 的組成改變（例如 zero_answer_boundary() 的結果變了、或新增/替換某一筆），該路線的實際得分掉到 0/20 或 1/20 都不會讓 python3 plan017.py 失敗。",
+     "evidence": "讀 plan017.py:118-124：CAPS 五條裡只有 R_reference 用 \"==\"，W1_decimal_tail／W2/W3/W4 全用 \"<=\"。跑 python3 plan017.py --check 確認目前實測值是 W1_decimal_tail=2（與 spec 一致），但同檔案裡 W2_forgot_half/W3_only_v3 的『剛好 11/12』其實是靠另一組獨立恆等式鎖死（pair_sum != len(ENTRIES)+ties 與 worst != bound 兩條斷言），只有 W1_decimal_tail 沒有等價鎖定機制，僅靠 MIN_DECIMAL_KILLS=6（只保證『錯的筆數 >= 6』即得分 <= 14，遠比 2 寬鬆）。對照 apcs015（plan015.py 對 WRONG_ANSWER 用 score != want_score 精確比對）與 apcs016（plan016.py 的 CAPS 全部是 (\"eq\", cap)），三題中只有 apcs017 的 W1 是唯一沒有把 spec 的『exactly』字面主張鎖進斷言牆的一條。",
+     "consequence": "spec.md 對這條路線的字面契約（exactly 2/20）比實際被機械守住的契約（at most 2/20）更強；一旦分數意外掉到 0 或 1，plan017.py 不會攔下來，spec.md 與 Scenario 就會留下一個文件說『2/20』但實測不再是 2/20 的靜默落差，要到下一輪人工稽核才會被發現。",
+     "suggestedFix": "二選一：(a) 把 CAPS[\"W1_decimal_tail\"] 從 (\"<=\", DECIMAL_CAP) 改成 (\"==\", DECIMAL_CAP)，讓斷言牆真的鎖住『剛好 2』；或 (b) 若『上界』才是刻意設計，則把 spec.md 該句改成『SHALL score at most 2/20』並同步修 Scenario 措辭，不要用『exactly』字眼立下比程式碼強的契約。",
+     "fixRisk": "低——改 CAPS 的 tuple 是一行變更且目前測資本來就通過 ==2；改 spec.md 措辭同樣是局部文字修改，不涉及邏輯或既有測資。",
+     "lens": "E：spec 條文可驗證性（逐條 SHALL 檢查能否被驗證，並與 curation/plan01*.py 斷言牆逐條對照）",
+     "survivedAdversarialReview": false
+    },
+    {
+     "id": "F-015-polyfit",
+     "severity": "high",
+     "factIds": [
+      "E1",
+      "E2",
+      "D4",
+      "D3"
+     ],
+     "where": "docs/challenge/ap-layout-plan.md 的「先手算幾個小的」範例表（D3/D4）+ trace-matrix.md E 段（E1/E2/E9）未涵蓋此攻擊族",
+     "claim": "第 k 列答案在題面明講的定義域內恰好是「k 的四次多項式」（即使拿掉正解裡的 `if k>=3` 分支、只用無條件的封閉式，1..1000 全部逐項相符）。這代表只要有題面已公開的任意 5 個相異 k 點（範例表 k=1..5 或 worked example 的 k=1..8 都夠），用拉格朗日插值就能唯一還原整條多項式，完全不需要理解「格子配對」「干擾表」「2×3 區塊」的任何幾何意義。",
+     "evidence": "1) 驗證『(k²(k²−1)/2 − 4(k−1)(k−2))』無條件式與含 if 的正解對 k=1..1000 逐項相同（差集為空），證明數列本身即單一四次多項式。2) 實作只讀題面表格 5 個點（0,6,28,96,252，對應 k=1..5）做 Lagrange 插值、對每個 k 求值的攻擊程式（/tmp/attack015_polyfit.py），用 verify/judge_ops.py 的 count_ops_source（與 C1/C2 同一份判題複刻）對 curation/out/frontmatter015.yaml 的 20 筆 literal 逐筆跑，結果 20/20 全對，單筆最大 op 927,346（遠低於 OP_LIMIT=10,000,000，餘裕 10.8 倍），verdicts 全 A。",
+     "consequence": "此題被設計為『難度標籤衡量數學推論深度』（D4 裁決），但一名熟悉牛頓差分／拉格朗日插值（常見競程/數學社技巧，非本題專屬洞見）的學生，完全不需要理解基地台干擾幾何、也不需要理解任何組合計數，僅憑題面自己給出的範例表就能滿分過關。這使得本題實際的鑑別軸從『是否推導出 2×3 區塊排除法』退化成『是否會查表插值』，與出題目的（考組合推論深度）脫鉤。且此路線 op 成本與 REFERENCE 同一量級，不會被 op 上限攔下，也未被列入任何一支已知誤解/攻擊路線（不受 W 段瀏覽器驗證涵蓋）。",
+     "suggestedFix": "兩個方向擇一：(a) 接受此為已知殘留，在 trace-matrix.md E 段新增一筆事實記錄插值攻擊與其 20/20 結果，並在 design.md 殘餘風險段落補充說明——與現有 D4『不說破 2×3 區塊』的裁決精神一致，只是要誠實記錄『不說破』仍擋不住插值；(b) 若維護者認為這是需要修的鑑別力破口，把範例表改成非連續或少於 5 個相異點（例如只留 k=1,2,3，或額外提供一個非等差間距的點打亂），使 5 點插值條件不再滿足。",
+     "fixRisk": "選 (a) 風險低，純補文件。選 (b) 有中度風險：範例表存在的目的是讓零基礎學生驗證自己讀懂規則（D3/D4 決策的教學考量），砍點數可能傷害初學者的自我驗證體驗，需要維護者在『防插值』與『教學可讀性』間權衡，不建議在稽核當下自行決定砍法。",
+     "lens": "F：鑑別力（出題人視角，攻擊 apcs015/016/017）",
+     "survivedAdversarialReview": true
+    },
+    {
+     "id": "F-017-avg-family",
+     "severity": "medium",
+     "factIds": [
+      "G5",
+      "G6"
+     ],
+     "where": "openspec/changes/add-counting-trio/trace-matrix.md G5/G6；design.md 殘餘風險段（\"One wrong route ... scores 12/20 and cannot be pushed lower\"）；specs/counting-trio-challenges/spec.md 第 86 行",
+     "claim": "G5/G6 已證明並鎖定『取單邊』（只用 v3，或只用 v2//2）這一族猜測的上界是 12/20，且 spec.md 用字已把範圍限定在『for this family』，技術上不算失真。但這只是眾多可能誤解族之一：另一個同樣自然的誤解——正確算出 v2 與 v3（Legendre 公式沒錯），但把兩個資源上限『平均』而非『取最小值』去合併——在 20 筆 literal 上得到 15/20，明顯超過矩陣與 design.md 殘餘風險段落唯一提到的 12/20 這個數字。",
+     "evidence": "路線 (v2//2 + v3)//2（v2、v3 皆用與正解相同的 Legendre 迴圈正確算出）用 count_ops_source 對 curation/out/frontmatter017.yaml 20 筆 literal 跑分：15/20，verdicts AAAAAAAAAWWWAAWAWAAA，單筆最大 op 154（與 G3 記載的 REFERENCE/ACCEPTED op 量級 155/156/166 相當，遠低於上限，不會被 op 攔下）。另一路線 (v2+v3)//3（同樣正確算出 v2/v3 後用另一種錯誤合併方式）得 13/20，同樣超過 12。對照組：另外測了 valuation_of_n（誤把 n 當 n! 算價數）、single_term_legendre（Legendre 公式漏掉高次項）、divide_n_by_12（直接對 n 反覆除 12）、log12_of_n（用近似對數）四族，全部 ≤3/20，未超過門檻，不構成 finding。",
+     "consequence": "trace-matrix.md 與 design.md 的殘餘風險段落只討論了『取單邊』族與 math.factorial 族兩種已知誤解路線的得分上界，讓讀者容易誤以為『猜測攻擊在本題的實務天花板是 60%（12/20）』。但『兩資源平均而非取最小值』是同樣自然、同樣只需理解一半題意（知道要算兩個資源上限，但合併邏輯錯）的誤解，卻能拿到 75%（15/20），比文件唯一記載的天花板高出 3 分。這不代表 G5/spec.md 的既有文字錯誤（其用字已正確限定範圍），而是殘餘風險/矩陣的覆蓋範圍有缺口——未涵蓋『雙資源合併方式錯誤』這一整個誤解類別。",
+     "suggestedFix": "在 trace-matrix.md G 段新增一筆事實（例如 G9）記錄 avg 族與 sum_div3 族的得分與 op 量測；design.md 殘餘風險段落補一句，明確說明『12/20 僅是取單邊族內的已證下界，並非本題所有可能誤解路線的全域上界，已知還有得分更高（15/20）的雙資源合併類誤解』，避免未來稽核或維護者誤讀 12/20 為天花板。",
+     "fixRisk": "低——純粹補充矩陣事實列與一句殘餘風險文字，不涉及題目、測資或程式碼變更，不影響已凍結的 S9/四鍵。",
+     "lens": "F：鑑別力（出題人視角，攻擊 apcs015/016/017）",
+     "survivedAdversarialReview": false
+    }
+   ],
+   "survivorCount": 13,
+   "totalCount": 15
+  }
+ ]
+}

@@ -84,6 +84,21 @@ SPELLINGS = [
     ("O(n^2) 抽小函式", rowscan_helper, 2),
 ]
 
+# 追溯矩陣要引用本檔的數字，因此除了 stdout 之外一律落成 measure/nbound015.json
+# （見 trace-matrix.md 的 E7／D7 兩列）。這裡給每種寫法一個 ASCII 短名當 json 鍵，
+# 讓位址（`measure/nbound015.json#extrapolated["3000"].rowscan_helper`）寫得出來。
+SLUG = {
+    "O(n) 封閉式": "closed_form",
+    "O(n^2) 明寫迴圈": "rowscan_plain",
+    "O(n^2) sum 產生器": "rowscan_sum",
+    "O(n^2) 抽小函式": "rowscan_helper",
+}
+RECORD = {
+    "purpose": "apcs015 的 n 上界決策：op 成長階數、候選上界外推、決議上界直接實測",
+    "ops_source": "verify/judge_ops.py::count_ops（本 change 唯一允許的量測來源）",
+    "op_limit": OP_LIMIT,
+}
+
 # 前置：三種 O(n^2) 寫法必須與封閉式答案完全一致，否則量的是錯的東西。
 for n in (1, 2, 3, 8, 40, 200):
     ref = closed_form(n)
@@ -97,6 +112,8 @@ print(f"基準實測（n={BASE_A} 與 n={BASE_B}）與成長階數驗證：")
 print(f"{'寫法':<20} {'n=' + str(BASE_A):>12} {'n=' + str(BASE_B):>12} {'比值':>7} {'期望':>5}")
 print("-" * 62)
 model = {}
+RECORD["baseline_n"] = {"small": BASE_A, "large": BASE_B}
+RECORD["baseline"] = {}
 for name, fn, order in SPELLINGS:
     a = count_ops(lambda fn=fn: fn(BASE_A))
     b = count_ops(lambda fn=fn: fn(BASE_B))
@@ -105,6 +122,14 @@ for name, fn, order in SPELLINGS:
     print(f"{name:<20} {a:>12,} {b:>12,} {ratio:>7.2f} {expect:>5}")
     # 用較大的基準點定係數，order 為已驗證的成長階數
     model[name] = (b / (BASE_B**order), order)
+    RECORD["baseline"][SLUG[name]] = {
+        "label": name,
+        "ops_small": a,
+        "ops_large": b,
+        "growth_ratio": round(ratio, 2),
+        "expected_ratio": expect,
+        "order": order,
+    }
 print()
 
 CANDIDATES = [500, 1000, 1500, 2000, 2400, 2500, 3000, 3162, 3500, 4000]
@@ -113,23 +138,37 @@ header = f"{'n 上界':>7} | " + " | ".join(f"{nm:>19}" for nm, _, _ in SPELLING
 print(header)
 print("-" * len(header))
 rows = {}
+RECORD["candidates"] = CANDIDATES
+RECORD["extrapolated"] = {}
 for n in CANDIDATES:
     cells, rows[n] = [], {}
+    RECORD["extrapolated"][str(n)] = {}
     for name, _, _ in SPELLINGS:
         c, order = model[name]
         ops = c * (n**order)
         rows[n][name] = ops
+        RECORD["extrapolated"][str(n)][SLUG[name]] = round(ops)
         cells.append(f"{ops:>13,.0f} {'死' if ops > OP_LIMIT else '活'}")
     print(f"{n:>7} | " + " | ".join(f"{x:>19}" for x in cells))
 
 print()
 print("判讀：三種 O(n^2) 寫法是否同生同死（刀鋒即為不可接受）")
+RECORD["knife_edge"] = {}
+first_knife_edge = None
 for n in CANDIDATES:
     v = [rows[n][nm] for nm, _, _ in SPELLINGS[1:]]
     alive = sum(1 for x in v if x <= OP_LIMIT)
     worst_margin = OP_LIMIT / max(v)
     verdict = "全活" if alive == 3 else ("全死" if alive == 0 else f"刀鋒（{alive}/3 活）")
+    RECORD["knife_edge"][str(n)] = {
+        "spellings_alive": alive,
+        "worst_margin": round(worst_margin, 2),
+        "verdict": verdict,
+    }
+    if first_knife_edge is None and 0 < alive < 3:
+        first_knife_edge = n
     print(f"  n={n:>5}: {verdict:<14} 最貴寫法餘裕 {worst_margin:>5.2f} 倍")
+RECORD["first_knife_edge_n"] = first_knife_edge
 
 # ── 決議上界的直接實測（不靠外推） ─────────────────────────────────────
 DECIDED_N = 1000
@@ -146,3 +185,22 @@ assert all(direct[nm] <= OP_LIMIT for nm, _, _ in SPELLINGS[1:]), \
     "n=1000 仍有 O(n^2) 寫法撞上限，上界決議不成立"
 assert OP_LIMIT / worst >= 3, "最貴寫法餘裕不足 3 倍，刀鋒仍在"
 print("  → 三種寫法同生，刀鋒消除。")
+
+RECORD["decided_n"] = DECIDED_N
+RECORD["rejected_n"] = 3000  # 訪談原訂值，被本探針的刀鋒判讀推翻
+RECORD["direct_at_decided_n"] = {SLUG[nm]: direct[nm] for nm, _, _ in SPELLINGS}
+RECORD["direct_worst_ops"] = worst
+RECORD["direct_worst_margin"] = round(OP_LIMIT / worst, 2)
+RECORD["note"] = (
+    "直測值與主 harness（measure/routes015.json）可能差 1，那是量測外殼的固定開銷，"
+    "不是路線差異；跨工具比對一律看差值不看絕對值。"
+)
+
+if "--json" in sys.argv:
+    import json
+
+    out = os.path.join(HERE, "nbound015.json")
+    with open(out, "w", encoding="utf-8") as fh:
+        json.dump(RECORD, fh, ensure_ascii=False, indent=2)
+        fh.write("\n")
+    print(f"\n已寫出 {out}")
