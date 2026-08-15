@@ -11,7 +11,7 @@
    "ops": 5278547,
    "over_op_limit": false,
    "times_over_limit": 0.53,
-   "measurement_seconds": 0.5,
+   "measurement_seconds": 0.4,
    "expect": "survives",
    "matches_expectation": true
   },
@@ -21,7 +21,7 @@
    "ops": 216759740,
    "over_op_limit": true,
    "times_over_limit": 21.68,
-   "measurement_seconds": 18.0,
+   "measurement_seconds": 17.4,
    "expect": "dies",
    "matches_expectation": true
   }

@@ -282,6 +282,294 @@ def unclean_per_entry():
     return rows
 
 
+# ── 契約檢查（斷言牆） ───────────────────────────────────────────────────────
+#
+# 為什麼要有這一段：spec 對 apcs017 的多條 SHALL（G3 的 20/20 與 op 數、G4 的 2/20、
+# G5 的 ≤12/20、G7 的 op 佔比、G8 的記憶體數字）**唯一的量測來源就是本檔**。
+# 本檔原本不論量到什麼都無條件寫檔並 return 0：路線檔被改壞、判題器上限改動、
+# 或環境害得某條 ACCEPTED 掉分，json 都會照樣產出，散文照樣引用，沒有任何一層會叫。
+# 對照組是 curation/plan015.py（20+ 處 problems.append）與 measure/measure016.py。
+#
+# 門檻值一律取自實際量測輸出（2026-08-15 兩次獨立全量執行，離散量測值逐位相同），
+# 不是憑空訂的；下面每個常數都標注了實測值與留了多少餘裕。
+DEADLINE_MS = 5000
+
+CLEAN_FILES = ("routes/r017_ref.py", "routes/r017_divmod.py", "routes/r017_helper.py")
+DECIMAL_FILE = "routes/r017_w1_decimal.py"
+SINGLE_SIDE_FILES = ("routes/r017_w2_forgot_half.py", "routes/r017_w3_only_v3.py",
+                     "routes/r017_w4_only_half_v2.py")
+UNCLEAN_FILE = "routes/r017_u1_factorial.py"
+
+# 下面兩條刻意不重疊：CEIL 抓「op 絕對值飄掉」，HEADROOM 抓「判題器上限被調小」。
+# （若把 HEADROOM 設成 ≤ OP_LIMIT/CEIL = 10,000 倍，它就永遠不可能先於 CEIL 觸發，
+#   等於死碼——這是本檔第一版自我測試抓到的問題。）
+CLEAN_OPS_CEIL = 1_000           # 實測 155／156／166；留 6 倍餘裕給 Python 版本間的事件差異
+CLEAN_OPS_MIN_HEADROOM = 30_000  # 「遠低於上限」的機械定義：op 上限 / max_ops ≥ 30000 倍（實測 ~60000 倍）
+DECIMAL_SCORE = 2                # G4：十進位尾零規則恰好 2/20
+SINGLE_SIDE_MAX_SCORE = 12       # G5：三條取單邊路線的最高分恰為 12（可證下界，亦是實測上界）
+UNCLEAN_OPS_CEIL = 200_000       # 實測 98,699；留 2 倍餘裕
+UNCLEAN_OPS_PCT_CEIL = 2.0       # 實測 0.987% —— 成本躲在 C 呼叫內，計數器看不見
+UNCLEAN_DENSITY_RATIO = 100      # 「成本躲在 C 內」的機械定義：op/ms 密度須比最稀疏的乾淨路線再低 100 倍
+                                 # （實測 2.9 op/ms vs 乾淨路線約 7,000 op/ms，相差約 2,400 倍）
+MEM_BYTES_AT_1E8 = 314_159_123     # G8：封閉式（lgamma），與機器狀態無關
+MEM_BYTES_AT_1E9 = 3_556_832_228   # G8：同上
+
+
+def _score(text):
+    """把 "13/20" 拆成 (13, 20)；格式不對回傳 (None, None)。"""
+    try:
+        num, den = text.split("/")
+        return int(num), int(den)
+    except (ValueError, AttributeError):
+        return None, None
+
+
+def contract_problems(payload):
+    """對已組好的 payload 逐條驗契約，回傳違約敘述清單（空 = 全數通過）。
+
+    刻意寫成「吃 payload 的純函式」：契約邏輯不必重跑 5 分鐘的量測就能被負向控制
+    測到（見 --self-test）。沒有負向控制的檢查等於沒有檢查。
+    """
+    problems = []
+    routes = {r["file"]: r for r in payload.get("routes", [])}
+    op_limit = payload.get("op_limit_per_case")
+
+    # 0. 結構：路線齊全、20 筆、判題硬約束沒被偷改
+    for fn in CLEAN_FILES + (DECIMAL_FILE,) + SINGLE_SIDE_FILES + (UNCLEAN_FILE,):
+        if fn not in routes:
+            problems.append("缺少路線 %s 的量測結果" % fn)
+    if len(payload.get("entries", [])) != 20:
+        problems.append("literal 筆數應為 20，實為 %d" % len(payload.get("entries", [])))
+    if op_limit != OP_LIMIT:
+        problems.append("op 上限應為 %d，payload 記為 %r" % (OP_LIMIT, op_limit))
+    if payload.get("deadline_ms_per_case") != DEADLINE_MS:
+        problems.append("deadline 應為 %d ms，payload 記為 %r"
+                        % (DEADLINE_MS, payload.get("deadline_ms_per_case")))
+
+    # 1. 每條路線的共通不變量：max_ops 名副其實、逐筆都在 op 上限內
+    for fn, r in routes.items():
+        per = r.get("per_entry_ops") or []
+        if per and max(per) != r.get("max_ops"):
+            problems.append("%s 的 max_ops %r 與 per_entry_ops 最大值 %d 不一致"
+                            % (fn, r.get("max_ops"), max(per)))
+        over = [i for i, o in enumerate(per, 1) if op_limit and o > op_limit]
+        if over:
+            problems.append("%s 的第 %s 筆 op 數超過上限 %s" % (fn, over, op_limit))
+
+    # 2. REFERENCE 與兩條 ACCEPTED：20/20，且 op 遠低於上限、最壞一筆吃得下 deadline
+    for fn in CLEAN_FILES:
+        r = routes.get(fn)
+        if r is None:
+            continue
+        num, den = _score(r.get("score"))
+        if (num, den) != (20, 20):
+            problems.append("%s 應為 20/20，實測 %s" % (fn, r.get("score")))
+        if r.get("entries_skipped"):
+            problems.append("%s 不應跳過任何筆，實跳過 %s" % (fn, r.get("entries_skipped")))
+        ops = r.get("max_ops") or 0
+        if ops > CLEAN_OPS_CEIL:
+            problems.append("%s 最大 op %d 超過乾淨路線上限 %d" % (fn, ops, CLEAN_OPS_CEIL))
+        if ops and op_limit and op_limit / ops < CLEAN_OPS_MIN_HEADROOM:
+            problems.append("%s 的 op 餘裕僅 %.1f 倍，未達「遠低於上限」門檻 %d 倍"
+                            % (fn, op_limit / ops, CLEAN_OPS_MIN_HEADROOM))
+        worst = r.get("worst_entry_pyodide_estimate_ms")
+        if worst is None or worst >= DEADLINE_MS:
+            problems.append("%s 最壞一筆 Pyodide 估計 %r ms 未低於 deadline %d ms"
+                            % (fn, worst, DEADLINE_MS))
+
+    # 3. 十進位尾零規則（G4）：恰好 2/20，多一分少一分都代表 literal 組合變了
+    r = routes.get(DECIMAL_FILE)
+    if r is not None and _score(r.get("score")) != (DECIMAL_SCORE, 20):
+        problems.append("%s 應為 %d/20，實測 %s" % (DECIMAL_FILE, DECIMAL_SCORE, r.get("score")))
+
+    # 4. 三條「取單邊」誤解路線（G5）：各自 ≤ 12/20，且最高者恰為 12
+    #    （12 是恆等式推得的可證下界，同時是實測到的最高分；高於它代表題目不再有鑑別度，
+    #     低於它代表下界推導與實測對不上。）
+    singles = []
+    for fn in SINGLE_SIDE_FILES:
+        r = routes.get(fn)
+        if r is None:
+            continue
+        num, den = _score(r.get("score"))
+        if num is None or den != 20:
+            problems.append("%s 的得分格式異常：%r" % (fn, r.get("score")))
+            continue
+        singles.append((fn, num))
+        if num > SINGLE_SIDE_MAX_SCORE:
+            problems.append("%s 得 %d/20，超過取單邊路線上限 %d/20"
+                            % (fn, num, SINGLE_SIDE_MAX_SCORE))
+    if len(singles) == len(SINGLE_SIDE_FILES) and max(n for _, n in singles) != SINGLE_SIDE_MAX_SCORE:
+        problems.append("取單邊路線的最高分應為 %d/20，實測 %d/20"
+                        % (SINGLE_SIDE_MAX_SCORE, max(n for _, n in singles)))
+    # G6 的必要條件：min(v2, v3) 與「只取 v3」輸出恆等，故得分必須相同
+    w2, w3 = routes.get(SINGLE_SIDE_FILES[0]), routes.get(SINGLE_SIDE_FILES[1])
+    if w2 and w3 and w2.get("score") != w3.get("score"):
+        problems.append("G6 恆等：忘記折半（%s）與只取 v3（%s）得分應相同"
+                        % (w2.get("score"), w3.get("score")))
+
+    # 5. UNCLEAN_DEATH（G7）：op 數極低但牆鐘遠超 deadline ——「成本躲在 C 呼叫內」的
+    #    機械定義。**不在此斷言 0/20**：那是瀏覽器實測的結論（browser-verification.jsonl），
+    #    本機投影法算不出來，硬寫進來就變成補資料去符合散文。
+    r = routes.get(UNCLEAN_FILE)
+    if r is not None:
+        ops = r.get("max_ops") or 0
+        if ops > UNCLEAN_OPS_CEIL:
+            problems.append("%s 最大 op %d 超過 %d —— 若計數器看得見成本，G7 的論證就不成立"
+                            % (UNCLEAN_FILE, ops, UNCLEAN_OPS_CEIL))
+        pct = r.get("max_ops_pct_of_limit")
+        if pct is None or pct >= UNCLEAN_OPS_PCT_CEIL:
+            problems.append("%s 的 op 佔上限比 %r%% 未低於 %.1f%%"
+                            % (UNCLEAN_FILE, pct, UNCLEAN_OPS_PCT_CEIL))
+        worst = r.get("worst_entry_pyodide_estimate_ms") or 0
+        if worst <= DEADLINE_MS:
+            problems.append("%s 最壞一筆 Pyodide 估計 %r ms 未超過 deadline %d ms —— "
+                            "該路線本應被時間殺死" % (UNCLEAN_FILE, worst, DEADLINE_MS))
+        # 「成本躲在 C 呼叫內」的機械定義：與乾淨路線相比，這條路線每毫秒才走幾個 op。
+        densities = [rt["max_ops"] / rt["worst_entry_pyodide_estimate_ms"]
+                     for fn2 in CLEAN_FILES
+                     for rt in [routes.get(fn2)]
+                     if rt and rt.get("worst_entry_pyodide_estimate_ms")]
+        if worst > 0 and densities:
+            here, clean_min = ops / worst, min(densities)
+            if here * UNCLEAN_DENSITY_RATIO > clean_min:
+                problems.append(
+                    "%s 的 op 密度 %.2f op/ms 未比最稀疏的乾淨路線（%.0f op/ms）低 %d 倍 —— "
+                    "成本不再是躲在 C 呼叫內" % (UNCLEAN_FILE, here, clean_min,
+                                                UNCLEAN_DENSITY_RATIO))
+        if not r.get("entries_skipped"):
+            problems.append("%s 應因記憶體安全閥跳過大 n 的筆數，實跳過 %r"
+                            % (UNCLEAN_FILE, r.get("entries_skipped")))
+        if r.get("dies_from_entry") is None:
+            problems.append("%s 應標出第一筆死亡的 entry，實為 None" % UNCLEAN_FILE)
+
+    # 6. 記憶體支柱（G8）：封閉式，重跑必須逐位相同；單調遞增
+    pillar = payload.get("memory_pillar", {})
+    rows = {row["n"]: row for row in pillar.get("rows", [])}
+    if not pillar.get("deterministic"):
+        problems.append("memory_pillar.deterministic 應為 true")
+    byte_seq = [row["bytes_of_bigint"] for row in pillar.get("rows", [])]
+    if byte_seq != sorted(byte_seq) or len(set(byte_seq)) != len(byte_seq):
+        problems.append("memory_pillar 的 bytes_of_bigint 未嚴格遞增：%s" % byte_seq)
+    for n, expect in ((100_000_000, MEM_BYTES_AT_1E8), (1_000_000_000, MEM_BYTES_AT_1E9)):
+        got = rows.get(n, {}).get("bytes_of_bigint")
+        if got != expect:
+            problems.append("n=%d 的 n! 位元組數應為 %d（封閉式），實為 %r" % (n, expect, got))
+
+    return problems
+
+
+def self_test():
+    """負向控制：對已落盤的 routes017.json 注入單點錯誤，確認斷言牆真的會叫。
+
+    正向控制（未注入 → 零違約）同樣是斷言的一部分：只證明「會叫」不夠，
+    還要證明它不是無論如何都叫。
+    """
+    path = os.path.join(HERE, "routes017.json")
+    with open(path) as fh:
+        base = json.load(fh)
+
+    def mutate(fn):
+        payload = json.loads(json.dumps(base))
+        fn(payload)
+        return contract_problems(payload)
+
+    def route(payload, name):
+        return next(r for r in payload["routes"] if r["file"] == name)
+
+    def set_ops(payload, name, value):
+        """同時改 max_ops 與 per_entry_ops——只改一邊會被『兩者一致』那條先攔下，
+        負向控制就證明不到 op 天花板那一條真的存在。"""
+        r = route(payload, name)
+        r["max_ops"] = value
+        r["per_entry_ops"] = [value] * len(r["per_entry_ops"])
+        if payload["op_limit_per_case"]:
+            r["max_ops_pct_of_limit"] = round(value / payload["op_limit_per_case"] * 100, 4)
+
+    # 每個注入點都指定「期望觸發哪一條」：只確認「有叫」不夠，叫錯條等於那條仍未受測。
+    cases = [
+        ("REFERENCE 掉一分", lambda p: route(p, CLEAN_FILES[0]).__setitem__("score", "19/20"),
+         "應為 20/20"),
+        ("ACCEPTED op 暴增", lambda p: set_ops(p, CLEAN_FILES[1], 20_000),
+         "超過乾淨路線上限"),
+        ("ACCEPTED op 餘裕不足", lambda p: set_ops(p, CLEAN_FILES[1], 900),
+         "未達「遠低於上限」門檻"),
+        ("ACCEPTED 最壞一筆撞 deadline",
+         lambda p: route(p, CLEAN_FILES[2]).__setitem__("worst_entry_pyodide_estimate_ms", 9999.0),
+         "未低於 deadline"),
+        ("ACCEPTED 跳過某些筆",
+         lambda p: route(p, CLEAN_FILES[2]).__setitem__("entries_skipped", 3), "不應跳過任何筆"),
+        ("十進位路線分數變動", lambda p: route(p, DECIMAL_FILE).__setitem__("score", "3/20"),
+         "應為 2/20"),
+        ("取單邊路線超過 12", lambda p: route(p, SINGLE_SIDE_FILES[2]).__setitem__("score", "13/20"),
+         "超過取單邊路線上限"),
+        ("取單邊最高分掉到 11", lambda p: route(p, SINGLE_SIDE_FILES[2]).__setitem__("score", "11/20"),
+         "最高分應為 12/20"),
+        ("G6 恆等破裂", lambda p: route(p, SINGLE_SIDE_FILES[1]).__setitem__("score", "10/20"),
+         "G6 恆等"),
+        ("取單邊得分格式壞掉",
+         lambda p: route(p, SINGLE_SIDE_FILES[0]).__setitem__("score", "十一分"), "得分格式異常"),
+        ("UNCLEAN op 變得看得見", lambda p: set_ops(p, UNCLEAN_FILE, 5_000_000),
+         "若計數器看得見成本"),
+        ("UNCLEAN op 佔比灌水",
+         lambda p: route(p, UNCLEAN_FILE).__setitem__("max_ops_pct_of_limit", 42.0),
+         "未低於 2.0%"),
+        ("UNCLEAN 不再超時",
+         lambda p: route(p, UNCLEAN_FILE).__setitem__("worst_entry_pyodide_estimate_ms", 100.0),
+         "該路線本應被時間殺死"),
+        ("UNCLEAN 成本不再躲在 C 內",
+         lambda p: route(p, UNCLEAN_FILE).__setitem__("worst_entry_pyodide_estimate_ms", 500.0),
+         "成本不再是躲在 C 呼叫內"),
+        ("UNCLEAN 沒跳過任何筆",
+         lambda p: route(p, UNCLEAN_FILE).__setitem__("entries_skipped", 0),
+         "應因記憶體安全閥跳過"),
+        ("UNCLEAN 未標出死亡起點",
+         lambda p: route(p, UNCLEAN_FILE).__setitem__("dies_from_entry", None),
+         "應標出第一筆死亡的 entry"),
+        ("max_ops 與逐筆不一致",
+         lambda p: route(p, CLEAN_FILES[0])["per_entry_ops"].__setitem__(0, 200),
+         "不一致"),
+        ("逐筆 op 撞上限", lambda p: set_ops(p, DECIMAL_FILE, 99_999_999),
+         "op 數超過上限"),
+        ("literal 筆數變動", lambda p: p["entries"].pop(), "literal 筆數應為 20"),
+        ("op 上限被偷改", lambda p: p.__setitem__("op_limit_per_case", 1), "op 上限應為"),
+        ("deadline 被偷改", lambda p: p.__setitem__("deadline_ms_per_case", 60_000),
+         "deadline 應為"),
+        ("整條路線消失", lambda p: p["routes"].pop(0), "缺少路線"),
+        ("記憶體封閉式差一位元組",
+         lambda p: p["memory_pillar"]["rows"][2].__setitem__("bytes_of_bigint",
+                                                             MEM_BYTES_AT_1E8 + 1),
+         "位元組數應為"),
+        ("記憶體不再單調",
+         lambda p: p["memory_pillar"]["rows"][3].__setitem__("bytes_of_bigint", 1),
+         "未嚴格遞增"),
+        ("記憶體宣稱不可重現",
+         lambda p: p["memory_pillar"].__setitem__("deterministic", False),
+         "deterministic 應為 true"),
+    ]
+
+    failures = []
+    clean = contract_problems(base)
+    print("正向控制：未注入 → %d 條違約 %s" % (len(clean), "PASS" if not clean else "FAIL"))
+    if clean:
+        failures.append("未注入卻報 %d 條違約：%s" % (len(clean), clean))
+    for label, fn, expect in cases:
+        got = mutate(fn)
+        hit = [g for g in got if expect in g]
+        print("  %-26s %-6s %s" % (label, "FIRED" if hit else "MISS",
+                                   hit[0] if hit else (got[0] if got else "（完全沒叫）")))
+        if not hit:
+            failures.append("注入「%s」後未觸發預期檢查（期望訊息含 %r，實得 %s）"
+                            % (label, expect, got or "無"))
+
+    if failures:
+        print("\n負向控制失敗：")
+        for f in failures:
+            print("  -", f)
+        return 1
+    print("\n負向控制全數通過（%d 個注入點皆觸發，未注入時零違約）。" % len(cases))
+    return 0
+
+
 def main():
     results = []
     for disposition, note, fn in ROUTE_FILES:
@@ -335,11 +623,18 @@ def main():
         "unclean_per_entry": per_entry,
         "routes": results,
     }
+    payload["problems"] = contract_problems(payload)
     with open(os.path.join(HERE, "routes017.json"), "w") as fh:
         json.dump(payload, fh, indent=1, ensure_ascii=False)
     print(json.dumps(payload, ensure_ascii=False, indent=1))
+    if payload["problems"]:
+        print("\n實測斷言失敗：")
+        for p in payload["problems"]:
+            print("  -", p)
+        return 1
+    print("\n實測斷言全數通過。")
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(self_test() if "--self-test" in sys.argv else main())

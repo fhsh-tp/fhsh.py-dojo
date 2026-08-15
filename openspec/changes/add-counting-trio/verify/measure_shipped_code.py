@@ -59,8 +59,11 @@ def main():
         "ops_source": "verify/judge_ops.py::count_ops_source_fresh",
         "note": "此表描述 frontmatter 內的出貨碼，與 curation/routes/ 的學生路線檔是不同對象",
         "challenges": [],
+        # 契約違規一律落盤（原本只印在 stdout 並靠 failed 旗標退出，json 本身看不出
+        # 「這份數字通過了什麼檢查」）。meta 檢查 verify/check_measure_json.py 驗這個鍵。
+        "problems": [],
     }
-    failed = False
+    problems = report["problems"]
     for cid, slug in CHALLENGES:
         page = os.path.join(ROOT, "docs", "challenge", f"{slug}.md")
         text = open(page, encoding="utf-8").read()
@@ -76,7 +79,7 @@ def main():
                 ops, _out, rc = count_ops_source_fresh(path, lit, timeout=300)
                 if ops is None or rc != 0:
                     print(f"  ! {cid} {key} 在某筆失敗 rc={rc}")
-                    failed = True
+                    problems.append(f"{cid} 的 {key} 在第 {len(per) + 1} 筆量測失敗（rc={rc}）")
                     per.append(None)
                 else:
                     per.append(ops)
@@ -89,9 +92,13 @@ def main():
                 "worst_entry": per.index(mx) + 1 if mx else None,
                 "per_entry_ops": per,
             }
-            if mx and mx > OP_LIMIT:
+            if mx is None:
+                problems.append(f"{cid} 的 {key} 沒有任何一筆量得到 op 數")
+            elif mx > OP_LIMIT:
                 print(f"  ! {cid} {key} 超過 op 上限：{mx:,}")
-                failed = True
+                problems.append(f"{cid} 的 {key} 最壞 {mx:,} op 超過上限 {OP_LIMIT:,}")
+        if len(lits) != 20:
+            problems.append(f"{cid} 的 literal 筆數應為 20，實為 {len(lits)}")
         report["challenges"].append(entry)
         g = entry["programs"]["generator"]
         r = entry["programs"]["reference_solution"]
@@ -100,11 +107,19 @@ def main():
             f"   reference_solution {r['max_ops']:>10,} ({r['max_ops_pct_of_limit']:>7.4f}%)"
         )
 
+    # 暫存目錄用完就刪：它是量測過程的中間產物，不是證物，
+    # 留著會被誤 commit 進 repo（2026-08-15 差點發生）。
+    import shutil
+    shutil.rmtree(tmp, ignore_errors=True)
+
     out = os.path.join(CHANGE, "measure", "shipped-code-ops.json")
     with open(out, "w", encoding="utf-8") as fh:
         json.dump(report, fh, ensure_ascii=False, indent=1)
     print(f"\n已寫出 {os.path.relpath(out, ROOT)}")
-    if failed:
+    if problems:
+        print("實測斷言失敗：")
+        for p in problems:
+            print("  -", p)
         raise SystemExit(1)
     print("全部出貨碼皆在 op 上限內。")
 

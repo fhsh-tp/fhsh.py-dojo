@@ -14,8 +14,17 @@
       "soft_full": [],
       "soft_body": []
     },
+    "performance_hint": {
+      "timing_terms": [],
+      "timing_term_hits": [],
+      "cost_hint_paragraphs": 1,
+      "cost_hint_paragraphs_with_required_phrase": 1,
+      "uses_op_limit_phrase": true,
+      "required_phrase": "執行量上限",
+      "problems": []
+    },
     "numbers": {
-      "total": 81,
+      "total": 77,
       "distinct": [
         -2,
         -1,
@@ -23,8 +32,6 @@
         1,
         2,
         3,
-        4,
-        5,
         6,
         8,
         28,
@@ -35,7 +42,7 @@
         1056,
         1848
       ],
-      "distinct_count": 17,
+      "distinct_count": 15,
       "unmatched": [],
       "unmatched_count": 0
     }
@@ -64,6 +71,15 @@
           1
         ]
       ]
+    },
+    "performance_hint": {
+      "timing_terms": [],
+      "timing_term_hits": [],
+      "cost_hint_paragraphs": 0,
+      "cost_hint_paragraphs_with_required_phrase": 0,
+      "uses_op_limit_phrase": false,
+      "required_phrase": "執行量上限",
+      "problems": []
     },
     "numbers": {
       "total": 53,
@@ -96,6 +112,15 @@
       "hard_body": [],
       "soft_full": [],
       "soft_body": []
+    },
+    "performance_hint": {
+      "timing_terms": [],
+      "timing_term_hits": [],
+      "cost_hint_paragraphs": 0,
+      "cost_hint_paragraphs_with_required_phrase": 0,
+      "uses_op_limit_phrase": false,
+      "required_phrase": "執行量上限",
+      "problems": []
     },
     "numbers": {
       "total": 97,

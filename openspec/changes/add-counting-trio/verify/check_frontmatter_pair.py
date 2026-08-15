@@ -18,6 +18,11 @@
      fact id。允許集合一律**由 semantics 模組與 testcase_plan 機械導出**，不手抄。
 
   F. **frontmatter 欄位集合一致**：三題鍵集合必須相同且 ``tags`` 非空。
+  G. **效能提醒措辭（鎖 S7）**：對題目頁**內文**（不含 frontmatter）掃描「時間限制」
+     一類把成本軸講成時間的措辭，命中即 FAIL；另反向要求：凡提到成本上限的
+     「提醒」段，必須逐字出現「執行量上限」。S7 這條規範起因於題面曾把死因誤寫成
+     時間限制、被瀏覽器實測推翻，但在此之前沒有任何機械防線擋得住改回去。
+     掃描器自帶負向控制（``timing_self_test``），沒有負向控制的檢查等於沒有檢查。
 
 用法：
     python3 openspec/changes/add-counting-trio/verify/check_frontmatter_pair.py
@@ -249,6 +254,120 @@ def scan_soft(text: str) -> list[tuple[str, int]]:
     return _scan(text, SOFT_ZH, SOFT_EN)
 
 
+# ── G. 效能提醒措辭（鎖 S7）────────────────────────────────────────────
+# S7：題面的效能提醒必須把天花板講成「執行量上限」，不得講成時間限制。
+# 理由是實測：E8 那條路線死於 op 計數器，不是死於 deadline；先前題面寫「時間限制」
+# 是被瀏覽器實測推翻的錯誤敘述。這裡把那條規範變成兩道機械檢查（禁 + 必）。
+#
+# **只掃內文**：frontmatter 內含 generator／reference_solution 的程式碼與註解，
+# 那不是給學生看的文案，掃它只會製造誤報。
+#
+# 詞庫刻意只收**不可能有合理用法**的措辭。單獨的「時間」「秒」「慢」一律不收——
+# 「同一時間」「每秒」這類寫法完全合法，收進來就是誤殺。
+TIMING_ZH = [
+    "時間限制", "限制時間", "時間上限", "上限時間", "時限",
+    "逾時", "超時", "執行時間", "運行時間", "運算時間",
+    "秒數上限", "毫秒上限", "時間內跑完", "時間就會被",
+]
+# 英文一律用邊界比對：不加邊界的話 "tle" 會被 "title"／"little" 吃到。
+TIMING_EN = [
+    "time limit", "time-limit", "timelimit", "time budget",
+    "timeout", "time out", "deadline", "wall clock", "wall-clock",
+    "runtime limit", "elapsed time", "tle",
+]
+
+# 反向（必須出現）：提到成本天花板的「提醒」段，一定要逐字寫「執行量上限」。
+HINT_MARKER = "提醒"
+REQUIRED_HINT_PHRASE = "執行量上限"
+# 只有真的在談天花板的提醒段才受這條約束；純情境提醒不該被硬塞術語。
+COST_MARKERS = ("上限", "限制", "超出", "超過", "撐不住")
+
+
+def scan_timing(body: str) -> list[tuple[str, int]]:
+    """回傳內文命中的「時間限制」類措辭 [(詞, 次數)]；空清單 = 乾淨。"""
+    low = body.lower()
+    hits = [(t, body.count(t)) for t in TIMING_ZH if body.count(t)]
+    for t in TIMING_EN:
+        pat = r"(?<![a-z0-9])%s(?![a-z0-9])" % re.escape(t).replace(r"\ ", r"[\s_-]+")
+        n = len(re.findall(pat, low))
+        if n:
+            hits.append((t, n))
+    return hits
+
+
+def hint_paragraphs(body: str) -> list[str]:
+    """內文中談到成本天花板的「提醒」段（段落＝空行分隔）。"""
+    out = []
+    for para in re.split(r"\n\s*\n", body):
+        if HINT_MARKER in para and any(m in para for m in COST_MARKERS):
+            out.append(" ".join(para.split()))
+    return out
+
+
+def check_performance_hint(body: str) -> dict:
+    """G 檢查的純函式部分：回傳結構化結果，``problems`` 非空即 FAIL。"""
+    timing = scan_timing(body)
+    paras = hint_paragraphs(body)
+    missing = [p for p in paras if REQUIRED_HINT_PHRASE not in p]
+    problems = []
+    if timing:
+        problems.append("內文出現把成本軸講成時間的措辭 %s——S7 規定必須寫「%s」"
+                        % ([t for t, _ in timing], REQUIRED_HINT_PHRASE))
+    for p in missing:
+        problems.append("談到成本天花板的提醒段沒有逐字寫「%s」：%r"
+                        % (REQUIRED_HINT_PHRASE, p[:120]))
+    return {
+        "timing_terms": [t for t, _ in timing],
+        "timing_term_hits": timing,
+        "cost_hint_paragraphs": len(paras),
+        "cost_hint_paragraphs_with_required_phrase": len(paras) - len(missing),
+        "uses_op_limit_phrase": bool(paras) and not missing,
+        "required_phrase": REQUIRED_HINT_PHRASE,
+        "problems": problems,
+    }
+
+
+# 負向控制：每一條規則都要有「注入錯誤 → 真的會叫」的證明。
+TIMING_PROBES = [
+    ("這題有嚴格的時間限制。", "時間限制"),
+    ("後段測資會超過時限。", "時限"),
+    ("寫得慢會逾時。", "逾時"),
+    ("程式的執行時間會太長。", "執行時間"),
+    ("this challenge has a time limit", "time limit"),
+    ("your program will hit the deadline", "deadline"),
+    ("the judge reports TLE", "tle"),
+    ("watch the wall-clock", "wall-clock"),
+]
+# 乾淨對照：合法用法不得被誤殺。
+TIMING_CLEAN = [
+    "> 提醒：這個寫法會超出單筆測資的執行量上限。",
+    "每秒鐘燈號會切換一次，同一時間只有一格會亮。",   # 「時間」「秒」單獨出現合法
+    "> 提醒：輸入的兩個數字之間只有一個空白。",        # 提醒段但不談天花板 → 不受反向約束
+]
+
+
+def timing_self_test() -> None:
+    """G 檢查的掃描器必須真的會叫；不會叫的檢查等於沒有檢查。"""
+    for probe, want in TIMING_PROBES:
+        got = check_performance_hint(probe)
+        if want not in got["timing_terms"]:
+            raise SystemExit("G 檢查 self-test 失敗：%r 應命中 %r，實得 %s"
+                             % (probe, want, got["timing_terms"]))
+        if not got["problems"]:
+            raise SystemExit("G 檢查 self-test 失敗：%r 命中卻沒判 FAIL" % probe)
+    for clean in TIMING_CLEAN:
+        got = check_performance_hint(clean)
+        if got["problems"]:
+            raise SystemExit("G 檢查 self-test 失敗：乾淨樣本 %r 被誤殺（%s）"
+                             % (clean, got["problems"]))
+    # 反向規則的負向控制：談天花板卻不寫「執行量上限」必須叫
+    vague = "> 提醒：後段測資的 n 會很大，這個寫法會超出單筆測資的上限。"
+    got = check_performance_hint(vague)
+    if not got["problems"] or got["uses_op_limit_phrase"]:
+        raise SystemExit("G 檢查 self-test 失敗：含糊的『超出上限』未被要求寫出「%s」"
+                         % REQUIRED_HINT_PHRASE)
+
+
 # ── E. 數字追溯 ────────────────────────────────────────────────────────
 NUM_RE = re.compile(r"[-−]?\d[\d,]*")
 
@@ -420,6 +539,10 @@ def main() -> int:
     assemble.scanner_self_test()
     print("[掃描器 self-test] assemble.scan_banned 對 %d 個 probe 全部命中，"
           "乾淨樣本零誤判 → 掃描器確實會叫" % len(assemble.SCANNER_PROBES))
+    timing_self_test()
+    print("[掃描器 self-test] G 檢查（S7 措辭）對 %d 個時間類 probe 全部命中、"
+          "%d 個乾淨樣本零誤判，含糊的『超出上限』也會被要求寫出「%s」"
+          % (len(TIMING_PROBES), len(TIMING_CLEAN), REQUIRED_HINT_PHRASE))
     print("[禁用清單規模] assemble BANNED_EN=%d／BANNED_ZH=%d；本檔補掃 "
           "HARD_ZH=%d／HARD_EN=%d（命中即 FAIL）、SOFT_ZH=%d／SOFT_EN=%d（僅列出）"
           % (len(assemble.BANNED_EN), len(assemble.BANNED_ZH),
@@ -514,6 +637,16 @@ def main() -> int:
         if hard_full:
             fail("%s：全頁命中 HARD 補掃詞 %s" % (name, [t for t, _ in hard_full]))
 
+        # --- G ---（S7：效能提醒的措辭，只掃內文）
+        hint = check_performance_hint(body)
+        rec["performance_hint"] = hint
+        print("  [G] 效能提醒措辭（S7）：時間類措辭 %s；談天花板的提醒段 %d 段，"
+              "其中含「%s」者 %d 段"
+              % (hint["timing_terms"] or "零命中", hint["cost_hint_paragraphs"],
+                 REQUIRED_HINT_PHRASE, hint["cost_hint_paragraphs_with_required_phrase"]))
+        for p in hint["problems"]:
+            fail("%s：%s" % (name, p))
+
         # --- E ---
         allowed = allowed_map(tag, sem, lits)
         nums = body_numbers(body) + body_cjk_numbers(body)
@@ -571,7 +704,7 @@ def main() -> int:
         for f in FAILURES:
             print("  ✗ %s" % f)
         return 1
-    print("\nPASS：三題 A/B/C/D/E/F 六道檢查全數通過。")
+    print("\nPASS：三題 A/B/C/D/E/F/G 七道檢查全數通過。")
     return 0
 
 

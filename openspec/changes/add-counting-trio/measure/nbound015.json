@@ -177,5 +177,6 @@
   },
   "direct_worst_ops": 2509512,
   "direct_worst_margin": 3.98,
-  "note": "直測值與主 harness（measure/routes015.json）可能差 1，那是量測外殼的固定開銷，不是路線差異；跨工具比對一律看差值不看絕對值。"
+  "note": "直測值與主 harness（measure/routes015.json）可能差 1，那是量測外殼的固定開銷，不是路線差異；跨工具比對一律看差值不看絕對值。",
+  "problems": []
 }

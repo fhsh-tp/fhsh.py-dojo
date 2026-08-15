@@ -52,7 +52,28 @@ def fetch(path, allow_redirect=False):
         return e.code, getattr(e, "url", url), ""
 
 
+def preflight():
+    """站台沒起來時給可行動的訊息，而不是丟一個 URLError 的 traceback。
+
+    這支腳本本來就只能在 `pnpm preview:cf` 執行中才有意義；在 CI 或一般
+    開發流程裡跑到它並不代表有缺陷。把這件事說清楚，避免下一個人把
+    「連線被拒」誤讀成 e2e 失敗。
+    """
+    try:
+        urllib.request.urlopen(BASE, timeout=5)
+    except urllib.error.HTTPError:
+        return  # 有回應就算站台活著，狀態碼交由各項檢查自己判斷
+    except OSError as exc:
+        print("無法連上 %s：%s" % (BASE, exc))
+        print("這支腳本需要預覽站台在執行中。請先跑：")
+        print("  pnpm preview:cf")
+        print("  pnpm build:redirects   # preview:cf 不會做這件事，見矩陣 W8")
+        print("  cp docs/public/_redirects .vitepress/dist/_redirects")
+        raise SystemExit(2)
+
+
 def main():
+    preflight()
     report = {
         "purpose": "e2e 冒煙測試中可機械化的觀察，讓 W7／W8 的數字有位址",
         "base": BASE,

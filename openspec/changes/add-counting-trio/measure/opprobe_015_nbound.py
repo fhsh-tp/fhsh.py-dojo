@@ -99,12 +99,20 @@ RECORD = {
     "op_limit": OP_LIMIT,
 }
 
+# 契約違規一律進這張清單，最後寫進 RECORD["problems"] 並決定退出碼。
+# 原本這些條件是裸 assert：條件成立與否只留在 stdout，落盤的 json 看不出「這份數字
+# 通過了什麼檢查」，下游引用者也無從判斷。改成清單後 meta 檢查
+# （verify/check_measure_json.py）才驗得到「這份 json 背後有斷言牆」。
+PROBLEMS = []
+
 # 前置：三種 O(n^2) 寫法必須與封閉式答案完全一致，否則量的是錯的東西。
 for n in (1, 2, 3, 8, 40, 200):
     ref = closed_form(n)
     for name, fn, _ in SPELLINGS[1:]:
-        assert fn(n) == ref, f"{name} 在 n={n} 與封閉式不符"
-print("正確性前置檢查通過：三種 O(n^2) 寫法在 n=1,2,3,8,40,200 均與封閉式相符。")
+        if fn(n) != ref:
+            PROBLEMS.append(f"{name} 在 n={n} 與封閉式答案不符——量到的不是同一條演算法")
+print("正確性前置檢查通過：三種 O(n^2) 寫法在 n=1,2,3,8,40,200 均與封閉式相符。"
+      if not PROBLEMS else "正確性前置檢查失敗。")
 print()
 
 BASE_A, BASE_B = 700, 1400
@@ -181,13 +189,24 @@ for name, fn, _ in SPELLINGS:
           f"   {'活' if direct[name] <= OP_LIMIT else '死'}")
 worst = max(direct[nm] for nm, _, _ in SPELLINGS[1:])
 print(f"  三種 O(n^2) 寫法最貴者 {worst:,} op，餘裕 {OP_LIMIT / worst:.2f} 倍")
-assert all(direct[nm] <= OP_LIMIT for nm, _, _ in SPELLINGS[1:]), \
-    "n=1000 仍有 O(n^2) 寫法撞上限，上界決議不成立"
-assert OP_LIMIT / worst >= 3, "最貴寫法餘裕不足 3 倍，刀鋒仍在"
-print("  → 三種寫法同生，刀鋒消除。")
+for nm, _, _ in SPELLINGS[1:]:
+    if direct[nm] > OP_LIMIT:
+        PROBLEMS.append(f"n={DECIDED_N} 的「{nm}」寫法 {direct[nm]:,} op 撞上限，上界決議不成立")
+if OP_LIMIT / worst < 3:
+    PROBLEMS.append(f"n={DECIDED_N} 最貴寫法餘裕僅 {OP_LIMIT / worst:.2f} 倍（門檻 3 倍），刀鋒仍在")
+# 成長階數：外推是靠它做的，階數量錯則整張候選表失效（門檻 ±5%，實測 2.00／3.98／3.98／3.99）
+for name, _, order in SPELLINGS:
+    got, expect = RECORD["baseline"][SLUG[name]]["growth_ratio"], 2**order
+    if abs(got - expect) / expect > 0.05:
+        PROBLEMS.append(f"「{name}」的成長比 {got} 偏離期望 {expect} 逾 5%，外推模型不成立")
+if not PROBLEMS:
+    print("  → 三種寫法同生，刀鋒消除。")
 
 RECORD["decided_n"] = DECIDED_N
 RECORD["rejected_n"] = 3000  # 訪談原訂值，被本探針的刀鋒判讀推翻
+# 被推翻的 n=3000 必須真的是刀鋒（否則「推翻該上界」這個結論本身沒有依據）
+if RECORD["knife_edge"][str(RECORD["rejected_n"])]["spellings_alive"] == 3:
+    PROBLEMS.append(f"n={RECORD['rejected_n']} 竟然三種寫法同生，推翻該上界的理由不成立")
 RECORD["direct_at_decided_n"] = {SLUG[nm]: direct[nm] for nm, _, _ in SPELLINGS}
 RECORD["direct_worst_ops"] = worst
 RECORD["direct_worst_margin"] = round(OP_LIMIT / worst, 2)
@@ -195,6 +214,7 @@ RECORD["note"] = (
     "直測值與主 harness（measure/routes015.json）可能差 1，那是量測外殼的固定開銷，"
     "不是路線差異；跨工具比對一律看差值不看絕對值。"
 )
+RECORD["problems"] = PROBLEMS
 
 if "--json" in sys.argv:
     import json
@@ -204,3 +224,10 @@ if "--json" in sys.argv:
         json.dump(RECORD, fh, ensure_ascii=False, indent=2)
         fh.write("\n")
     print(f"\n已寫出 {out}")
+
+if PROBLEMS:
+    print("\n實測斷言失敗：")
+    for p in PROBLEMS:
+        print("  -", p)
+    raise SystemExit(1)
+print("\n實測斷言全數通過。")
