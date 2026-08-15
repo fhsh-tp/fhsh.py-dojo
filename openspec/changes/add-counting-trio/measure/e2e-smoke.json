@@ -1,0 +1,85 @@
+{
+ "purpose": "e2e 冒煙測試中可機械化的觀察，讓 W7／W8 的數字有位址",
+ "base": "http://localhost:8788",
+ "problems": [],
+ "listing": {
+  "status": 200,
+  "apcs_ids_found": 17,
+  "apcs_ids": [
+   "apcs001",
+   "apcs002",
+   "apcs003",
+   "apcs004",
+   "apcs005",
+   "apcs006",
+   "apcs007",
+   "apcs008",
+   "apcs009",
+   "apcs010",
+   "apcs011",
+   "apcs012",
+   "apcs013",
+   "apcs014",
+   "apcs015",
+   "apcs016",
+   "apcs017"
+  ],
+  "trio_titles_present": {
+   "基地台佈點規劃": true,
+   "跑馬燈顯示計數": true,
+   "園遊會代幣兌換": true
+  }
+ },
+ "aliases": [
+  {
+   "id": "apcs015",
+   "redirect_status": 302,
+   "followed_status": 200,
+   "final_path": "/challenge/ap-layout-plan",
+   "expected_path": "/challenge/ap-layout-plan",
+   "ok": true
+  },
+  {
+   "id": "apcs016",
+   "redirect_status": 302,
+   "followed_status": 200,
+   "final_path": "/challenge/marquee-display-count",
+   "expected_path": "/challenge/marquee-display-count",
+   "ok": true
+  },
+  {
+   "id": "apcs017",
+   "redirect_status": 302,
+   "followed_status": 200,
+   "final_path": "/challenge/fair-token-exchange",
+   "expected_path": "/challenge/fair-token-exchange",
+   "ok": true
+  }
+ ],
+ "pages": [
+  {
+   "id": "apcs015",
+   "slug": "ap-layout-plan",
+   "status": 200,
+   "title_present": true,
+   "id_badge_present": true,
+   "leak_terms_found": []
+  },
+  {
+   "id": "apcs016",
+   "slug": "marquee-display-count",
+   "status": 200,
+   "title_present": true,
+   "id_badge_present": true,
+   "leak_terms_found": []
+  },
+  {
+   "id": "apcs017",
+   "slug": "fair-token-exchange",
+   "status": 200,
+   "title_present": true,
+   "id_badge_present": true,
+   "leak_terms_found": []
+  }
+ ]
+}
