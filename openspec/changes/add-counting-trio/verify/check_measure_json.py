@@ -1,4 +1,8 @@
-"""通用 meta 檢查：凡落在 ``measure/`` 的量測 json，必須帶一個 ``problems`` 陣列。
+"""通用 meta 檢查：``measure/`` **頂層**的每一份量測 json，必須帶一個 ``problems`` 陣列。
+
+掃描範圍刻意寫成頂層而非遞迴，與實作的 glob 一致——2026-08-15 第四輪稽核指出
+原本的 docstring 用「凡落在 measure/ 的」這種全稱語氣，承諾大於實作範圍。目前
+子目錄底下沒有任何 json，但若日後有人把量測輸出放進子目錄，它會靜默逃過這支檢查。
 
 為什麼要這一支：本 change 的量測腳本有兩種體質——像 curation/plan015.py、
 measure/measure016.py 那樣把契約寫成 ``problems`` 清單並以非零碼退出的；以及

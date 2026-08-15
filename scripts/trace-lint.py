@@ -89,6 +89,14 @@
     以整個 bullet 為作用域在 Scenario 條列處等同整句、在 Decisions 表格處則會把
     整列混成一格。**已知誤判風險**（各有負向控制或例外表兜住）：
 
+    4. **同一 fact 底下不同欄位的值可以互相冒名頂替。** (b)/(d) 的比對是
+       「數字落在該列所有位址值的**聯集**裡」，工具沒有語意、無法判斷散文那句
+       話指的是哪個欄位。實例：把 spec 裡的 op 數 577 換成筆數 20，兩者都在
+       E10 的聯集裡，檢查照樣通過（2026-08-15 第四輪稽核以此實證）。
+       緩解而非修補：綁鍵成功的訊息會**指名綁到哪一個位址**，
+       覆核時 `577 → routes[9].max_ops` 變成 `20 → label=…rows` 一眼可見。
+       這是把不可機械化的部分交還給人，不是假裝已經蓋住。
+
     - 表格列逐格切開，等於**放棄檢查同列其他格的數字**（例如 design.md 決策表
       「Q7 (fact D7)」那格有標記、數字卻在隔壁格）。這是刻意的：整列混成一格
       會製造大量假陽性，寧可少驗不要誤殺。
@@ -533,6 +541,36 @@ def claim_segments(claim: str) -> list[str] | None:
     return segments
 
 
+def matching_addresses(token: str, resolved: dict[str, dict[str, object]]) -> list[str]:
+    """回傳 token 綁得上的**位址名稱**清單（可能多於一個）。
+
+    為什麼要知道「綁到哪一個」：(b)/(d) 的比對是「token 落在該列所有位址值的
+    聯集裡」。同一個 fact 常同時引用語意完全不同的鍵（op 數、得分、筆數…），
+    因此**同一列內兩個欄位的值可以互相冒名頂替而仍然通過**——2026-08-15 第四
+    輪稽核以「把 spec 裡的 op 數 577 換成筆數 20」實證了這一點。
+
+    工具沒有語意，無法判斷散文那句話指的是哪個欄位；但把「綁到哪個位址」印出來，
+    覆核者一眼就能看出 `577 → routes[9].max_ops` 變成 `20 → label=...rows`
+    是換了個完全不同的量。這是把不可機械化的部分交還給人，而不是假裝已經蓋住。
+    """
+    plain = token.replace(",", "")
+    try:
+        target = float(plain)
+    except ValueError:
+        return []
+    decimals = len(plain.split(".")[1]) if "." in plain else 0
+    hits: list[str] = []
+    for addr, values in resolved.items():
+        leaves = values if isinstance(values, (list, tuple)) else [values]
+        for value in leaves:
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
+                continue
+            if abs(round(float(value), decimals) - target) <= 1e-9 * max(1.0, abs(target)):
+                hits.append(addr)
+                break
+    return hits
+
+
 def number_matches(token: str, candidates: list[float]) -> bool:
     """散文數字 token 是否等於任一候選值（四捨五入到 token 的小數位數）。"""
     plain = token.replace(",", "")
@@ -706,6 +744,9 @@ def run_lint(change: Path) -> dict[str, Any]:
     # fact id → 該列所有位址的數值候選；以及 位址 → 摘要（供 (d) 的錯誤訊息用）
     row_candidates: dict[str, list[float]] = {}
     row_resolved: dict[str, dict[str, str]] = {}
+    # 位址 → 該位址底下的數值葉節點。用來回答「這個數字綁到哪一個位址」，
+    # 讓同一列內語意不同的欄位互相冒名頂替在覆核時看得見（第四輪 F1）。
+    row_numeric: dict[str, dict[str, list[float]]] = {}
 
     # --- 矩陣結構：id 必須唯一，否則「單一真相來源」在自己內部就分岔了 ---
     seen: dict[str, str] = {}
@@ -769,6 +810,7 @@ def run_lint(change: Path) -> dict[str, Any]:
         lines = "；".join(f"`{a}` = {v}" for a, v in detail.items()) or "（無可解析位址）"
         row_candidates[fact] = candidates
         row_resolved[fact] = detail
+        row_numeric[fact] = {a: numeric_leaves(v) for a, v in resolved.items()}
 
         claim = row.get("claim", "")
 
@@ -1010,7 +1052,15 @@ def run_lint(change: Path) -> dict[str, Any]:
                                 "doc-number-bound",
                                 True,
                                 label,
-                                f"{rel}:{lineno} 的 {token} 已綁鍵",
+                                f"{rel}:{lineno} 的 {token} 已綁鍵 → "
+                                + "、".join(
+                                    a
+                                    for f in facts
+                                    for a in matching_addresses(
+                                        token, row_numeric.get(f, {})
+                                    )
+                                )
+                                or f"{rel}:{lineno} 的 {token} 已綁鍵",
                             )
                         )
                         continue

@@ -21,7 +21,7 @@
    "ops": 216759740,
    "over_op_limit": true,
    "times_over_limit": 21.68,
-   "measurement_seconds": 17.4,
+   "measurement_seconds": 17.7,
    "expect": "dies",
    "matches_expectation": true
   }
