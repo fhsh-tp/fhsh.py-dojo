@@ -1,0 +1,29 @@
+{
+ "purpose": "證明 apcs015 的插值路線可行，且題面改動無法關閉它",
+ "op_limit": 10000000,
+ "ops_source": "verify/judge_ops.py::count_ops_source_fresh",
+ "page_example_values_published": 8,
+ "points_needed_for_quartic": 5,
+ "page_change_can_close_route": false,
+ "variants": [
+  {
+   "variant": "page_table",
+   "note": "只用題面答案表的五個值",
+   "score": 20,
+   "of": 20,
+   "max_ops": 966351,
+   "op_margin": 10.3,
+   "passes": true
+  },
+  {
+   "variant": "self_generated",
+   "note": "完全不看題面，自己暴力枚舉 k=1..5 造點",
+   "score": 20,
+   "of": 20,
+   "max_ops": 968502,
+   "op_margin": 10.3,
+   "passes": true
+  }
+ ],
+ "problems": []
+}

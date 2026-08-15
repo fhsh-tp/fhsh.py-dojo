@@ -66,8 +66,16 @@ jobs:
       - name: Lint (ESLint + Prettier)
         run: pnpm lint
 
+      # deadline-pyodide.spec.ts 判斷的是「中斷有沒有在牆鐘期限內送達」，
+      # watchdog 在主執行緒、受測的 Python 迴圈在 worker，兩者被 CPU 競爭
+      # 餓到的程度不對稱。與其他測試檔平行跑時，該檔曾由 11.5 秒膨脹到
+      # 45.2 秒、其中一筆從 803 毫秒變成 34 秒並超過自己的 timeout。
+      # 因此把它排除在平行池外、單獨序列執行；兩步合計仍是同一組 821 筆測試。
       - name: Unit tests (Vitest)
-        run: pnpm test --run
+        run: pnpm test --run --exclude '**/deadline-pyodide.spec.ts'
+
+      - name: Deadline interrupt tests (serial, timing-sensitive)
+        run: pnpm test --run --no-file-parallelism .vitepress/theme/__tests__/deadline-pyodide.spec.ts
 
       - name: Rust tests
         run: cargo test --manifest-path testcase-generator/Cargo.toml

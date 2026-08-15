@@ -1,0 +1,1232 @@
+{
+ "challenge": "apcs016 跑馬燈顯示計數",
+ "op_counter_source": "verify/judge_ops.py（判題器 opGuard 的忠實複刻）",
+ "op_limit": 10000000,
+ "entries_measured": 20,
+ "routes": {
+  "REF_pow3": {
+   "file": "routes/r016_ref_pow3.py",
+   "worst_ops": 7,
+   "worst_entry": 1,
+   "worst_entry_n": 5,
+   "worst_entry_k": 2,
+   "worst_entry_free_cells": 3,
+   "op_limit_pct": 0.0,
+   "died_entries": [],
+   "errors": [],
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "free_cells": 3,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "free_cells": 0,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "free_cells": 0,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "free_cells": 10,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "free_cells": 1000000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "free_cells": 2,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "free_cells": 33,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "free_cells": 47,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "free_cells": 63,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "free_cells": 30,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "free_cells": 5556,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "free_cells": 98757,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "free_cells": 499999,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "free_cells": 1,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "free_cells": 654321,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "free_cells": 500000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "free_cells": 600000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "free_cells": 999980,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "free_cells": 150001,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "free_cells": 32769,
+     "ops": 7,
+     "error": null
+    }
+   ]
+  },
+  "A1_loop": {
+   "file": "routes/r016_a1_loop.py",
+   "worst_ops": 2000009,
+   "worst_entry": 5,
+   "worst_entry_n": 1000000,
+   "worst_entry_k": 0,
+   "worst_entry_free_cells": 1000000,
+   "op_limit_pct": 20.0,
+   "died_entries": [],
+   "errors": [],
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "free_cells": 3,
+     "ops": 15,
+     "error": null
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "free_cells": 0,
+     "ops": 9,
+     "error": null
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "free_cells": 0,
+     "ops": 9,
+     "error": null
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "free_cells": 10,
+     "ops": 29,
+     "error": null
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "free_cells": 1000000,
+     "ops": 2000009,
+     "error": null
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "free_cells": 2,
+     "ops": 13,
+     "error": null
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "free_cells": 33,
+     "ops": 75,
+     "error": null
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "free_cells": 47,
+     "ops": 103,
+     "error": null
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "free_cells": 63,
+     "ops": 135,
+     "error": null
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "free_cells": 30,
+     "ops": 69,
+     "error": null
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "free_cells": 5556,
+     "ops": 11121,
+     "error": null
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "free_cells": 98757,
+     "ops": 197523,
+     "error": null
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "free_cells": 499999,
+     "ops": 1000007,
+     "error": null
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "free_cells": 1,
+     "ops": 11,
+     "error": null
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "free_cells": 654321,
+     "ops": 1308651,
+     "error": null
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "free_cells": 500000,
+     "ops": 1000009,
+     "error": null
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "free_cells": 600000,
+     "ops": 1200009,
+     "error": null
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "free_cells": 999980,
+     "ops": 1999969,
+     "error": null
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "free_cells": 150001,
+     "ops": 300011,
+     "error": null
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "free_cells": 32769,
+     "ops": 65547,
+     "error": null
+    }
+   ]
+  },
+  "A2_bigint": {
+   "file": "routes/r016_a2_bigint.py",
+   "worst_ops": 7,
+   "worst_entry": 1,
+   "worst_entry_n": 5,
+   "worst_entry_k": 2,
+   "worst_entry_free_cells": 3,
+   "op_limit_pct": 0.0,
+   "died_entries": [],
+   "errors": [],
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "free_cells": 3,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "free_cells": 0,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "free_cells": 0,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "free_cells": 10,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "free_cells": 1000000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "free_cells": 2,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "free_cells": 33,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "free_cells": 47,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "free_cells": 63,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "free_cells": 30,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "free_cells": 5556,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "free_cells": 98757,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "free_cells": 499999,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "free_cells": 1,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "free_cells": 654321,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "free_cells": 500000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "free_cells": 600000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "free_cells": 999980,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "free_cells": 150001,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "free_cells": 32769,
+     "ops": 7,
+     "error": null
+    }
+   ]
+  },
+  "W1_ignore_k": {
+   "file": "routes/r016_w1_ignore_k.py",
+   "worst_ops": 7,
+   "worst_entry": 1,
+   "worst_entry_n": 5,
+   "worst_entry_k": 2,
+   "worst_entry_free_cells": 3,
+   "op_limit_pct": 0.0,
+   "died_entries": [],
+   "errors": [],
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "free_cells": 3,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "free_cells": 0,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "free_cells": 0,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "free_cells": 10,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "free_cells": 1000000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "free_cells": 2,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "free_cells": 33,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "free_cells": 47,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "free_cells": 63,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "free_cells": 30,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "free_cells": 5556,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "free_cells": 98757,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "free_cells": 499999,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "free_cells": 1,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "free_cells": 654321,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "free_cells": 500000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "free_cells": 600000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "free_cells": 999980,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "free_cells": 150001,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "free_cells": 32769,
+     "ops": 7,
+     "error": null
+    }
+   ]
+  },
+  "W2_use_k": {
+   "file": "routes/r016_w2_use_k.py",
+   "worst_ops": 7,
+   "worst_entry": 1,
+   "worst_entry_n": 5,
+   "worst_entry_k": 2,
+   "worst_entry_free_cells": 3,
+   "op_limit_pct": 0.0,
+   "died_entries": [],
+   "errors": [],
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "free_cells": 3,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "free_cells": 0,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "free_cells": 0,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "free_cells": 10,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "free_cells": 1000000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "free_cells": 2,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "free_cells": 33,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "free_cells": 47,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "free_cells": 63,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "free_cells": 30,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "free_cells": 5556,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "free_cells": 98757,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "free_cells": 499999,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "free_cells": 1,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "free_cells": 654321,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "free_cells": 500000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "free_cells": 600000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "free_cells": 999980,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "free_cells": 150001,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "free_cells": 32769,
+     "ops": 7,
+     "error": null
+    }
+   ]
+  },
+  "W3_plain_diff": {
+   "file": "routes/r016_w3_plain_diff.py",
+   "worst_ops": 7,
+   "worst_entry": 1,
+   "worst_entry_n": 5,
+   "worst_entry_k": 2,
+   "worst_entry_free_cells": 3,
+   "op_limit_pct": 0.0,
+   "died_entries": [],
+   "errors": [],
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "free_cells": 3,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "free_cells": 0,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "free_cells": 0,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "free_cells": 10,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "free_cells": 1000000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "free_cells": 2,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "free_cells": 33,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "free_cells": 47,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "free_cells": 63,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "free_cells": 30,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "free_cells": 5556,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "free_cells": 98757,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "free_cells": 499999,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "free_cells": 1,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "free_cells": 654321,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "free_cells": 500000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "free_cells": 600000,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "free_cells": 999980,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "free_cells": 150001,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "free_cells": 32769,
+     "ops": 7,
+     "error": null
+    }
+   ]
+  },
+  "W4_nomod": {
+   "file": "routes/r016_w4_nomod.py",
+   "worst_ops": 7,
+   "worst_entry": 1,
+   "worst_entry_n": 5,
+   "worst_entry_k": 2,
+   "worst_entry_free_cells": 3,
+   "op_limit_pct": 0.0,
+   "died_entries": [
+    5,
+    12,
+    13,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "errors": [
+    "ValueError"
+   ],
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "free_cells": 3,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "free_cells": 0,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "free_cells": 0,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "free_cells": 10,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "free_cells": 1000000,
+     "ops": null,
+     "error": "ValueError"
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "free_cells": 2,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "free_cells": 33,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "free_cells": 47,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "free_cells": 63,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "free_cells": 30,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "free_cells": 5556,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "free_cells": 98757,
+     "ops": null,
+     "error": "ValueError"
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "free_cells": 499999,
+     "ops": null,
+     "error": "ValueError"
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "free_cells": 1,
+     "ops": 7,
+     "error": null
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "free_cells": 654321,
+     "ops": null,
+     "error": "ValueError"
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "free_cells": 500000,
+     "ops": null,
+     "error": "ValueError"
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "free_cells": 600000,
+     "ops": null,
+     "error": "ValueError"
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "free_cells": 999980,
+     "ops": null,
+     "error": "ValueError"
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "free_cells": 150001,
+     "ops": null,
+     "error": "ValueError"
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "free_cells": 32769,
+     "ops": null,
+     "error": "ValueError"
+    }
+   ]
+  }
+ },
+ "problems": []
+}

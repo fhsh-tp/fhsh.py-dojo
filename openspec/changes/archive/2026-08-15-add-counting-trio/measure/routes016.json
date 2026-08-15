@@ -1,0 +1,1958 @@
+{
+ "challenge": "apcs016 跑馬燈顯示計數",
+ "slug": "marquee-display-count",
+ "algorithm": "marquee_display_count",
+ "measured_on": {
+  "python": "3.13.11",
+  "platform": "darwin",
+  "pyodide_factor": 4,
+  "repeats": 7,
+  "note": "cpython_ms 為 7 次取最佳；pyodide_estimate_ms = cpython_ms × 4"
+ },
+ "deadline_ms": 5000,
+ "op_cap": 10000000,
+ "op_counter_source": "verify/judge_ops.py（判題器 opGuard 的忠實複刻）",
+ "worst_traced_ops": {
+  "REF_pow3": 7,
+  "A1_loop": 2000009,
+  "A2_bigint": 7
+ },
+ "routes": {
+  "REF_pow3": {
+   "score": "20/20",
+   "block_cpython_ms": 0.305,
+   "block_pyodide_estimate_ms": 1.22,
+   "worst_entry": 5,
+   "worst_cpython_ms": 0.016,
+   "worst_pyodide_estimate_ms": 0.062,
+   "worst_deadline_headroom_ms": 4999.938,
+   "worst_entry_near_ties": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "worst_entry_note": "最壞單筆的身分不穩定：entry [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] 的牆鐘都落在最大值的 10% 以內，跨次執行會互換（本題最大的兩筆工作量只差 0.002%）。要指名最壞一筆請用 worst_traced_ops_entry，op 數是決定性的。",
+   "errors": [],
+   "max_out_len": 9,
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.062,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.061,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": true,
+     "error": null,
+     "out_len": 4
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "cpython_ms": 0.016,
+     "pyodide_estimate_ms": 0.062,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "cpython_ms": 0.016,
+     "pyodide_estimate_ms": 0.063,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "cpython_ms": 0.016,
+     "pyodide_estimate_ms": 0.062,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "cpython_ms": 0.016,
+     "pyodide_estimate_ms": 0.062,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.061,
+     "ok": true,
+     "error": null,
+     "out_len": 8
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.061,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.061,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.062,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.06,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "cpython_ms": 0.016,
+     "pyodide_estimate_ms": 0.063,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.061,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.062,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.062,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.062,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.061,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    }
+   ],
+   "file": "routes/r016_ref_pow3.py",
+   "disposition": "REFERENCE",
+   "worst_traced_ops": 7,
+   "worst_traced_ops_entry": 1,
+   "worst_traced_ops_free_cells": 3,
+   "traced_ops_per_entry": [
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7
+   ]
+  },
+  "A1_loop": {
+   "score": "20/20",
+   "block_cpython_ms": 319.865,
+   "block_pyodide_estimate_ms": 1279.46,
+   "worst_entry": 5,
+   "worst_cpython_ms": 71.432,
+   "worst_pyodide_estimate_ms": 285.726,
+   "worst_deadline_headroom_ms": 4714.274,
+   "worst_entry_near_ties": [
+    5,
+    18
+   ],
+   "worst_entry_note": "最壞單筆的身分不穩定：entry [5, 18] 的牆鐘都落在最大值的 10% 以內，跨次執行會互換（本題最大的兩筆工作量只差 0.002%）。要指名最壞一筆請用 worst_traced_ops_entry，op 數是決定性的。",
+   "errors": [],
+   "max_out_len": 9,
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "cpython_ms": 0.02,
+     "pyodide_estimate_ms": 0.081,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "cpython_ms": 0.02,
+     "pyodide_estimate_ms": 0.08,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "cpython_ms": 0.019,
+     "pyodide_estimate_ms": 0.078,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "cpython_ms": 0.02,
+     "pyodide_estimate_ms": 0.079,
+     "ok": true,
+     "error": null,
+     "out_len": 4
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "cpython_ms": 71.432,
+     "pyodide_estimate_ms": 285.726,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "cpython_ms": 0.02,
+     "pyodide_estimate_ms": 0.08,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "cpython_ms": 0.022,
+     "pyodide_estimate_ms": 0.086,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "cpython_ms": 0.022,
+     "pyodide_estimate_ms": 0.088,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "cpython_ms": 0.023,
+     "pyodide_estimate_ms": 0.091,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "cpython_ms": 0.021,
+     "pyodide_estimate_ms": 0.083,
+     "ok": true,
+     "error": null,
+     "out_len": 8
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "cpython_ms": 0.405,
+     "pyodide_estimate_ms": 1.62,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "cpython_ms": 6.908,
+     "pyodide_estimate_ms": 27.633,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "cpython_ms": 35.079,
+     "pyodide_estimate_ms": 140.317,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "cpython_ms": 0.02,
+     "pyodide_estimate_ms": 0.079,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "cpython_ms": 45.774,
+     "pyodide_estimate_ms": 183.097,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "cpython_ms": 34.985,
+     "pyodide_estimate_ms": 139.941,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "cpython_ms": 42.028,
+     "pyodide_estimate_ms": 168.111,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "cpython_ms": 70.182,
+     "pyodide_estimate_ms": 280.728,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "cpython_ms": 10.545,
+     "pyodide_estimate_ms": 42.182,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "cpython_ms": 2.32,
+     "pyodide_estimate_ms": 9.279,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    }
+   ],
+   "file": "routes/r016_a1_loop.py",
+   "disposition": "ACCEPTED",
+   "worst_traced_ops": 2000009,
+   "worst_traced_ops_entry": 5,
+   "worst_traced_ops_free_cells": 1000000,
+   "traced_ops_per_entry": [
+    15,
+    9,
+    9,
+    29,
+    2000009,
+    13,
+    75,
+    103,
+    135,
+    69,
+    11121,
+    197523,
+    1000007,
+    11,
+    1308651,
+    1000009,
+    1200009,
+    1999969,
+    300011,
+    65547
+   ]
+  },
+  "A2_bigint": {
+   "score": "20/20",
+   "block_cpython_ms": 15.877,
+   "block_pyodide_estimate_ms": 63.508,
+   "worst_entry": 18,
+   "worst_cpython_ms": 3.879,
+   "worst_pyodide_estimate_ms": 15.517,
+   "worst_deadline_headroom_ms": 4984.483,
+   "worst_entry_near_ties": [
+    5,
+    18
+   ],
+   "worst_entry_note": "最壞單筆的身分不穩定：entry [5, 18] 的牆鐘都落在最大值的 10% 以內，跨次執行會互換（本題最大的兩筆工作量只差 0.002%）。要指名最壞一筆請用 worst_traced_ops_entry，op 數是決定性的。",
+   "errors": [],
+   "max_out_len": 9,
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.055,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.055,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.055,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.055,
+     "ok": true,
+     "error": null,
+     "out_len": 4
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "cpython_ms": 3.848,
+     "pyodide_estimate_ms": 15.393,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.054,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.054,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.055,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.054,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.054,
+     "ok": true,
+     "error": null,
+     "out_len": 8
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "cpython_ms": 0.022,
+     "pyodide_estimate_ms": 0.088,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "cpython_ms": 0.29,
+     "pyodide_estimate_ms": 1.161,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "cpython_ms": 1.925,
+     "pyodide_estimate_ms": 7.699,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.054,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "cpython_ms": 1.847,
+     "pyodide_estimate_ms": 7.387,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "cpython_ms": 1.868,
+     "pyodide_estimate_ms": 7.473,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "cpython_ms": 1.564,
+     "pyodide_estimate_ms": 6.255,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "cpython_ms": 3.879,
+     "pyodide_estimate_ms": 15.517,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "cpython_ms": 0.377,
+     "pyodide_estimate_ms": 1.508,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "cpython_ms": 0.12,
+     "pyodide_estimate_ms": 0.479,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    }
+   ],
+   "file": "routes/r016_a2_bigint.py",
+   "disposition": "ACCEPTED",
+   "worst_traced_ops": 7,
+   "worst_traced_ops_entry": 1,
+   "worst_traced_ops_free_cells": 3,
+   "traced_ops_per_entry": [
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7
+   ]
+  },
+  "W1_ignore_k": {
+   "score": "2/20",
+   "block_cpython_ms": 0.293,
+   "block_pyodide_estimate_ms": 1.172,
+   "worst_entry": 3,
+   "worst_cpython_ms": 0.015,
+   "worst_pyodide_estimate_ms": 0.06,
+   "worst_deadline_headroom_ms": 4999.94,
+   "worst_entry_near_ties": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "worst_entry_note": "最壞單筆的身分不穩定：entry [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] 的牆鐘都落在最大值的 10% 以內，跨次執行會互換（本題最大的兩筆工作量只差 0.002%）。要指名最壞一筆請用 worst_traced_ops_entry，op 數是決定性的。",
+   "errors": [],
+   "max_out_len": 9,
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.058,
+     "ok": false,
+     "error": null,
+     "out_len": 2
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.058,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.06,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.057,
+     "ok": true,
+     "error": null,
+     "out_len": 4
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.06,
+     "ok": true,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.057,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.058,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.058,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.058,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.058,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.06,
+     "ok": false,
+     "error": null,
+     "out_len": 7
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.06,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.06,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.06,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.06,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.06,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    }
+   ],
+   "file": "routes/r016_w1_ignore_k.py",
+   "disposition": "WRONG_ANSWER"
+  },
+  "W2_use_k": {
+   "score": "0/20",
+   "block_cpython_ms": 0.298,
+   "block_pyodide_estimate_ms": 1.192,
+   "worst_entry": 3,
+   "worst_cpython_ms": 0.016,
+   "worst_pyodide_estimate_ms": 0.062,
+   "worst_deadline_headroom_ms": 4999.938,
+   "worst_entry_near_ties": [
+    1,
+    2,
+    3,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    14,
+    15,
+    16,
+    17,
+    19,
+    20
+   ],
+   "worst_entry_note": "最壞單筆的身分不穩定：entry [1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 19, 20] 的牆鐘都落在最大值的 10% 以內，跨次執行會互換（本題最大的兩筆工作量只差 0.002%）。要指名最壞一筆請用 worst_traced_ops_entry，op 數是決定性的。",
+   "errors": [],
+   "max_out_len": 9,
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.061,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "cpython_ms": 0.016,
+     "pyodide_estimate_ms": 0.062,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.057,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.057,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": false,
+     "error": null,
+     "out_len": 3
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.06,
+     "ok": false,
+     "error": null,
+     "out_len": 4
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.06,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.061,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.057,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.06,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.059,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.057,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "cpython_ms": 0.016,
+     "pyodide_estimate_ms": 0.062,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "cpython_ms": 0.015,
+     "pyodide_estimate_ms": 0.061,
+     "ok": false,
+     "error": null,
+     "out_len": 9
+    }
+   ],
+   "file": "routes/r016_w2_use_k.py",
+   "disposition": "WRONG_ANSWER"
+  },
+  "W3_plain_diff": {
+   "score": "0/20",
+   "block_cpython_ms": 0.243,
+   "block_pyodide_estimate_ms": 0.972,
+   "worst_entry": 1,
+   "worst_cpython_ms": 0.013,
+   "worst_pyodide_estimate_ms": 0.05,
+   "worst_deadline_headroom_ms": 4999.95,
+   "worst_entry_near_ties": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "worst_entry_note": "最壞單筆的身分不穩定：entry [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] 的牆鐘都落在最大值的 10% 以內，跨次執行會互換（本題最大的兩筆工作量只差 0.002%）。要指名最壞一筆請用 worst_traced_ops_entry，op 數是決定性的。",
+   "errors": [],
+   "max_out_len": 7,
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.05,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.05,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.05,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.05,
+     "ok": false,
+     "error": null,
+     "out_len": 2
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.049,
+     "ok": false,
+     "error": null,
+     "out_len": 7
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.047,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 2
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 2
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 2
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 2
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 4
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 5
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 6
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 6
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 6
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 6
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 6
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 6
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "cpython_ms": 0.012,
+     "pyodide_estimate_ms": 0.048,
+     "ok": false,
+     "error": null,
+     "out_len": 5
+    }
+   ],
+   "file": "routes/r016_w3_plain_diff.py",
+   "disposition": "WRONG_ANSWER"
+  },
+  "W4_nomod": {
+   "score": "6/20",
+   "block_cpython_ms": 15.297,
+   "block_pyodide_estimate_ms": 61.188,
+   "worst_entry": 18,
+   "worst_cpython_ms": 3.725,
+   "worst_pyodide_estimate_ms": 14.898,
+   "worst_deadline_headroom_ms": 4985.102,
+   "worst_entry_near_ties": [
+    5,
+    18
+   ],
+   "worst_entry_note": "最壞單筆的身分不穩定：entry [5, 18] 的牆鐘都落在最大值的 10% 以內，跨次執行會互換（本題最大的兩筆工作量只差 0.002%）。要指名最壞一筆請用 worst_traced_ops_entry，op 數是決定性的。",
+   "errors": [
+    "ValueError"
+   ],
+   "max_out_len": 1673,
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.056,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.055,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.055,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.055,
+     "ok": true,
+     "error": null,
+     "out_len": 4
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "cpython_ms": 3.697,
+     "pyodide_estimate_ms": 14.79,
+     "ok": false,
+     "error": "ValueError",
+     "out_len": 0
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.053,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.053,
+     "ok": false,
+     "error": null,
+     "out_len": 10
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.054,
+     "ok": false,
+     "error": null,
+     "out_len": 15
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.053,
+     "ok": false,
+     "error": null,
+     "out_len": 19
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.053,
+     "ok": false,
+     "error": null,
+     "out_len": 10
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "cpython_ms": 0.055,
+     "pyodide_estimate_ms": 0.222,
+     "ok": false,
+     "error": null,
+     "out_len": 1673
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "cpython_ms": 0.275,
+     "pyodide_estimate_ms": 1.101,
+     "ok": false,
+     "error": "ValueError",
+     "out_len": 0
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "cpython_ms": 1.85,
+     "pyodide_estimate_ms": 7.401,
+     "ok": false,
+     "error": "ValueError",
+     "out_len": 0
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.057,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "cpython_ms": 1.82,
+     "pyodide_estimate_ms": 7.279,
+     "ok": false,
+     "error": "ValueError",
+     "out_len": 0
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "cpython_ms": 1.794,
+     "pyodide_estimate_ms": 7.177,
+     "ok": false,
+     "error": "ValueError",
+     "out_len": 0
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "cpython_ms": 1.481,
+     "pyodide_estimate_ms": 5.924,
+     "ok": false,
+     "error": "ValueError",
+     "out_len": 0
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "cpython_ms": 3.725,
+     "pyodide_estimate_ms": 14.898,
+     "ok": false,
+     "error": "ValueError",
+     "out_len": 0
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "cpython_ms": 0.351,
+     "pyodide_estimate_ms": 1.404,
+     "ok": false,
+     "error": "ValueError",
+     "out_len": 0
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "cpython_ms": 0.114,
+     "pyodide_estimate_ms": 0.455,
+     "ok": false,
+     "error": "ValueError",
+     "out_len": 0
+    }
+   ],
+   "file": "routes/r016_w4_nomod.py",
+   "disposition": "WRONG_ANSWER",
+   "nomod_correct_entries": [
+    1,
+    2,
+    3,
+    4,
+    6,
+    14
+   ],
+   "nomod_correct_count": 6,
+   "nomod_exception_entries": [
+    5,
+    12,
+    13,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "nomod_exception_count": 9,
+   "nomod_wrong_no_exception_entries": [
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "nomod_wrong_no_exception_count": 5,
+   "nomod_outcome_note": "三類互斥且窮盡（正確 6 ＋ 拋例外 9 ＋ 安靜錯答 5 ＝ 20）。安靜錯答是「印得出來但值錯」的筆，判題器記 WRONG_ANSWER 而非例外——把它併進「拋例外」是 2026-08-15 稽核抓到的散文誤述。"
+  },
+  "W4_nomod_unlimited_str": {
+   "score": "6/20",
+   "block_cpython_ms": 115.609,
+   "block_pyodide_estimate_ms": 462.436,
+   "worst_entry": 5,
+   "worst_cpython_ms": 22.654,
+   "worst_pyodide_estimate_ms": 90.617,
+   "worst_deadline_headroom_ms": 4909.383,
+   "worst_entry_near_ties": [
+    5,
+    18
+   ],
+   "worst_entry_note": "最壞單筆的身分不穩定：entry [5, 18] 的牆鐘都落在最大值的 10% 以內，跨次執行會互換（本題最大的兩筆工作量只差 0.002%）。要指名最壞一筆請用 worst_traced_ops_entry，op 數是決定性的。",
+   "errors": [],
+   "max_out_len": 301030,
+   "per_entry": [
+    {
+     "entry": 1,
+     "n": 5,
+     "k": 2,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.053,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 2,
+     "n": 1,
+     "k": 1,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.053,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 3,
+     "n": 1000000,
+     "k": 1000000,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.053,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 4,
+     "n": 10,
+     "k": 0,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.053,
+     "ok": true,
+     "error": null,
+     "out_len": 4
+    },
+    {
+     "entry": 5,
+     "n": 1000000,
+     "k": 0,
+     "cpython_ms": 22.654,
+     "pyodide_estimate_ms": 90.617,
+     "ok": false,
+     "error": null,
+     "out_len": 301030
+    },
+    {
+     "entry": 6,
+     "n": 3,
+     "k": 1,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.054,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 7,
+     "n": 40,
+     "k": 7,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.054,
+     "ok": false,
+     "error": null,
+     "out_len": 10
+    },
+    {
+     "entry": 8,
+     "n": 60,
+     "k": 13,
+     "cpython_ms": 0.013,
+     "pyodide_estimate_ms": 0.054,
+     "ok": false,
+     "error": null,
+     "out_len": 15
+    },
+    {
+     "entry": 9,
+     "n": 100,
+     "k": 37,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.054,
+     "ok": false,
+     "error": null,
+     "out_len": 19
+    },
+    {
+     "entry": 10,
+     "n": 1000,
+     "k": 970,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.054,
+     "ok": false,
+     "error": null,
+     "out_len": 10
+    },
+    {
+     "entry": 11,
+     "n": 12345,
+     "k": 6789,
+     "cpython_ms": 0.056,
+     "pyodide_estimate_ms": 0.224,
+     "ok": false,
+     "error": null,
+     "out_len": 1673
+    },
+    {
+     "entry": 12,
+     "n": 99991,
+     "k": 1234,
+     "cpython_ms": 5.248,
+     "pyodide_estimate_ms": 20.993,
+     "ok": false,
+     "error": null,
+     "out_len": 29729
+    },
+    {
+     "entry": 13,
+     "n": 500000,
+     "k": 1,
+     "cpython_ms": 10.839,
+     "pyodide_estimate_ms": 43.355,
+     "ok": false,
+     "error": null,
+     "out_len": 150515
+    },
+    {
+     "entry": 14,
+     "n": 500000,
+     "k": 499999,
+     "cpython_ms": 0.014,
+     "pyodide_estimate_ms": 0.057,
+     "ok": true,
+     "error": null,
+     "out_len": 1
+    },
+    {
+     "entry": 15,
+     "n": 777777,
+     "k": 123456,
+     "cpython_ms": 16.741,
+     "pyodide_estimate_ms": 66.965,
+     "ok": false,
+     "error": null,
+     "out_len": 196971
+    },
+    {
+     "entry": 16,
+     "n": 999999,
+     "k": 499999,
+     "cpython_ms": 10.732,
+     "pyodide_estimate_ms": 42.929,
+     "ok": false,
+     "error": null,
+     "out_len": 150515
+    },
+    {
+     "entry": 17,
+     "n": 654321,
+     "k": 54321,
+     "cpython_ms": 16.155,
+     "pyodide_estimate_ms": 64.622,
+     "ok": false,
+     "error": null,
+     "out_len": 180618
+    },
+    {
+     "entry": 18,
+     "n": 999983,
+     "k": 3,
+     "cpython_ms": 22.617,
+     "pyodide_estimate_ms": 90.469,
+     "ok": false,
+     "error": null,
+     "out_len": 301024
+    },
+    {
+     "entry": 19,
+     "n": 250000,
+     "k": 99999,
+     "cpython_ms": 9.35,
+     "pyodide_estimate_ms": 37.399,
+     "ok": false,
+     "error": null,
+     "out_len": 45155
+    },
+    {
+     "entry": 20,
+     "n": 65537,
+     "k": 32768,
+     "cpython_ms": 1.084,
+     "pyodide_estimate_ms": 4.335,
+     "ok": false,
+     "error": null,
+     "out_len": 9865
+    }
+   ],
+   "file": "routes/r016_w4_nomod.py",
+   "disposition": "WRONG_ANSWER"
+  }
+ },
+ "problems": []
+}

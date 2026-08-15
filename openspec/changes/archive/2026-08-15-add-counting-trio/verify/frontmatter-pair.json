@@ -1,0 +1,240 @@
+{
+  "apcs015": {
+    "file": "/Users/phoenix/dev/fhsh-projects/fhsh.py-dojo/docs/challenge/ap-layout-plan.md",
+    "triple_ok": 20,
+    "four_key_bytes": "identical(599)",
+    "four_key_bytes_n": 599,
+    "four_key_identical": true,
+    "starter_code": "empty",
+    "banned": {
+      "assemble_full": [],
+      "assemble_body": [],
+      "hard_full": [],
+      "hard_body": [],
+      "soft_full": [],
+      "soft_body": []
+    },
+    "performance_hint": {
+      "timing_terms": [],
+      "timing_term_hits": [],
+      "cost_hint_paragraphs": 1,
+      "cost_hint_paragraphs_with_required_phrase": 1,
+      "uses_op_limit_phrase": true,
+      "required_phrase": "執行量上限",
+      "problems": []
+    },
+    "numbers": {
+      "total": 77,
+      "distinct": [
+        -2,
+        -1,
+        0,
+        1,
+        2,
+        3,
+        6,
+        8,
+        28,
+        96,
+        252,
+        550,
+        1000,
+        1056,
+        1848
+      ],
+      "distinct_count": 15,
+      "unmatched": [],
+      "unmatched_count": 0
+    }
+  },
+  "apcs016": {
+    "file": "/Users/phoenix/dev/fhsh-projects/fhsh.py-dojo/docs/challenge/marquee-display-count.md",
+    "triple_ok": 20,
+    "four_key_bytes": "identical(791)",
+    "four_key_bytes_n": 791,
+    "four_key_identical": true,
+    "starter_code": "empty",
+    "banned": {
+      "assemble_full": [],
+      "assemble_body": [],
+      "hard_full": [],
+      "hard_body": [],
+      "soft_full": [
+        [
+          "馬",
+          2
+        ]
+      ],
+      "soft_body": [
+        [
+          "馬",
+          1
+        ]
+      ]
+    },
+    "performance_hint": {
+      "timing_terms": [],
+      "timing_term_hits": [],
+      "cost_hint_paragraphs": 0,
+      "cost_hint_paragraphs_with_required_phrase": 0,
+      "uses_op_limit_phrase": false,
+      "required_phrase": "執行量上限",
+      "problems": []
+    },
+    "numbers": {
+      "total": 53,
+      "distinct": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        8,
+        1000000,
+        1000000007
+      ],
+      "distinct_count": 8,
+      "unmatched": [],
+      "unmatched_count": 0
+    }
+  },
+  "apcs017": {
+    "file": "/Users/phoenix/dev/fhsh-projects/fhsh.py-dojo/docs/challenge/fair-token-exchange.md",
+    "triple_ok": 20,
+    "four_key_bytes": "identical(651)",
+    "four_key_bytes_n": 651,
+    "four_key_identical": true,
+    "starter_code": "empty",
+    "banned": {
+      "assemble_full": [],
+      "assemble_body": [],
+      "hard_full": [],
+      "hard_body": [],
+      "soft_full": [],
+      "soft_body": []
+    },
+    "performance_hint": {
+      "timing_terms": [],
+      "timing_term_hits": [],
+      "cost_hint_paragraphs": 0,
+      "cost_hint_paragraphs_with_required_phrase": 0,
+      "uses_op_limit_phrase": false,
+      "required_phrase": "執行量上限",
+      "problems": []
+    },
+    "numbers": {
+      "total": 97,
+      "distinct": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        6,
+        9,
+        12,
+        210,
+        2520,
+        30240,
+        362880,
+        1000000000
+      ],
+      "distinct_count": 13,
+      "unmatched": [],
+      "unmatched_count": 0
+    }
+  },
+  "frontmatter_fields": {
+    "required_key_count": 15,
+    "required_keys": [
+      "layout",
+      "id",
+      "title",
+      "difficulty",
+      "category",
+      "type",
+      "tags",
+      "description",
+      "algorithm",
+      "params",
+      "input_budget",
+      "testcase_plan",
+      "generator",
+      "reference_solution",
+      "starter_code"
+    ],
+    "per_challenge": {
+      "apcs015": {
+        "key_count": 15,
+        "keys": [
+          "layout",
+          "id",
+          "title",
+          "difficulty",
+          "category",
+          "type",
+          "tags",
+          "description",
+          "algorithm",
+          "params",
+          "input_budget",
+          "testcase_plan",
+          "generator",
+          "reference_solution",
+          "starter_code"
+        ],
+        "missing": [],
+        "extra": [],
+        "tags_nonempty": true
+      },
+      "apcs016": {
+        "key_count": 15,
+        "keys": [
+          "layout",
+          "id",
+          "title",
+          "difficulty",
+          "category",
+          "type",
+          "tags",
+          "description",
+          "algorithm",
+          "params",
+          "input_budget",
+          "testcase_plan",
+          "generator",
+          "reference_solution",
+          "starter_code"
+        ],
+        "missing": [],
+        "extra": [],
+        "tags_nonempty": true
+      },
+      "apcs017": {
+        "key_count": 15,
+        "keys": [
+          "layout",
+          "id",
+          "title",
+          "difficulty",
+          "category",
+          "type",
+          "tags",
+          "description",
+          "algorithm",
+          "params",
+          "input_budget",
+          "testcase_plan",
+          "generator",
+          "reference_solution",
+          "starter_code"
+        ],
+        "missing": [],
+        "extra": [],
+        "tags_nonempty": true
+      }
+    },
+    "key_sets_identical": true,
+    "problems": []
+  }
+}

@@ -1,0 +1,105 @@
+{
+ "generated_by": "curation/assemble.py",
+ "scanner_self_test": "通過（乾淨樣本不叫、6 個帶術語樣本都叫）",
+ "banned_terms_count": {
+  "en": 66,
+  "zh": 49
+ },
+ "engine_param_field_allowlist_source": "testcase-generator/src/parser.rs:225（int）與 :383（count）",
+ "engine_default_input_budget": 4096,
+ "challenges": [
+  {
+   "tag": "015",
+   "slug": "ap-layout-plan",
+   "algorithm": "ap_layout_plan",
+   "source": "curation/out/plan015.yaml",
+   "fragment": "curation/out/frontmatter015.yaml",
+   "keys": [
+    "algorithm",
+    "params",
+    "input_budget",
+    "testcase_plan"
+   ],
+   "params": {
+    "n": {
+     "type": "int",
+     "min": 1,
+     "max": 1000
+    }
+   },
+   "input_budget": 4096,
+   "entry_count": 20,
+   "max_entry_bytes": 5,
+   "first_entry": "8\n",
+   "literals_sha256": "8ded1666c7af347657b6d31dc90ebeb0c2e238aeb4f3083c340fba439221414c",
+   "literals_sha256_from_fragment": "8ded1666c7af347657b6d31dc90ebeb0c2e238aeb4f3083c340fba439221414c",
+   "byte_identical_to_source": true,
+   "matches_assertion_wall_entries": true,
+   "banned_term_hits": []
+  },
+  {
+   "tag": "016",
+   "slug": "marquee-display-count",
+   "algorithm": "marquee_display_count",
+   "source": "curation/out/plan016.yaml",
+   "fragment": "curation/out/frontmatter016.yaml",
+   "keys": [
+    "algorithm",
+    "params",
+    "input_budget",
+    "testcase_plan"
+   ],
+   "params": {
+    "nk": {
+     "type": "int",
+     "min": 0,
+     "max": 1000000,
+     "count": {
+      "min": 2,
+      "max": 2,
+      "separator": " "
+     }
+    }
+   },
+   "input_budget": 4096,
+   "entry_count": 20,
+   "max_entry_bytes": 16,
+   "first_entry": "5 2\n",
+   "literals_sha256": "063264b041a8e2f31275432b2d6a8d86fca054f592249c6fd8731cdf403fa7a8",
+   "literals_sha256_from_fragment": "063264b041a8e2f31275432b2d6a8d86fca054f592249c6fd8731cdf403fa7a8",
+   "byte_identical_to_source": true,
+   "matches_assertion_wall_entries": true,
+   "banned_term_hits": []
+  },
+  {
+   "tag": "017",
+   "slug": "fair-token-exchange",
+   "algorithm": "fair_token_exchange",
+   "source": "curation/out/plan017.yaml",
+   "fragment": "curation/out/frontmatter017.yaml",
+   "keys": [
+    "algorithm",
+    "params",
+    "input_budget",
+    "testcase_plan"
+   ],
+   "params": {
+    "n": {
+     "type": "int",
+     "min": 1,
+     "max": 1000000000
+    }
+   },
+   "input_budget": 4096,
+   "entry_count": 20,
+   "max_entry_bytes": 11,
+   "first_entry": "9\n",
+   "literals_sha256": "c6762beba8afb2c3ebb5be0258ba2cdbaea80110b96b5f99b102e115593ba01f",
+   "literals_sha256_from_fragment": "c6762beba8afb2c3ebb5be0258ba2cdbaea80110b96b5f99b102e115593ba01f",
+   "byte_identical_to_source": true,
+   "matches_assertion_wall_entries": true,
+   "banned_term_hits": []
+  }
+ ],
+ "problems": []
+}

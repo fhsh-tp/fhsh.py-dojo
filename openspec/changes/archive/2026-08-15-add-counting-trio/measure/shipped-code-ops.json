@@ -1,0 +1,198 @@
+{
+ "purpose": "實際出貨的 generator / reference_solution 的 op 數（冷行程）",
+ "op_limit": 10000000,
+ "ops_source": "verify/judge_ops.py::count_ops_source_fresh",
+ "note": "此表描述 frontmatter 內的出貨碼，與 curation/routes/ 的學生路線檔是不同對象",
+ "challenges": [
+  {
+   "id": "apcs015",
+   "slug": "ap-layout-plan",
+   "entries": 20,
+   "programs": {
+    "generator": {
+     "max_ops": 6008,
+     "max_ops_pct_of_limit": 0.0601,
+     "margin_x": 1664.45,
+     "worst_entry": 20,
+     "per_entry_ops": [
+      56,
+      15,
+      20,
+      26,
+      32,
+      44,
+      134,
+      440,
+      1502,
+      1508,
+      1958,
+      2408,
+      2858,
+      3308,
+      3758,
+      4208,
+      4658,
+      5108,
+      5558,
+      6008
+     ]
+    },
+    "reference_solution": {
+     "max_ops": 2005018,
+     "max_ops_pct_of_limit": 20.0502,
+     "margin_x": 4.99,
+     "worst_entry": 20,
+     "per_entry_ops": [
+      186,
+      25,
+      36,
+      51,
+      70,
+      120,
+      1005,
+      10746,
+      125265,
+      126268,
+      212893,
+      322018,
+      453643,
+      607768,
+      784393,
+      983518,
+      1205143,
+      1449268,
+      1715893,
+      2005018
+     ]
+    }
+   }
+  },
+  {
+   "id": "apcs016",
+   "slug": "marquee-display-count",
+   "entries": 20,
+   "programs": {
+    "generator": {
+     "max_ops": 7,
+     "max_ops_pct_of_limit": 0.0001,
+     "margin_x": 1428571.43,
+     "worst_entry": 1,
+     "per_entry_ops": [
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7
+     ]
+    },
+    "reference_solution": {
+     "max_ops": 2000012,
+     "max_ops_pct_of_limit": 20.0001,
+     "margin_x": 5.0,
+     "worst_entry": 5,
+     "per_entry_ops": [
+      18,
+      12,
+      12,
+      32,
+      2000012,
+      16,
+      78,
+      106,
+      138,
+      72,
+      11124,
+      197526,
+      1000010,
+      14,
+      1308654,
+      1000012,
+      1200012,
+      1999972,
+      300014,
+      65550
+     ]
+    }
+   }
+  },
+  {
+   "id": "apcs017",
+   "slug": "fair-token-exchange",
+   "entries": 20,
+   "programs": {
+    "generator": {
+     "max_ops": 154,
+     "max_ops_pct_of_limit": 0.0015,
+     "margin_x": 64935.06,
+     "worst_entry": 18,
+     "per_entry_ops": [
+      28,
+      13,
+      19,
+      25,
+      28,
+      28,
+      37,
+      37,
+      43,
+      49,
+      61,
+      70,
+      82,
+      91,
+      106,
+      139,
+      139,
+      154,
+      154,
+      154
+     ]
+    },
+    "reference_solution": {
+     "max_ops": 164,
+     "max_ops_pct_of_limit": 0.0016,
+     "margin_x": 60975.61,
+     "worst_entry": 18,
+     "per_entry_ops": [
+      38,
+      23,
+      29,
+      35,
+      38,
+      38,
+      47,
+      47,
+      53,
+      59,
+      71,
+      80,
+      92,
+      101,
+      116,
+      149,
+      149,
+      164,
+      164,
+      164
+     ]
+    }
+   }
+  }
+ ],
+ "problems": []
+}

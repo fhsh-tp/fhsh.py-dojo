@@ -3,8 +3,6 @@ name: Release Dist Packaging
 on:
   release:
     types: [published]
-  push:
-    tags: ['v*']
 
 permissions:
   contents: write

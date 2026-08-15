@@ -1,0 +1,182 @@
+{
+  "purpose": "apcs015 的 n 上界決策：op 成長階數、候選上界外推、決議上界直接實測",
+  "ops_source": "verify/judge_ops.py::count_ops（本 change 唯一允許的量測來源）",
+  "op_limit": 10000000,
+  "baseline_n": {
+    "small": 700,
+    "large": 1400
+  },
+  "baseline": {
+    "closed_form": {
+      "label": "O(n) 封閉式",
+      "ops_small": 2811,
+      "ops_large": 5611,
+      "growth_ratio": 2.0,
+      "expected_ratio": 2,
+      "order": 1
+    },
+    "rowscan_plain": {
+      "label": "O(n^2) 明寫迴圈",
+      "ops_small": 495611,
+      "ops_large": 1971211,
+      "growth_ratio": 3.98,
+      "expected_ratio": 4,
+      "order": 2
+    },
+    "rowscan_sum": {
+      "label": "O(n^2) sum 產生器",
+      "ops_small": 742361,
+      "ops_large": 2954711,
+      "growth_ratio": 3.98,
+      "expected_ratio": 4,
+      "order": 2
+    },
+    "rowscan_helper": {
+      "label": "O(n^2) 抽小函式",
+      "ops_small": 1231662,
+      "ops_large": 4913312,
+      "growth_ratio": 3.99,
+      "expected_ratio": 4,
+      "order": 2
+    }
+  },
+  "candidates": [
+    500,
+    1000,
+    1500,
+    2000,
+    2400,
+    2500,
+    3000,
+    3162,
+    3500,
+    4000
+  ],
+  "extrapolated": {
+    "500": {
+      "closed_form": 2004,
+      "rowscan_plain": 251430,
+      "rowscan_sum": 376876,
+      "rowscan_helper": 626698
+    },
+    "1000": {
+      "closed_form": 4008,
+      "rowscan_plain": 1005720,
+      "rowscan_sum": 1507506,
+      "rowscan_helper": 2506792
+    },
+    "1500": {
+      "closed_form": 6012,
+      "rowscan_plain": 2262870,
+      "rowscan_sum": 3391888,
+      "rowscan_helper": 5640282
+    },
+    "2000": {
+      "closed_form": 8016,
+      "rowscan_plain": 4022880,
+      "rowscan_sum": 6030022,
+      "rowscan_helper": 10027167
+    },
+    "2400": {
+      "closed_form": 9619,
+      "rowscan_plain": 5792947,
+      "rowscan_sum": 8683232,
+      "rowscan_helper": 14439121
+    },
+    "2500": {
+      "closed_form": 10020,
+      "rowscan_plain": 6285749,
+      "rowscan_sum": 9421910,
+      "rowscan_helper": 15667449
+    },
+    "3000": {
+      "closed_form": 12024,
+      "rowscan_plain": 9051479,
+      "rowscan_sum": 13567551,
+      "rowscan_helper": 22561127
+    },
+    "3162": {
+      "closed_form": 12673,
+      "rowscan_plain": 10055433,
+      "rowscan_sum": 15072409,
+      "rowscan_helper": 25063516
+    },
+    "3500": {
+      "closed_form": 14027,
+      "rowscan_plain": 12320069,
+      "rowscan_sum": 18466944,
+      "rowscan_helper": 30708200
+    },
+    "4000": {
+      "closed_form": 16031,
+      "rowscan_plain": 16091518,
+      "rowscan_sum": 24120090,
+      "rowscan_helper": 40108669
+    }
+  },
+  "knife_edge": {
+    "500": {
+      "spellings_alive": 3,
+      "worst_margin": 15.96,
+      "verdict": "全活"
+    },
+    "1000": {
+      "spellings_alive": 3,
+      "worst_margin": 3.99,
+      "verdict": "全活"
+    },
+    "1500": {
+      "spellings_alive": 3,
+      "worst_margin": 1.77,
+      "verdict": "全活"
+    },
+    "2000": {
+      "spellings_alive": 2,
+      "worst_margin": 1.0,
+      "verdict": "刀鋒（2/3 活）"
+    },
+    "2400": {
+      "spellings_alive": 2,
+      "worst_margin": 0.69,
+      "verdict": "刀鋒（2/3 活）"
+    },
+    "2500": {
+      "spellings_alive": 2,
+      "worst_margin": 0.64,
+      "verdict": "刀鋒（2/3 活）"
+    },
+    "3000": {
+      "spellings_alive": 1,
+      "worst_margin": 0.44,
+      "verdict": "刀鋒（1/3 活）"
+    },
+    "3162": {
+      "spellings_alive": 0,
+      "worst_margin": 0.4,
+      "verdict": "全死"
+    },
+    "3500": {
+      "spellings_alive": 0,
+      "worst_margin": 0.33,
+      "verdict": "全死"
+    },
+    "4000": {
+      "spellings_alive": 0,
+      "worst_margin": 0.25,
+      "verdict": "全死"
+    }
+  },
+  "first_knife_edge_n": 2000,
+  "decided_n": 1000,
+  "rejected_n": 3000,
+  "direct_at_decided_n": {
+    "closed_form": 4011,
+    "rowscan_plain": 1008011,
+    "rowscan_sum": 1510511,
+    "rowscan_helper": 2509512
+  },
+  "direct_worst_ops": 2509512,
+  "direct_worst_margin": 3.98,
+  "note": "直測值與主 harness（measure/routes015.json）可能差 1，那是量測外殼的固定開銷，不是路線差異；跨工具比對一律看差值不看絕對值。",
+  "problems": []
+}
