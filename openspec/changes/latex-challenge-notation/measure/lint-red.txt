@@ -1,0 +1,252 @@
+
+ RUN  v4.0.18 /Users/phoenix/dev/fhsh-projects/fhsh.py-dojo
+
+ ❯ scripts/latex-notation.test.ts (14 tests | 1 failed) 33ms
+     ✓ finds challenge pages to check 1ms
+     × every challenge body uses LaTeX for math statements 30ms
+     ✓ catches a tier A symbol in prose 0ms
+     ✓ catches a tier A sequence even inside an inline code span 0ms
+     ✓ catches a tier B symbol in prose 0ms
+     ✓ exempts a tier B symbol inside an inline code span 0ms
+     ✓ accepts a converted statement 0ms
+     ✓ does not scan fenced code blocks 0ms
+     ✓ does not scan image alt text 0ms
+     ✓ honours the ignore marker for exactly one line 0ms
+     ✓ reports the line number from the original file, not the scan surface 0ms
+     ✓ catches an unescaped currency dollar sign 0ms
+     ✓ accepts an escaped currency dollar sign 0ms
+     ✓ treats a file without frontmatter as all body 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/latex-notation.test.ts > challenge math notation > every challenge body uses LaTeX for math statements
+AssertionError: 206 處違規，散布於 53 個檔案：
+docs/challenge/ap-layout-plan.md:113 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/ap-layout-plan.md:114 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/ap-layout-plan.md:115 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/ap-layout-plan.md:115 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/ap-layout-plan.md:117 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/ap-layout-plan.md:118 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/ap-layout-plan.md:119 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/ap-layout-plan.md:119 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/ap-layout-plan.md:129 出現 A 級記號 "<="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/ap-layout-plan.md:129 出現 A 級記號 "<="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/arithmetic-sum.md:47 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/arithmetic-sum.md:47 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/arithmetic-sum.md:48 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/arithmetic-sum.md:48 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/arithmetic-sum.md:49 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/arithmetic-sum.md:49 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/beverage-cashier.md:39 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/bmi-classifier.md:42 出現 B 級記號 "²"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/bmi-classifier.md:51 出現 A 級記號 ">="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/buffer-audit-log.md:126 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/buffer-audit-log.md:126 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/buffer-audit-log.md:128 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/buffer-audit-log.md:128 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/buffer-audit-log.md:129 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/buffer-audit-log.md:129 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/buffer-audit-log.md:133 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/card-restack-count.md:98 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/card-restack-count.md:98 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/change-calculator.md:39 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/collatz-steps.md:37 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/collatz-steps.md:43 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/collatz-steps.md:43 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/countdown.md:31 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/countdown.md:31 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/coupon-combo-quote.md:254 出現 A 級記號 ">="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/date-validator.md:59 出現 A 級記號 ">="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/digit-counter.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/digit-counter.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/digit-sum-skip.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/digit-sum-skip.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/digital-root.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/digital-root.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/even-countdown.md:33 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/even-countdown.md:33 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/exam-collect-verify.md:537 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/exam-collect-verify.md:537 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/exam-collect-verify.md:539 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/exam-collect-verify.md:539 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/exam-collect-verify.md:539 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/exam-collect-verify.md:539 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/exam-collect-verify.md:540 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/exam-collect-verify.md:540 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/factorial.md:33 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/factorial.md:33 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/fair-token-exchange.md:116 出現 A 級記號 "<="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/fair-token-exchange.md:116 出現 A 級記號 "<="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/first-divisor.md:29 出現 A 級記號 "≥"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/first-divisor.md:33 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/first-divisor.md:33 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/gcd-euclid.md:40 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/gcd-euclid.md:40 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/gcd-euclid.md:41 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/gcd-euclid.md:41 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/gem-blast-playtest.md:135 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/gem-blast-playtest.md:135 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/gem-blast-playtest.md:137 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/gem-blast-playtest.md:137 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/guess-number-simple.md:41 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/guess-number-simple.md:41 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/inverted-triangle.md:32 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/inverted-triangle.md:32 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/isosceles-triangle.md:31 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/isosceles-triangle.md:31 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/magazine-typeset-check.md:160 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/magazine-typeset-check.md:160 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/marquee-display-count.md:89 出現 A 級記號 "<="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/marquee-display-count.md:89 出現 A 級記號 "<="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/marquee-display-count.md:90 出現 A 級記號 "<="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/marquee-display-count.md:90 出現 A 級記號 "<="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/movie-ticket.md:48 出現未跳脫的錢字號 "$"，貨幣請寫成 \$（見 Usage.md 記號分類表）
+docs/challenge/movie-ticket.md:49 出現未跳脫的錢字號 "$"，貨幣請寫成 \$（見 Usage.md 記號分類表）
+docs/challenge/movie-ticket.md:50 出現未跳脫的錢字號 "$"，貨幣請寫成 \$（見 Usage.md 記號分類表）
+docs/challenge/movie-ticket.md:51 出現未跳脫的錢字號 "$"，貨幣請寫成 \$（見 Usage.md 記號分類表）
+docs/challenge/movie-ticket.md:51 出現 A 級記號 ">="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/movie-ticket.md:55 出現未跳脫的錢字號 "$"，貨幣請寫成 \$（見 Usage.md 記號分類表）
+docs/challenge/multiplication-table.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/multiplication-table.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/multiplication-table.md:41 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/multiplication-table.md:41 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/nested-triangle.md:34 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/nested-triangle.md:34 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/number-pyramid.md:36 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/number-pyramid.md:36 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/number-reverse.md:34 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/number-reverse.md:34 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/number-staircase.md:31 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/number-staircase.md:31 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/number-sum.md:29 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/number-sum.md:29 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/odd-numbers.md:30 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/odd-numbers.md:30 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pair-count.md:40 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pair-count.md:40 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pair-count.md:40 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pair-count.md:44 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pair-count.md:44 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pair-count.md:45 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pair-count.md:45 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/perfect-number.md:39 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/perfect-number.md:39 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/perfect-numbers-range.md:34 出現 A 級記號 "≥"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/perfect-numbers-range.md:38 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/perfect-numbers-range.md:38 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:83 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:83 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:91 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:92 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:93 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:94 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:95 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:96 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:107 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:107 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:115 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:115 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:116 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:116 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:117 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/pillbox-reminder.md:117 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prime-check.md:55 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prime-check.md:55 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/print-farm-schedule.md:103 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/print-farm-schedule.md:103 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/print-farm-schedule.md:104 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/print-farm-schedule.md:104 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/print-farm-schedule.md:105 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/print-farm-schedule.md:105 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:173 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:173 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:173 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:173 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:173 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:173 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:173 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:181 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:181 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:181 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:181 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:181 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:183 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:187 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:187 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:188 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:188 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:188 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:188 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:188 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prize-order-code.md:218 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prop-box-packing.md:163 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/prop-box-packing.md:163 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/range-sum.md:33 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/range-sum.md:38 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/range-sum.md:38 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:144 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:144 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:144 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:144 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:144 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:144 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:150 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:150 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:150 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:150 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:150 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:152 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:152 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:152 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:152 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:156 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:156 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:157 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/rank-code-backfill.md:157 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/repeat-greeting.md:36 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/repeat-greeting.md:36 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/skip-multiples.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/skip-multiples.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/skip-multiples.md:38 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/skip-multiples.md:38 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/smallest-prime-factor.md:38 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/smallest-prime-factor.md:38 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/snack-bar-register.md:215 出現 A 級記號 ">="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/star-diamond.md:34 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/star-diamond.md:34 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/star-rectangle.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/star-rectangle.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/star-rectangle.md:38 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/star-rectangle.md:38 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/star-square.md:28 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/star-square.md:32 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/star-square.md:32 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/sum-skip-fives.md:34 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/sum-skip-fives.md:34 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/target-sum.md:32 出現 A 級記號 "≥"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/target-sum.md:36 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/target-sum.md:36 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/target-sum.md:40 出現 A 級記號 "≥"，請改寫成 LaTeX（見 Usage.md 記號分類表）: expected 206 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 206
+
+ ❯ scripts/latex-notation.test.ts:178:32
+    176|       ...all.map(describeViolation),
+    177|     ].join('\n')
+    178|     expect(all.length, report).toBe(0)
+       |                                ^
+    179|   })
+    180| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 13 passed (14)
+   Start at  16:44:21
+   Duration  205ms (transform 38ms, setup 45ms, import 17ms, tests 33ms, environment 0ms)
+
