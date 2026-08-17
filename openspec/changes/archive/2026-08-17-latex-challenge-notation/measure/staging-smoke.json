@@ -1,0 +1,164 @@
+{
+  "_comment": [
+    "merge 後在 staging 站台的冒煙驗證。與本地 dev server 的 render-verification.jsonl 用同一組",
+    "觀測／判讀腳本，只換 BASE；判讀結果同為 CLEAN。",
+    "另外補兩項本地驗不到的：字型相依的說明圖是否還供得出來（LFS 遷移後最該確認的），",
+    "以及判題管線是否完好（pools／WASM／Pyodide 一路到 AC）。"
+  ],
+  "base": "https://staging.fhsh-py-dojo.pages.dev",
+  "merge_commit": "304f37d",
+  "render": {
+    "verdict": "CLEAN",
+    "observed": 12,
+    "inline_proofs": 9,
+    "problems": [],
+    "pages": [
+      {
+        "slug": "pinball-track-predict",
+        "status": "OK",
+        "attempts": 1,
+        "doc_len": 863,
+        "mjx_count": 20,
+        "inline_count": 20,
+        "bare_dollars": 0,
+        "source_leaks": []
+      },
+      {
+        "slug": "exhibit-route-rebuild",
+        "status": "OK",
+        "attempts": 1,
+        "doc_len": 1489,
+        "mjx_count": 18,
+        "inline_count": 18,
+        "bare_dollars": 0,
+        "source_leaks": []
+      },
+      {
+        "slug": "quadratic-discriminant",
+        "status": "OK",
+        "attempts": 1,
+        "doc_len": 433,
+        "mjx_count": 8,
+        "inline_count": 8,
+        "bare_dollars": 0,
+        "source_leaks": []
+      },
+      {
+        "slug": "prize-order-code",
+        "status": "OK",
+        "attempts": 1,
+        "doc_len": 1089,
+        "mjx_count": 33,
+        "inline_count": 33,
+        "bare_dollars": 0,
+        "source_leaks": []
+      },
+      {
+        "slug": "rank-code-backfill",
+        "status": "OK",
+        "attempts": 1,
+        "doc_len": 857,
+        "mjx_count": 22,
+        "inline_count": 22,
+        "bare_dollars": 0,
+        "source_leaks": []
+      },
+      {
+        "slug": "pillbox-reminder",
+        "status": "OK",
+        "attempts": 1,
+        "doc_len": 1204,
+        "mjx_count": 43,
+        "inline_count": 43,
+        "bare_dollars": 0,
+        "source_leaks": []
+      },
+      {
+        "slug": "ap-layout-plan",
+        "status": "OK",
+        "attempts": 1,
+        "doc_len": 951,
+        "mjx_count": 20,
+        "inline_count": 20,
+        "bare_dollars": 0,
+        "source_leaks": []
+      },
+      {
+        "slug": "movie-ticket",
+        "status": "OK",
+        "attempts": 1,
+        "doc_len": 300,
+        "mjx_count": 3,
+        "inline_count": 3,
+        "bare_dollars": 5,
+        "source_leaks": []
+      },
+      {
+        "slug": "bmi-classifier",
+        "status": "OK",
+        "attempts": 1,
+        "doc_len": 342,
+        "mjx_count": 3,
+        "inline_count": 3,
+        "bare_dollars": 0,
+        "source_leaks": []
+      },
+      {
+        "slug": "print-farm-schedule",
+        "status": "OK",
+        "attempts": 1,
+        "doc_len": 986,
+        "mjx_count": 9,
+        "inline_count": 9,
+        "bare_dollars": 0,
+        "source_leaks": []
+      },
+      {
+        "slug": "marquee-display-count",
+        "status": "OK",
+        "attempts": 1,
+        "doc_len": 826,
+        "mjx_count": 11,
+        "inline_count": 11,
+        "bare_dollars": 0,
+        "source_leaks": []
+      },
+      {
+        "slug": "target-sum",
+        "status": "OK",
+        "attempts": 1,
+        "doc_len": 180,
+        "mjx_count": 6,
+        "inline_count": 6,
+        "bare_dollars": 0,
+        "source_leaks": []
+      }
+    ]
+  },
+  "figures": {
+    "_comment": "字型只在重建說明圖時才需要；已產出的 PNG 是 commit 進 repo 的靜態資產，不受 LFS 影響。這裡確認它們確實供得出來。",
+    "assets": [
+      {
+        "path": "/assets/challenge/apcs013/圖一.png",
+        "http": 200,
+        "bytes": 159746,
+        "content_type": "image/png"
+      },
+      {
+        "path": "/assets/challenge/apcs014/圖一.png",
+        "http": 200,
+        "bytes": 243370,
+        "content_type": "image/png"
+      }
+    ]
+  },
+  "judge": {
+    "_comment": "本次改動不碰 frontmatter，判題理論上不可能受影響——冒煙的意義正是去驗那個「不可能」。",
+    "slug": "marquee-display-count",
+    "method": "把該題的 reference_solution 貼進編輯器後提交",
+    "result": "20 / 20 通過"
+  },
+  "notes": [
+    "marquee-display-count 的編輯器載入後是空的，這是該題 frontmatter 寫 starter_code: \"\" 的預期行為，不是缺陷；已用未被本次改動的 taxi-fare（starter_code 有值、載入正常）作對照確認。"
+  ]
+}
