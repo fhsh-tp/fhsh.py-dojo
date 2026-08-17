@@ -62,6 +62,10 @@ RULES_PATH = ROOT / "scripts" / "latex-notation-rules.json"
 FENCE_RE = re.compile(r"^[ \t]*```.*?^[ \t]*```", re.S | re.M)
 IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)", re.S)
 CODESPAN_RE = re.compile(r"(`+)(?:(?!\1).)*?\1", re.S)
+# 自動連結 `<https://…>` 與 `<a@b.c>`：形態上就是「運算元 < … > 運算元」，
+# 會被裸比較運算子的 pattern 誤判。題目頁目前一個都沒有，先擋著，免得將來
+# 有人加一條連結然後拿到一則看不懂的記號違規。
+AUTOLINK_RE = re.compile(r"<[^>\s]+[:@][^>\s]*>")
 DISPLAY_RE = re.compile(r"\$\$.*?\$\$", re.S)
 # 行內公式：開頭的 $ 後面不接空白，結尾的 $ 前面不接空白，且不跨行。
 # 這是 markdown-it 那一族的實際判準，也正是 movie-ticket 的 `$150 | … | $250`
@@ -75,6 +79,10 @@ def load_rules(path: pathlib.Path = RULES_PATH) -> dict:
     return {
         "tier_a_symbols": rules["tierA"]["symbols"],
         "tier_a_sequences": rules["tierA"]["sequences"],
+        "tier_a_patterns": [
+            {"name": p["name"], "re": re.compile(p["regex"])}
+            for p in rules["tierA"].get("patterns", [])
+        ],
         "tier_b_symbols": rules["tierB"]["symbols"],
         "ignore_marker": rules["ignoreMarker"],
     }
@@ -107,6 +115,7 @@ def scan_surfaces(body: str) -> tuple[str, str, int]:
     """
     stage = _blank_out(FENCE_RE, body)
     stage = _blank_out(IMAGE_RE, stage)
+    stage = _blank_out(AUTOLINK_RE, stage)
     stage = stage.replace(r"\$", ESCAPED_DOLLAR)
     stage = _blank_out(DISPLAY_RE, stage)
     stage = _blank_out(INLINE_RE, stage)
@@ -149,7 +158,16 @@ def find_violations(body: str, body_start: int, rules: dict) -> list[dict]:
                 for _ in range(line.count(token)):
                     hits.append({"line": lineno, "tier": tier, "token": token})
 
+    def sweep_patterns(surface: str) -> None:
+        for lineno, line in enumerate(surface.split("\n"), start=body_start):
+            if lineno in skip:
+                continue
+            for pat in rules["tier_a_patterns"]:
+                for m in pat["re"].finditer(line):
+                    hits.append({"line": lineno, "tier": "A", "token": m.group(0).strip()})
+
     sweep(with_spans, rules["tier_a_symbols"] + rules["tier_a_sequences"], "A")
+    sweep_patterns(with_spans)
     sweep(without_spans, rules["tier_b_symbols"], "B")
     hits.sort(key=lambda h: (h["line"], h["tier"], h["token"]))
     return hits
@@ -245,6 +263,17 @@ def _self_test() -> None:
         ("圖片 alt 不掃", "![圖 1：`n <= 5` 的樣子](/a.png)", []),
         ("逃生門跳過下一行", "<!-- latex-lint-ignore-next-line -->\n寫 `x <= 3` 是合法的。", []),
         ("逃生門只跳一行", "<!-- latex-lint-ignore-next-line -->\n`x <= 3`\n`y >= 4`", [">="]),
+        # 裸的 < 與 > ——quadrant-classifier 整頁 7 條不等式就是從這裡漏掉的，
+        # 因此被歸成「內文無數學記號」，整頁沒有人看過。
+        ("裸比較運算子要抓", "若 x > 0 且 y < 0 則在第四象限。", ["<", ">"]),
+        ("中文運算元的裸比較也要抓", "當 付款 < 價格 時退回。", ["<"]),
+        ("不等於要抓", "若 `a != b` 則不同。", ["!="]),
+        ("已包成 LaTeX 的比較不算違規", "若 $x > 0$ 且 $y < 0$ 則成立。", []),
+        # 以下三種形態正是「不能直接把 < 與 > 列成 A 級 token」的原因
+        ("markdown 引言行首不誤判", "> 這是引言區塊", []),
+        ("HTML 註解不誤判", "<!-- 一則註解 -->", []),
+        ("自動連結不誤判", "詳見 <https://example.com/a> 說明", []),
+        ("除號要抓", "把 n ÷ 3 取整。", ["÷"]),
     ]
     for name, body, expect in cases:
         got = [v["token"] for v in scan(fm + body)]
