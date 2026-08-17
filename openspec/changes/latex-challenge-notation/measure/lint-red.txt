@@ -1,11 +1,24 @@
+轉換前的紅燈基準線
+==================
+
+在 8c06e9f 的題目頁內容上跑本次的守門測試，證明它確實會亮紅燈。
+**用的是黑名單擴充後的規則**（收錄裸的 < >、!=、÷），所以數字與提案初稿的
+206 處 / 53 檔不同——初稿那份是規則還有缺口時量的。
+
 
  RUN  v4.0.18 /Users/phoenix/dev/fhsh-projects/fhsh.py-dojo
 
- ❯ scripts/latex-notation.test.ts (14 tests | 1 failed) 33ms
+ ❯ scripts/latex-notation.test.ts (29 tests | 2 failed) 28ms
      ✓ finds challenge pages to check 1ms
-     × every challenge body uses LaTeX for math statements 30ms
+     × every challenge body uses LaTeX for math statements 20ms
+     × every formula is syntactically renderable 5ms
      ✓ catches a tier A symbol in prose 0ms
      ✓ catches a tier A sequence even inside an inline code span 0ms
+     ✓ catches a bare comparison operator between two operands 0ms
+     ✓ catches a bare comparison with Chinese operands 0ms
+     ✓ catches `!=` 0ms
+     ✓ does not flag a markdown blockquote, an HTML comment, or an autolink 0ms
+     ✓ does not flag a comparison already wrapped in LaTeX 0ms
      ✓ catches a tier B symbol in prose 0ms
      ✓ exempts a tier B symbol inside an inline code span 0ms
      ✓ accepts a converted statement 0ms
@@ -16,11 +29,20 @@
      ✓ catches an unescaped currency dollar sign 0ms
      ✓ accepts an escaped currency dollar sign 0ms
      ✓ treats a file without frontmatter as all body 0ms
+     ✓ accepts a well-formed formula 0ms
+     ✓ catches an odd number of dollar signs on a line 0ms
+     ✓ catches an unbraced multi-character exponent 0ms
+     ✓ catches an unbalanced brace 0ms
+     ✓ catches an unknown command 0ms
+     ✓ catches Chinese inside a formula 0ms
+     ✓ accepts Chinese kept outside the formula 0ms
+     ✓ catches \text{} wrapping 0ms
+     ✓ does not scan fenced code blocks for syntax 0ms
 
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
 
  FAIL  scripts/latex-notation.test.ts > challenge math notation > every challenge body uses LaTeX for math statements
-AssertionError: 206 處違規，散布於 53 個檔案：
+AssertionError: 222 處違規，散布於 55 個檔案：
 docs/challenge/ap-layout-plan.md:113 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/ap-layout-plan.md:114 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/ap-layout-plan.md:115 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
@@ -50,6 +72,7 @@ docs/challenge/buffer-audit-log.md:133 出現 B 級記號 "×"，請改寫成 La
 docs/challenge/card-restack-count.md:98 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/card-restack-count.md:98 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/change-calculator.md:39 出現 B 級記號 "−"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/collatz-steps.md:36 出現 B 級記號 "÷"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/collatz-steps.md:37 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/collatz-steps.md:43 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/collatz-steps.md:43 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
@@ -77,6 +100,9 @@ docs/challenge/factorial.md:33 出現 A 級記號 "≤"，請改寫成 LaTeX（�
 docs/challenge/factorial.md:33 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/fair-token-exchange.md:116 出現 A 級記號 "<="，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/fair-token-exchange.md:116 出現 A 級記號 "<="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/fair-token-exchange.md:140 出現 B 級記號 "÷"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/fair-token-exchange.md:141 出現 B 級記號 "÷"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/fair-token-exchange.md:142 出現 B 級記號 "÷"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/first-divisor.md:29 出現 A 級記號 "≥"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/first-divisor.md:33 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/first-divisor.md:33 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
@@ -106,6 +132,7 @@ docs/challenge/movie-ticket.md:50 出現未跳脫的錢字號 "$"，貨幣請寫
 docs/challenge/movie-ticket.md:51 出現未跳脫的錢字號 "$"，貨幣請寫成 \$（見 Usage.md 記號分類表）
 docs/challenge/movie-ticket.md:51 出現 A 級記號 ">="，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/movie-ticket.md:55 出現未跳脫的錢字號 "$"，貨幣請寫成 \$（見 Usage.md 記號分類表）
+docs/challenge/movie-ticket.md:55 出現 A 級記號 "<"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/multiplication-table.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/multiplication-table.md:37 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/multiplication-table.md:41 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
@@ -181,6 +208,16 @@ docs/challenge/prize-order-code.md:188 出現 A 級記號 "≤"，請改寫成 L
 docs/challenge/prize-order-code.md:218 出現 B 級記號 "×"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/prop-box-packing.md:163 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/prop-box-packing.md:163 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/quadrant-classifier.md:48 出現 A 級記號 "!="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/quadrant-classifier.md:49 出現 A 級記號 "!="，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/quadrant-classifier.md:50 出現 A 級記號 ">"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/quadrant-classifier.md:50 出現 A 級記號 ">"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/quadrant-classifier.md:51 出現 A 級記號 "<"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/quadrant-classifier.md:51 出現 A 級記號 ">"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/quadrant-classifier.md:52 出現 A 級記號 "<"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/quadrant-classifier.md:52 出現 A 級記號 "<"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/quadrant-classifier.md:53 出現 A 級記號 ">"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/quadrant-classifier.md:53 出現 A 級記號 "<"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/range-sum.md:33 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/range-sum.md:38 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/range-sum.md:38 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
@@ -226,27 +263,52 @@ docs/challenge/sum-skip-fives.md:34 出現 A 級記號 "≤"，請改寫成 LaTe
 docs/challenge/target-sum.md:32 出現 A 級記號 "≥"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/target-sum.md:36 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
 docs/challenge/target-sum.md:36 出現 A 級記號 "≤"，請改寫成 LaTeX（見 Usage.md 記號分類表）
-docs/challenge/target-sum.md:40 出現 A 級記號 "≥"，請改寫成 LaTeX（見 Usage.md 記號分類表）: expected 206 to be +0 // Object.is equality
+docs/challenge/target-sum.md:40 出現 A 級記號 "≥"，請改寫成 LaTeX（見 Usage.md 記號分類表）
+docs/challenge/vending-change.md:44 出現 A 級記號 "<"，請改寫成 LaTeX（見 Usage.md 記號分類表）: expected 222 to be +0 // Object.is equality
 
 - Expected
 + Received
 
 - 0
-+ 206
++ 222
 
- ❯ scripts/latex-notation.test.ts:178:32
-    176|       ...all.map(describeViolation),
-    177|     ].join('\n')
-    178|     expect(all.length, report).toBe(0)
+ ❯ scripts/latex-notation.test.ts:297:32
+    295|       ...all.map(describeViolation),
+    296|     ].join('\n')
+    297|     expect(all.length, report).toBe(0)
        |                                ^
-    179|   })
-    180| })
+    298|   })
+    299| 
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  scripts/latex-notation.test.ts > challenge math notation > every formula is syntactically renderable
+AssertionError: 5 個公式語法問題：
+docs/challenge/movie-ticket.md — 錢字號奇數個：第 12 行（相對內文）：| 兒童 | < 12 歲 | $150 |
+docs/challenge/movie-ticket.md — 錢字號奇數個：第 13 行（相對內文）：| 學生 | 12 ~ 25 歲 | $250 |
+docs/challenge/movie-ticket.md — 錢字號奇數個：第 14 行（相對內文）：| 成人 | 26 ~ 64 歲 | $350 |
+docs/challenge/movie-ticket.md — 錢字號奇數個：第 15 行（相對內文）：| 敬老 | >= 65 歲 | $150 |
+docs/challenge/movie-ticket.md — 錢字號奇數個：第 19 行（相對內文）：- 場次時間 < 12 點：所有票價減 $50: expected 5 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 5
+
+ ❯ scripts/latex-notation.test.ts:309:32
+    307|       ...all.map((p) => `docs/challenge/${p.file} — ${p.kind}：${p.deta…
+    308|     ].join('\n')
+    309|     expect(all.length, report).toBe(0)
+       |                                ^
+    310|   })
+    311| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
 
 
  Test Files  1 failed (1)
-      Tests  1 failed | 13 passed (14)
-   Start at  16:44:21
-   Duration  205ms (transform 38ms, setup 45ms, import 17ms, tests 33ms, environment 0ms)
+      Tests  2 failed | 27 passed (29)
+   Start at  22:15:41
+   Duration  188ms (transform 37ms, setup 38ms, import 23ms, tests 28ms, environment 0ms)
 

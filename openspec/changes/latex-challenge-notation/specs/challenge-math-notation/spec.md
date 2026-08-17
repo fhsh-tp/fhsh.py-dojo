@@ -21,7 +21,14 @@ Text that appears verbatim in the challenge's input or output SHALL remain in ba
 | Arithmetic expression | `N×(N−1)×…×(N−M+1)` | `$N \times (N-1) \times \cdots \times (N-M+1)$` | mathematical statement |
 | Assignment | `以 N=10 為例` | `以 $N = 10$ 為例` | mathematical statement |
 | Exponent | `2^(D−1)` | `$2^{D-1}$` | mathematical statement |
-| Large number | `1000000000` | `$10^9$` | mathematical statement |
+| Large number, exact power of ten, at least `10^6` | `1000000000` | `$10^9$` | mathematical statement |
+| Large number, not a power of ten | `1000000007` | `1000000007` | a literal constant, not an expression |
+| Inequality whose middle term is a Chinese word | `1 ≤ 座號 ≤ 999` | `$1 \le$ 座號 $\le 999$` | only the math fragment is wrapped |
+| Multi-character variable identifier | `Ni` | `Ni` | adding a subscript reinterprets the problem's naming |
+| Programming operator in prose | `i+j==S` | `$i + j = S$` | prose describing a mathematical condition |
+| Bare comparison, ASCII operands | `x > 0 且 y < 0` | `$x > 0$ 且 $y < 0$` | a mathematical statement even without a Unicode symbol |
+| Bare comparison, Chinese operands | `付款 < 價格` | `付款 $<$ 價格` | only the math fragment is wrapped |
+| Division sign | `362880 ÷ 12 = 30240` | `$362880 \div 12 = 30240$` | mathematical statement |
 | Signed value in a table cell | `−2` | `$-2$` | mathematical statement |
 | Variable letter in prose | `` 輸出 `n` 行 `` | `輸出 $n$ 行` | mathematical statement |
 | Input line format | `` `D I` `` | `` `D I` `` | verbatim input token |
@@ -77,11 +84,24 @@ Converting a challenge body to LaTeX notation SHALL NOT modify any frontmatter f
 
 The test suite run by the project's test command SHALL fail when any challenge body violates the notation rules. The check SHALL classify forbidden symbols into two tiers.
 
-Tier A symbols — `≤`, `≥`, `＜`, `＞`, and the ASCII sequences `<=` and `>=` — SHALL be forbidden everywhere in the body, including inside inline code spans, because in a challenge body they can only express a constraint.
+Tier A symbols — `≤`, `≥`, `＜`, `＞`, and the ASCII sequences `<=`, `>=`, `!=` — SHALL be forbidden everywhere in the body, including inside inline code spans, because in a challenge body they can only express a constraint.
 
-Tier B symbols — `×`, `−`, `·`, `≠`, `≈`, `⌊`, `⌋`, `⌈`, `⌉`, `√`, `∑`, `∞`, `²`, `³`, `⁴`, `ⁿ` — SHALL be forbidden in prose but SHALL be permitted inside inline code spans, because they can denote a literal glyph.
+A bare `<` or `>` with an operand on both sides SHALL also be a tier A violation. An operand is an alphanumeric character, a CJK character, or a bracket. The check SHALL NOT flag a bare `<` or `>` without operands on both sides, because that shape also covers HTML tags, a blockquote's leading `>`, and a comment's closing `-->`.
 
-The scan surface SHALL be computed in this order: take the body after the closing frontmatter delimiter, remove fenced code blocks, remove image syntax, then remove matched `$...$` and `$$...$$` spans. Any other order produces false positives.
+Tier B symbols — `×`, `÷`, `−`, `·`, `≠`, `≈`, `⌊`, `⌋`, `⌈`, `⌉`, `√`, `∑`, `∞`, `²`, `³`, `⁴`, `ⁿ` — SHALL be forbidden in prose but SHALL be permitted inside inline code spans, because they can denote a literal glyph.
+
+The scan surface SHALL be computed in this order: take the body after the closing frontmatter delimiter, remove fenced code blocks, remove image syntax, remove autolinks, then remove matched `$...$` and `$$...$$` spans. Any other order produces false positives.
+
+#### Scenario: A bare comparison operator fails the test
+
+- **WHEN** a challenge body contains `付款 < 價格` or `x > 0`
+- **THEN** the test SHALL fail
+- **AND** the failure message SHALL name the file, the line number, and the offending operator
+
+#### Scenario: A bare angle bracket without operands passes
+
+- **WHEN** a challenge body contains a blockquote line beginning `> `, an HTML comment `<!-- ... -->`, or an autolink `<https://example.com>`
+- **THEN** the test SHALL pass
 
 A line preceded by an HTML comment containing `latex-lint-ignore-next-line` SHALL be excluded from the check.
 
@@ -104,9 +124,9 @@ A line preceded by an HTML comment containing `latex-lint-ignore-next-line` SHAL
 
 ##### Example: the pre-conversion baseline
 
-- **GIVEN** the 53 unconverted challenge pages present before this change
+- **GIVEN** the 55 unconverted challenge pages present before this change
 - **WHEN** the test runs
-- **THEN** the failure list SHALL contain 53 entries, one per file
+- **THEN** the failure list SHALL name 55 distinct files
 - **AND** the list SHALL include `prize-order-code`, `movie-ticket`, and `print-farm-schedule`
 - **AND** the entry for `print-farm-schedule` SHALL cite its six prose `≤` occurrences and SHALL NOT cite its `` `·` `` code span
 
@@ -115,6 +135,37 @@ A line preceded by an HTML comment containing `latex-lint-ignore-next-line` SHAL
 - **WHEN** a line is immediately preceded by an HTML comment containing `latex-lint-ignore-next-line`
 - **THEN** that line SHALL be excluded from the check
 - **AND** the following lines SHALL still be checked
+
+### Requirement: Every formula is syntactically renderable
+
+The same test SHALL also fail when a challenge body contains a formula that cannot render correctly. A malformed formula fails silently in Markdown — the reader simply sees the raw source — so nothing but an explicit check finds it.
+
+The check SHALL reject: an odd number of unescaped dollar signs on a line, unbalanced braces, a backslash command outside the project's recognised set, an exponent or subscript longer than one character without braces, a Unicode math symbol left inside a formula, Chinese characters inside a formula, and any use of `\text{}`.
+
+#### Scenario: An unbraced exponent fails
+
+- **WHEN** a challenge body contains `$2^10$`
+- **THEN** the test SHALL fail
+- **AND** the failure SHALL name the exponent problem
+
+##### Example: why this one matters
+
+- **GIVEN** the source `共有 $2^10$ 個袋子`
+- **WHEN** MathJax renders it
+- **THEN** it displays as two raised to the first power followed by a zero, not two to the tenth
+- **AND** the page therefore states a different number than the author intended
+
+#### Scenario: An unknown command fails
+
+- **WHEN** a challenge body contains `$1 \lte n$`
+- **THEN** the test SHALL fail and name the command
+- **AND** `$1 \le n$` SHALL pass
+
+#### Scenario: Chinese inside a formula fails but Chinese beside one passes
+
+- **WHEN** a challenge body contains `$1 \le 座號 \le 999$`
+- **THEN** the test SHALL fail
+- **AND** `$1 \le$ 座號 $\le 999$` SHALL pass
 
 ### Requirement: The authoring guide documents the notation rules
 
@@ -138,3 +189,6 @@ The challenge authoring guide SHALL document the notation decision table in the 
 | Output string stays in backticks | `quadratic-discriminant` |
 | Literal glyph stays in backticks | `print-farm-schedule` |
 | Tilde range stays plain | `movie-ticket` |
+| Bare comparison, ASCII operands | `quadrant-classifier` |
+| Bare comparison, Chinese operands | `vending-change` |
+| Division sign | `fair-token-exchange` |

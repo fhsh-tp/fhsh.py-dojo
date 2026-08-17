@@ -1,5 +1,5 @@
 {
-  "clean": 15,
+  "clean": 13,
   "clean_files": [
     "grade-average.md",
     "grade-level.md",
@@ -8,14 +8,12 @@
     "odd-even.md",
     "parrot-echo.md",
     "password-check.md",
-    "quadrant-classifier.md",
     "seconds-converter.md",
     "self-introduction.md",
     "sign-check.md",
     "taxi-fare.md",
     "triangle-check.md",
-    "triangle-classify.md",
-    "vending-change.md"
+    "triangle-classify.md"
   ],
   "converted": 3,
   "converted_files": [
@@ -23,7 +21,7 @@
     "pinball-track-predict.md",
     "quadratic-discriminant.md"
   ],
-  "pending": 53,
+  "pending": 55,
   "pending_files": [
     "ap-layout-plan.md",
     "arithmetic-sum.md",
@@ -67,6 +65,7 @@
     "print-farm-schedule.md",
     "prize-order-code.md",
     "prop-box-packing.md",
+    "quadrant-classifier.md",
     "range-sum.md",
     "rank-code-backfill.md",
     "repeat-greeting.md",
@@ -77,7 +76,8 @@
     "star-rectangle.md",
     "star-square.md",
     "sum-skip-fives.md",
-    "target-sum.md"
+    "target-sum.md",
+    "vending-change.md"
   ],
   "per_file": {
     "ap-layout-plan.md": {
@@ -302,11 +302,17 @@
       "bare_dollar": 0,
       "detail": {
         "×": 1,
+        "÷": 1,
         "≤": 2
       },
       "latex": 0,
-      "symbols": 3,
+      "symbols": 4,
       "violations": [
+        {
+          "line": 36,
+          "tier": "B",
+          "token": "÷"
+        },
         {
           "line": 37,
           "tier": "B",
@@ -534,10 +540,11 @@
     "fair-token-exchange.md": {
       "bare_dollar": 0,
       "detail": {
-        "<=": 2
+        "<=": 2,
+        "÷": 3
       },
       "latex": 0,
-      "symbols": 2,
+      "symbols": 5,
       "violations": [
         {
           "line": 116,
@@ -548,6 +555,21 @@
           "line": 116,
           "tier": "A",
           "token": "<="
+        },
+        {
+          "line": 140,
+          "tier": "B",
+          "token": "÷"
+        },
+        {
+          "line": 141,
+          "tier": "B",
+          "token": "÷"
+        },
+        {
+          "line": 142,
+          "tier": "B",
+          "token": "÷"
         }
       ]
     },
@@ -778,15 +800,21 @@
     "movie-ticket.md": {
       "bare_dollar": 5,
       "detail": {
+        "<": 1,
         ">=": 1
       },
       "latex": 0,
-      "symbols": 1,
+      "symbols": 2,
       "violations": [
         {
           "line": 51,
           "tier": "A",
           "token": ">="
+        },
+        {
+          "line": 55,
+          "tier": "A",
+          "token": "<"
         }
       ]
     },
@@ -1349,10 +1377,65 @@
     },
     "quadrant-classifier.md": {
       "bare_dollar": 0,
-      "detail": {},
+      "detail": {
+        "!=": 2,
+        "<": 4,
+        ">": 4
+      },
       "latex": 0,
-      "symbols": 0,
-      "violations": []
+      "symbols": 10,
+      "violations": [
+        {
+          "line": 48,
+          "tier": "A",
+          "token": "!="
+        },
+        {
+          "line": 49,
+          "tier": "A",
+          "token": "!="
+        },
+        {
+          "line": 50,
+          "tier": "A",
+          "token": ">"
+        },
+        {
+          "line": 50,
+          "tier": "A",
+          "token": ">"
+        },
+        {
+          "line": 51,
+          "tier": "A",
+          "token": "<"
+        },
+        {
+          "line": 51,
+          "tier": "A",
+          "token": ">"
+        },
+        {
+          "line": 52,
+          "tier": "A",
+          "token": "<"
+        },
+        {
+          "line": 52,
+          "tier": "A",
+          "token": "<"
+        },
+        {
+          "line": 53,
+          "tier": "A",
+          "token": "<"
+        },
+        {
+          "line": 53,
+          "tier": "A",
+          "token": ">"
+        }
+      ]
     },
     "quadratic-discriminant.md": {
       "bare_dollar": 0,
@@ -1749,10 +1832,18 @@
     },
     "vending-change.md": {
       "bare_dollar": 0,
-      "detail": {},
+      "detail": {
+        "<": 1
+      },
       "latex": 0,
-      "symbols": 0,
-      "violations": []
+      "symbols": 1,
+      "violations": [
+        {
+          "line": 44,
+          "tier": "A",
+          "token": "<"
+        }
+      ]
     }
   },
   "total": 71
