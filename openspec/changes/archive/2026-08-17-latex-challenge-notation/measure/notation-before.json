@@ -1,0 +1,1850 @@
+{
+  "clean": 13,
+  "clean_files": [
+    "grade-average.md",
+    "grade-level.md",
+    "hello-world.md",
+    "leap-year.md",
+    "odd-even.md",
+    "parrot-echo.md",
+    "password-check.md",
+    "seconds-converter.md",
+    "self-introduction.md",
+    "sign-check.md",
+    "taxi-fare.md",
+    "triangle-check.md",
+    "triangle-classify.md"
+  ],
+  "converted": 3,
+  "converted_files": [
+    "exhibit-route-rebuild.md",
+    "pinball-track-predict.md",
+    "quadratic-discriminant.md"
+  ],
+  "pending": 55,
+  "pending_files": [
+    "ap-layout-plan.md",
+    "arithmetic-sum.md",
+    "beverage-cashier.md",
+    "bmi-classifier.md",
+    "buffer-audit-log.md",
+    "card-restack-count.md",
+    "change-calculator.md",
+    "collatz-steps.md",
+    "countdown.md",
+    "coupon-combo-quote.md",
+    "date-validator.md",
+    "digit-counter.md",
+    "digit-sum-skip.md",
+    "digital-root.md",
+    "even-countdown.md",
+    "exam-collect-verify.md",
+    "factorial.md",
+    "fair-token-exchange.md",
+    "first-divisor.md",
+    "gcd-euclid.md",
+    "gem-blast-playtest.md",
+    "guess-number-simple.md",
+    "inverted-triangle.md",
+    "isosceles-triangle.md",
+    "magazine-typeset-check.md",
+    "marquee-display-count.md",
+    "movie-ticket.md",
+    "multiplication-table.md",
+    "nested-triangle.md",
+    "number-pyramid.md",
+    "number-reverse.md",
+    "number-staircase.md",
+    "number-sum.md",
+    "odd-numbers.md",
+    "pair-count.md",
+    "perfect-number.md",
+    "perfect-numbers-range.md",
+    "pillbox-reminder.md",
+    "prime-check.md",
+    "print-farm-schedule.md",
+    "prize-order-code.md",
+    "prop-box-packing.md",
+    "quadrant-classifier.md",
+    "range-sum.md",
+    "rank-code-backfill.md",
+    "repeat-greeting.md",
+    "skip-multiples.md",
+    "smallest-prime-factor.md",
+    "snack-bar-register.md",
+    "star-diamond.md",
+    "star-rectangle.md",
+    "star-square.md",
+    "sum-skip-fives.md",
+    "target-sum.md",
+    "vending-change.md"
+  ],
+  "per_file": {
+    "ap-layout-plan.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "<=": 2,
+        "−": 8
+      },
+      "latex": 0,
+      "symbols": 10,
+      "violations": [
+        {
+          "line": 113,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 114,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 115,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 115,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 117,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 118,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 119,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 119,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 129,
+          "tier": "A",
+          "token": "<="
+        },
+        {
+          "line": 129,
+          "tier": "A",
+          "token": "<="
+        }
+      ]
+    },
+    "arithmetic-sum.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 6
+      },
+      "latex": 0,
+      "symbols": 6,
+      "violations": [
+        {
+          "line": 47,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 47,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 48,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 48,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 49,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 49,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "beverage-cashier.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "×": 1
+      },
+      "latex": 0,
+      "symbols": 1,
+      "violations": [
+        {
+          "line": 39,
+          "tier": "B",
+          "token": "×"
+        }
+      ]
+    },
+    "bmi-classifier.md": {
+      "bare_dollar": 0,
+      "detail": {
+        ">=": 1,
+        "²": 1
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 42,
+          "tier": "B",
+          "token": "²"
+        },
+        {
+          "line": 51,
+          "tier": "A",
+          "token": ">="
+        }
+      ]
+    },
+    "buffer-audit-log.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "×": 1,
+        "≤": 6
+      },
+      "latex": 0,
+      "symbols": 7,
+      "violations": [
+        {
+          "line": 126,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 126,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 128,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 128,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 129,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 129,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 133,
+          "tier": "B",
+          "token": "×"
+        }
+      ]
+    },
+    "card-restack-count.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 98,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 98,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "change-calculator.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "−": 1
+      },
+      "latex": 0,
+      "symbols": 1,
+      "violations": [
+        {
+          "line": 39,
+          "tier": "B",
+          "token": "−"
+        }
+      ]
+    },
+    "collatz-steps.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "×": 1,
+        "÷": 1,
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 4,
+      "violations": [
+        {
+          "line": 36,
+          "tier": "B",
+          "token": "÷"
+        },
+        {
+          "line": 37,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 43,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 43,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "countdown.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 31,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 31,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "coupon-combo-quote.md": {
+      "bare_dollar": 0,
+      "detail": {
+        ">=": 1
+      },
+      "latex": 0,
+      "symbols": 1,
+      "violations": [
+        {
+          "line": 254,
+          "tier": "A",
+          "token": ">="
+        }
+      ]
+    },
+    "date-validator.md": {
+      "bare_dollar": 0,
+      "detail": {
+        ">=": 1
+      },
+      "latex": 0,
+      "symbols": 1,
+      "violations": [
+        {
+          "line": 59,
+          "tier": "A",
+          "token": ">="
+        }
+      ]
+    },
+    "digit-counter.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 37,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 37,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "digit-sum-skip.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 37,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 37,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "digital-root.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 37,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 37,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "even-countdown.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 33,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 33,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "exam-collect-verify.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 8
+      },
+      "latex": 0,
+      "symbols": 8,
+      "violations": [
+        {
+          "line": 537,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 537,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 539,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 539,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 539,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 539,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 540,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 540,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "exhibit-route-rebuild.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 18,
+      "symbols": 0,
+      "violations": []
+    },
+    "factorial.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 33,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 33,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "fair-token-exchange.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "<=": 2,
+        "÷": 3
+      },
+      "latex": 0,
+      "symbols": 5,
+      "violations": [
+        {
+          "line": 116,
+          "tier": "A",
+          "token": "<="
+        },
+        {
+          "line": 116,
+          "tier": "A",
+          "token": "<="
+        },
+        {
+          "line": 140,
+          "tier": "B",
+          "token": "÷"
+        },
+        {
+          "line": 141,
+          "tier": "B",
+          "token": "÷"
+        },
+        {
+          "line": 142,
+          "tier": "B",
+          "token": "÷"
+        }
+      ]
+    },
+    "first-divisor.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2,
+        "≥": 1
+      },
+      "latex": 0,
+      "symbols": 3,
+      "violations": [
+        {
+          "line": 29,
+          "tier": "A",
+          "token": "≥"
+        },
+        {
+          "line": 33,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 33,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "gcd-euclid.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 4
+      },
+      "latex": 0,
+      "symbols": 4,
+      "violations": [
+        {
+          "line": 40,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 40,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 41,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 41,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "gem-blast-playtest.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 4
+      },
+      "latex": 0,
+      "symbols": 4,
+      "violations": [
+        {
+          "line": 135,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 135,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 137,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 137,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "grade-average.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "grade-level.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "guess-number-simple.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 41,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 41,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "hello-world.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "inverted-triangle.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 32,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 32,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "isosceles-triangle.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 31,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 31,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "leap-year.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "magazine-typeset-check.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 160,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 160,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "marquee-display-count.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "<=": 4
+      },
+      "latex": 0,
+      "symbols": 4,
+      "violations": [
+        {
+          "line": 89,
+          "tier": "A",
+          "token": "<="
+        },
+        {
+          "line": 89,
+          "tier": "A",
+          "token": "<="
+        },
+        {
+          "line": 90,
+          "tier": "A",
+          "token": "<="
+        },
+        {
+          "line": 90,
+          "tier": "A",
+          "token": "<="
+        }
+      ]
+    },
+    "movie-ticket.md": {
+      "bare_dollar": 5,
+      "detail": {
+        "<": 1,
+        ">=": 1
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 51,
+          "tier": "A",
+          "token": ">="
+        },
+        {
+          "line": 55,
+          "tier": "A",
+          "token": "<"
+        }
+      ]
+    },
+    "multiplication-table.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 4
+      },
+      "latex": 0,
+      "symbols": 4,
+      "violations": [
+        {
+          "line": 37,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 37,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 41,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 41,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "nested-triangle.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 34,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 34,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "number-pyramid.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 36,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 36,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "number-reverse.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 34,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 34,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "number-staircase.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 31,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 31,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "number-sum.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 29,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 29,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "odd-even.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "odd-numbers.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 30,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 30,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "pair-count.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 7
+      },
+      "latex": 0,
+      "symbols": 7,
+      "violations": [
+        {
+          "line": 40,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 40,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 40,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 44,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 44,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 45,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 45,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "parrot-echo.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "password-check.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "perfect-number.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 39,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 39,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "perfect-numbers-range.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2,
+        "≥": 1
+      },
+      "latex": 0,
+      "symbols": 3,
+      "violations": [
+        {
+          "line": 34,
+          "tier": "A",
+          "token": "≥"
+        },
+        {
+          "line": 38,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 38,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "pillbox-reminder.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "×": 10,
+        "≤": 6
+      },
+      "latex": 0,
+      "symbols": 16,
+      "violations": [
+        {
+          "line": 83,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 83,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 91,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 92,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 93,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 94,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 95,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 96,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 107,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 107,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 115,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 115,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 116,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 116,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 117,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 117,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "pinball-track-predict.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 20,
+      "symbols": 0,
+      "violations": []
+    },
+    "prime-check.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 55,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 55,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "print-farm-schedule.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 6
+      },
+      "latex": 0,
+      "symbols": 6,
+      "violations": [
+        {
+          "line": 103,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 103,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 104,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 104,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 105,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 105,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "prize-order-code.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "×": 8,
+        "−": 6,
+        "≤": 7
+      },
+      "latex": 0,
+      "symbols": 21,
+      "violations": [
+        {
+          "line": 173,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 173,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 173,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 173,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 173,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 173,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 173,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 181,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 181,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 181,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 181,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 181,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 183,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 187,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 187,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 188,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 188,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 188,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 188,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 188,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 218,
+          "tier": "B",
+          "token": "×"
+        }
+      ]
+    },
+    "prop-box-packing.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 163,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 163,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "quadrant-classifier.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "!=": 2,
+        "<": 4,
+        ">": 4
+      },
+      "latex": 0,
+      "symbols": 10,
+      "violations": [
+        {
+          "line": 48,
+          "tier": "A",
+          "token": "!="
+        },
+        {
+          "line": 49,
+          "tier": "A",
+          "token": "!="
+        },
+        {
+          "line": 50,
+          "tier": "A",
+          "token": ">"
+        },
+        {
+          "line": 50,
+          "tier": "A",
+          "token": ">"
+        },
+        {
+          "line": 51,
+          "tier": "A",
+          "token": "<"
+        },
+        {
+          "line": 51,
+          "tier": "A",
+          "token": ">"
+        },
+        {
+          "line": 52,
+          "tier": "A",
+          "token": "<"
+        },
+        {
+          "line": 52,
+          "tier": "A",
+          "token": "<"
+        },
+        {
+          "line": 53,
+          "tier": "A",
+          "token": "<"
+        },
+        {
+          "line": 53,
+          "tier": "A",
+          "token": ">"
+        }
+      ]
+    },
+    "quadratic-discriminant.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 5,
+      "symbols": 0,
+      "violations": []
+    },
+    "range-sum.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 3
+      },
+      "latex": 0,
+      "symbols": 3,
+      "violations": [
+        {
+          "line": 33,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 38,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 38,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "rank-code-backfill.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "×": 12,
+        "−": 3,
+        "≤": 4
+      },
+      "latex": 0,
+      "symbols": 19,
+      "violations": [
+        {
+          "line": 144,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 144,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 144,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 144,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 144,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 144,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 150,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 150,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 150,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 150,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 150,
+          "tier": "B",
+          "token": "−"
+        },
+        {
+          "line": 152,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 152,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 152,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 152,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 156,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 156,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 157,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 157,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "repeat-greeting.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 36,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 36,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "seconds-converter.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "self-introduction.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "sign-check.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "skip-multiples.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 4
+      },
+      "latex": 0,
+      "symbols": 4,
+      "violations": [
+        {
+          "line": 37,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 37,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 38,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 38,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "smallest-prime-factor.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 38,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 38,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "snack-bar-register.md": {
+      "bare_dollar": 0,
+      "detail": {
+        ">=": 1
+      },
+      "latex": 0,
+      "symbols": 1,
+      "violations": [
+        {
+          "line": 215,
+          "tier": "A",
+          "token": ">="
+        }
+      ]
+    },
+    "star-diamond.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 34,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 34,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "star-rectangle.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 4
+      },
+      "latex": 0,
+      "symbols": 4,
+      "violations": [
+        {
+          "line": 37,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 37,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 38,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 38,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "star-square.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "×": 1,
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 3,
+      "violations": [
+        {
+          "line": 28,
+          "tier": "B",
+          "token": "×"
+        },
+        {
+          "line": 32,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 32,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "sum-skip-fives.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2
+      },
+      "latex": 0,
+      "symbols": 2,
+      "violations": [
+        {
+          "line": 34,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 34,
+          "tier": "A",
+          "token": "≤"
+        }
+      ]
+    },
+    "target-sum.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "≤": 2,
+        "≥": 2
+      },
+      "latex": 0,
+      "symbols": 4,
+      "violations": [
+        {
+          "line": 32,
+          "tier": "A",
+          "token": "≥"
+        },
+        {
+          "line": 36,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 36,
+          "tier": "A",
+          "token": "≤"
+        },
+        {
+          "line": 40,
+          "tier": "A",
+          "token": "≥"
+        }
+      ]
+    },
+    "taxi-fare.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "triangle-check.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "triangle-classify.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "vending-change.md": {
+      "bare_dollar": 0,
+      "detail": {
+        "<": 1
+      },
+      "latex": 0,
+      "symbols": 1,
+      "violations": [
+        {
+          "line": 44,
+          "tier": "A",
+          "token": "<"
+        }
+      ]
+    }
+  },
+  "total": 71
+}

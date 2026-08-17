@@ -1,0 +1,581 @@
+{
+  "clean": 5,
+  "clean_files": [
+    "grade-average.md",
+    "grade-level.md",
+    "self-introduction.md",
+    "taxi-fare.md",
+    "triangle-check.md"
+  ],
+  "converted": 66,
+  "converted_files": [
+    "ap-layout-plan.md",
+    "arithmetic-sum.md",
+    "beverage-cashier.md",
+    "bmi-classifier.md",
+    "buffer-audit-log.md",
+    "card-restack-count.md",
+    "change-calculator.md",
+    "collatz-steps.md",
+    "countdown.md",
+    "coupon-combo-quote.md",
+    "date-validator.md",
+    "digit-counter.md",
+    "digit-sum-skip.md",
+    "digital-root.md",
+    "even-countdown.md",
+    "exam-collect-verify.md",
+    "exhibit-route-rebuild.md",
+    "factorial.md",
+    "fair-token-exchange.md",
+    "first-divisor.md",
+    "gcd-euclid.md",
+    "gem-blast-playtest.md",
+    "guess-number-simple.md",
+    "hello-world.md",
+    "inverted-triangle.md",
+    "isosceles-triangle.md",
+    "leap-year.md",
+    "magazine-typeset-check.md",
+    "marquee-display-count.md",
+    "movie-ticket.md",
+    "multiplication-table.md",
+    "nested-triangle.md",
+    "number-pyramid.md",
+    "number-reverse.md",
+    "number-staircase.md",
+    "number-sum.md",
+    "odd-even.md",
+    "odd-numbers.md",
+    "pair-count.md",
+    "parrot-echo.md",
+    "password-check.md",
+    "perfect-number.md",
+    "perfect-numbers-range.md",
+    "pillbox-reminder.md",
+    "pinball-track-predict.md",
+    "prime-check.md",
+    "print-farm-schedule.md",
+    "prize-order-code.md",
+    "prop-box-packing.md",
+    "quadrant-classifier.md",
+    "quadratic-discriminant.md",
+    "range-sum.md",
+    "rank-code-backfill.md",
+    "repeat-greeting.md",
+    "seconds-converter.md",
+    "sign-check.md",
+    "skip-multiples.md",
+    "smallest-prime-factor.md",
+    "snack-bar-register.md",
+    "star-diamond.md",
+    "star-rectangle.md",
+    "star-square.md",
+    "sum-skip-fives.md",
+    "target-sum.md",
+    "triangle-classify.md",
+    "vending-change.md"
+  ],
+  "pending": 0,
+  "pending_files": [],
+  "per_file": {
+    "ap-layout-plan.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 20,
+      "symbols": 0,
+      "violations": []
+    },
+    "arithmetic-sum.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 9,
+      "symbols": 0,
+      "violations": []
+    },
+    "beverage-cashier.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 1,
+      "symbols": 0,
+      "violations": []
+    },
+    "bmi-classifier.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 3,
+      "symbols": 0,
+      "violations": []
+    },
+    "buffer-audit-log.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 8,
+      "symbols": 0,
+      "violations": []
+    },
+    "card-restack-count.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 10,
+      "symbols": 0,
+      "violations": []
+    },
+    "change-calculator.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 1,
+      "symbols": 0,
+      "violations": []
+    },
+    "collatz-steps.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 10,
+      "symbols": 0,
+      "violations": []
+    },
+    "countdown.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 6,
+      "symbols": 0,
+      "violations": []
+    },
+    "coupon-combo-quote.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 3,
+      "symbols": 0,
+      "violations": []
+    },
+    "date-validator.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 1,
+      "symbols": 0,
+      "violations": []
+    },
+    "digit-counter.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 5,
+      "symbols": 0,
+      "violations": []
+    },
+    "digit-sum-skip.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 5,
+      "symbols": 0,
+      "violations": []
+    },
+    "digital-root.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 3,
+      "symbols": 0,
+      "violations": []
+    },
+    "even-countdown.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 4,
+      "symbols": 0,
+      "violations": []
+    },
+    "exam-collect-verify.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 21,
+      "symbols": 0,
+      "violations": []
+    },
+    "exhibit-route-rebuild.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 18,
+      "symbols": 0,
+      "violations": []
+    },
+    "factorial.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 6,
+      "symbols": 0,
+      "violations": []
+    },
+    "fair-token-exchange.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 8,
+      "symbols": 0,
+      "violations": []
+    },
+    "first-divisor.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 8,
+      "symbols": 0,
+      "violations": []
+    },
+    "gcd-euclid.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 8,
+      "symbols": 0,
+      "violations": []
+    },
+    "gem-blast-playtest.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 8,
+      "symbols": 0,
+      "violations": []
+    },
+    "grade-average.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "grade-level.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "guess-number-simple.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 4,
+      "symbols": 0,
+      "violations": []
+    },
+    "hello-world.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 1,
+      "symbols": 0,
+      "violations": []
+    },
+    "inverted-triangle.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 8,
+      "symbols": 0,
+      "violations": []
+    },
+    "isosceles-triangle.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 8,
+      "symbols": 0,
+      "violations": []
+    },
+    "leap-year.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 1,
+      "symbols": 0,
+      "violations": []
+    },
+    "magazine-typeset-check.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 6,
+      "symbols": 0,
+      "violations": []
+    },
+    "marquee-display-count.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 11,
+      "symbols": 0,
+      "violations": []
+    },
+    "movie-ticket.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 3,
+      "symbols": 0,
+      "violations": []
+    },
+    "multiplication-table.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 7,
+      "symbols": 0,
+      "violations": []
+    },
+    "nested-triangle.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 7,
+      "symbols": 0,
+      "violations": []
+    },
+    "number-pyramid.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 7,
+      "symbols": 0,
+      "violations": []
+    },
+    "number-reverse.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 4,
+      "symbols": 0,
+      "violations": []
+    },
+    "number-staircase.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 6,
+      "symbols": 0,
+      "violations": []
+    },
+    "number-sum.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 5,
+      "symbols": 0,
+      "violations": []
+    },
+    "odd-even.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 1,
+      "symbols": 0,
+      "violations": []
+    },
+    "odd-numbers.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 7,
+      "symbols": 0,
+      "violations": []
+    },
+    "pair-count.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 8,
+      "symbols": 0,
+      "violations": []
+    },
+    "parrot-echo.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 2,
+      "symbols": 0,
+      "violations": []
+    },
+    "password-check.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 6,
+      "symbols": 0,
+      "violations": []
+    },
+    "perfect-number.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 4,
+      "symbols": 0,
+      "violations": []
+    },
+    "perfect-numbers-range.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 6,
+      "symbols": 0,
+      "violations": []
+    },
+    "pillbox-reminder.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 43,
+      "symbols": 0,
+      "violations": []
+    },
+    "pinball-track-predict.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 20,
+      "symbols": 0,
+      "violations": []
+    },
+    "prime-check.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 4,
+      "symbols": 0,
+      "violations": []
+    },
+    "print-farm-schedule.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 9,
+      "symbols": 0,
+      "violations": []
+    },
+    "prize-order-code.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 33,
+      "symbols": 0,
+      "violations": []
+    },
+    "prop-box-packing.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 7,
+      "symbols": 0,
+      "violations": []
+    },
+    "quadrant-classifier.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 18,
+      "symbols": 0,
+      "violations": []
+    },
+    "quadratic-discriminant.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 8,
+      "symbols": 0,
+      "violations": []
+    },
+    "range-sum.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 9,
+      "symbols": 0,
+      "violations": []
+    },
+    "rank-code-backfill.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 22,
+      "symbols": 0,
+      "violations": []
+    },
+    "repeat-greeting.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 5,
+      "symbols": 0,
+      "violations": []
+    },
+    "seconds-converter.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 1,
+      "symbols": 0,
+      "violations": []
+    },
+    "self-introduction.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "sign-check.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 1,
+      "symbols": 0,
+      "violations": []
+    },
+    "skip-multiples.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 10,
+      "symbols": 0,
+      "violations": []
+    },
+    "smallest-prime-factor.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 7,
+      "symbols": 0,
+      "violations": []
+    },
+    "snack-bar-register.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 6,
+      "symbols": 0,
+      "violations": []
+    },
+    "star-diamond.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 5,
+      "symbols": 0,
+      "violations": []
+    },
+    "star-rectangle.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 10,
+      "symbols": 0,
+      "violations": []
+    },
+    "star-square.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 6,
+      "symbols": 0,
+      "violations": []
+    },
+    "sum-skip-fives.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 4,
+      "symbols": 0,
+      "violations": []
+    },
+    "target-sum.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 6,
+      "symbols": 0,
+      "violations": []
+    },
+    "taxi-fare.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "triangle-check.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 0,
+      "symbols": 0,
+      "violations": []
+    },
+    "triangle-classify.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 3,
+      "symbols": 0,
+      "violations": []
+    },
+    "vending-change.md": {
+      "bare_dollar": 0,
+      "detail": {},
+      "latex": 1,
+      "symbols": 0,
+      "violations": []
+    }
+  },
+  "total": 71
+}

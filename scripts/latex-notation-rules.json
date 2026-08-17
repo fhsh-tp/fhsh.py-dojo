@@ -1,0 +1,40 @@
+{
+  "_comment": [
+    "題目頁數學記號的黑名單，由兩個讀取端共用：",
+    "  scripts/latex-notation.test.ts   —— CI 守門（TypeScript 原生實作，不依賴 python3）",
+    "  scripts/latex-notation-survey.py —— 盤點與證物產生（人可讀 / --json）",
+    "刻意不讓守門測試去 spawn python3：content-regression.test.ts 在沒有 python3 時會 skip，",
+    "而守門測試的全部價值就在於不能有靜默通過的路徑。兩端各自實作掃描，但規則只有這一份。",
+    "規則的來源與判準見 openspec/specs/challenge-math-notation/spec.md 的記號分類表。"
+  ],
+  "tierA": {
+    "_comment": [
+      "連行內 code span 內都禁止。在題目頁這些只可能是約束陳述，`T >= 1` 這種誤包正是要抓的目標。",
+      "patterns 是正規表示式，用來抓「運算元 運算子 運算元」形態的裸比較。",
+      "只列 symbols 抓不到裸的 < 與 >，quadrant-classifier 整頁 7 條不等式就是這樣漏掉的——",
+      "它因此被盤點歸類成「內文無數學記號」，整頁沒有人看過。",
+      "為什麼用 pattern 而不是直接把 < 與 > 列進 symbols：那會誤殺 HTML 標籤、",
+      "markdown 引言的行首 >、以及註解的 -->。要求兩側都有運算元就沒有這個問題",
+      "（已對全部 71 頁實測，零假陽性；題目頁內文目前完全沒有 HTML 標籤）。"
+    ],
+    "symbols": ["≤", "≥", "＜", "＞"],
+    "sequences": ["<=", ">=", "!="],
+    "patterns": [
+      {
+        "name": "裸比較運算子",
+        "regex": "(?<=[\\w\\u4e00-\\u9fff)\\]])[ \\t]*[<>][ \\t]*(?=[\\w\\u4e00-\\u9fff(\\[])",
+        "hint": "改寫成 LaTeX，例如 $x > 0$、$1 \\le n$"
+      }
+    ]
+  },
+  "tierB": {
+    "_comment": "僅散文禁止，行內 code span 內允許——可能是字面圖形，例如 print-farm-schedule 甘特圖裡的 `·`。",
+    "symbols": [
+      "×", "÷", "−", "·", "≠", "≈",
+      "⌊", "⌋", "⌈", "⌉",
+      "√", "∑", "∞",
+      "²", "³", "⁴", "ⁿ"
+    ]
+  },
+  "ignoreMarker": "latex-lint-ignore-next-line"
+}

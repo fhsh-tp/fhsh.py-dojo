@@ -1,0 +1,365 @@
+{
+  "expected": {
+    "before": {
+      "total": 71,
+      "converted": 3,
+      "pending": 55,
+      "clean": 13
+    },
+    "after": {
+      "total": 71,
+      "converted": 66,
+      "pending": 0,
+      "clean": 5
+    }
+  },
+  "actual": {
+    "before": {
+      "total": 71,
+      "converted": 3,
+      "pending": 55,
+      "clean": 13
+    },
+    "after": {
+      "total": 71,
+      "converted": 66,
+      "pending": 0,
+      "clean": 5
+    }
+  },
+  "converted_count": 55,
+  "converted": [
+    {
+      "file": "ap-layout-plan.md",
+      "symbols_before": 10,
+      "latex_before": 0,
+      "latex_after": 20
+    },
+    {
+      "file": "arithmetic-sum.md",
+      "symbols_before": 6,
+      "latex_before": 0,
+      "latex_after": 9
+    },
+    {
+      "file": "beverage-cashier.md",
+      "symbols_before": 1,
+      "latex_before": 0,
+      "latex_after": 1
+    },
+    {
+      "file": "bmi-classifier.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 3
+    },
+    {
+      "file": "buffer-audit-log.md",
+      "symbols_before": 7,
+      "latex_before": 0,
+      "latex_after": 8
+    },
+    {
+      "file": "card-restack-count.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 10
+    },
+    {
+      "file": "change-calculator.md",
+      "symbols_before": 1,
+      "latex_before": 0,
+      "latex_after": 1
+    },
+    {
+      "file": "collatz-steps.md",
+      "symbols_before": 4,
+      "latex_before": 0,
+      "latex_after": 10
+    },
+    {
+      "file": "countdown.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 6
+    },
+    {
+      "file": "coupon-combo-quote.md",
+      "symbols_before": 1,
+      "latex_before": 0,
+      "latex_after": 3
+    },
+    {
+      "file": "date-validator.md",
+      "symbols_before": 1,
+      "latex_before": 0,
+      "latex_after": 1
+    },
+    {
+      "file": "digit-counter.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 5
+    },
+    {
+      "file": "digit-sum-skip.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 5
+    },
+    {
+      "file": "digital-root.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 3
+    },
+    {
+      "file": "even-countdown.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 4
+    },
+    {
+      "file": "exam-collect-verify.md",
+      "symbols_before": 8,
+      "latex_before": 0,
+      "latex_after": 21
+    },
+    {
+      "file": "factorial.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 6
+    },
+    {
+      "file": "fair-token-exchange.md",
+      "symbols_before": 5,
+      "latex_before": 0,
+      "latex_after": 8
+    },
+    {
+      "file": "first-divisor.md",
+      "symbols_before": 3,
+      "latex_before": 0,
+      "latex_after": 8
+    },
+    {
+      "file": "gcd-euclid.md",
+      "symbols_before": 4,
+      "latex_before": 0,
+      "latex_after": 8
+    },
+    {
+      "file": "gem-blast-playtest.md",
+      "symbols_before": 4,
+      "latex_before": 0,
+      "latex_after": 8
+    },
+    {
+      "file": "guess-number-simple.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 4
+    },
+    {
+      "file": "inverted-triangle.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 8
+    },
+    {
+      "file": "isosceles-triangle.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 8
+    },
+    {
+      "file": "magazine-typeset-check.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 6
+    },
+    {
+      "file": "marquee-display-count.md",
+      "symbols_before": 4,
+      "latex_before": 0,
+      "latex_after": 11
+    },
+    {
+      "file": "movie-ticket.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 3
+    },
+    {
+      "file": "multiplication-table.md",
+      "symbols_before": 4,
+      "latex_before": 0,
+      "latex_after": 7
+    },
+    {
+      "file": "nested-triangle.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 7
+    },
+    {
+      "file": "number-pyramid.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 7
+    },
+    {
+      "file": "number-reverse.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 4
+    },
+    {
+      "file": "number-staircase.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 6
+    },
+    {
+      "file": "number-sum.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 5
+    },
+    {
+      "file": "odd-numbers.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 7
+    },
+    {
+      "file": "pair-count.md",
+      "symbols_before": 7,
+      "latex_before": 0,
+      "latex_after": 8
+    },
+    {
+      "file": "perfect-number.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 4
+    },
+    {
+      "file": "perfect-numbers-range.md",
+      "symbols_before": 3,
+      "latex_before": 0,
+      "latex_after": 6
+    },
+    {
+      "file": "pillbox-reminder.md",
+      "symbols_before": 16,
+      "latex_before": 0,
+      "latex_after": 43
+    },
+    {
+      "file": "prime-check.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 4
+    },
+    {
+      "file": "print-farm-schedule.md",
+      "symbols_before": 6,
+      "latex_before": 0,
+      "latex_after": 9
+    },
+    {
+      "file": "prize-order-code.md",
+      "symbols_before": 21,
+      "latex_before": 0,
+      "latex_after": 33
+    },
+    {
+      "file": "prop-box-packing.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 7
+    },
+    {
+      "file": "quadrant-classifier.md",
+      "symbols_before": 10,
+      "latex_before": 0,
+      "latex_after": 18
+    },
+    {
+      "file": "range-sum.md",
+      "symbols_before": 3,
+      "latex_before": 0,
+      "latex_after": 9
+    },
+    {
+      "file": "rank-code-backfill.md",
+      "symbols_before": 19,
+      "latex_before": 0,
+      "latex_after": 22
+    },
+    {
+      "file": "repeat-greeting.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 5
+    },
+    {
+      "file": "skip-multiples.md",
+      "symbols_before": 4,
+      "latex_before": 0,
+      "latex_after": 10
+    },
+    {
+      "file": "smallest-prime-factor.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 7
+    },
+    {
+      "file": "snack-bar-register.md",
+      "symbols_before": 1,
+      "latex_before": 0,
+      "latex_after": 6
+    },
+    {
+      "file": "star-diamond.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 5
+    },
+    {
+      "file": "star-rectangle.md",
+      "symbols_before": 4,
+      "latex_before": 0,
+      "latex_after": 10
+    },
+    {
+      "file": "star-square.md",
+      "symbols_before": 3,
+      "latex_before": 0,
+      "latex_after": 6
+    },
+    {
+      "file": "sum-skip-fives.md",
+      "symbols_before": 2,
+      "latex_before": 0,
+      "latex_after": 4
+    },
+    {
+      "file": "target-sum.md",
+      "symbols_before": 4,
+      "latex_before": 0,
+      "latex_after": 6
+    },
+    {
+      "file": "vending-change.md",
+      "symbols_before": 1,
+      "latex_before": 0,
+      "latex_after": 1
+    }
+  ],
+  "problems": [],
+  "verdict": "PASS"
+}

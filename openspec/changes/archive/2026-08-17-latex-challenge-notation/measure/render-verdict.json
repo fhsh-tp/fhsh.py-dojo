@@ -1,0 +1,61 @@
+{
+  "observed": 12,
+  "inline_proofs": [
+    {
+      "slug": "pinball-track-predict",
+      "tag": "li",
+      "formulas": 2,
+      "lines": 1
+    },
+    {
+      "slug": "exhibit-route-rebuild",
+      "tag": "li",
+      "formulas": 2,
+      "lines": 1
+    },
+    {
+      "slug": "prize-order-code",
+      "tag": "li",
+      "formulas": 2,
+      "lines": 1
+    },
+    {
+      "slug": "rank-code-backfill",
+      "tag": "li",
+      "formulas": 2,
+      "lines": 1
+    },
+    {
+      "slug": "pillbox-reminder",
+      "tag": "li",
+      "formulas": 2,
+      "lines": 1
+    },
+    {
+      "slug": "ap-layout-plan",
+      "tag": "li",
+      "formulas": 2,
+      "lines": 1
+    },
+    {
+      "slug": "print-farm-schedule",
+      "tag": "li",
+      "formulas": 2,
+      "lines": 1
+    },
+    {
+      "slug": "marquee-display-count",
+      "tag": "li",
+      "formulas": 2,
+      "lines": 1
+    },
+    {
+      "slug": "target-sum",
+      "tag": "li",
+      "formulas": 2,
+      "lines": 1
+    }
+  ],
+  "problems": [],
+  "verdict": "CLEAN"
+}
