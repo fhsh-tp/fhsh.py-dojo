@@ -1,0 +1,67 @@
+{
+  "what": "三張說明圖在題目頁實際欄寬下的量測（wrangler pages dev :8788）",
+  "reference_viewport": {
+    "viewport_px": 1728,
+    "note": "apcs013 的設計結論所依據的桌機寬度。三張新圖與既有的 apcs013 圖在此寬度下欄寬完全一致。",
+    "figures": [
+      {
+        "slug": "hall-fan-coverage",
+        "id": "apcs018",
+        "natural": [
+          1280,
+          2716
+        ],
+        "rendered_w": 643,
+        "scale": 0.5025,
+        "min_type_screen_px": 12.06,
+        "body_overflow_x": false
+      },
+      {
+        "slug": "club-room-allocation",
+        "id": "apcs019",
+        "natural": [
+          1280,
+          1880
+        ],
+        "rendered_w": 643,
+        "scale": 0.5025,
+        "min_type_screen_px": 12.06,
+        "body_overflow_x": false
+      },
+      {
+        "slug": "radio-relay-tape",
+        "id": "apcs020",
+        "natural": [
+          1280,
+          2054
+        ],
+        "rendered_w": 643,
+        "scale": 0.5025,
+        "min_type_screen_px": 12.06,
+        "body_overflow_x": false
+      },
+      {
+        "slug": "exhibit-route-rebuild",
+        "id": "apcs013",
+        "natural": [
+          1280,
+          2060
+        ],
+        "rendered_w": 643,
+        "scale": 0.5025,
+        "min_type_screen_px": 12.06,
+        "body_overflow_x": false,
+        "role": "既有圖，作為對照"
+      }
+    ],
+    "verdict": "三張新圖皆符合『最小字級不低於 12 螢幕像素』且無水平溢出。"
+  },
+  "narrower_viewport_observation": {
+    "viewport_px": 1280,
+    "rendered_w": 464,
+    "scale": 0.3625,
+    "min_type_screen_px": 8.7,
+    "note": "在 1280 寬的筆電上，欄寬只有 464 px，24 authored px 的字只剩 8.7 螢幕像素，低於 12 px 的可讀下限。這不是本 change 引入的迴歸——既有的 apcs013 圖在同一視窗下量到完全相同的 464 px 與 0.3625，是站台既有的版面性質。若要修，該修的是題目頁的圖片版面規則（例如允許圖片在窄視窗下全寬顯示或可點擊放大），不是個別的 plate 腳本，因此不在本 change 範圍內。"
+  },
+  "how_measured": "agent-browser set viewport <w> 1080 之後開啟題目頁，等 img.complete 且 naturalWidth>0，再讀 getBoundingClientRect().width 與 naturalWidth 相除。"
+}

@@ -1,0 +1,50 @@
+{
+  "checked": "matrix rows vs browser-cliff.json",
+  "rows": [
+    {
+      "slug": "hall-fan-coverage",
+      "matrix_technique": "two-dimensional difference array",
+      "matrix_killed": "fill every cell of every rectangle, as a nested loop, as that loop folded, or as a slice assignment",
+      "matrix_accepted": "two-dimensional differencing; per-row one-dimensional differencing; the fill written with `map` (accepted, recorded)",
+      "measured_reference": "20/20",
+      "measured_killed": {
+        "A-brute-nested": "12/20",
+        "A-brute-nested-fold": "15/20",
+        "A-brute-slice": "15/20"
+      },
+      "measured_surviving": {
+        "A-brute-map": "20/20"
+      }
+    },
+    {
+      "slug": "club-room-allocation",
+      "matrix_technique": "sort then maintain per-room state",
+      "matrix_killed": "rescan all earlier applications for overlap, as a loop, as that loop folded, or as a set comprehension",
+      "matrix_accepted": "scan the open rooms; priority queue; the rescan written with `itertools.compress` (accepted, recorded)",
+      "measured_reference": "20/20",
+      "measured_killed": {
+        "B-brute-loop": "14/20",
+        "B-brute-loop-fold": "14/20",
+        "B-brute-setcomp": "16/20"
+      },
+      "measured_surviving": {
+        "B-brute-compress": "20/20"
+      }
+    },
+    {
+      "slug": "radio-relay-tape",
+      "matrix_technique": "two-pointer sliding window with last-seen positions",
+      "matrix_killed": "extend from every start until a repeat, including the formatting-only fold and the binary-search variant",
+      "matrix_accepted": "two pointers with last-seen positions",
+      "measured_reference": "20/20",
+      "measured_killed": {
+        "C2-brute-loop": "14/20",
+        "C2-brute-fold-a": "15/20",
+        "C2-brute-fold-b": "16/20",
+        "C2-brute-fold-c": "15/20",
+        "C2-binsearch": "16/20"
+      },
+      "measured_surviving": {}
+    }
+  ]
+}
