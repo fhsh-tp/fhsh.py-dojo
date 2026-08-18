@@ -643,5 +643,70 @@
       }
     ],
     "gates_after_edit": "vitest 862 passed / typecheck 乾淨 / lint 0 errors / docs:build 成功"
+  },
+  "production_smoke": {
+    "when": "2026-08-18，v1.9.0 發布後（tag de753ee、Release Dist Packaging 單一 run success）",
+    "where": "https://fhsh-py-dojo.pages.dev — 正式 Cloudflare Pages，COOP/COEP 標頭實測有送（cross-origin-embedder-policy: require-corp、cross-origin-opener-policy: same-origin）",
+    "how": "BASE=https://fhsh-py-dojo.pages.dev zsh measure.sh <slug> <solution.py> <label>，session 名 prod-smoke；冷啟時先 agent-browser open 該頁並輪詢到「提交」出現再送出，繞過 measure.sh 只等 .cm-content 的時序缺陷",
+    "reference_solutions": [
+      {
+        "label": "PROD-hall-fan-coverage-ref",
+        "slug": "hall-fan-coverage",
+        "id": "apcs018",
+        "score": "20/20",
+        "max_ms": 218,
+        "local_max_ms": 215
+      },
+      {
+        "label": "PROD-club-room-allocation-ref",
+        "slug": "club-room-allocation",
+        "id": "apcs019",
+        "score": "20/20",
+        "max_ms": 71,
+        "local_max_ms": 67
+      },
+      {
+        "label": "PROD-radio-relay-tape-ref",
+        "slug": "radio-relay-tape",
+        "id": "apcs020",
+        "score": "20/20",
+        "max_ms": 15,
+        "local_max_ms": 15
+      }
+    ],
+    "cliff_still_holds": {
+      "label": "PROD-A-brute-nested",
+      "slug": "hall-fan-coverage",
+      "score": "12/20",
+      "verdicts": "AAAAAAAAAAAATTTTTTTT",
+      "max_ms": 1921,
+      "note": "與本機量測的 12/20 逐位一致——前 12 筆 Accepted、後 8 筆 TLE，斷崖位置未因正式站環境而移動"
+    },
+    "infrastructure_checks": {
+      "pages": "六題 /challenge/<slug> 皆 200",
+      "aliases": "六題 /c/<id> 皆 302",
+      "pools": "六題 /pools/<slug>.bin 皆 200（851179／10376／9024／2380103／3907591／3843286 bytes）",
+      "latex": "/challenge/hall-fan-coverage 內含 80 個 mjx-container，確認 MathJax 於建置期渲染而非留下原始記號"
+    },
+    "also_verified_from_pr_35": [
+      {
+        "label": "PROD-ap-layout-plan-ref",
+        "id": "apcs015",
+        "score": "20/20",
+        "max_ms": 379
+      },
+      {
+        "label": "PROD-marquee-display-count-ref",
+        "id": "apcs016",
+        "score": "20/20",
+        "max_ms": 453
+      },
+      {
+        "label": "PROD-fair-token-exchange-ref",
+        "id": "apcs017",
+        "score": "20/20",
+        "max_ms": 3
+      }
+    ]
   }
 }
