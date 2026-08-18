@@ -1,0 +1,388 @@
+{
+  "slug": "hall-fan-coverage",
+  "id": "apcs018",
+  "op_limit": 10000000,
+  "input_budget": 51200,
+  "hard_cap": 65536,
+  "measured_with": "CPython 3.13.11 sys.settrace, one count per trace event (same semantics as .vitepress/theme/workers/worker-utils.ts)",
+  "inputs_from": "testcase-generator WASM (seed 'hall-fan-coverage'), the same engine and seed scripts/generate-pools.ts uses",
+  "generator_reference_agreement": "all 20 entries equal",
+  "max_actual_bytes": 39435,
+  "max_worst_case_bytes": 48012,
+  "scale_monotonic": true,
+  "spellings": {
+    "nested-loop": {
+      "dead_entries": [
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "score": "12/20",
+      "ops_last_entry": 34703747,
+      "ops_first_dead": 11515434,
+      "per_entry_ops": [
+        103,
+        36894,
+        59074,
+        17200,
+        93412,
+        54598,
+        231394,
+        627861,
+        1517305,
+        3143801,
+        5829887,
+        8587300,
+        11515434,
+        14473879,
+        18493649,
+        21854261,
+        25382819,
+        29120355,
+        31938520,
+        34703747
+      ]
+    },
+    "slice-assign": {
+      "dead_entries": [
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "score": "15/20",
+      "ops_last_entry": 17815158,
+      "ops_first_dead": 11219232,
+      "per_entry_ops": [
+        92,
+        19349,
+        30660,
+        9464,
+        48279,
+        29067,
+        120128,
+        323618,
+        778546,
+        1617906,
+        2992225,
+        4409415,
+        5912691,
+        7438755,
+        9494995,
+        11219232,
+        13028811,
+        14948945,
+        16394341,
+        17815158
+      ]
+    }
+  },
+  "entries": [
+    {
+      "entry": 1,
+      "f": null,
+      "bytes": 30,
+      "worst_case_bytes": 30,
+      "answer": "3",
+      "inbounds_row": null,
+      "inbounds_col": null,
+      "observed_deepest_row": "3 <= 4",
+      "observed_rightmost_col": "4 <= 5",
+      "ops": {
+        "nested-loop": 103,
+        "slice-assign": 92
+      }
+    },
+    {
+      "entry": 2,
+      "f": 1,
+      "bytes": 24,
+      "worst_case_bytes": 25,
+      "answer": "1",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "185 <= 300",
+      "observed_rightmost_col": "222 <= 300",
+      "ops": {
+        "nested-loop": 36894,
+        "slice-assign": 19349
+      }
+    },
+    {
+      "entry": 3,
+      "f": 2,
+      "bytes": 37,
+      "worst_case_bytes": 41,
+      "answer": "1",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "277 <= 300",
+      "observed_rightmost_col": "189 <= 300",
+      "ops": {
+        "nested-loop": 59074,
+        "slice-assign": 30660
+      }
+    },
+    {
+      "entry": 4,
+      "f": 3,
+      "bytes": 47,
+      "worst_case_bytes": 57,
+      "answer": "1",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "169 <= 300",
+      "observed_rightmost_col": "249 <= 300",
+      "ops": {
+        "nested-loop": 17200,
+        "slice-assign": 9464
+      }
+    },
+    {
+      "entry": 5,
+      "f": 5,
+      "bytes": 77,
+      "worst_case_bytes": 89,
+      "answer": "3",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "219 <= 300",
+      "observed_rightmost_col": "286 <= 300",
+      "ops": {
+        "nested-loop": 93412,
+        "slice-assign": 48279
+      }
+    },
+    {
+      "entry": 6,
+      "f": 10,
+      "bytes": 138,
+      "worst_case_bytes": 170,
+      "answer": "3",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "194 <= 300",
+      "observed_rightmost_col": "235 <= 300",
+      "ops": {
+        "nested-loop": 54598,
+        "slice-assign": 29067
+      }
+    },
+    {
+      "entry": 7,
+      "f": 25,
+      "bytes": 338,
+      "worst_case_bytes": 410,
+      "answer": "7",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "278 <= 300",
+      "observed_rightmost_col": "271 <= 300",
+      "ops": {
+        "nested-loop": 231394,
+        "slice-assign": 120128
+      }
+    },
+    {
+      "entry": 8,
+      "f": 60,
+      "bytes": 791,
+      "worst_case_bytes": 970,
+      "answer": "19",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "286 <= 300",
+      "observed_rightmost_col": "290 <= 300",
+      "ops": {
+        "nested-loop": 627861,
+        "slice-assign": 323618
+      }
+    },
+    {
+      "entry": 9,
+      "f": 140,
+      "bytes": 1863,
+      "worst_case_bytes": 2251,
+      "answer": "40",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "287 <= 300",
+      "observed_rightmost_col": "286 <= 300",
+      "ops": {
+        "nested-loop": 1517305,
+        "slice-assign": 778546
+      }
+    },
+    {
+      "entry": 10,
+      "f": 300,
+      "bytes": 3949,
+      "worst_case_bytes": 4811,
+      "answer": "85",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "292 <= 300",
+      "observed_rightmost_col": "283 <= 300",
+      "ops": {
+        "nested-loop": 3143801,
+        "slice-assign": 1617906
+      }
+    },
+    {
+      "entry": 11,
+      "f": 500,
+      "bytes": 6580,
+      "worst_case_bytes": 8011,
+      "answer": "142",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "289 <= 300",
+      "observed_rightmost_col": "287 <= 300",
+      "ops": {
+        "nested-loop": 5829887,
+        "slice-assign": 2992225
+      }
+    },
+    {
+      "entry": 12,
+      "f": 750,
+      "bytes": 9883,
+      "worst_case_bytes": 12011,
+      "answer": "190",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "294 <= 300",
+      "observed_rightmost_col": "296 <= 300",
+      "ops": {
+        "nested-loop": 8587300,
+        "slice-assign": 4409415
+      }
+    },
+    {
+      "entry": 13,
+      "f": 1000,
+      "bytes": 13120,
+      "worst_case_bytes": 16012,
+      "answer": "265",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "296 <= 300",
+      "observed_rightmost_col": "290 <= 300",
+      "ops": {
+        "nested-loop": 11515434,
+        "slice-assign": 5912691
+      }
+    },
+    {
+      "entry": 14,
+      "f": 1300,
+      "bytes": 17047,
+      "worst_case_bytes": 20812,
+      "answer": "316",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "299 <= 300",
+      "observed_rightmost_col": "292 <= 300",
+      "ops": {
+        "nested-loop": 14473879,
+        "slice-assign": 7438755
+      }
+    },
+    {
+      "entry": 15,
+      "f": 1600,
+      "bytes": 21055,
+      "worst_case_bytes": 25612,
+      "answer": "420",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "297 <= 300",
+      "observed_rightmost_col": "297 <= 300",
+      "ops": {
+        "nested-loop": 18493649,
+        "slice-assign": 9494995
+      }
+    },
+    {
+      "entry": 16,
+      "f": 1900,
+      "bytes": 24888,
+      "worst_case_bytes": 30412,
+      "answer": "471",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "296 <= 300",
+      "observed_rightmost_col": "297 <= 300",
+      "ops": {
+        "nested-loop": 21854261,
+        "slice-assign": 11219232
+      }
+    },
+    {
+      "entry": 17,
+      "f": 2200,
+      "bytes": 28879,
+      "worst_case_bytes": 35212,
+      "answer": "586",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "300 <= 300",
+      "observed_rightmost_col": "299 <= 300",
+      "ops": {
+        "nested-loop": 25382819,
+        "slice-assign": 13028811
+      }
+    },
+    {
+      "entry": 18,
+      "f": 2500,
+      "bytes": 32834,
+      "worst_case_bytes": 40012,
+      "answer": "649",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "295 <= 300",
+      "observed_rightmost_col": "294 <= 300",
+      "ops": {
+        "nested-loop": 29120355,
+        "slice-assign": 14948945
+      }
+    },
+    {
+      "entry": 19,
+      "f": 2750,
+      "bytes": 36057,
+      "worst_case_bytes": 44012,
+      "answer": "729",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "297 <= 300",
+      "observed_rightmost_col": "299 <= 300",
+      "ops": {
+        "nested-loop": 31938520,
+        "slice-assign": 16394341
+      }
+    },
+    {
+      "entry": 20,
+      "f": 3000,
+      "bytes": 39435,
+      "worst_case_bytes": 48012,
+      "answer": "780",
+      "inbounds_row": "300 <= 300",
+      "inbounds_col": "300 <= 300",
+      "observed_deepest_row": "299 <= 300",
+      "observed_rightmost_col": "298 <= 300",
+      "ops": {
+        "nested-loop": 34703747,
+        "slice-assign": 17815158
+      }
+    }
+  ]
+}

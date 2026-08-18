@@ -95,3 +95,13 @@ refs/other-docs-dot-vitepress/
 # Python bytecode caches
 __pycache__/
 *.pyc
+
+# Spectra 量測產物：由 measure/ 底下的驗證腳本產生，內容是題目 frontmatter 的
+# generator 與 reference_solution 全文的再複製。正解本來就在 repo 的題目檔裡，
+# 所以這不是新的洩漏面，但多一份不受管理、會與題目檔漂移的副本沒有好處。
+openspec/changes/**/measure/inputs.json
+openspec/changes/**/measure/crossblock.json
+
+# 說明圖管線的中繼檔。plate 腳本以 set -e 執行，失敗時會停在刪除步驟之前，
+# 把中繼 HTML 留在原始碼樹裡等著被 commit。
+scripts/figures/plate*.html
