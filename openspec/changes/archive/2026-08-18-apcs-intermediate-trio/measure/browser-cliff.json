@@ -617,5 +617,31 @@
         }
       ]
     }
+  },
+  "post_review_recheck": {
+    "when": "人工 review 之後、合併之前",
+    "what_changed": "三題的 starter_code 改為單行 `# CODE HERE...`，並移除三題的〈邊界情況〉段落。兩者都不影響測資產生。",
+    "why_pools_differ_but_inputs_do_not": "重建後測資池的位元組與先前不同，但那不代表測資變了：加密含隨機 nonce，同一份輸入連續建兩次也會產生不同位元組（已實測確認）。測資引擎的請求由 scripts/generate-pools.ts 的 buildPoolRequest 組成，內容是 { params, seed: challenge.slug, input_budget, testcase_plan }——starter_code 不在其中，seed 就是 slug，因此產生的輸入完全相同。",
+    "evidence_that_judging_is_unchanged": [
+      {
+        "label": "WRAPUP-C-ref",
+        "score": "20/20",
+        "max_ms": 15,
+        "note": "apcs020 reference"
+      },
+      {
+        "label": "WRAPUP-A-ref",
+        "score": "20/20",
+        "max_ms": 233,
+        "note": "apcs018 reference"
+      },
+      {
+        "label": "WRAPUP-A-brute",
+        "score": "12/20",
+        "max_ms": 1867,
+        "note": "apcs018 巢狀迴圈暴力解，與編輯前量到的 12/20 完全相同"
+      }
+    ],
+    "gates_after_edit": "vitest 862 passed / typecheck 乾淨 / lint 0 errors / docs:build 成功"
   }
 }
