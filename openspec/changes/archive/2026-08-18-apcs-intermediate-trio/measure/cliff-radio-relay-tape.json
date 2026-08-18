@@ -1,0 +1,748 @@
+{
+  "slug": "radio-relay-tape",
+  "id": "apcs020",
+  "question": "最長的一段連續且歌曲兩兩相異的區段長度",
+  "op_limit": 10000000,
+  "abort_at": 10000001,
+  "seed": 20260818,
+  "input_budget": 60000,
+  "max_input_bytes": 48259,
+  "generator_reference_agreement": true,
+  "scale_monotonic": true,
+  "staircase_entries_2_to_20": [
+    3,
+    5,
+    10,
+    25,
+    60,
+    150,
+    350,
+    700,
+    1100,
+    1500,
+    1900,
+    2200,
+    2500,
+    4600,
+    6700,
+    6850,
+    7000,
+    7000,
+    7000
+  ],
+  "entries": [
+    {
+      "entry": 1,
+      "kind": "literal",
+      "n": 7,
+      "bytes": 16,
+      "expected_output": "4",
+      "sum_of_run_lengths": 18
+    },
+    {
+      "entry": 2,
+      "kind": "band",
+      "n": 3,
+      "bytes": 23,
+      "expected_output": "3",
+      "sum_of_run_lengths": 6
+    },
+    {
+      "entry": 3,
+      "kind": "band",
+      "n": 5,
+      "bytes": 37,
+      "expected_output": "5",
+      "sum_of_run_lengths": 15
+    },
+    {
+      "entry": 4,
+      "kind": "band",
+      "n": 10,
+      "bytes": 73,
+      "expected_output": "10",
+      "sum_of_run_lengths": 55
+    },
+    {
+      "entry": 5,
+      "kind": "band",
+      "n": 25,
+      "bytes": 176,
+      "expected_output": "25",
+      "sum_of_run_lengths": 325
+    },
+    {
+      "entry": 6,
+      "kind": "band",
+      "n": 60,
+      "bytes": 414,
+      "expected_output": "60",
+      "sum_of_run_lengths": 1830
+    },
+    {
+      "entry": 7,
+      "kind": "band",
+      "n": 150,
+      "bytes": 1043,
+      "expected_output": "150",
+      "sum_of_run_lengths": 11325
+    },
+    {
+      "entry": 8,
+      "kind": "band",
+      "n": 350,
+      "bytes": 2411,
+      "expected_output": "350",
+      "sum_of_run_lengths": 61425
+    },
+    {
+      "entry": 9,
+      "kind": "band",
+      "n": 700,
+      "bytes": 4823,
+      "expected_output": "700",
+      "sum_of_run_lengths": 245350
+    },
+    {
+      "entry": 10,
+      "kind": "band",
+      "n": 1100,
+      "bytes": 7580,
+      "expected_output": "696",
+      "sum_of_run_lengths": 379310
+    },
+    {
+      "entry": 11,
+      "kind": "band",
+      "n": 1500,
+      "bytes": 10337,
+      "expected_output": "1500",
+      "sum_of_run_lengths": 1125750
+    },
+    {
+      "entry": 12,
+      "kind": "band",
+      "n": 1900,
+      "bytes": 13097,
+      "expected_output": "1504",
+      "sum_of_run_lengths": 1249966
+    },
+    {
+      "entry": 13,
+      "kind": "band",
+      "n": 2200,
+      "bytes": 15165,
+      "expected_output": "1394",
+      "sum_of_run_lengths": 1577253
+    },
+    {
+      "entry": 14,
+      "kind": "band",
+      "n": 2500,
+      "bytes": 17208,
+      "expected_output": "1722",
+      "sum_of_run_lengths": 2333143
+    },
+    {
+      "entry": 15,
+      "kind": "band",
+      "n": 4600,
+      "bytes": 31663,
+      "expected_output": "2723",
+      "sum_of_run_lengths": 5196004
+    },
+    {
+      "entry": 16,
+      "kind": "band",
+      "n": 6700,
+      "bytes": 46182,
+      "expected_output": "2676",
+      "sum_of_run_lengths": 7385330
+    },
+    {
+      "entry": 17,
+      "kind": "band",
+      "n": 6850,
+      "bytes": 47218,
+      "expected_output": "2784",
+      "sum_of_run_lengths": 6514746
+    },
+    {
+      "entry": 18,
+      "kind": "band",
+      "n": 7000,
+      "bytes": 48259,
+      "expected_output": "2219",
+      "sum_of_run_lengths": 7055315
+    },
+    {
+      "entry": 19,
+      "kind": "band",
+      "n": 7000,
+      "bytes": 48211,
+      "expected_output": "2007",
+      "sum_of_run_lengths": 6334933
+    },
+    {
+      "entry": 20,
+      "kind": "band",
+      "n": 7000,
+      "bytes": 48226,
+      "expected_output": "2354",
+      "sum_of_run_lengths": 6655333
+    }
+  ],
+  "routes": {
+    "elementwise_loop": {
+      "per_entry": [
+        {
+          "entry": 1,
+          "n": 7,
+          "ops_measured": 99,
+          "exceeded": false,
+          "seconds": 0.0,
+          "ops_full": 99,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 2,
+          "n": 3,
+          "ops_measured": 42,
+          "exceeded": false,
+          "seconds": 0.0,
+          "ops_full": 42,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 3,
+          "n": 5,
+          "ops_measured": 79,
+          "exceeded": false,
+          "seconds": 0.0,
+          "ops_full": 79,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 4,
+          "n": 10,
+          "ops_measured": 224,
+          "exceeded": false,
+          "seconds": 0.0,
+          "ops_full": 224,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 5,
+          "n": 25,
+          "ops_measured": 1109,
+          "exceeded": false,
+          "seconds": 0.0,
+          "ops_full": 1109,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 6,
+          "n": 60,
+          "ops_measured": 5799,
+          "exceeded": false,
+          "seconds": 0.001,
+          "ops_full": 5799,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 7,
+          "n": 150,
+          "ops_measured": 34734,
+          "exceeded": false,
+          "seconds": 0.004,
+          "ops_full": 34734,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 8,
+          "n": 350,
+          "ops_measured": 186034,
+          "exceeded": false,
+          "seconds": 0.02,
+          "ops_full": 186034,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 9,
+          "n": 700,
+          "ops_measured": 739559,
+          "exceeded": false,
+          "seconds": 0.076,
+          "ops_full": 739559,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 10,
+          "n": 1100,
+          "ops_measured": 1143439,
+          "exceeded": false,
+          "seconds": 0.12,
+          "ops_full": 1143439,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 11,
+          "n": 1500,
+          "ops_measured": 3384759,
+          "exceeded": false,
+          "seconds": 0.355,
+          "ops_full": 3384759,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 12,
+          "n": 1900,
+          "ops_measured": 3759407,
+          "exceeded": false,
+          "seconds": 0.395,
+          "ops_full": 3759407,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 13,
+          "n": 2200,
+          "ops_measured": 4742768,
+          "exceeded": false,
+          "seconds": 0.536,
+          "ops_full": 4742768,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 14,
+          "n": 2500,
+          "ops_measured": 7011941,
+          "exceeded": false,
+          "seconds": 0.756,
+          "ops_full": 7011941,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 15,
+          "n": 4600,
+          "ops_measured": 10000002,
+          "exceeded": true,
+          "seconds": 1.062,
+          "ops_full": 15611022,
+          "ops_full_source": "closed form"
+        },
+        {
+          "entry": 16,
+          "n": 6700,
+          "ops_measured": 10000002,
+          "exceeded": true,
+          "seconds": 1.165,
+          "ops_full": 22189499,
+          "ops_full_source": "closed form"
+        },
+        {
+          "entry": 17,
+          "n": 6850,
+          "ops_measured": 10000002,
+          "exceeded": true,
+          "seconds": 1.198,
+          "ops_full": 19578499,
+          "ops_full_source": "closed form"
+        },
+        {
+          "entry": 18,
+          "n": 7000,
+          "ops_measured": 10000002,
+          "exceeded": true,
+          "seconds": 1.106,
+          "ops_full": 21200957,
+          "ops_full_source": "closed form"
+        },
+        {
+          "entry": 19,
+          "n": 7000,
+          "ops_measured": 10000002,
+          "exceeded": true,
+          "seconds": 1.106,
+          "ops_full": 19039811,
+          "ops_full_source": "closed form"
+        },
+        {
+          "entry": 20,
+          "n": 7000,
+          "ops_measured": 10000002,
+          "exceeded": true,
+          "seconds": 1.166,
+          "ops_full": 20001011,
+          "ops_full_source": "closed form"
+        }
+      ],
+      "dead_entries": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "score": "14/20",
+      "ops_last_entry_measured": 10000002,
+      "ops_last_entry_full": 20001011,
+      "seconds_last_entry_cpython": 1.166,
+      "dead_is_contiguous_tail": true
+    },
+    "c_builtin_set_slice": {
+      "per_entry": [
+        {
+          "entry": 1,
+          "n": 7,
+          "ops_measured": 74,
+          "exceeded": false,
+          "seconds": 0.001,
+          "ops_full": 74,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 2,
+          "n": 3,
+          "ops_measured": 33,
+          "exceeded": false,
+          "seconds": 0.0,
+          "ops_full": 33,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 3,
+          "n": 5,
+          "ops_measured": 59,
+          "exceeded": false,
+          "seconds": 0.0,
+          "ops_full": 59,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 4,
+          "n": 10,
+          "ops_measured": 159,
+          "exceeded": false,
+          "seconds": 0.0,
+          "ops_full": 159,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 5,
+          "n": 25,
+          "ops_measured": 759,
+          "exceeded": false,
+          "seconds": 0.0,
+          "ops_full": 759,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 6,
+          "n": 60,
+          "ops_measured": 3909,
+          "exceeded": false,
+          "seconds": 0.001,
+          "ops_full": 3909,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 7,
+          "n": 150,
+          "ops_measured": 23259,
+          "exceeded": false,
+          "seconds": 0.011,
+          "ops_full": 23259,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 8,
+          "n": 350,
+          "ops_measured": 124259,
+          "exceeded": false,
+          "seconds": 0.096,
+          "ops_full": 124259,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 9,
+          "n": 700,
+          "ops_measured": 493509,
+          "exceeded": false,
+          "seconds": 0.735,
+          "ops_full": 493509,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 10,
+          "n": 1100,
+          "ops_measured": 763029,
+          "exceeded": false,
+          "seconds": 1.099,
+          "ops_full": 763029,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 11,
+          "n": 1500,
+          "ops_measured": 2257509,
+          "exceeded": false,
+          "seconds": 6.555,
+          "ops_full": 2257509,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 12,
+          "n": 1900,
+          "ops_measured": 2507541,
+          "exceeded": false,
+          "seconds": 6.593,
+          "ops_full": 2507541,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 13,
+          "n": 2200,
+          "ops_measured": 3163315,
+          "exceeded": false,
+          "seconds": 7.693,
+          "ops_full": 3163315,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 14,
+          "n": 2500,
+          "ops_measured": 4676298,
+          "exceeded": false,
+          "seconds": 15.926,
+          "ops_full": 4676298,
+          "ops_full_source": "measured"
+        },
+        {
+          "entry": 15,
+          "n": 4600,
+          "ops_measured": 10000002,
+          "exceeded": true,
+          "seconds": 54.88,
+          "ops_full": 10410418,
+          "ops_full_source": "closed form"
+        },
+        {
+          "entry": 16,
+          "n": 6700,
+          "ops_measured": 10000002,
+          "exceeded": true,
+          "seconds": 63.049,
+          "ops_full": 14797469,
+          "ops_full_source": "closed form"
+        },
+        {
+          "entry": 17,
+          "n": 6850,
+          "ops_measured": 10000002,
+          "exceeded": true,
+          "seconds": 56.502,
+          "ops_full": 13056903,
+          "ops_full_source": "closed form"
+        },
+        {
+          "entry": 18,
+          "n": 7000,
+          "ops_measured": 10000002,
+          "exceeded": true,
+          "seconds": 41.312,
+          "ops_full": 14138642,
+          "ops_full_source": "closed form"
+        },
+        {
+          "entry": 19,
+          "n": 7000,
+          "ops_measured": 10000002,
+          "exceeded": true,
+          "seconds": 35.599,
+          "ops_full": 12697878,
+          "ops_full_source": "closed form"
+        },
+        {
+          "entry": 20,
+          "n": 7000,
+          "ops_measured": 10000002,
+          "exceeded": true,
+          "seconds": 51.803,
+          "ops_full": 13338678,
+          "ops_full_source": "closed form"
+        }
+      ],
+      "dead_entries": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "score": "14/20",
+      "ops_last_entry_measured": 10000002,
+      "ops_last_entry_full": 13338678,
+      "seconds_last_entry_cpython": 51.803,
+      "dead_is_contiguous_tail": true
+    },
+    "binary_search_set_slice": {
+      "per_entry": [
+        {
+          "entry": 1,
+          "n": 7,
+          "ops_measured": 106,
+          "exceeded": false,
+          "seconds": 0.0
+        },
+        {
+          "entry": 2,
+          "n": 3,
+          "ops_measured": 41,
+          "exceeded": false,
+          "seconds": 0.0
+        },
+        {
+          "entry": 3,
+          "n": 5,
+          "ops_measured": 73,
+          "exceeded": false,
+          "seconds": 0.0
+        },
+        {
+          "entry": 4,
+          "n": 10,
+          "ops_measured": 165,
+          "exceeded": false,
+          "seconds": 0.0
+        },
+        {
+          "entry": 5,
+          "n": 25,
+          "ops_measured": 505,
+          "exceeded": false,
+          "seconds": 0.0
+        },
+        {
+          "entry": 6,
+          "n": 60,
+          "ops_measured": 1461,
+          "exceeded": false,
+          "seconds": 0.0
+        },
+        {
+          "entry": 7,
+          "n": 150,
+          "ops_measured": 4421,
+          "exceeded": false,
+          "seconds": 0.001
+        },
+        {
+          "entry": 8,
+          "n": 350,
+          "ops_measured": 12001,
+          "exceeded": false,
+          "seconds": 0.007
+        },
+        {
+          "entry": 9,
+          "n": 700,
+          "ops_measured": 26757,
+          "exceeded": false,
+          "seconds": 0.026
+        },
+        {
+          "entry": 10,
+          "n": 1100,
+          "ops_measured": 43697,
+          "exceeded": false,
+          "seconds": 0.046
+        },
+        {
+          "entry": 11,
+          "n": 1500,
+          "ops_measured": 63865,
+          "exceeded": false,
+          "seconds": 0.152
+        },
+        {
+          "entry": 12,
+          "n": 1900,
+          "ops_measured": 80673,
+          "exceeded": false,
+          "seconds": 0.172
+        },
+        {
+          "entry": 13,
+          "n": 2200,
+          "ops_measured": 95441,
+          "exceeded": false,
+          "seconds": 0.21
+        },
+        {
+          "entry": 14,
+          "n": 2500,
+          "ops_measured": 112096,
+          "exceeded": false,
+          "seconds": 0.356
+        },
+        {
+          "entry": 15,
+          "n": 4600,
+          "ops_measured": 218510,
+          "exceeded": false,
+          "seconds": 0.899
+        },
+        {
+          "entry": 16,
+          "n": 6700,
+          "ops_measured": 330757,
+          "exceeded": false,
+          "seconds": 1.405
+        },
+        {
+          "entry": 17,
+          "n": 6850,
+          "ops_measured": 341091,
+          "exceeded": false,
+          "seconds": 1.301
+        },
+        {
+          "entry": 18,
+          "n": 7000,
+          "ops_measured": 348252,
+          "exceeded": false,
+          "seconds": 1.415
+        },
+        {
+          "entry": 19,
+          "n": 7000,
+          "ops_measured": 347908,
+          "exceeded": false,
+          "seconds": 1.252
+        },
+        {
+          "entry": 20,
+          "n": 7000,
+          "ops_measured": 349472,
+          "exceeded": false,
+          "seconds": 1.374
+        }
+      ],
+      "dead_entries": [],
+      "score": "20/20",
+      "ops_last_entry_measured": 349472,
+      "ops_last_entry_full": 349472,
+      "seconds_last_entry_cpython": 1.374,
+      "dead_is_contiguous_tail": true
+    }
+  },
+  "notes": [
+    "ops 以與 .vitepress/theme/workers/worker-utils.ts 的 _tracer 同語意的 sys.settrace 計數（每個 trace event 加一）。",
+    "ops_measured 在計數超過 10,000,001 時中止，與判題器 raise TimeoutError 的位置相同，因此超限條目的 ops_measured 是下界而非總量。",
+    "ops_full 為閉式：elementwise_loop = 3S + 5n + B + 8、c_builtin_set_slice = 2S + 4n + B + 8，S 為各起點延伸長度總和、B 為 best 嚴格變大的次數。閉式在全部未中止的條目上與實測值逐筆全等（腳本 assert），因此超限條目的 ops_full 可信。",
+    "seconds 為 CPython 3.13 的牆鐘（含 settrace 負擔），非 Pyodide 判題耗時；c_builtin_set_slice 在 n = 1500 就已經超過 5000 ms 的 deadline，代表這條拼法在正式判題中兩道閘門都會觸發。",
+    "斷崖穩健度：本題的成本正比於「各起點延伸長度總和」，該量在值域 1..1000000 下的逐筆相對標準差約 0.20 到 0.25。因此階梯刻意在 n = 2500 與 n = 4600 之間跳過門檻帶：n <= 2570 時 steps <= n(n+1)/2 使 elementwise_loop 必然低於一千萬（確定性上界），而 n >= 6700 的條目在 500 次抽樣模擬中 c_builtin_set_slice 的致死率約 0.97 到 0.99。整條階梯「超限筆數為連續後段」的模擬機率為 elementwise_loop 1.000、c_builtin_set_slice 0.950。"
+  ]
+}

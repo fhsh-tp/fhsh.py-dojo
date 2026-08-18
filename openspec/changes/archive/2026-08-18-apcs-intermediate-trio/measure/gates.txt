@@ -1,0 +1,42 @@
+########## typecheck ##########
+
+> fhsh-py-dojo@1.0.0 typecheck /Users/phoenix/dev/fhsh-projects/fhsh.py-dojo
+> vue-tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit && vue-tsc -p tsconfig.vitest.json --noEmit
+
+########## lint ##########
+
+/Users/phoenix/dev/fhsh-projects/fhsh.py-dojo/scripts/new-tutor.ts
+  79:11  warning  'subject' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+✖ 21 problems (0 errors, 21 warnings)
+
+Checking formatting...
+All matched files use Prettier code style!
+########## vitest ##########
+[90mstdout[2m | scripts/content-regression.test.ts[2m > [22m[2mcontent-layer regression: reference_solution earns AC against generator[2m > [22m[2mprop-box-packing: reference_solution matches generator on student-facing inputs
+[22m[39m[content-regression] prop-box-packing sampled indices: 2,6,9,14,15,17,38,50,52,60,66,68,83,87,92,114,117,129,156,160
+
+[90mstdout[2m | scripts/content-regression.test.ts[2m > [22m[2mcontent-layer regression: reference_solution earns AC against generator[2m > [22m[2mradio-relay-tape: reference_solution matches generator on student-facing inputs
+[22m[39m[content-regression] radio-relay-tape sampled indices: 12,30,37,68,84,85,86,97,98,103,104,148,158,167,168,172,186,187,189,194
+
+[90mstdout[2m | scripts/content-regression.test.ts[2m > [22m[2mcontent-layer regression: reference_solution earns AC against generator[2m > [22m[2mrank-code-backfill: reference_solution matches generator on student-facing inputs
+[22m[39m[content-regression] rank-code-backfill sampled indices: 9,10,35,38,48,52,66,86,93,94,119,120,125,129,150,169,179,193,196,197
+
+[90mstdout[2m | scripts/content-regression.test.ts[2m > [22m[2mcontent-layer regression: reference_solution earns AC against generator[2m > [22m[2msnack-bar-register: reference_solution matches generator on student-facing inputs
+[22m[39m[content-regression] snack-bar-register sampled indices: 1,15,20,41,47,50,70,73,77,84,95,119,124,139,143,144,158,172,179,182
+
+ [32m✓[39m scripts/content-regression.test.ts [2m([22m[2m75 tests[22m[2m | [22m[33m50 skipped[39m[2m)[22m[33m 8435[2mms[22m[39m
+     [33m[2m✓[22m[39m ap-layout-plan: reference_solution matches generator on student-facing inputs [33m 372[2mms[22m[39m
+     [33m[2m✓[22m[39m club-room-allocation: reference_solution matches generator on student-facing inputs [33m 327[2mms[22m[39m
+     [33m[2m✓[22m[39m hall-fan-coverage: reference_solution matches generator on student-facing inputs [33m 820[2mms[22m[39m
+     [33m[2m✓[22m[39m marquee-display-count: reference_solution matches generator on student-facing inputs [33m 385[2mms[22m[39m
+     [33m[2m✓[22m[39m prize-order-code: reference_solution matches generator on student-facing inputs [33m 999[2mms[22m[39m
+     [33m[2m✓[22m[39m rank-code-backfill: reference_solution matches generator on student-facing inputs [33m 2491[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m59 passed[39m[22m[90m (59)[39m
+[2m      Tests [22m [1m[32m862 passed[39m[22m[2m | [22m[33m50 skipped[39m[90m (912)[39m
+[2m   Start at [22m 04:00:30
+[2m   Duration [22m 22.54s[2m (transform 1.50s, setup 1.26s, import 15.89s, tests 59.80s, environment 18.13s)[22m
+
+
+[exited with code 0]

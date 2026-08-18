@@ -39,16 +39,16 @@ description: 根據體重身高計算 BMI 並分級
 
 ### 計算公式
 
-BMI = 體重(kg) / 身高(m)²
+BMI = 體重(kg) / 身高(m)$^2$
 
 ### 分級標準
 
 | BMI 範圍 | 分級 |
 |---------|------|
-| < 18.5 | Underweight |
+| $< 18.5$ | Underweight |
 | 18.5 ~ 24（不含 24） | Normal |
 | 24 ~ 27（不含 27） | Overweight |
-| >= 27 | Obese |
+| $\ge 27$ | Obese |
 
 ### 輸入說明
 

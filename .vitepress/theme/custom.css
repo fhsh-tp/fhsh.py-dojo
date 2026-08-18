@@ -5,3 +5,13 @@
 .custom-block p:not(.custom-block-title) {
     margin-left: 1rem;
 }
+
+/* MathJax emits every formula as an <svg>, but Tailwind's preflight sets
+   `svg { display: block }`, so each inline $…$ was being pushed onto a line of
+   its own — a sentence like「整數 T（T ≥ 1），表示…」came out as four lines.
+   Restore the UA default on MathJax's own output only, so preflight keeps
+   applying to every other svg on the site. Display math ($$…$$) is unaffected:
+   MathJax puts `display: block` on the mjx-container, not on the svg. */
+mjx-container > svg {
+    display: inline;
+}

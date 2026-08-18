@@ -1,0 +1,26 @@
+{
+  "problems": [],
+  "base": "https://staging.fhsh-py-dojo.pages.dev",
+  "deployed_commit": "41d6ee7770e44c2964172a802fe96ed23b92f395",
+  "observed_on": "2026-08-16",
+  "raw": "measure/staging-e2e.jsonl",
+  "retracted_probes": {
+    "freshness.no_k4_row": "整頁搜尋會命中範例輸出區塊；由 freshness_table 取代"
+  },
+  "stats": {
+    "records": 25,
+    "by_check": {
+      "alias": 3,
+      "freshness": 1,
+      "freshness_table": 1,
+      "leak": 3,
+      "leak_control": 1,
+      "listing": 6,
+      "mount": 3,
+      "submit": 7
+    },
+    "positive_routes": 6,
+    "negative_route_score": 8,
+    "negative_route_verdicts": "AAAAAAAATTTTTTTTTTTT"
+  }
+}

@@ -1,0 +1,42 @@
+# 由 plan015.py 產生，請勿手改。apcs015 / ap-layout-plan
+testcase_plan:
+  - literal: |
+      8
+  - literal: |
+      1
+  - literal: |
+      2
+  - literal: |
+      3
+  - literal: |
+      4
+  - literal: |
+      6
+  - literal: |
+      21
+  - literal: |
+      72
+  - literal: |
+      249
+  - literal: |
+      250
+  - literal: |
+      325
+  - literal: |
+      400
+  - literal: |
+      475
+  - literal: |
+      550
+  - literal: |
+      625
+  - literal: |
+      700
+  - literal: |
+      775
+  - literal: |
+      850
+  - literal: |
+      925
+  - literal: |
+      1000

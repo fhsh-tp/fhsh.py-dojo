@@ -1,0 +1,25 @@
+{"check":"listing","probe":"apcs015","status":"OK"}
+{"check":"listing","probe":"apcs016","status":"OK"}
+{"check":"listing","probe":"apcs017","status":"OK"}
+{"check":"listing","probe":"基地台佈點規劃","status":"OK"}
+{"check":"listing","probe":"跑馬燈顯示計數","status":"OK"}
+{"check":"listing","probe":"園遊會代幣兌換","status":"OK"}
+{"check":"alias","id":"apcs015","status":"OK","final_url":"https://staging.fhsh-py-dojo.pages.dev/challenge/ap-layout-plan"}
+{"check":"alias","id":"apcs016","status":"OK","final_url":"https://staging.fhsh-py-dojo.pages.dev/challenge/marquee-display-count"}
+{"check":"alias","id":"apcs017","status":"OK","final_url":"https://staging.fhsh-py-dojo.pages.dev/challenge/fair-token-exchange"}
+{"check":"mount","id":"apcs015","slug":"ap-layout-plan","status":"OK","editor":true,"submit_button":true,"id_badge":true}
+{"check":"mount","id":"apcs016","slug":"marquee-display-count","status":"OK","editor":true,"submit_button":true,"id_badge":true}
+{"check":"mount","id":"apcs017","slug":"fair-token-exchange","status":"OK","editor":true,"submit_button":true,"id_badge":true}
+{"label": "015-reference", "slug": "ap-layout-plan", "status": "OK", "rows": 20, "score": 20, "verdicts": "AAAAAAAAAAAAAAAAAAAA", "max_ms": 383.0, "sum_ms": 1927, "per_ms": [4.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 4.0, 24.0, 24.0, 40.0, 60.0, 83.0, 113.0, 147.0, 187.0, 246.0, 270.0, 330.0, 383.0], "check": "submit"}
+{"label": "015-rowscan-plain", "slug": "ap-layout-plan", "status": "OK", "rows": 20, "score": 20, "verdicts": "AAAAAAAAAAAAAAAAAAAA", "max_ms": 276.0, "sum_ms": 1436, "per_ms": [4.0, 2.0, 2.0, 4.0, 2.0, 2.0, 3.0, 4.0, 19.0, 18.0, 32.0, 46.0, 65.0, 85.0, 112.0, 144.0, 177.0, 199.0, 240.0, 276.0], "check": "submit"}
+{"label": "015-rowscan-helper", "slug": "ap-layout-plan", "status": "OK", "rows": 20, "score": 20, "verdicts": "AAAAAAAAAAAAAAAAAAAA", "max_ms": 525.0, "sum_ms": 2633, "per_ms": [4.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 5.0, 36.0, 37.0, 59.0, 87.0, 117.0, 156.0, 201.0, 250.0, 310.0, 378.0, 456.0, 525.0], "check": "submit"}
+{"label": "015-rowscan-sum", "slug": "ap-layout-plan", "status": "OK", "rows": 20, "score": 20, "verdicts": "AAAAAAAAAAAAAAAAAAAA", "max_ms": 345.0, "sum_ms": 1738, "per_ms": [4.0, 2.0, 2.0, 3.0, 2.0, 2.0, 2.0, 4.0, 24.0, 23.0, 39.0, 57.0, 78.0, 106.0, 133.0, 166.0, 207.0, 246.0, 293.0, 345.0], "check": "submit"}
+{"label": "016-reference", "slug": "marquee-display-count", "status": "OK", "rows": 20, "score": 20, "verdicts": "AAAAAAAAAAAAAAAAAAAA", "max_ms": 457.0, "sum_ms": 2098, "per_ms": [4.0, 3.0, 2.0, 3.0, 457.0, 2.0, 2.0, 2.0, 2.0, 2.0, 4.0, 47.0, 226.0, 2.0, 296.0, 227.0, 281.0, 451.0, 69.0, 16.0], "check": "submit"}
+{"label": "017-reference", "slug": "fair-token-exchange", "status": "OK", "rows": 20, "score": 20, "verdicts": "AAAAAAAAAAAAAAAAAAAA", "max_ms": 3.0, "sum_ms": 42, "per_ms": [3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 3.0, 2.0, 2.0], "check": "submit"}
+{"label": "015-cellscan-NEGATIVE", "slug": "ap-layout-plan", "status": "OK", "rows": 20, "score": 8, "verdicts": "AAAAAAAATTTTTTTTTTTT", "max_ms": 2118.0, "sum_ms": 26117, "per_ms": [6.0, 3.0, 3.0, 3.0, 2.0, 3.0, 33.0, 1108.0, 2118.0, 2085.0, 2068.0, 2094.0, 2058.0, 2062.0, 2085.0, 2090.0, 2070.0, 2081.0, 2087.0, 2058.0], "check": "submit"}
+{"check": "leak", "slug": "/challenge/ap-layout-plan", "resources": 12, "fetched": 12, "failed": [], "bytes": 768687, "hits": {"015_blocked_fn": false, "015_comment": false, "016_working": false, "017_step": false, "generator_key": false}}
+{"check": "leak", "slug": "/challenge/marquee-display-count", "resources": 12, "fetched": 12, "failed": [], "bytes": 768145, "hits": {"015_blocked_fn": false, "015_comment": false, "016_working": false, "017_step": false, "generator_key": false}}
+{"check": "leak", "slug": "/challenge/fair-token-exchange", "resources": 12, "fetched": 12, "failed": [], "bytes": 767826, "hits": {"015_blocked_fn": false, "015_comment": false, "016_working": false, "017_step": false, "generator_key": false}}
+{"check": "leak_control", "bytes": 768687, "control": {"title_zh": true, "body_prose": true, "py_marker_present_somewhere": false}}
+{"check": "freshness", "slug": "ap-layout-plan", "n_bound_1000": true, "no_n_bound_3000": true, "perf_note_ops": true, "perf_note_not_time": true, "table_k3": true}
+{"check": "freshness_table", "found": true, "tables": 2, "rows": [["1", "0"], ["2", "6"], ["3", "28"]]}
